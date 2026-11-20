@@ -15,8 +15,8 @@
    - 10 D.C. circuits
    - 11 Particle physics (missing entirely from your data)
 
-   `/Users/tranquanh/Documents/A-levels simulation/data/syllabus_9709_9702.json` (`as_topics`) and `CURRICULUM_MAP.md` use the 2022–24 numbering. Fix them before tagging. The A Level topics 12–25 are correct.
-2. **The scratchpad is volatile.** Copy `/private/tmp/claude-501/-Users-tranquanh-Documents-A-levels-simulation/2590aec6-b9a8-42e2-b20f-de9be3c8fb3c/scratchpad/raw/*.txt` (121 files, pages separated by `\f`, made with pdfplumber by `bulk.py`) into the project, e.g. `data/papers_text/`. Otherwise you can re-run `bulk.py` on `data/papers`.
+   `data/syllabus_9709_9702.json` (`as_topics`) and `CURRICULUM_MAP.md` use the 2022–24 numbering. Fix them before tagging. The A Level topics 12–25 are correct.
+2. **The scratchpad is volatile.** Copy `(temporary scratchpad) raw/*.txt` (121 files, pages separated by `\f`, made with pdfplumber by `bulk.py`) into the project, e.g. `data/papers_text/`. Otherwise you can re-run `bulk.py` on `data/papers`.
 3. **The mark-total check already works on the raw text.** All 121 raw files give exactly 50 (9709) or 100 (9702) with `re.findall(r'\[(\d{1,2})\]')` after removing `[Total: n]`. Five 9702 files have `[Total:]` lines that sum to 95, so one `[Total]` line was lost in extraction; the part marks are still fine. Those files are 9702 s21_41, s21_43, w18_41, w18_43 and w19_42.
 4. **9702 Paper 4 papers from 2018–2021 follow an older syllabus.** They contain op‑amps (every year 2018–21) and communication topics (modulation, dB). 2022 onwards has astronomy instead. The tagger needs legacy tags (section C).
 5. **There are no 9702 Paper 1/2 texts.** The AS question-type list below comes from the syllabus and typical Paper 1/2 items. To validate it, extract 9702 `qp_1x` and `qp_2x` with the same `bulk.py` glob changed.
@@ -707,8 +707,8 @@ Use `approx(a, e, rel = 1e-4)`. Use 1e‑9 for exact values.
   - The glyph mappings (G/H/1/2/i) need spot-checking per series.
 
 ### Critical files for implementation
-- /Users/tranquanh/Documents/A-levels simulation/data/syllabus_9709_9702.json
-- /Users/tranquanh/Documents/A-levels simulation/CURRICULUM_MAP.md
-- /private/tmp/claude-501/-Users-tranquanh-Documents-A-levels-simulation/2590aec6-b9a8-42e2-b20f-de9be3c8fb3c/scratchpad/syl/9702_2025-2027_syllabus.txt (lines 438–763; data sheet at 1886+)
-- /private/tmp/claude-501/-Users-tranquanh-Documents-A-levels-simulation/2590aec6-b9a8-42e2-b20f-de9be3c8fb3c/scratchpad/bulk.py and /private/tmp/claude-501/-Users-tranquanh-Documents-A-levels-simulation/2590aec6-b9a8-42e2-b20f-de9be3c8fb3c/scratchpad/raw/ (e.g. 9709_s24_qp_41.txt for the old layout, 9709_w24_qp_41.txt for the barcode/cid layout, 9709_m26_qp_42.txt for watermarks, 9702_s24_qp_42.txt for the 9702 layout)
-- /Users/tranquanh/Documents/A-levels simulation/data/papers/9709/<year>/<session>/*_ms_*.pdf (mark schemes, for preset and split validation)
+- data/syllabus_9709_9702.json
+- CURRICULUM_MAP.md
+- (temporary scratchpad) syl/9702_2025-2027_syllabus.txt (lines 438–763; data sheet at 1886+)
+- (temporary scratchpad) bulk.py and (temporary scratchpad) raw/ (e.g. 9709_s24_qp_41.txt for the old layout, 9709_w24_qp_41.txt for the barcode/cid layout, 9709_m26_qp_42.txt for watermarks, 9702_s24_qp_42.txt for the 9702 layout)
+- data/papers/9709/<year>/<session>/*_ms_*.pdf (mark schemes, for preset and split validation)

@@ -32,7 +32,7 @@ Right, in this order: "Exam setups" (presets), "Parameters", "Live working" (exa
 - **Only syllabus content.** 9709: particle model, g = 10, no air resistance, no moments, no impulse/restitution, no variable mass, 1-D momentum only. 9702: g = 9.81 (data sheet). Anything outside the learning outcomes is left out. Anything qualitative-only in the syllabus is labelled "qualitative only" and must not produce numbers students might copy.
 - Show working as `symbol = formula = substituted numbers = result unit`, 3 s.f. (angles 1 d.p.). State the sign convention on screen.
 - Detect impossible or invalid regimes and say so: string slack, loses contact, no real root, division by zero.
-- Presets: realistic exam setups. If a preset reproduces a past-paper question, name it like `9709/41 M/J 24 Q5` and check the numbers against the mark scheme PDF in `data/papers/...` (pdf text can be extracted with the venv python + pdfplumber: `/private/tmp/claude-501/-Users-tranquanh-Documents-A-levels-simulation/2590aec6-b9a8-42e2-b20f-de9be3c8fb3c/scratchpad/venv/bin/python -I`). Question-paper text is already in `data/papers_text/*.txt`.
+- Presets: realistic exam setups. If a preset reproduces a past-paper question, name it like `9709/41 M/J 24 Q5` and check the numbers against the mark scheme PDF in `data/papers/...` (pdf text can be extracted with the venv python + pdfplumber: `(temporary scratchpad) venv/bin/python -I`). Question-paper text is already in `data/papers_text/*.txt`.
 - Colours: use roles from `ui.colors()` (`weight`, `normal`, `friction`, `tension`, `applied`, `resultant`, `velocity`, `accel`, `component`, `s1..s4`). Works in light and dark.
 - Must look right at 375 px wide (stacks to one column) and on desktop.
 

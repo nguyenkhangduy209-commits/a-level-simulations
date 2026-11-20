@@ -4,6 +4,8 @@ Interactive simulations for **Cambridge 9709 Mathematics Paper 4 (Mechanics)** a
 
 ## Open it
 
+**Live site:** https://nguyenkhangduy209-commits.github.io/a-level-simulations/ (updates automatically on every push to `main`).
+
 No install, no build step: plain HTML + canvas + JavaScript.
 
 - Open `sim/index.html` in a browser, or
