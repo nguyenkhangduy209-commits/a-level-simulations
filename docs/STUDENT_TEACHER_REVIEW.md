@@ -1,195 +1,161 @@
 # Student and Teacher Review: A Level Mechanics Simulations
 
-**Repository:** [a-level-simulations](https://github.com/nguyenkhangduy209-commits/a-level-simulations)  
-**Review date:** 20 November 2026  
-**Audience considered:** Cambridge 9709 Mechanics teachers and students, especially students at the start of mechanics and students who have limited experience with websites or devices.
+**Repository:** [a-level-simulations](https://github.com/nguyenkhangduy209-commits/a-level-simulations)
+**Review date:** 20 November 2026 (revised against the syllabus the same day)
+**Syllabuses:** Cambridge International AS & A Level Mathematics 9709 (2026–2027), Paper 4 Mechanics; Physics 9702 (2025–2027), AS topics 1–11
+**Audience considered:** 9709 Mechanics teachers and students, especially students new to mechanics or not confident with websites and devices.
 
-## Executive summary
+## Summary
 
-The repository contains a broad set of interactive simulations for Cambridge 9709 Mechanics and 9702 AS Physics, alongside a large collection of tagged Paper 4 question data. The simulations combine visual models, editable parameters, exam setups, worked calculations, and common traps. These are useful ingredients for teaching and exam practice.
+The suite already has the hard parts: a model for every 9709 Paper 4 topic, typed exact inputs, live working to 3 s.f., exam setups checked against mark schemes, and no dependencies (it runs offline from a folder). What it lacks is a **route through that material**. A beginner opens a page with a dozen controls and the full answer already visible, and has to work out what to look at.
 
-The main learning risk is the gap between **having a detailed simulation** and **knowing how to learn from it**. A student new to mechanics may not know the vocabulary, how to operate the controls, what to observe, or how to connect a moving diagram to equations and a past-paper method. Several simulations are deliberately flexible; flexibility creates a high control burden for beginners.
+The single most useful change is a guided **Learn** route for one topic (4.1 Forces and equilibrium), following the method a mark scheme rewards: forces → resolve → equate → solve → check. Keep the current pages as the **Explore / Teach** view.
 
-The highest-value improvement is a guided beginner route that teaches one idea at a time and explicitly demonstrates how to operate the page. Keep the full explorer for teacher demonstrations and experienced students, but offer a simple, linear route from concept to practice.
+## Evidence and scope
 
-## Review scope and evidence
+- Read: README, `CURRICULUM_MAP.md`, `docs/PLAN.md` (learning outcomes), `docs/SIM_CONVENTIONS.md`, `data/syllabus_9709_9702.json`, `data/questions/VALIDATION.md`.
+- Inspected in detail: the hub (`sim/index.html`) and Strings and rings (`sim/sims/9709/m1-strings.html`).
+- Checked across all pages by code search: external requests, viewport meta, browser storage handling, reduced-motion support, exam-mode behaviour.
+- Not done: testing with real students or teachers, every page on every device, screen-reader testing. Recommendations about other pages are design guidance, not confirmed defects.
 
-This review includes:
+## Syllabus alignment
 
-- Repository materials: README, curriculum map, simulation conventions, curriculum and paper data, and paper-data validation report.
-- The local 9709 Mechanics hub and a hands-on inspection of the “Strings and rings” equilibrium simulation, including its visible setup choices, controls, displayed force components, worked equations, exam setups, and common traps.
-- A second perspective: how a teacher might use the page to demonstrate a concept, and how a beginner student might approach the same page without prior mechanics knowledge.
+### 9709 Paper 4 coverage
 
-The detailed interface observations below are strongest for the hub and strings simulation. The repository contains other simulations, but this was not a systematic usability audit of every page, device size, browser, or assistive technology. Recommendations for the wider set are framed as design guidance rather than claims that every page has the same issue.
+| Syllabus | Simulations | Comment |
+|---|---|---|
+| 4.1 Forces and equilibrium | `m1-resultant`, `m1-strings`, `m1m4-plane` (friction) | Covers components, equilibrium, smooth contact, F ≤ μR and limiting equilibrium. Lami's theorem is offered as an optional check and labelled "not required", which is the right call: resolving in two directions always works and is what beginners should learn first. |
+| 4.2 Kinematics in a straight line | `m2-journey`, `m2-vertical`, `m2-calculus` | Includes v–t areas, distance vs displacement, and calculus. Calculus should stay within P1 techniques (powers of t, including fractional and negative, and (at + b)ⁿ); no ln. |
+| 4.3 Momentum | `m3-collisions` | Direct impact of two bodies in a line, including coalescence. Impulse and coefficient of restitution are Further Mathematics and should not appear in 9709 pages. |
+| 4.4 Newton's laws of motion | `m1m4-plane`, `m4-connected`, `m4-lift`, `m4-vehicle` | Strings over smooth pulleys/pegs, car and trailer, lifts: all on syllabus. |
+| 4.5 Energy, work and power | `m5-energy`, `m4-vehicle` | W = Fd cos θ, KE, GPE, work–energy with friction, P = Fv. |
+
+No gaps found against the 4.1–4.5 outcomes. Two out-of-syllabus risks to guard in any new Learn content: **moments** (9702 only; not in 9709 P4) and **impulse/restitution** (Further Maths).
+
+### Exam conventions beginners must be taught
+
+These appear on every 9709 Paper 4 and cost marks when missed. The original review did not mention them; a beginner route should state them on the first screen:
+
+- Use **g = 10 m s⁻²** (9702 uses 9.81; the hub already switches this by course).
+- Give non-exact answers to **3 significant figures**, angles to **1 decimal place**.
+- Show the equations you resolve, not just the result: method marks (M1) depend on a correct-form equation with the right number of terms.
+
+### Syllabus order for a "Start here" sequence
+
+Not every topic depends on every other. A sensible order, based on what each outcome needs:
+
+1. **4.1** Forces and equilibrium (resolving is used everywhere after this)
+2. **4.2** Kinematics (independent of 4.1; can run in parallel)
+3. **4.4** Newton's laws (needs 4.1 resolving and 4.2 constant-acceleration formulae)
+4. **4.5** Energy, work and power (needs 4.4 for forces and 4.2 for motion)
+5. **4.3** Momentum (self-contained; often combined with 4.2 in questions)
+
+### 9702: what the past-paper data can and cannot support
+
+9702 **Paper 4 assesses the A Level topics 12–25**, while the 9702 simulations cover **AS topics 1–11**. The hub already says this, but the consequence matters for teaching: the tagged 9702 Paper 4 questions cannot serve as "past-paper transfer" for the AS simulations. That needs 9702 Papers 1 and 2, which are not in the data. Also, 2018–2021 9702 Paper 4s follow the older syllabus (op-amps, communication) and should be marked as legacy in any student-facing list.
 
 ## What already works well
 
-### Learning content and subject coverage
+- **Topic structure matches the syllabus.** The 9709 hub groups by the five Paper 4 areas.
+- **Exam values can be typed exactly.** Every slider has a number box.
+- **Working is shown as equations with the student's numbers**, formatted to 3 s.f., in the style of a mark scheme.
+- **Exam setups reproduce real questions** and were checked against mark schemes.
+- **Common traps** match real mark-scheme pitfalls (sin/cos swap, assuming F = μR when not limiting, R changing when a force has a perpendicular component).
+- **Low-tech friendly by construction:** plain HTML/JS, no external requests, no accounts, works offline from a folder, every page has a mobile viewport tag, and browser storage is wrapped in try/catch so pages work with storage blocked.
+- **Data quality is documented:** 121 papers, 1,081 questions, 3,743 parts, mark totals checked, tags hand-reviewed. Tags are still a guide, not an answer key.
 
-- The 9709 hub groups content under the five Paper 4 areas: forces and equilibrium, kinematics, momentum, Newton’s laws, and energy/work/power.
-- The repository describes simulations for core mechanics situations including forces, friction, journeys, vertical motion, variable acceleration, connected particles, lifts, energy, and collisions.
-- The strings simulation displays a force-component table and equations for horizontal and vertical equilibrium. It also explains sign convention and includes notes about tension, angles, smooth rings, and strings going slack.
-- Exam setups connect the abstract model to named Cambridge paper questions. This can make realistic examples easier to prepare and revisit.
-- Slider-plus-typed-value controls allow exploration as well as entering exact exam values.
-- The paper data has a documented processing pipeline and validation report. The report covers 121 papers, 1,081 questions, and 3,743 parts, and records mark totals, mark-scheme comparisons, and held-out tagging checks. This is meaningful quality-control evidence, though it does not guarantee every tag or extracted text is error-free.
+## Where beginners struggle
 
-### Teacher perspective
+### 1. No first step
 
-A teacher can use an exam setup to reproduce a known configuration, change a parameter live, and point to the corresponding diagram, components, and calculations. The common-traps panel is a useful prompt for class discussion. The broad controls can also help teachers compare cases—for example, how tension changes as a string angle changes.
+The hub offers two courses, five areas, 16 simulations, modes, and a question-type index. "Open one, then pick a mode or an exam setup inside" describes the structure but not what to do first.
 
-### Beginner student perspective
+### 2. Too many decisions on one page
 
-The picture, numerical components, sign convention, equations, and explanatory notes provide multiple ways into the problem. The student can change a mass or angle and see the calculation update. A typed value is available when a slider is imprecise.
+Strings and rings exposes setup type, geometry, unknowns, orientation, force direction, preset, mass, angles, force, tensions, Lami's check, and exam mode. Useful for a teacher; for a beginner, the controls compete with the physics.
 
-## Where beginners may struggle
+### 3. The answer is visible before the reasoning
 
-### 1. The starting point is not sufficiently guided
+Working updates live, so a student can read the result without attempting it. **Exam mode exists**, but it reveals answers by **mouse hover only** (`.exam-hidden .eq:hover .res` in `theme.css`). On a phone or tablet, and for keyboard users, there is no reliable way to reveal a single line. This is a concrete defect: add tap/click/Enter to reveal each line, and a "reveal next step" button.
 
-The hub presents two courses, many topic areas, simulations, modes, and a past-paper question-type list. A novice may not know whether to start with a concept, a simulation, or a question. “Open one, then pick a mode or an exam setup inside” explains the structure at a high level but does not teach a first-time user exactly what to do next.
+### 4. Vocabulary arrives without definitions
 
-### 2. The strings simulation presents many decisions at once
+"Resultant", "equilibrium", "tension", "smooth", "limiting", "resolve", "slack" are used in controls and notes before being explained. A one-line definition at first use is enough.
 
-The inspected page exposes choices for setup type, geometry, unknowns, string orientation, force direction, exam setup, mass, angles, force, tensions, optional resolution, Lami’s theorem, and exam mode. This is powerful for exploration, but a beginner can spend attention on selecting controls before understanding equilibrium.
+### 5. Past papers come too early
 
-### 3. Correct output is not the same as a learning sequence
+The question index is valuable after a concept is learned, not before. Point to it from the end of a Learn sequence instead.
 
-The page shows working and answers live. A beginner needs the reasoning order too: identify forces, choose axes, resolve forces, apply equilibrium, solve, then check the physical meaning of the answer. If all of the working is visible immediately, a student may read a result without attempting or understanding the steps.
+## Recommendations (priority order)
 
-### 4. Mechanics vocabulary and conventions need an entry ramp
+### 1. Build one Learn sequence: equilibrium of a particle on two strings (4.1)
 
-Words such as “resultant,” “equilibrium,” “tension,” “smooth ring,” “limiting friction,” “resolve,” and “slack” are meaningful to a teacher but can stop a novice. The site should introduce them in plain language before relying on them in controls or notes. Diagrams should consistently identify the object, the forces acting on it, angle references, and positive directions.
+Steps, matching how the mark scheme awards marks:
 
-### 5. Past-paper browsing may be a poor first exercise
+1. **The object.** The particle is a point; list the forces on it.
+2. **Each force.** Highlight weight, then each tension. A string pulls along its length and cannot push.
+3. **Directions.** Show positive horizontal and vertical on the diagram.
+4. **One component.** Highlight one tension and its marked angle. Ask "sin or cos for the horizontal part?" before revealing. (This targets the most common 4.1 error.)
+5. **Equations.** Horizontal sum = 0, then vertical sum = 0. Each is a method mark.
+6. **Solve.** Reveal the simultaneous solution line by line; answers to 3 s.f.
+7. **Check.** Tensions must be positive; a negative value means the string would be slack.
+8. **Predict, then test.** "If the left angle gets steeper, does T₁ go up or down?"
+9. **Parallel question** with the answer hidden and one hint.
+10. **Past-paper transfer:** link the matching exam setup and its tagged question.
 
-A topic/type index is valuable after instruction. A learner who is still acquiring the model may face long lists of exam wording before knowing the prerequisite idea. Question tags are also a guide, not an infallible answer key; the validation report records less-than-perfect held-out question-type accuracy.
+Then reuse the same shape for other topics: **idea → model → prediction → worked example → practice → past paper**.
 
-## Low-tech and first-time user support
+### 2. Separate Learn from Explore
 
-“Low-tech” can mean an older phone or computer, a small screen, slow or unreliable internet, shared access, limited confidence with sliders, or little experience with browser interfaces. The product should not assume a student knows what a tab, slider, preset, search box, or embedded simulation does.
+- **Learn:** one task at a time, two or three controls, reveal-next-step, Reset.
+- **Explore / Teach:** the current pages, unchanged.
 
-### Make the first action explicit
+### 3. Fix exam-mode reveal for touch and keyboard
 
-Add a short instruction strip at the top of every activity, for example:
+Small change, real benefit: click/tap/Enter toggles a single line; add "reveal next" and "reveal all". This also gives teachers a pause-predict-reveal tool for class.
 
-1. **Choose a lesson or example** from the list.
-2. **Press Play** to watch, or use Pause to stop.
-3. **Change one value** using the number box; use the slider only if you want to explore.
-4. **Look at the highlighted force or graph.**
-5. **Read Step 1**, then press Next to reveal the next line.
-6. Use **Reset** to return to the starting example.
+### 4. Add a "Start here" path on the 9709 hub
 
-Use the actual labels and controls present on each page. Avoid instructions that assume a student understands “interact with the simulation.”
+Follow the syllabus order above, state g = 10, 3 s.f., 1 d.p. once, and make clear that 9702 is a separate course.
 
-### Make controls easy to recognize and operate
+### 5. Respect reduced motion
 
-- Give every control a plain-language label and a short explanation of what changing it will affect.
-- Use buttons with text such as **Play**, **Pause**, **Next step**, **Show answer**, and **Reset**. Do not rely on icons or color alone.
-- Keep labels beside sliders, show the current value and units, and let users type an exact value without needing precise pointer movement.
-- Make focus and selected states visible for keyboard users. Support Tab, Shift+Tab, Enter/Space, and arrow keys where appropriate.
-- Provide a stable, obvious way to return to the topic list and to reset the example.
-- Avoid making a student infer whether a tab changes the course, the mode, or the page.
+No page checks `prefers-reduced-motion`, and sims auto-play when an input changes. Under reduced motion, show the final state and let Play start the animation.
 
-### Support small screens and limited devices
+### 6. Short scaffolded practice per topic
 
-- Test common phone-sized screens and narrow browser windows. Keep the force diagram and the essential control visible without horizontal scrolling where practical.
-- Allow the diagram to be enlarged or opened separately if it is too small to read.
-- Offer a **Simple view** with fewer controls and a **Full view** for exploration.
-- Keep pages lightweight: avoid unnecessary animation, provide a pause control, and make reduced-motion preferences available.
-- Ensure that essential explanations are selectable text, not only labels drawn into a canvas.
-- Let students use the core activity without accounts, downloads, or high-bandwidth media.
+Identify a force or graph feature → choose a method → complete a calculation → a real past-paper part. Hints should target the likely misconception (from the existing common-traps lists), not just say right or wrong.
 
-### Support unreliable connectivity and shared devices
+### 7. Test with real students
 
-- Provide printable or downloadable lesson notes and worked examples as a fallback.
-- Keep a concise text explanation and static diagram available if animation fails or is disabled.
-- Explain how to resume after a page refresh, and make reset behavior predictable.
-- Avoid requiring students to create accounts or retain personal data just to explore a lesson.
-- Where browser storage is used for preferences, make the activity continue normally if storage is unavailable.
+Ask students new to mechanics to finish the Learn sequence unaided on a phone. Note where they hesitate, pick the wrong control, or misread the diagram.
 
-### Use plain language and visible progress
+## Considered and rejected
 
-- Define a new term in one short sentence at first use, with an optional deeper explanation.
-- Show a clear lesson progress marker, such as **1 of 5: Identify the forces**.
-- Tell the learner what they should notice: “The horizontal components cancel; the vertical components balance the weight.”
-- Give a next action after feedback instead of leaving a student at a dead end.
-- Provide concise error recovery: “That value makes the string slack. Reset or reduce the force, then try again.”
+Kept out on purpose, so they are not re-proposed without a reason:
 
-## Recommended student learning pathway
+- **Printable notes, account-free use, offline fallback.** Already satisfied: there are no accounts and the site runs offline from a folder. Printable notes duplicate textbooks.
+- **A difficulty rating for past-paper questions.** Not defined by the syllabus and subjective; filtering by syllabus topic and question type (already present) is more reliable.
+- **Removing advanced controls.** Teachers use them. Hide them behind Explore instead.
+- **A generic instruction strip on every page.** Same text everywhere gets ignored. Instructions belong inside the Learn sequence, at the moment they are needed.
+- **Using 9702 Paper 4 questions with the AS sims.** Wrong syllabus level (see above).
 
-For equilibrium of a particle held by two strings:
+## Acceptance checks for the Learn sequence
 
-1. **Start with the object.** Explain that the model treats the particle as a point and asks what forces act on it.
-2. **Identify each force.** Highlight weight and each tension one at a time. Explain that a string pulls along its length and cannot push.
-3. **Choose directions.** Make the positive horizontal and vertical directions visible on the diagram.
-4. **Understand one component.** Highlight one tension and its angle reference. Ask whether the horizontal component uses sine or cosine before revealing the answer.
-5. **Build the equilibrium equations.** Show horizontal forces sum to zero, then vertical forces sum to zero.
-6. **Solve the pair.** Reveal the simultaneous equations and calculation steps in order.
-7. **Check the model.** Confirm that the triangle of forces closes and that tensions are non-negative.
-8. **Try one change.** Ask the learner to predict what happens when one angle or mass changes, then let them test it.
-9. **Attempt a parallel question.** Hide the answer, offer a hint, then reveal the mark-scheme-style working.
-10. **Transfer to a past paper.** Link to a suitable question only after the learner has practised the underlying method.
+Ready for class when a first-time student can, without help:
 
-Use this same progression across the syllabus: **plain-language idea → visual model → guided prediction → worked example → independent practice → past-paper transfer**.
+- Find the 9709 Learn sequence from the hub.
+- Name the forces on the particle and say why tension acts along the string.
+- Choose sin or cos from the marked angle and explain why.
+- Say in words what the two equilibrium equations mean.
+- Give the answer to 3 s.f. using g = 10.
+- Reveal steps one at a time on a phone (no hover).
+- Recover from a slack-string setup with Reset.
 
-## Recommendations by priority
-
-### Priority 1: Build a true beginner route
-
-Create a guided sequence for one representative topic—forces and equilibrium is a good candidate. It should define terms, show the operating instructions, reveal the method in steps, include prediction checks, and end with an independent question. Pilot it with students who have just started mechanics.
-
-### Priority 2: Separate “Learn” from “Explore”
-
-Provide two clear routes:
-
-- **Learn:** one task at a time, minimal controls, guided prompts, answer reveal, and reset.
-- **Explore / Teach:** full parameter controls, presets, optional checks, and teacher-led demonstration.
-
-Do not remove advanced controls; make them an intentional choice rather than the default burden for a beginner.
-
-### Priority 3: Clarify course and syllabus navigation
-
-Make “9709 Mathematics: Mechanics” the clear route for a student who came to learn mechanics. Label “9702 AS Physics” as a separate course, explain the difference, and offer a “Start here” sequence through 9709 topics and prerequisites.
-
-### Priority 4: Add scaffolded practice
-
-For each major idea, include short questions that progress from identifying a force or graph feature, to selecting a method, to completing a calculation, to solving a past-paper part. Give hints tied to the likely misconception rather than only displaying right/wrong.
-
-### Priority 5: Improve question discovery and data transparency
-
-Allow filtering by syllabus topic, year/session, question type, and an appropriate difficulty or prerequisite level. Surface the paper/session/question reference clearly. Let teachers or maintainers review questionable tags, and make it possible for a user to report a mismatch.
-
-### Priority 6: Add teacher-ready presentation support
-
-Provide a lesson sequence, suggested questions, and an answer reveal suitable for class discussion. A teacher should be able to set up an example quickly, pause at a useful point, collect predictions, and then reveal the working.
-
-### Priority 7: Validate the experience on real student devices
-
-Test on small phones, older laptops, keyboard-only navigation, reduced motion, slow connections, and browsers with storage disabled. Ask students with low confidence in mechanics and low confidence with technology to complete a first lesson without help. Record where they hesitate, choose the wrong control, or cannot interpret the diagram.
-
-## Example acceptance checks for a beginner lesson
-
-A beginner lesson should be considered ready for classroom use when a first-time student can:
-
-- Find the correct course and lesson without being told which link to click.
-- Explain what Play, Pause, Next step, Show answer, and Reset do.
-- Identify the forces on the particle from the diagram.
-- Explain why a tension acts along the string and why the string pulls.
-- Determine which component uses sine or cosine from the marked angle.
-- Explain in words what the two equilibrium equations mean.
-- Complete a similar problem with hints but without seeing the full answer first.
-- Recover from an impossible setup and reset it without losing their place.
-- Use the activity on a small screen or with a keyboard, without needing precise slider control.
-
-These checks are proposed review criteria, not results of student testing.
+These are proposed criteria, not results of testing.
 
 ## Limitations
 
-- The live walkthrough focused on the hub and the strings-and-rings simulation. I did not complete a page-by-page audit of every simulation.
-- I did not conduct interviews or usability tests with actual teachers or students; the personas are analytical viewpoints based on the requested audiences.
-- I did not independently verify each past-paper question, mark scheme, or syllabus mapping against Cambridge source documents. The report cites the repository’s own validation evidence as reported.
-- Device, browser, accessibility, and offline recommendations should be confirmed through hands-on testing before being treated as measured defects.
-
-## Conclusion
-
-The project has unusually rich ingredients for an independent learning resource: visual models, adjustable values, worked calculations, exam setups, and extensive question data. The next improvement should focus on making the first experience understandable and operable for a novice, including students who are not confident with technology. A guided, low-control lesson with clear instructions and progressive reveal can make the existing technical depth teachable; the full simulation then becomes a powerful second step for exploration and exam transfer.
-
+- Detailed inspection covered the hub and Strings and rings; other pages were checked by code search only.
+- No interviews or usability tests with real teachers or students.
+- Syllabus learning outcomes are taken from the repository's `docs/PLAN.md` and `data/syllabus_9709_9702.json`, which paraphrase the Cambridge documents; check exact note wording (e.g. on Lami's theorem) against the published syllabus before quoting it to students.
