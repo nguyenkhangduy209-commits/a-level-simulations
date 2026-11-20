@@ -803,37 +803,49 @@
     return d;
   }
   function initWorkspace(refs) {
-    if (!stage || !stage.dock || !document.body || !document.body.classList) return;
+    if (!stage || !stage.el || !stage.dock || !document.body || !document.body.classList) return;
     if (!refs.setup.length && !refs.explain.length && !refs.calc.length) return;
     document.body.classList.add('ws-clean');
     function fireResize() {
       setTimeout(function () { if (typeof root.dispatchEvent === 'function') root.dispatchEvent(new Event('resize')); }, 20);
     }
     var dData = makeDrawer('top-left', '⚙ Data & Parameters', true, fireResize);
-    var dExplain = makeDrawer('bottom-left', '💡 Explanations & Common Traps', false, null);
+    var dExplain = makeDrawer('bottom-left', '💡 Explanations & Legend', true, fireResize);
     var dCalc = makeDrawer('calc-box', '📊 Calculations & Graphs', true, fireResize);
 
-    var bar = h('div', { class: 'ws-bar', role: 'toolbar', 'aria-label': 'Simulation panels' });
     var cnt = visibleParams().length;
-    var bData = h('button', { type: 'button', class: 'ws-pill', html: '⚙ <span>Data &amp; Setup</span>' + (cnt ? '<span class="ws-cnt">' + cnt + '</span>' : ''), onclick: function () { dData.toggle(); } });
-    var bExp = h('button', { type: 'button', class: 'ws-pill', html: '💡 <span>Explain</span>', onclick: function () { dExplain.toggle(); } });
-    var bCalc = h('button', { type: 'button', class: 'ws-pill primary', html: '📊 <span>Calculations &amp; Graphs</span>', onclick: function () { dCalc.toggle(); } });
+    var bData = h('button', { type: 'button', class: 'ws-pill', html: '⚙ <span class="ws-lbl">Data &amp; Setup</span>' + (cnt ? '<span class="ws-cnt">' + cnt + '</span>' : ''), onclick: function () { dData.toggle(); } });
+    var bExp = h('button', { type: 'button', class: 'ws-pill', html: '💡 <span class="ws-lbl">Explain</span>', onclick: function () { dExplain.toggle(); } });
+    var bCalc = h('button', { type: 'button', class: 'ws-pill primary', html: '📊 <span class="ws-lbl">Calculations &amp; Graphs</span>', onclick: function () { dCalc.toggle(); } });
     dData.bindPill(bData); dExplain.bindPill(bExp); dCalc.bindPill(bCalc);
 
-    bar.appendChild(bData);
-    if (refs.explain.length) bar.appendChild(bExp);
-    if (refs.calc.length) bar.appendChild(bCalc);
-    bar.appendChild(h('button', { type: 'button', class: 'ws-pill', html: '⇣ <span>Fetch Data</span>', onclick: openDataHub }));
-    if (query.get('embed') === '1') bar.appendChild(h('button', { type: 'button', class: 'ws-pill', html: '? <span>Guide</span>', onclick: openGuide }));
+    // Mount floating corner triggers directly over the full-screen stage
+    var tl = h('div', { class: 'ws-corner tl' }, [bData]);
+    var bl = h('div', { class: 'ws-corner bl' });
+    var br = h('div', { class: 'ws-corner br' });
+    if (refs.explain.length) bl.appendChild(bExp);
+    if (refs.calc.length) br.appendChild(bCalc);
+    if (query.get('embed') === '1') {
+      tl.appendChild(h('button', { type: 'button', class: 'ws-pill', html: '⇣ <span class="ws-lbl">Fetch Data</span>', onclick: openDataHub }));
+      tl.appendChild(h('button', { type: 'button', class: 'ws-pill', html: '? <span class="ws-lbl">Guide</span>', onclick: openGuide }));
+    }
+    stage.el.appendChild(tl);
+    if (bl.children.length) stage.el.appendChild(bl);
+    if (br.children.length) stage.el.appendChild(br);
 
-    if (stage.dock.parentNode) stage.dock.parentNode.insertBefore(bar, stage.dock);
     dData.body.appendChild(stage.dock);
     refs.setup.forEach(function (c) { dData.body.appendChild(c); });
-    refs.explain.forEach(function (c) { dExplain.body.appendChild(c); });
     if (refs.left && refs.left.querySelectorAll) {
+      Array.prototype.slice.call(refs.left.querySelectorAll('.legend')).forEach(function (lg) {
+        if (!bl.children.length) bl.appendChild(bExp);
+        if (!bl.parentNode) stage.el.appendChild(bl);
+        dExplain.body.appendChild(lg);
+      });
       Array.prototype.slice.call(refs.left.querySelectorAll('.plots')).forEach(function (pl) { dCalc.body.appendChild(pl); });
     }
+    refs.explain.forEach(function (c) { dExplain.body.appendChild(c); });
     refs.calc.forEach(function (c) { dCalc.body.appendChild(c); });
+    fireResize();
   }
 
   /* ---------- dock quick-entry & universal modals (? Guide, Quick Edit All, Fetch Data Hub) ---------- */

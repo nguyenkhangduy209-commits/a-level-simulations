@@ -419,23 +419,51 @@ code { font-family: var(--code); font-size: 0.92em; background: var(--chip); pad
 .hub-status { font-size: 12.5px; color: var(--ok); font-weight: 600; margin-left: auto; }
 @media (max-width: 720px) { .guide-btn span.txt, .data-btn span.txt { display: none; } }
 
-/* ---------- simulation-first workspace: clean hero stage + corner/fullscreen popup drawers ---------- */
-body.ws-clean main.sim { grid-template-columns: minmax(0, 1fr); max-width: 1240px; padding-top: 14px; }
+/* ---------- simulation-first full-screen workspace: hero canvas + corner/fullscreen popup drawers ---------- */
+body.ws-clean { height: 100vh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+body.ws-clean header.sim-head { flex: none; min-height: 48px; padding: 6px 14px; }
+body.ws-clean main.sim { flex: 1; min-height: 0; width: 100%; max-width: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+body.ws-clean main.sim > .left { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+body.ws-clean main.sim > .left > .card:first-child { flex: 1; min-height: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; display: flex; flex-direction: column; position: relative; }
+body.ws-clean .sim-stage { flex: 1; min-height: 0; width: 100%; height: 100%; border-radius: 0; }
+body.ws-clean .sim-stage > canvas { width: 100% !important; height: 100% !important; aspect-ratio: auto !important; border: 0; border-radius: 0; }
 body.ws-clean main.sim > .right,
 body.ws-clean main.sim > .bottom { display: none; }
-.ws-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 2px 2px; }
-.ws-pill { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--panel2); color: var(--ink); font: 650 14px var(--sans); cursor: pointer; box-shadow: var(--shadow); transition: border-color .12s, transform .12s, box-shadow .12s; }
+
+/* floating corner triggers over the full-screen stage */
+.ws-corner { position: absolute; z-index: 15; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; pointer-events: none; }
+.ws-corner > * { pointer-events: auto; }
+.ws-corner.tl { top: 12px; left: 12px; }
+.ws-corner.bl { bottom: 12px; left: 12px; }
+.ws-corner.br { bottom: 12px; right: 12px; }
+body.ws-clean .sim-stage .stage-tip { left: 50%; transform: translateX(-50%); top: 12px; max-width: min(520px, calc(100% - 360px)); text-align: center; }
+body.ws-clean .sim-stage.has-actions .stage-tip { max-width: min(520px, calc(100% - 400px)); }
+
+/* floating frosted-glass animation clock */
+body.ws-clean .left > .card:first-child > .anim {
+  position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 14;
+  background: color-mix(in srgb, var(--panel) 84%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--line); border-radius: 14px; padding: 6px 12px; box-shadow: var(--shadow);
+  max-width: calc(100% - 440px); margin: 0;
+}
+body.ws-clean .left > .card:first-child > .cb-pal,
+body.ws-clean .left > .card:first-child > .cb-row,
+body.ws-clean .left > .card:first-child > .cb-hint {
+  flex: none; background: var(--panel); padding: 6px 14px; margin: 0; border-top: 1px solid var(--line);
+}
+
+.ws-pill { display: inline-flex; align-items: center; gap: 7px; min-height: 42px; padding: 0 15px; border-radius: 999px; border: 1.5px solid var(--line); background: color-mix(in srgb, var(--panel) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--ink); font: 650 13.5px var(--sans); cursor: pointer; box-shadow: var(--shadow); transition: border-color .12s, transform .12s, box-shadow .12s; }
 .ws-pill:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 6px 18px var(--glow); }
-.ws-pill.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--panel2)); color: var(--accent); }
+.ws-pill.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--panel)); color: var(--accent); }
 .ws-pill.primary { background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); color: #fff; border-color: transparent; box-shadow: 0 6px 18px var(--glow); }
 .ws-pill .ws-cnt { font-size: 11.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: var(--chip); color: var(--muted); }
 .ws-pill.primary .ws-cnt { background: rgba(255,255,255,.22); color: #fff; }
 
 .ws-drawer { position: fixed; z-index: 65; display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--line); border-radius: 18px; box-shadow: var(--shadow-lg); overflow: hidden; }
 .ws-drawer[hidden] { display: none; }
-.ws-drawer.top-left { top: 68px; left: 16px; width: min(460px, calc(100vw - 32px)); max-height: calc(100vh - 90px); }
-.ws-drawer.bottom-left { bottom: 16px; left: 16px; width: min(460px, calc(100vw - 32px)); max-height: min(48vh, 440px); }
-.ws-drawer.calc-box { top: 68px; right: 16px; width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 90px); }
+.ws-drawer.top-left { top: 62px; left: 12px; width: min(470px, calc(100vw - 24px)); max-height: calc(100vh - 84px); }
+.ws-drawer.bottom-left { bottom: 62px; left: 12px; width: min(470px, calc(100vw - 24px)); max-height: min(50vh, 440px); }
+.ws-drawer.calc-box { top: 62px; right: 12px; width: min(680px, calc(100vw - 24px)); max-height: calc(100vh - 84px); }
 .ws-drawer.fullscreen { inset: 12px !important; width: auto !important; max-height: none !important; z-index: 75; }
 .ws-dhead { display: flex; align-items: center; gap: 8px; padding: 11px 14px; background: var(--panel2); border-bottom: 1px solid var(--line); }
 .ws-dhead h3 { margin: 0; font-size: 14.5px; font-weight: 750; flex: 1; }
@@ -445,6 +473,13 @@ body.ws-clean main.sim > .bottom { display: none; }
 .ws-dbody .card { box-shadow: none; padding: 12px; }
 .ws-dbody .card + .card { margin-top: 10px; }
 .ws-dbody .dock { padding-top: 4px; }
+@media (max-width: 960px) {
+  body.ws-clean .left > .card:first-child > .anim { position: static; transform: none; max-width: none; border-radius: 0; border-left: 0; border-right: 0; }
+  body.ws-clean .sim-stage .stage-tip { display: none; }
+  .ws-corner.bl { bottom: 60px; }
+  .ws-corner.br { bottom: 60px; }
+}
 @media (max-width: 720px) {
   .ws-drawer.top-left, .ws-drawer.bottom-left, .ws-drawer.calc-box { left: 8px; right: 8px; width: auto; }
+  .ws-pill span.ws-lbl { display: none; }
 }
