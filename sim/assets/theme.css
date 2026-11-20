@@ -317,3 +317,30 @@ body.embed main.sim { padding-top: 14px; }
 @media (max-width: 720px) { .stage-actions { position: static; margin-top: 8px; justify-content: flex-start; } .place-banner { white-space: normal; width: calc(100% - 24px); } }
 /* tables get the full width under the diagram instead of a squeezed grid column */
 .plots > div[style*="overflow-x"], .plots > .tblwrap { grid-column: 1 / -1; }
+
+/* Live working: a full-width row under everything, numbered steps with a plain-English reason under each */
+main.sim { max-width: none; grid-template-columns: minmax(0, 1fr) 400px; }
+main.sim > .bottom { grid-column: 1 / -1; min-width: 0; }
+main.sim > .bottom:empty { display: none; }
+.card.working .readout { font-size: 17px; counter-reset: step; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); column-gap: 16px; align-items: start; }
+.card.working .readout > * { grid-column: 1 / -1; }
+.card.working .readout > .eq { grid-column: auto; }
+.card.working .walk-page { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); column-gap: 16px; align-items: start; }
+.card.working .walk-page > :not(.eq) { grid-column: 1 / -1; }
+.card.working .readout .eq { padding: 14px 16px; position: relative; }
+.card.working .readout > .eq::before, .card.working .walk-page > .eq::before { counter-increment: step; content: "Step " counter(step); display: block; font: 700 12px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.card.working .walk-page { counter-reset: step; }
+.card.working .walk-page > .eq::before { content: "(" counter(step, lower-alpha) ")"; }
+.card.working .readout .eq .lines { font-size: 21px; }
+.card.working .readout .eq .u { font-size: 17px; }
+.card.working .readout .eq .note { font-size: 14px; }
+.card.working .readout .head { font-size: 13px; }
+.readout .why { font: 500 14px/1.45 var(--sans); color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.readout .why::before { content: "Why: "; font-weight: 700; color: var(--ink); }
+.readout .why.solo { border: 0; padding: 0; margin: 6px 0; }
+@media (max-width: 1000px) { main.sim { grid-template-columns: minmax(0, 1fr); } }
+
+/* Real life / Diagram switch in the corner of the main stage */
+.look-switch { position: absolute; right: 10px; top: 10px; z-index: 4; display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: color-mix(in srgb, var(--panel) 88%, transparent); border: 1px solid var(--line); backdrop-filter: blur(6px); }
+.look-switch button { font: 600 12px var(--sans); color: var(--muted); background: transparent; border: 0; border-radius: 999px; padding: 6px 11px; min-height: 30px; cursor: pointer; }
+.look-switch button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }

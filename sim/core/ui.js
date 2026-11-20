@@ -67,13 +67,16 @@
     // ?embed=1: shown as a mode inside a grouped simulation (group.html supplies the header)
     if (query.get('embed') === '1') { document.body.classList.add('embed'); var tg = query.get('theme'); if (tg === 'dark' || tg === 'light') document.documentElement.setAttribute('data-theme', tg); }
     else document.body.appendChild(head);
-    document.body.appendChild(h('main', { class: 'sim' }, [left, right]));
+    var bottom = h('section', { class: 'bottom' });
+    document.body.appendChild(h('main', { class: 'sim' }, [left, right, bottom]));
     function card(where, title) {
-      var c = h('div', { class: 'card' }, title ? [h('h2', { text: title })] : []);
-      (where === 'left' ? left : where === 'right' ? right : where).appendChild(c);
+      // "Live working" sits under the scene and graphs, full width, so the working is big enough to read
+      var working = where === 'right' && /^live working/i.test(title || '');
+      var c = h('div', { class: 'card' + (working ? ' working' : '') }, title ? [h('h2', { text: title })] : []);
+      (working ? bottom : where === 'left' ? left : where === 'right' ? right : where).appendChild(c);
       return c;
     }
-    return { left: left, right: right, card: card };
+    return { left: left, right: right, bottom: bottom, card: card };
   }
 
   /* ---------- the stage: the first main canvas, with a dock of parameter chips under it ---------- */
@@ -85,6 +88,7 @@
       var wrap = h('div', { class: 'sim-stage' }), dock = h('div', { class: 'dock', role: 'group', 'aria-label': 'Values in this simulation (tap to change)' });
       wrap.appendChild(c); container.appendChild(wrap); container.appendChild(dock);
       stage = { el: wrap, canvas: c, dock: dock, chips: [] };
+      if (SIM.scene && SIM.scene.mountSwitch) SIM.scene.mountSwitch(wrap);   // Real life / Diagram
       return c;
     }
     container.appendChild(c); return c;
@@ -448,6 +452,30 @@
      Each head() starts a step; everything before the first head is the summary shown above the steps.
      The current step is kept while the readout re-renders (every animation frame), and students can
      tap a step, use Back / Next (or ← / →), or switch to "Show all steps". */
+  /* Fallback explanations for common working lines, matched on the left-hand side (pages can pass their own `why`). */
+  var WHY = [
+    [/^momentum before|^p before|^total momentum before/i, 'Momentum = mass × velocity. Add it for every body, keeping the sign of each velocity (direction matters).'],
+    [/^momentum after|^p after|^total momentum after/i, 'With no external impulse, total momentum after the collision equals total momentum before.'],
+    [/^KE before/i, 'Kinetic energy = ½mv² for each body. It is a scalar, so just add the values (no directions).'],
+    [/^KE after/i, 'Same formula with the speeds after the event. Compare with KE before to see what was lost (or gained).'],
+    [/^KE (lost|loss)|^loss of KE|^KE gained/i, 'The difference between the two totals: energy changed into heat, sound and deformation (or released, in an explosion).'],
+    [/^V$|^common velocity|^v<sub>common/i, 'They move together, so one velocity: total momentum ÷ total mass.'],
+    [/^(a|acceleration)$/i, 'Newton’s second law: acceleration = resultant force ÷ mass, along the direction of motion.'],
+    [/^(F|resultant|resultant force|F<sub>net<\/sub>|ΣF)$/i, 'Add the forces along the line of motion, taking one direction as positive.'],
+    [/^(R|N|normal reaction|normal contact force)$/i, 'Perpendicular to the surface nothing accelerates, so the forces that way balance.'],
+    [/^(F<sub>max<\/sub>|limiting friction|μR|F ?= ?μR)/i, 'Limiting friction = μ × normal reaction: the largest friction the surface can supply.'],
+    [/^(W|weight|mg)$/i, 'Weight = mass × g, acting vertically down.'],
+    [/^(T|tension)$/i, 'Tension comes from the equation of motion (or equilibrium) of the body the string pulls on.'],
+    [/^(v|final velocity|speed)$/i, 'Choose the suvat equation that contains the three quantities you know and the one you want.'],
+    [/^(s|displacement|distance)$/i, 'Displacement from suvat, or the area under the velocity–time graph.'],
+    [/^(t|time)$/i, 'Solve for the time from the suvat equation (reject any negative root).'],
+    [/^(P|power)$/i, 'Power = driving force × speed (or work done ÷ time).'],
+    [/^(KE|kinetic energy)$/i, 'Kinetic energy = ½ × mass × speed².'],
+    [/^(PE|GPE|ΔGPE|gravitational potential energy)/i, 'Change in gravitational potential energy = mgh, with h the vertical height change.'],
+    [/^(WD|work done|work)/i, 'Work done = force × distance moved in the direction of the force.']
+  ];
+  function autoWhy(lhs) { var k = stripTags(String(lhs || '')).trim(); for (var i = 0; i < WHY.length; i++) if (WHY[i][0].test(k)) return WHY[i][1]; return ''; }
+
   function Readout(container) {
     var buf = [], el = h('div', { class: 'readout' }), page = 0, showAll = false, lastTitles = '', onDiagram = true, lastFocus = '', shownPage = -1;
     container.appendChild(el);
@@ -470,14 +498,15 @@
       clear: function () { buf = []; return api; },
       head: function (t) { buf.push({ head: t }); return api; },
       /** eq('a', 'F/m = 12/3', 4, 'm s<sup>−2</sup>') — value may be a number (formatted 3 s.f.) or html string */
-      eq: function (lhs, work, value, unit) {
+      eq: function (lhs, work, value, unit, why) {
         var v = typeof value === 'number' ? U.sf(value) : (value === undefined ? '' : String(value));
+        var wy = why || autoWhy(lhs), whyHtml = wy ? '<div class="why">' + wy + '</div>' : '';
         // no single answer: the work is one or more whole equations (e.g. "−T₁ cos 35° + T₂ cos 40° = 0"); one per line, kept intact
         if (v === '' && work && !isProse(String(work).split(/<br\s*\/?>/i)[0])) {
           var eqs = String(work).split(/<br\s*\/?>/i).filter(function (x) { return stripTags(x).trim() !== ''; });
           var hh = '<div class="eq eqn"><div class="lines">';
           eqs.forEach(function (q, i) { hh += '<span class="lhs">' + (i === 0 ? lhs : '') + '</span><span class="rel">' + (i === 0 && lhs ? ':' : '') + '</span><span class="ex">' + niceMinus(q) + '</span>'; });
-          buf.push(hh + '</div></div>'); return api;
+          buf.push(hh + '</div>' + whyHtml + '</div>'); return api;
         }
         var note = '', steps = [];
         if (work) {
@@ -495,9 +524,11 @@
         var html = '<div class="eq">' + (note ? '<div class="note">' + note + '</div>' : '') + '<div class="lines">';
         rows.forEach(function (r, i) { html += '<span class="lhs">' + (i === 0 ? lhs : '') + '</span>' + r; });
         if (!rows.length) html += '<span class="lhs">' + lhs + '</span><span class="rel"></span><span class="ex"></span>';
-        buf.push(html + '</div></div>');
+        buf.push(html + '</div>' + whyHtml + '</div>');
         return api;
       },
+      /** plain-English reason for the step just added (or a stand-alone explanation line) */
+      why: function (t) { var last = buf[buf.length - 1]; if (typeof last === 'string' && /^<div class="eq/.test(last) && last.indexOf('class="why"') < 0) buf[buf.length - 1] = last.replace(/<\/div>$/, '<div class="why">' + t + '</div></div>'); else buf.push('<div class="why solo">' + t + '</div>'); return api; },
       badge: function (t, kind) { buf.push('<span class="badge ' + (kind || 'info') + '">' + t + '</span>'); return api; },
       html: function (s) { buf.push(s); return api; },
       render: function () {
@@ -627,6 +658,6 @@
   /** escape for safe HTML interpolation of user-provided text */
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
-  SIM.ui = { h: h, course: course, gFor: gFor, colors: colors, onTheme: onTheme, page: page, canvas: canvas, params: params, select: select,
+  SIM.ui = { redraw: themeChanged, h: h, course: course, gFor: gFor, colors: colors, onTheme: onTheme, page: page, canvas: canvas, params: params, select: select,
     toggle: toggle, presets: presets, openEditor: openEditor, askNumber: askNumber, stageTip: stageTip, stageAction: stageAction, placeMode: placeMode, cancelPlace: function () { cancelPlace(false); }, stage: function () { return stage; }, syncChips: function () { syncChips(); }, Readout: Readout, examToggle: examToggle, notes: notes, legend: legend, readHash: readHash, writeHash: writeHash, esc: esc };
 })(typeof self !== 'undefined' ? self : this);

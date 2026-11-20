@@ -82,7 +82,6 @@
     c.fillStyle = col.ink; c.font = '12px system-ui, sans-serif';
     c.textAlign = 'right'; c.textBaseline = 'bottom'; c.fillText(xLabel, L + W, T + H + B - 2);
     c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText(yLabel, 6, 4);
-    if (spec.title) { c.textAlign = 'right'; c.fillStyle = col.muted; c.fillText(spec.title, L + W, 4); }
     // clip to plot area
     c.save(); c.beginPath(); c.rect(L, T, W, H); c.clip();
     (spec.series || []).forEach(function (s, i) {
@@ -131,6 +130,18 @@
       });
     }
     c.restore();
+    // title: top-right beside the y label if there is room, otherwise a caption inside the plot (never on top of the y label)
+    if (spec.title) {
+      c.font = '12px system-ui, sans-serif'; c.textBaseline = 'top';
+      var tw = c.measureText(spec.title).width, lw = c.measureText(yLabel).width;
+      if (6 + lw + 14 + tw <= L + W) { c.textAlign = 'right'; c.fillStyle = col.muted; c.fillText(spec.title, L + W, 4); }
+      else {
+        c.font = '11px system-ui, sans-serif'; tw = c.measureText(spec.title).width;
+        var tx = Math.max(L + 4, L + W - 4 - tw), ty = T + 4;
+        c.fillStyle = col.panel || col.bg || '#fff'; c.globalAlpha = 0.85; c.fillRect(tx - 3, ty - 2, Math.min(tw, W - 8) + 6, 15); c.globalAlpha = 1;
+        c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText(spec.title, tx, ty, W - 8);
+      }
+    }
   };
 
   SIM.plot = { Plot: Plot };

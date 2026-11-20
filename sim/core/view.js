@@ -149,6 +149,7 @@
   /** rectangle block centred at screen (x,y), rotated by math angle a (rad), size w×h px; base sits on the line */
   D.block = function (c, x, y, w, h, a, opt) {
     opt = opt || {}; var col = SIM.ui.colors();
+    if (SIM.scene && SIM.scene.real() && !opt.plain && !opt.fill) { SIM.scene.crate(c, x, y, w, h, a, { label: opt.label }); return; }
     c.save(); c.translate(x, y); c.rotate(-a);
     c.fillStyle = opt.fill || col.object; c.strokeStyle = opt.stroke || col['object-line']; c.lineWidth = 1.5;
     c.beginPath(); c.rect(-w / 2, -h, w, h); c.fill(); c.stroke();
@@ -157,13 +158,15 @@
   };
   D.particle = function (c, x, y, r, opt) {
     opt = opt || {}; var col = SIM.ui.colors();
+    if (SIM.scene && SIM.scene.real() && !opt.plain && r >= 3) { SIM.scene.ball(c, x, y, r, { color: opt.fill && /^#/.test(opt.fill) ? opt.fill : undefined, kind: 'steel' }); if (opt.label) D.label(c, opt.label, x, y, '#111', { size: 12, bold: true }); return; }
     c.save(); c.fillStyle = opt.fill || col.object; c.strokeStyle = opt.stroke || col['object-line']; c.lineWidth = 1.5;
     c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); c.stroke();
     if (opt.label) D.label(c, opt.label, x, y, col.ink, { size: 12, bold: true });
     c.restore();
   };
-  D.pulley = function (c, x, y, r) {
+  D.pulley = function (c, x, y, r, angle) {
     var col = SIM.ui.colors();
+    if (SIM.scene && SIM.scene.real()) { SIM.scene.pulley(c, x, y, r, angle); return; }
     c.save(); c.strokeStyle = col['object-line']; c.fillStyle = col.surface; c.lineWidth = 1.6;
     c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); c.stroke();
     c.beginPath(); c.arc(x, y, 2.5, 0, Math.PI * 2); c.fillStyle = col['object-line']; c.fill(); c.restore();

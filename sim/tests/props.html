@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="icon" href="data:,"><title>Scene props</title>
+<link rel="stylesheet" href="../assets/theme.css">
+<style>body{padding:16px} canvas{width:100%;height:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}</style>
+</head><body>
+<p style="color:var(--muted)">Developer gallery of SIM.scene props (light/dark follows the theme). <button id="tg">Toggle theme</button></p>
+<canvas id="c" width="1400" height="760"></canvas>
+<script src="../core/util.js"></script><script src="../core/ui.js"></script><script src="../core/view.js"></script><script src="../core/scene.js"></script>
+<script>
+var cv = document.getElementById('c'), c = cv.getContext('2d'), S = SIM.scene, t0 = performance.now();
+document.getElementById('tg').onclick = function () { var d = document.documentElement; d.setAttribute('data-theme', d.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); };
+function frame(now) {
+  var t = (now - t0) / 1000;
+  c.clearRect(0, 0, 1400, 760);
+  S.sky(c, 0, 0, 1400, 300, { horizon: 300 });
+  S.tree(c, 120, 300, 110); S.tree(c, 1290, 300, 90);
+  S.ground(c, 0, 700, 300, { kind: 'road', scroll: -t * 80, depth: 60 });
+  S.ground(c, 700, 1400, 300, { kind: 'grass', scroll: 0, depth: 60 });
+  var r = S.car(c, 260, 300, 150, 0, { kind: 'car', wheel: t * 6 });
+  var tr = S.car(c, 120 + 0, 300, 90, 0, { kind: 'caravan', wheel: t * 6 });
+  S.rope(c, [tr.front, r.back], { width: 3 });
+  S.car(c, 520, 300, 230, 0, { kind: 'truck', wheel: t * 4, facing: -1 });
+  S.person(c, 780, 300, 70, { pose: 'push' }); S.crate(c, 830, 300, 50, 46, 0, { label: '5 kg' });
+  S.ball(c, 960 + 60 * Math.sin(t), 160 - 80 * Math.abs(Math.cos(t * 2)), 16, { kind: 'football', spin: t * 4 });
+  S.ball(c, 1040, 270, 12, { kind: 'tennis', spin: t * 3 }); S.ball(c, 1080, 270, 12, { kind: 'cricket', spin: t * 3 }); S.ball(c, 1120, 272, 10, { kind: 'steel' });
+  S.motionLines(c, 1200, 220, 1, 0, 50, null, 14); S.ball(c, 1200, 220, 14, { kind: 'basketball', spin: t * 5 });
+  // second row
+  S.ramp(c, [[60, 680], [420, 460], [420, 680]], { kind: 'wood' });
+  S.crate(c, 240, 570, 54, 40, Math.atan2(220, 360), { label: 'P' });
+  S.ramp(c, [[460, 680], [700, 560], [700, 680]], { kind: 'concrete' });
+  S.pulley(c, 760, 400, 22, t * 2); S.rope(c, [[738, 400], [738, 520]]); S.rope(c, [[782, 400], [782, 470]]);
+  S.crate(c, 738, 560, 40, 40, 0, { label: 'A' }); S.crate(c, 782, 510, 34, 34, 0, { label: 'B' });
+  S.lift(c, 900, 430, 90, 120, { people: true, cableTop: 330 });
+  S.wall(c, 980, 380, 40, 300, {}); S.puck(c, 1080, 450, 22, '#2f5bd3', '1'); S.puck(c, 1140, 470, 22, '#d03a20', '2');
+  S.impact(c, 1110, 460, 30, (t % 1.5) / 1.5); S.dust(c, 1250, 680, (t % 1.2) / 1.2);
+  S.cliff(c, 1240, 520, 700, 'left', 1180); S.water(c, 1240, 640, 160, 60, t); S.cannon(c, 1200, 512, 0.6, 50);
+  S.table(c, 1040, 1170, 600, 80); S.ball(c, 1100, 588, 12, { kind: 'steel' });
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script></body></html>
