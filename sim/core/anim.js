@@ -23,7 +23,8 @@
     // type a time to jump straight to it (data in the Live working panel is shown for that instant)
     this.tBox = h('input', { type: 'text', inputmode: 'decimal', class: 'numbox tbox', value: '0', 'aria-label': 'Go to time t in seconds' });
     var go = function () {
-      var v = Number(String(self.tBox.value).replace(',', '.').replace('−', '-').trim());
+      var raw = String(self.tBox.value);
+      var v = SIM.ui && SIM.ui.parseNum ? SIM.ui.parseNum(raw) : Number(raw.replace(',', '.').replace('−', '-').trim());
       if (!isFinite(v) || self.tBox.value === '') { self.tBox.value = self.t.toFixed(2); return; }
       self.pause(); self.seek(v);
     };
@@ -81,5 +82,5 @@
     this.scrub.value = String(Math.round(1000 * this.t / this.duration));
   };
 
-  SIM.anim = { Clock: Clock, inputChanged: inputChanged, reducedMotion: reducedMotion };
+  SIM.anim = { Clock: Clock, clocks: clocks, inputChanged: inputChanged, reducedMotion: reducedMotion };
 })(typeof self !== 'undefined' ? self : this);

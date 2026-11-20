@@ -377,6 +377,7 @@
     bReal.addEventListener('click', function () { set(true); sync(); });
     bDia.addEventListener('click', function () { set(false); sync(); });
     S.onChange(sync);
+    stageEl.classList.add('has-look');
     stageEl.appendChild(box);
   };
 

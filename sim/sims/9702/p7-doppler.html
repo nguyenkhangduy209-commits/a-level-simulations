@@ -241,8 +241,8 @@
       if (xs !== null && !locked('fs')) hs.push({ id: 'fs', x: xs, y: vp.Y(0), r: 16, color: col.applied });
       if (xs !== null && !locked('vs')) hs.push({ id: 'vs', x: xs + ARR0 + v.vs * arrK(), y: vp.Y(0) - 18, color: col.applied });
       if (mode.get() === 'vs' && !locked('fo')) {
-        hs.push({ id: 'foA', x: vp.X(XA * W), y: vp.Y(0) + labOff() + 16, r: 18, color: col.s2 });
-        hs.push({ id: 'foB', x: vp.X(XB * W), y: vp.Y(0) + labOff() + 16, r: 18, color: col.s3 });
+        hs.push({ id: 'foA', kind: 'pill', w: 86, h: 22, x: vp.X(XA * W), y: vp.Y(0) + labOff() + 16, color: col.s2 });
+        hs.push({ id: 'foB', kind: 'pill', w: 86, h: 22, x: vp.X(XB * W), y: vp.Y(0) + labOff() + 16, color: col.s3 });
       }
       return hs;
     },

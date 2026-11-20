@@ -36,6 +36,76 @@
   function themeChanged() { colorCache = null; themeListeners.forEach(function (f) { f(); }); }
   if (root.matchMedia) root.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', themeChanged);
 
+  /* ---------- safe physics/math number parser (SI prefixes + arithmetic) ---------- */
+  var SI_MUL = { G: 1e9, M: 1e6, k: 1e3, K: 1e3, c: 1e-2, m: 1e-3, u: 1e-6, 'µ': 1e-6, 'μ': 1e-6, n: 1e-9, p: 1e-12 };
+  function parseNum(raw) {
+    var s = String(raw === undefined || raw === null ? '' : raw).trim().replace(/,/g, '.').replace(/−/g, '-').replace(/×/g, '*').replace(/÷/g, '/').replace(/π/g, 'pi');
+    if (!s) return NaN;
+    // simple number with optional SI suffix (e.g. 4.7k, 15m, 200u)
+    var ms = /^([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)\s*([GMkKcmuµμnp])$/.exec(s);
+    if (ms) return Number(ms[1]) * SI_MUL[ms[2]];
+    var plain = Number(s);
+    if (isFinite(plain)) return plain;
+    // recursive-descent arithmetic parser: + - * / ^ ( ) pi e sqrt sin cos tan
+    var idx = 0;
+    function skip() { while (idx < s.length && /\s/.test(s[idx])) idx++; }
+    function expr() {
+      var v = term();
+      while (true) { skip(); var ch = s[idx]; if (ch === '+' || ch === '-') { idx++; v = ch === '+' ? v + term() : v - term(); } else break; }
+      return v;
+    }
+    function term() {
+      var v = power();
+      while (true) {
+        skip(); var ch = s[idx];
+        if (ch === '*' || ch === '/') { idx++; var r = power(); v = ch === '*' ? v * r : v / r; }
+        else break;
+      }
+      return v;
+    }
+    function power() {
+      var v = unary(); skip();
+      if (s[idx] === '^') { idx++; return Math.pow(v, power()); }
+      return v;
+    }
+    function unary() {
+      skip();
+      if (s[idx] === '+') { idx++; return unary(); }
+      if (s[idx] === '-') { idx++; return -unary(); }
+      return atom();
+    }
+    function atom() {
+      skip();
+      if (s[idx] === '(') { idx++; var v = expr(); skip(); if (s[idx] !== ')') return NaN; idx++; return v; }
+      var numM = /^(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/.exec(s.slice(idx));
+      if (numM) {
+        idx += numM[0].length;
+        var val = Number(numM[0]);
+        if (idx < s.length && SI_MUL[s[idx]] && (idx + 1 >= s.length || !/[a-zA-Z]/.test(s[idx + 1]))) { val *= SI_MUL[s[idx++]]; }
+        return val;
+      }
+      var idM = /^[a-zA-Z]+/.exec(s.slice(idx));
+      if (idM) {
+        idx += idM[0].length;
+        var id = idM[0].toLowerCase();
+        if (id === 'pi') return Math.PI;
+        if (id === 'e') return Math.E;
+        skip();
+        if (s[idx] === '(') {
+          idx++; var arg = expr(); skip(); if (s[idx] !== ')') return NaN; idx++;
+          if (id === 'sqrt') return Math.sqrt(arg);
+          if (id === 'abs') return Math.abs(arg);
+          if (id === 'sin') return Math.sin(arg);
+          if (id === 'cos') return Math.cos(arg);
+          if (id === 'tan') return Math.tan(arg);
+        }
+      }
+      return NaN;
+    }
+    var out = expr(); skip();
+    return idx === s.length && isFinite(out) ? out : NaN;
+  }
+
   /* ---------- page skeleton ---------- */
   var LOGO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
     '<path d="M4 18c3-9 8-12 16-12"/><circle cx="4" cy="18" r="1.6" fill="#fff"/><path d="M15 6h5v5"/></svg>';
@@ -60,7 +130,11 @@
       h('h1', { text: opt.title }),
       h('div', { class: 'tags' }, (opt.tags || []).map(function (t) { return h('span', { class: 'chip', text: t }); })
         .concat(opt.g ? [h('span', { class: 'chip g', html: 'g = ' + opt.g + ' m s<sup>−2</sup>' })] : [])),
-      themeButton()
+      h('div', { class: 'head-actions' }, [
+        h('button', { type: 'button', class: 'data-btn', 'aria-label': 'Fetch or export data', html: '⇣ <span class="txt">Fetch Data</span>', onclick: function () { openDataHub(); } }),
+        h('button', { type: 'button', class: 'guide-btn', 'aria-label': 'Simulation guide', html: '<span class="guide-q">?</span><span class="txt">Guide</span>', onclick: function () { openGuide(); } }),
+        themeButton()
+      ])
     ]);
     try { var saved = localStorage.getItem('sim-theme'); if (saved) document.documentElement.setAttribute('data-theme', saved); } catch (e) { /* ignore */ }
     var left = h('section', { class: 'left' }), right = h('aside', { class: 'right' });
@@ -112,6 +186,7 @@
     if (!stage) return null;
     var bar = stage.actions || (stage.actions = h('div', { class: 'stage-actions' }));
     if (!bar.parentNode) stage.el.appendChild(bar);
+    stage.el.classList.add('has-actions');
     var b = h('button', { type: 'button', class: 'stage-act', html: '<b>' + (o.icon || '+') + '</b><span>' + o.label + '</span>', onclick: function () { o.onClick && o.onClick(); } });
     bar.appendChild(b);
     return { el: b, show: function (v) { b.style.display = v ? '' : 'none'; }, label: function (t) { b.querySelector('span').textContent = t; } };
@@ -168,16 +243,23 @@
     var host = stage ? stage.el : document.body, d = o.decimals === undefined ? 2 : o.decimals, step = o.step || 1;
     var input = h('input', { type: 'text', inputmode: 'decimal', autocomplete: 'off', 'aria-label': o.title, value: U.num(o.value, d) });
     var range = h('input', { type: 'range', min: o.min, max: o.max, step: 'any', value: o.value, 'aria-label': o.title + ' slider' });
-    var cur = Number(o.value);
+    var cur = Number(o.value), initVal = Number(o.value);
+    var hint = h('div', { class: 'pop-hint' });
     function clampSnap(v) { v = U.clamp(v, Number(o.min), Number(o.max)); return Number(v.toFixed(Math.max(0, d))); }
     function set(v, from) {
       if (!isFinite(v)) return; cur = clampSnap(v);
       if (from !== 'input') input.value = U.num(cur, d);
       if (from !== 'range') range.value = cur;
+      if (from === 'input') {
+        var raw = String(input.value).trim();
+        if (v < Number(o.min) || v > Number(o.max)) { hint.textContent = 'clamped to [' + U.num(Number(o.min), 4) + ', ' + U.num(Number(o.max), 4) + ']'; hint.className = 'pop-hint warn'; }
+        else if (/[GMkKcmuµμnp*\/+^()]|pi|sqrt/i.test(raw)) { hint.textContent = '= ' + U.num(cur, d); hint.className = 'pop-hint'; }
+        else hint.textContent = '';
+      } else hint.textContent = '';
       if (o.onInput) o.onInput(cur);
     }
-    function parse() { return Number(String(input.value).replace(',', '.').replace('−', '-').trim()); }
-    input.addEventListener('input', function () { var v = parse(); if (input.value !== '' && isFinite(v)) set(v, 'input'); });
+    function parse() { return parseNum(input.value); }
+    input.addEventListener('input', function () { var v = parse(); if (input.value !== '' && isFinite(v)) set(v, 'input'); else { hint.textContent = input.value.trim() ? 'e.g. 4.7k, 15m, 1/3, 2*pi' : ''; hint.className = 'pop-hint'; } });
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') { e.preventDefault(); done(); }
       else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); set(cur + (e.key === 'ArrowUp' ? 1 : -1) * step * (e.shiftKey ? 10 : 1)); }
@@ -196,11 +278,19 @@
       h('button', { class: 'pop-close', type: 'button', text: '×', 'aria-label': 'Close', onclick: function () { closePop(true); if (o.onCancel) o.onCancel(); } }),
       h('p', { class: 'pop-title', html: o.title }),
       o.sub ? h('p', { class: 'pop-sub', html: o.sub }) : null,
+      h('div', { class: 'pop-meta' }, [
+        h('span', { html: 'Range: ' + U.num(Number(o.min), 4) + ' – ' + U.num(Number(o.max), 4) + (o.unit ? ' ' + o.unit : '') }),
+        h('span', { text: 'Step: ' + U.num(step, 4) })
+      ]),
       h('div', { class: 'big' }, [stepper(-1, '−'), h('div', { class: 'numwrap' }, [input, o.unit ? h('span', { class: 'u', html: o.unit }) : null]), stepper(1, '+')]),
+      hint,
       range,
-      h('div', { class: 'range-ends' }, [h('span', { text: U.num(Number(o.min), 4) }), h('span', { text: U.num(Number(o.max), 4) })]),
-      o.quick && o.quick.length ? h('div', { class: 'quick' }, o.quick.map(function (q) { return h('button', { type: 'button', text: String(q), onclick: function () { set(q); } }); })) : null,
-      h('div', { class: 'pop-actions' }, [h('button', { class: 'btn primary', type: 'button', text: o.doneLabel || 'Done', onclick: done })])
+      h('div', { class: 'range-ends' }, [h('span', { text: U.num(Number(o.min), 4) }), h('span', { text: 'Tip: 4.7k, 15m, 2*pi, 1/3' }), h('span', { text: U.num(Number(o.max), 4) })]),
+      o.quick && o.quick.length ? h('div', { class: 'quick' }, [h('span', { class: 'quick-lbl', text: 'Quick:' })].concat(o.quick.map(function (q) { return h('button', { type: 'button', text: String(q), onclick: function () { set(q); } }); }))) : null,
+      h('div', { class: 'pop-actions' }, [
+        h('button', { class: 'btn', type: 'button', text: '↺ Reset', title: 'Restore value', onclick: function () { set(initVal); } }),
+        h('button', { class: 'btn primary', type: 'button', text: o.doneLabel || 'Done', onclick: done })
+      ])
     ]);
     host.appendChild(el);
     // place next to the anchor inside the stage (desktop); CSS turns it into a bottom sheet on phones
@@ -208,7 +298,7 @@
     var x, y;
     if (o.anchorEl && o.anchorEl.getBoundingClientRect) { var ar = o.anchorEl.getBoundingClientRect(); x = ar.left - hr.left; y = ar.top - hr.top - 8; el.style.top = 'auto'; }
     else { x = (o.at ? o.at.x : hr.width / 2) + 14; y = (o.at ? o.at.y : hr.height / 2) - 40; }
-    var w = Math.min(340, (root.innerWidth || 800) - 24);
+    var w = Math.min(390, (root.innerWidth || 800) - 24);
     // beside the point, on whichever side has room, so the popover never covers what was just drawn
     if (!o.anchorEl && o.at && x + w > hr.width - 4 && o.at.x - 14 - w >= 4) x = o.at.x - 14 - w;
     x = Math.max(4, Math.min(x, hr.width - w - 4));
@@ -261,7 +351,7 @@
       ctl.rows[sp.key] = { row: row, range: range, box: box, spec: sp, d: d, step: step };
       range.addEventListener('input', function () { notify(); var v = snapValue(Number(range.value), sp, ctl.rows[sp.key].step); ctl.values[sp.key] = v; box.value = U.num(v, d); onChange && onChange(sp.key); });
       box.addEventListener('change', function () {
-        var v = Number(String(box.value).replace(',', '.').replace('−', '-').trim()); if (box.value === '' || !isFinite(v)) { box.value = ctl.values[sp.key]; return; }
+        var v = parseNum(box.value); if (box.value === '' || !isFinite(v)) { box.value = ctl.values[sp.key]; return; }
         v = U.clamp(v, Number(sp.min), Number(sp.max)); box.value = v; range.value = v; ctl.values[sp.key] = v; notify(); onChange && onChange(sp.key);
       });
     });
@@ -306,8 +396,9 @@
       r.chip = chip; r.ph = ph; r.docked = true;
       function render() {
         var v = r.locked && r.lockedVal !== undefined ? r.lockedVal : ctl.values[sp.key];
-        chip.innerHTML = (sp.sym ? '<span class="sym">' + sp.sym + '</span>' : '<span class="lbl">' + r.labelText + '</span>') +
-          '<span class="val">' + (isFinite(v) ? (r.locked ? U.sf(v) : fmtChip(v)) : '—') + '</span>' + (sp.unit ? '<span class="unit">' + sp.unit + '</span>' : '');
+        chip.innerHTML =
+          '<span class="chip-top"><span class="chip-name">' + esc(r.labelText) + '</span>' + (sp.sym ? '<span class="sym">' + sp.sym + '</span>' : '') + '</span>' +
+          '<span class="chip-main"><span class="val">' + (isFinite(v) ? (r.locked ? U.sf(v) : fmtChip(v)) : '—') + '</span>' + (sp.unit ? '<span class="unit">' + sp.unit + '</span>' : '') + '<span class="chip-edit" aria-hidden="true">✎</span></span>';
         chip.setAttribute('aria-label', r.labelText + ': ' + (isFinite(v) ? fmtChip(v) : 'not set') + ' ' + String(sp.unit || '').replace(/<[^>]+>/g, '') + (r.locked ? ' (solved)' : ', press Enter to change'));
       }
       r.renderChip = render;
@@ -337,6 +428,7 @@
     ctl.range = function (k, a, b, st) { o.range(k, a, b, st); var r = ctl.rows[k]; if (r && r.renderChip) r.renderChip(); };
     function each() { specs.forEach(function (sp) { var r = ctl.rows[sp.key]; if (r && r.renderChip) r.renderChip(); }); }
     syncChips();
+    ensureDockTools();
     if (!syncTimer && root.setInterval) syncTimer = setInterval(syncChips, 400);
   }
   /** a chip is shown when its row is visible and the card it came from is visible */
@@ -385,6 +477,22 @@
     var note = h('div', { class: 'scn-note' });
     var cur = h('button', { type: 'button', class: 'scn-current', 'aria-expanded': 'false' });
     var panel = h('div', { class: 'scn-panel', role: 'listbox', 'aria-label': 'Scenarios' }); panel.style.display = 'none';
+    if (list.length >= 6) {
+      var search = h('input', { type: 'search', class: 'scn-search', placeholder: 'Filter setups or paper code…', 'aria-label': 'Filter scenarios' });
+      search.addEventListener('input', function () {
+        var q = search.value.trim().toLowerCase();
+        Array.prototype.forEach.call(panel.querySelectorAll ? panel.querySelectorAll('.scn-group') : [], function (g) {
+          var any = false;
+          Array.prototype.forEach.call(g.querySelectorAll('.scn-item'), function (b) {
+            var hit = !q || b.textContent.toLowerCase().indexOf(q) >= 0;
+            b.style.display = hit ? '' : 'none';
+            if (hit) any = true;
+          });
+          g.style.display = any ? '' : 'none';
+        });
+      });
+      panel.appendChild(search);
+    }
     function label(p) {
       var m = PAPER_RE.exec(p.name);
       return m ? '<span class="scn-ref">' + esc(m[1]) + '</span><span class="scn-name">' + esc(m[2] || 'Exam question') + '</span>' : '<span class="scn-name">' + esc(p.name) + '</span>';
@@ -660,6 +768,386 @@
   /** escape for safe HTML interpolation of user-provided text */
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
+  /* ---------- dock quick-entry & universal modals (? Guide, Quick Edit All, Fetch Data Hub) ---------- */
+  var dockToolsAdded = false, activeModal = null;
+  function closeModal() {
+    if (!activeModal) return;
+    if (activeModal.parentNode) activeModal.parentNode.removeChild(activeModal);
+    activeModal = null;
+  }
+  if (typeof document !== 'undefined' && document.addEventListener) {
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && activeModal) { closeModal(); return; }
+      if (e.target && /INPUT|SELECT|TEXTAREA|BUTTON/.test(e.target.tagName || '')) return;
+      if (activeModal || pop) return;
+      if (e.key === '?' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); openGuide(); return; }
+      if (e.key === ' ' && SIM.anim && SIM.anim.clocks && SIM.anim.clocks.length) { e.preventDefault(); SIM.anim.clocks[0].toggle(); }
+    });
+  }
+  function openModal(title, bodyEl) {
+    closeModal();
+    var back = h('div', { class: 'sim-modal-back', role: 'dialog', 'aria-modal': 'true', 'aria-label': title });
+    var box = h('div', { class: 'sim-modal' }, [
+      h('div', { class: 'sim-modal-head' }, [
+        h('h2', { text: title }),
+        h('button', { type: 'button', class: 'sim-modal-close', text: '×', 'aria-label': 'Close', onclick: closeModal })
+      ]),
+      h('div', { class: 'sim-modal-body' }, [bodyEl])
+    ]);
+    back.appendChild(box);
+    back.addEventListener('click', function (e) { if (e.target === back) closeModal(); });
+    document.body.appendChild(back);
+    activeModal = back;
+    return box;
+  }
+  function ensureDockTools() {
+    if (!stage || !stage.dock || dockToolsAdded) return;
+    if (allDocked.length < 2) return;
+    dockToolsAdded = true;
+    var bEdit = h('button', { type: 'button', class: 'pchip dock-act', text: '✎ Edit all', title: 'Edit all parameters at once', onclick: openQuickEntry });
+    stage.dock.appendChild(bEdit);
+    if (query.get('embed') === '1') {
+      stage.dock.appendChild(h('button', { type: 'button', class: 'pchip dock-act', text: '⇣ Fetch Data', title: 'Extract from question or export data', onclick: openDataHub }));
+      stage.dock.appendChild(h('button', { type: 'button', class: 'pchip dock-act', text: '? Guide', title: 'How to use this simulation', onclick: openGuide }));
+    }
+  }
+  function visibleParams() {
+    return allDocked.filter(function (r) { return !r.locked && r.vis && r.chip && r.chip.style.display !== 'none'; });
+  }
+  function openQuickEntry() {
+    var list = visibleParams();
+    if (!list.length) return;
+    var wrap = h('div', {}), grid = h('div', { class: 'qentry-grid' }), inputs = [];
+    wrap.appendChild(h('p', { style: 'margin:0 0 12px;color:var(--muted)', html: 'Type values directly and press <span class="guide-kbd">Tab</span> to move between fields. Supports SI prefixes (<code>4.7k</code>, <code>15m</code>, <code>200u</code>) and math (<code>2*pi</code>, <code>1/3</code>).' }));
+    list.forEach(function (r) {
+      var sp = r.spec;
+      var inp = h('input', { type: 'text', inputmode: 'decimal', value: fmtChip(r.ctl.values[sp.key]), 'aria-label': r.labelText });
+      function applyVal(v) {
+        if (!isFinite(v)) { inp.value = fmtChip(r.ctl.values[sp.key]); return; }
+        v = U.clamp(v, Number(sp.min), Number(sp.max));
+        inp.value = fmtChip(v);
+        r.box.value = v; r.box.dispatchEvent(new Event('change'));
+        if (r.renderChip) r.renderChip();
+      }
+      inp.addEventListener('change', function () { applyVal(parseNum(inp.value)); });
+      var bDec = h('button', { type: 'button', class: 'qentry-step', text: '−', 'aria-label': 'Decrease ' + r.labelText, onclick: function () { applyVal(r.ctl.values[sp.key] - r.step); } });
+      var bInc = h('button', { type: 'button', class: 'qentry-step', text: '+', 'aria-label': 'Increase ' + r.labelText, onclick: function () { applyVal(r.ctl.values[sp.key] + r.step); } });
+      inputs.push(inp);
+      grid.appendChild(h('div', { class: 'qentry-item' }, [
+        h('label', { html: '<span>' + esc(r.labelText) + '</span>' + (sp.sym ? '<span class="qentry-sym">' + sp.sym + '</span>' : '') }),
+        h('div', { class: 'qentry-meta', html: 'Range: ' + U.num(Number(sp.min), 4) + ' – ' + U.num(Number(sp.max), 4) + (sp.unit ? ' ' + sp.unit : '') + ' · Step: ' + U.num(r.step, 4) }),
+        h('div', { class: 'qentry-in' }, [bDec, inp, bInc, sp.unit ? h('span', { class: 'unit', html: sp.unit }) : null])
+      ]));
+    });
+    wrap.appendChild(grid);
+    wrap.appendChild(h('div', { class: 'hub-bar' }, [
+      h('button', { type: 'button', class: 'btn primary', text: 'Done', onclick: closeModal })
+    ]));
+    openModal('Quick Data Entry — all parameters', wrap);
+    if (inputs[0] && inputs[0].focus) setTimeout(function () { inputs[0].focus(); if (inputs[0].select) inputs[0].select(); }, 20);
+  }
+  function openGuide() {
+    var tipTxt = stage && stage.tip && stage.tip.textContent ? stage.tip.textContent : 'Drag handles directly on the simulation canvas or tap parameter chips below.';
+    var vis = visibleParams();
+    var wrap = h('div', {}), tabs = h('div', { class: 'sim-tabs' }), pane = h('div', {});
+    var b1 = h('button', { type: 'button', class: 'sim-tab on', text: '🧭 How to use' });
+    var b2 = h('button', { type: 'button', class: 'sim-tab', text: '📐 SI Prefixes & Shortcuts' });
+    function show(tab) {
+      b1.classList.toggle('on', tab === 1); b2.classList.toggle('on', tab === 2);
+      if (tab === 1) {
+        pane.innerHTML =
+          '<p style="margin-top:0"><b>Current simulation:</b> ' + esc(document.title || 'Physics / Mechanics Simulation') + '</p>' +
+          '<div class="guide-grid">' +
+            '<div class="guide-card"><h3><span class="guide-num">1</span>Interact on the Canvas</h3><p style="margin:0;color:var(--muted)">' + esc(tipTxt) + '</p></div>' +
+            '<div class="guide-card"><h3><span class="guide-num">2</span>Enter Data Easily</h3><p style="margin:0;color:var(--muted)">Tap any chip under the stage, or click <b>✎ Edit all</b> to type everything in one grid. Type SI prefixes like <code>4.7k</code>, <code>15m</code>, <code>200u</code> or math like <code>2*pi</code>, <code>1/4</code>.</p></div>' +
+            '<div class="guide-card"><h3><span class="guide-num">3</span>Fetch &amp; Export Data</h3><p style="margin:0;color:var(--muted)">Click <b>⇣ Fetch Data</b> to paste an exam question (auto-extracts values &amp; converts units!) or export live results &amp; time-series tables as CSV, JSON, or Markdown.</p></div>' +
+            '<div class="guide-card"><h3><span class="guide-num">4</span>Learn &amp; Test Yourself</h3><p style="margin:0;color:var(--muted)">Switch between <b>Real life</b> and <b>Diagram</b> on the stage. Step through <b>Live working</b> below, or toggle <b>Exam mode</b> to hide answers and check your own working.</p></div>' +
+          '</div>' +
+          (vis.length ? '<p style="margin:10px 0 6px"><b>Editable values on this page:</b> ' + vis.map(function (r) { return '<code>' + esc(r.labelText) + '</code>'; }).join(' · ') + '</p>' : '') +
+          '<p style="margin:8px 0 0;color:var(--muted)"><b>Shortcuts:</b> <span class="guide-kbd">Space</span> play/pause · <span class="guide-kbd">?</span> guide · <span class="guide-kbd">↑</span>/<span class="guide-kbd">↓</span> nudge chip (<span class="guide-kbd">Shift</span> ×10) · <span class="guide-kbd">←</span>/<span class="guide-kbd">→</span> step working · <span class="guide-kbd">Esc</span> close</p>';
+      } else {
+        pane.innerHTML =
+          '<p style="margin-top:0;color:var(--muted)">You can type any of these SI prefixes or math expressions directly into any number box or <b>✎ Edit all</b>:</p>' +
+          '<table class="tbl"><thead><tr><th>Prefix / Input</th><th style="text-align:left">Meaning</th><th>Example</th><th>Evaluates to</th></tr></thead><tbody>' +
+          '<tr><td><code>G</code></td><td class="txt">giga (×10⁹)</td><td><code>2.4G</code></td><td>2.4×10⁹</td></tr>' +
+          '<tr><td><code>M</code></td><td class="txt">mega (×10⁶)</td><td><code>1.5M</code></td><td>1.5×10⁶</td></tr>' +
+          '<tr><td><code>k</code></td><td class="txt">kilo (×10³)</td><td><code>4.7k</code></td><td>4700</td></tr>' +
+          '<tr><td><code>c</code></td><td class="txt">centi (×10⁻²)</td><td><code>25c</code></td><td>0.25</td></tr>' +
+          '<tr><td><code>m</code></td><td class="txt">milli (×10⁻³)</td><td><code>15m</code></td><td>0.015</td></tr>' +
+          '<tr><td><code>u</code> / <code>µ</code></td><td class="txt">micro (×10⁻⁶)</td><td><code>200u</code></td><td>0.0002</td></tr>' +
+          '<tr><td><code>n</code></td><td class="txt">nano (×10⁻⁹)</td><td><code>550n</code></td><td>5.5×10⁻⁷</td></tr>' +
+          '<tr><td><code>p</code></td><td class="txt">pico (×10⁻¹²)</td><td><code>10p</code></td><td>1×10⁻¹¹</td></tr>' +
+          '<tr><td>Math</td><td class="txt"><code>+ − * / ^ pi sqrt()</code></td><td><code>2*pi/3</code></td><td>2.094</td></tr>' +
+          '</tbody></table>';
+      }
+    }
+    b1.onclick = function () { show(1); }; b2.onclick = function () { show(2); };
+    tabs.appendChild(b1); tabs.appendChild(b2);
+    wrap.appendChild(tabs); wrap.appendChild(pane);
+    show(1);
+    openModal('Simulation Guide', wrap);
+  }
+
+  /* ---------- Fetch Data Hub (Smart Question Extractor + Live/Time-Series Export + Import) ---------- */
+  var UNIT_CONV = {
+    'm': ['m', 1], 'cm': ['m', 1e-2], 'mm': ['m', 1e-3], 'um': ['m', 1e-6], 'µm': ['m', 1e-6], 'nm': ['m', 1e-9], 'km': ['m', 1e3],
+    's': ['s', 1], 'ms': ['s', 1e-3], 'us': ['s', 1e-6], 'µs': ['s', 1e-6], 'min': ['s', 60], 'h': ['s', 3600],
+    'hz': ['Hz', 1], 'khz': ['Hz', 1e3], 'mhz': ['Hz', 1e6], 'ghz': ['Hz', 1e9],
+    'kg': ['kg', 1], 'g': ['kg', 1e-3], 'mg': ['kg', 1e-6],
+    'w': ['W', 1], 'kw': ['W', 1e3], 'mw': ['W', 1e-3],
+    'v': ['V', 1], 'kv': ['V', 1e3], 'mv': ['V', 1e-3],
+    'a': ['A', 1], 'ma': ['A', 1e-3], 'ua': ['A', 1e-6], 'µa': ['A', 1e-6],
+    'ohm': ['Ω', 1], 'Ω': ['Ω', 1], 'kohm': ['Ω', 1e3], 'kΩ': ['Ω', 1e3], 'mohm': ['Ω', 1e6], 'MΩ': ['Ω', 1e6],
+    'n': ['N', 1], 'kn': ['N', 1e3], 'j': ['J', 1], 'kj': ['J', 1e3], 'mj': ['J', 1e6],
+    'm/s': ['m/s', 1], 'ms-1': ['m/s', 1], 'km/h': ['m/s', 1 / 3.6], 'deg': ['°', 1], '°': ['°', 1], 'rad': ['rad', 1],
+    'c': ['°C', 1], '°c': ['°C', 1], 'k': ['K', 1]
+  };
+  function normUnit(u) {
+    var s = String(u || '').replace(/<[^>]+>/g, '').replace(/\s+/g, '').replace(/−/g, '-').toLowerCase();
+    return UNIT_CONV[s] || [s, 1];
+  }
+  function extractQuestionData(text) {
+    var list = visibleParams(), matches = [], used = {};
+    // 1. Explicit "symbol = value unit" or "keyword ... value unit"
+    list.forEach(function (r) {
+      var sp = r.spec, sym = String(sp.sym || '').replace(/<[^>]+>/g, '').trim();
+      var lblWords = r.labelText.toLowerCase().split(/[^a-z0-9]+/).filter(function (w) { return w.length >= 3 && w !== 'the' && w !== 'and' && w !== 'for' && w !== 'from' && w !== 'with'; });
+      var targetU = normUnit(sp.unit);
+      // Try symbol match first: e.g. f = 50 Hz or λ = 1.5 cm
+      var patList = [];
+      if (sym) patList.push(new RegExp('(?:^|[\\s,;.(])' + sym.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*(?:=|is|of|:)\\s*(-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)\\s*([a-zA-Z°Ωµμ/0-9^-]{0,8})', 'i'));
+      lblWords.forEach(function (w) {
+        patList.push(new RegExp('\\b' + w + '\\b[^\\d\\n.;]{0,24}?(-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)\\s*([a-zA-Z°Ωµμ/0-9^-]{0,8})', 'i'));
+      });
+      for (var i = 0; i < patList.length; i++) {
+        var m = patList[i].exec(text);
+        if (m) {
+          var rawVal = Number(m[1]), uInfo = normUnit(m[2]), val = rawVal;
+          if (m[2] && targetU[0] && uInfo[0] === targetU[0]) val = rawVal * uInfo[1] / targetU[1];
+          val = Number(U.clamp(val, Number(sp.min), Number(sp.max)).toPrecision(4));
+          matches.push({ row: r, val: val, snippet: m[0].trim(), raw: m[1] + (m[2] ? ' ' + m[2] : '') });
+          used[sp.key] = true;
+          return;
+        }
+      }
+    });
+    // 2. Unit-based fallback for any remaining unmatched parameters with distinctive units
+    var reAll = /(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*(GHz|MHz|kHz|Hz|nm|µm|um|mm|cm|km|m\/s|km\/h|ms|µs|us|kΩ|MΩ|Ω|ohm|kW|mW|W|kV|mV|V|mA|µA|uA|A|kN|N|kJ|MJ|J|kg|g|°C|°|deg|rad|m|s)\b/g;
+    var tok;
+    while ((tok = reAll.exec(text)) !== null) {
+      var uIn = normUnit(tok[2]), vIn = Number(tok[1]);
+      for (var j = 0; j < list.length; j++) {
+        var r2 = list[j], sp2 = r2.spec;
+        if (used[sp2.key]) continue;
+        var tU2 = normUnit(sp2.unit);
+        if (tU2[0] && uIn[0] === tU2[0]) {
+          var vConv = Number(U.clamp(vIn * uIn[1] / tU2[1], Number(sp2.min), Number(sp2.max)).toPrecision(4));
+          matches.push({ row: r2, val: vConv, snippet: tok[0], raw: tok[0] });
+          used[sp2.key] = true;
+          break;
+        }
+      }
+    }
+    return matches;
+  }
+  function collectSnapshot() {
+    var rows = [];
+    visibleParams().forEach(function (r) {
+      rows.push({ kind: 'Input', name: r.labelText, symbol: stripTags(r.spec.sym || r.spec.key), value: r.ctl.values[r.spec.key], unit: stripTags(r.spec.unit || '') });
+    });
+    if (typeof document !== 'undefined' && document.querySelectorAll) {
+      Array.prototype.forEach.call(document.querySelectorAll('.readout .eq'), function (eq) {
+        if (!eq.classList || !eq.classList.contains('eq')) return;
+        var lhs = eq.querySelector('.lhs'), res = eq.querySelector('.res'), u = eq.querySelector('.u');
+        if (lhs && res && String(res.textContent || '').trim() !== '') {
+          rows.push({ kind: 'Result', name: stripTags(lhs.innerHTML), symbol: stripTags(lhs.innerHTML), value: stripTags(res.innerHTML), unit: u ? stripTags(u.innerHTML) : '' });
+        }
+      });
+    }
+    return rows;
+  }
+  function copyText(txt, statusEl, msg) {
+    if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function () { if (statusEl) statusEl.textContent = msg || 'Copied!'; }).catch(function () { if (statusEl) statusEl.textContent = 'Copy ready'; });
+    } else if (statusEl) statusEl.textContent = msg || 'Ready';
+  }
+  function downloadFile(name, content, mime) {
+    if (typeof Blob === 'undefined' || typeof URL === 'undefined' || !URL.createObjectURL) return;
+    var a = h('a', { href: URL.createObjectURL(new Blob([content], { type: mime })), download: name });
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+  function openDataHub() {
+    var wrap = h('div', {}), tabs = h('div', { class: 'sim-tabs' }), pane = h('div', {});
+    var tabDefs = [
+      { id: 'extract', label: '⚡ Smart Question Extractor' },
+      { id: 'export', label: '📊 Live & Time-Series Data' },
+      { id: 'import', label: '📥 Paste JSON / Link' }
+    ];
+    var tabBtns = {}, curTab = 'extract';
+    function renderTab(id) {
+      curTab = id;
+      Object.keys(tabBtns).forEach(function (k) { tabBtns[k].classList.toggle('on', k === id); });
+      pane.innerHTML = '';
+      if (id === 'extract') renderExtractTab(pane);
+      else if (id === 'export') renderExportTab(pane);
+      else renderImportTab(pane);
+    }
+    tabDefs.forEach(function (t) {
+      var b = h('button', { type: 'button', class: 'sim-tab' + (t.id === curTab ? ' on' : ''), text: t.label, onclick: function () { renderTab(t.id); } });
+      tabBtns[t.id] = b; tabs.appendChild(b);
+    });
+    wrap.appendChild(tabs); wrap.appendChild(pane);
+    renderTab('extract');
+    openModal('Fetch & Export Data Hub', wrap);
+  }
+  function renderExtractTab(pane) {
+    var list = visibleParams();
+    var sample = list.slice(0, 4).map(function (r) {
+      var sym = stripTags(r.spec.sym || r.spec.key), u = stripTags(r.spec.unit || '');
+      return r.labelText.toLowerCase() + ' ' + sym + ' = ' + fmtChip(r.ctl.values[r.spec.key]) + (u ? ' ' + u : '');
+    }).join(', ');
+    var ta = h('textarea', { class: 'hub-ta', placeholder: 'Paste an A-Level physics/mechanics question here (e.g. "A wave has frequency 50 Hz, wavelength 1.5 cm and amplitude 2.0 cm…")' });
+    var matchBox = h('div', { class: 'hub-matches' });
+    var status = h('span', { class: 'hub-status' });
+    var currentMatches = [];
+    function runExtract() {
+      currentMatches = extractQuestionData(ta.value);
+      matchBox.innerHTML = '';
+      if (!currentMatches.length) {
+        matchBox.innerHTML = '<p style="margin:0;color:var(--muted);grid-column:1/-1">No matching parameters detected yet. Include units (Hz, m, cm, V, Ω, kg, N, s) or symbols (=).</p>';
+        return;
+      }
+      currentMatches.forEach(function (m) {
+        var cb = h('input', { type: 'checkbox' }); cb.checked = true; m.use = true;
+        cb.addEventListener('change', function () { m.use = cb.checked; });
+        var valIn = h('input', { type: 'text', value: String(m.val) });
+        valIn.addEventListener('change', function () { var nv = parseNum(valIn.value); if (isFinite(nv)) m.val = nv; });
+        matchBox.appendChild(h('div', { class: 'hub-match' }, [
+          cb,
+          h('div', { style: 'flex:1;min-width:0' }, [
+            h('div', { style: 'font-size:12.5px;font-weight:700', text: m.row.labelText }),
+            h('div', { style: 'font-size:11px;color:var(--muted)', text: 'matched: "' + m.snippet + '"' })
+          ]),
+          valIn,
+          m.row.spec.unit ? h('span', { class: 'unit', html: m.row.spec.unit }) : null
+        ]));
+      });
+    }
+    ta.addEventListener('input', runExtract);
+    pane.appendChild(h('p', { style: 'margin:0 0 8px;color:var(--muted)', text: 'Paste any exam question — numbers and units (cm → m, kΩ → Ω, km/h → m/s) are automatically extracted and converted.' }));
+    if (sample) {
+      pane.appendChild(h('div', { class: 'hub-bar', style: 'margin:0 0 8px' }, [
+        h('button', { type: 'button', class: 'btn', text: '✦ Fill with sample text', onclick: function () { ta.value = 'Given ' + sample + '.'; runExtract(); } })
+      ]));
+    }
+    pane.appendChild(ta);
+    pane.appendChild(matchBox);
+    pane.appendChild(h('div', { class: 'hub-bar' }, [
+      h('button', { type: 'button', class: 'btn primary', text: '⚡ Apply to Simulation', onclick: function () {
+        var count = 0;
+        currentMatches.forEach(function (m) {
+          if (!m.use) return;
+          var sp = m.row.spec, v = U.clamp(m.val, Number(sp.min), Number(sp.max));
+          m.row.box.value = v; m.row.box.dispatchEvent(new Event('change'));
+          if (m.row.renderChip) m.row.renderChip();
+          count++;
+        });
+        status.textContent = count ? 'Applied ' + count + ' value' + (count > 1 ? 's' : '') + '!' : 'Select at least one match';
+      } }),
+      status
+    ]));
+  }
+  function renderExportTab(pane) {
+    var rows = collectSnapshot(), status = h('span', { class: 'hub-status' });
+    var clocks = SIM.anim && SIM.anim.clocks ? SIM.anim.clocks : [];
+    var tsRows = null;
+    var tblWrap = h('div', { class: 'hub-tblwrap' });
+    function showRows(list, cols) {
+      var th = '<tr>' + cols.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>';
+      var tb = list.map(function (r) { return '<tr>' + cols.map(function (c) { return '<td>' + esc(r[c] !== undefined ? r[c] : '') + '</td>'; }).join('') + '</tr>'; }).join('');
+      tblWrap.innerHTML = '<table class="tbl"><thead>' + th + '</thead><tbody>' + tb + '</tbody></table>';
+    }
+    showRows(rows, ['kind', 'name', 'value', 'unit']);
+    function toCSV(list, cols) {
+      return [cols.join(',')].concat(list.map(function (r) { return cols.map(function (c) { return '"' + String(r[c] !== undefined ? r[c] : '').replace(/"/g, '""') + '"'; }).join(','); })).join('\n');
+    }
+    function toMD(list, cols) {
+      return ['| ' + cols.join(' | ') + ' |', '| ' + cols.map(function () { return '---'; }).join(' | ') + ' |']
+        .concat(list.map(function (r) { return '| ' + cols.map(function (c) { return String(r[c] !== undefined ? r[c] : ''); }).join(' | ') + ' |'; })).join('\n');
+    }
+    function curData() { return tsRows || { list: rows, cols: ['kind', 'name', 'value', 'unit'] }; }
+    pane.appendChild(tblWrap);
+    if (clocks.length) {
+      var clk = clocks[0];
+      var nSel = h('select', { 'aria-label': 'Sample count' }, [10, 20, 50].map(function (n) { return h('option', { value: String(n), text: n + ' time points' }); }));
+      pane.appendChild(h('div', { class: 'hub-bar', style: 'margin-bottom:6px' }, [
+        nSel,
+        h('button', { type: 'button', class: 'btn', text: '⏱ Sample Time-Series', onclick: function () {
+          var N = Number(nSel.value) || 10, t0 = clk.t, wasPlaying = clk.playing;
+          clk.pause();
+          var out = [], cols = ['t_s'];
+          for (var i = 0; i <= N; i++) {
+            var tt = clk.duration * i / N;
+            clk.seek(tt);
+            var snap = collectSnapshot().filter(function (x) { return x.kind === 'Result'; });
+            var rec = { t_s: Number(tt.toFixed(4)) };
+            snap.forEach(function (x) { var k = x.symbol || x.name; if (cols.indexOf(k) < 0) cols.push(k); rec[k] = x.value; });
+            out.push(rec);
+          }
+          clk.seek(t0); if (wasPlaying) clk.play();
+          tsRows = { list: out, cols: cols };
+          showRows(out, cols);
+          status.textContent = 'Sampled ' + out.length + ' rows!';
+        } })
+      ]));
+    }
+    pane.appendChild(h('div', { class: 'hub-bar' }, [
+      h('button', { type: 'button', class: 'btn primary', text: 'Copy CSV', onclick: function () { var d = curData(); copyText(toCSV(d.list, d.cols), status, 'CSV copied!'); } }),
+      h('button', { type: 'button', class: 'btn', text: 'Download .csv', onclick: function () { var d = curData(); downloadFile('simulation-data.csv', toCSV(d.list, d.cols), 'text/csv'); status.textContent = 'Downloaded .csv'; } }),
+      h('button', { type: 'button', class: 'btn', text: 'Copy JSON', onclick: function () { var d = curData(); copyText(JSON.stringify(d.list, null, 2), status, 'JSON copied!'); } }),
+      h('button', { type: 'button', class: 'btn', text: 'Copy Markdown', onclick: function () { var d = curData(); copyText(toMD(d.list, d.cols), status, 'Markdown copied!'); } }),
+      h('button', { type: 'button', class: 'btn', text: 'Copy Share Link', onclick: function () {
+        var o = {}; visibleParams().forEach(function (r) { o[r.spec.key] = r.ctl.values[r.spec.key]; });
+        var url = location.href.split('#')[0] + '#' + Object.keys(o).map(function (k) { return encodeURIComponent(k) + '=' + encodeURIComponent(o[k]); }).join('&');
+        copyText(url, status, 'Share link copied!');
+      } }),
+      status
+    ]));
+  }
+  function renderImportTab(pane) {
+    var ta = h('textarea', { class: 'hub-ta', placeholder: 'Paste JSON (e.g. {"f": 50, "lam": 0.4}), key=value pairs (f=50, lam=0.4), or a simulation URL (#f=50&lam=0.4)' });
+    var status = h('span', { class: 'hub-status' });
+    pane.appendChild(h('p', { style: 'margin:0 0 8px;color:var(--muted)', text: 'Load saved or shared parameters directly into this simulation.' }));
+    pane.appendChild(ta);
+    pane.appendChild(h('div', { class: 'hub-bar' }, [
+      h('button', { type: 'button', class: 'btn primary', text: 'Load Data', onclick: function () {
+        var s = ta.value.trim(), obj = null;
+        if (!s) return;
+        try { if (s.charAt(0) === '{') obj = JSON.parse(s); } catch (e) { obj = null; }
+        if (!obj) {
+          obj = {};
+          var raw = s.indexOf('#') >= 0 ? s.split('#')[1] : s;
+          raw.split(/[&\n,;]+/).forEach(function (kv) {
+            var p = kv.split('=');
+            if (p.length === 2) { var v = parseNum(decodeURIComponent(p[1].trim())); if (isFinite(v)) obj[decodeURIComponent(p[0].trim())] = v; }
+          });
+        }
+        var applied = 0;
+        allDocked.forEach(function (r) {
+          var k = r.spec.key;
+          if (obj[k] !== undefined && isFinite(Number(obj[k]))) {
+            var v = U.clamp(Number(obj[k]), Number(r.spec.min), Number(r.spec.max));
+            r.box.value = v; r.box.dispatchEvent(new Event('change'));
+            if (r.renderChip) r.renderChip();
+            applied++;
+          }
+        });
+        status.textContent = applied ? 'Loaded ' + applied + ' parameter' + (applied > 1 ? 's' : '') + '!' : 'No matching parameter keys found';
+      } }),
+      status
+    ]));
+  }
+
   SIM.ui = { redraw: themeChanged, h: h, course: course, gFor: gFor, colors: colors, onTheme: onTheme, page: page, canvas: canvas, params: params, select: select,
-    toggle: toggle, presets: presets, openEditor: openEditor, askNumber: askNumber, stageTip: stageTip, stageAction: stageAction, placeMode: placeMode, cancelPlace: function () { cancelPlace(false); }, stage: function () { return stage; }, syncChips: function () { syncChips(); }, Readout: Readout, examToggle: examToggle, notes: notes, legend: legend, readHash: readHash, writeHash: writeHash, esc: esc };
+    toggle: toggle, presets: presets, openEditor: openEditor, askNumber: askNumber, parseNum: parseNum, stageTip: stageTip, stageAction: stageAction, placeMode: placeMode, cancelPlace: function () { cancelPlace(false); }, stage: function () { return stage; }, syncChips: function () { syncChips(); }, Readout: Readout, examToggle: examToggle, notes: notes, legend: legend, readHash: readHash, writeHash: writeHash, esc: esc };
 })(typeof self !== 'undefined' ? self : this);

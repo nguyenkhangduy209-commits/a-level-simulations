@@ -45,7 +45,12 @@
   var noteCard = pg.card('right', 'Common traps');
 
   var type = ui.select(paramCard, { label: 'Wave type', value: 'T', options: [
-    { value: 'T', label: 'transverse (rope, ripple tank, light)' }, { value: 'L', label: 'longitudinal (sound, slinky pushed along its length)' }] }, function () { update('*'); });
+    { value: 'T', label: 'transverse (sea waves, rope, ripple tank, light)' }, { value: 'L', label: 'longitudinal (sound, slinky pushed along its length)' }] }, function () { update('*'); });
+  var realScene = ui.select(paramCard, { label: 'Realistic scene', value: 'auto', options: [
+    { value: 'auto', label: 'auto (sea waves / ripple tank)' },
+    { value: 'sea', label: 'sea waves (ocean & buoys)' },
+    { value: 'rope', label: 'rope (shaken by hand)' },
+    { value: 'water', label: 'ripple tank (dipper)' }] }, function () { frame(); });
   var areaMode = ui.select(paramCard, { label: 'Area for intensity', value: 'given', options: [
     { value: 'given', label: 'power falls on a given area S' }, { value: 'sphere', label: 'spreads out uniformly: area 4πr²' }] }, function () { update('*'); });
   var prm = ui.params(paramCard, [
@@ -101,6 +106,7 @@
     var v = prm.values;
     if (key === 'Lw' || key === '*') { prm.range('x1', 0, v.Lw, 0.001); prm.range('x2', 0, v.Lw, 0.001); }
     prm.show('S', areaMode.get() === 'given'); prm.show('r', areaMode.get() === 'sphere');
+    if (realScene && realScene.row) realScene.row.style.display = type.get() === 'T' ? '' : 'none';
     frame();
   }
   function fmtT(t) { var a = Math.abs(t); return a === 0 ? '0 s' : a < 1e-3 ? U.sf(t * 1e6) + ' µs' : a < 1 ? U.sf(t * 1e3) + ' ms' : U.sf(t) + ' s'; }
@@ -122,22 +128,46 @@
     scene = { padL: padL, wpx: wpx, midY: midY, amp: amp, amp0: H * 0.28, W: W, H: H, top: midY - H * 0.28, tooMany: nWaves > 60 };
     var RL = real(), kindR = RL ? realKind() : '';
     if (RL) backdrop(c, W, H, midY, amp, kindR);
-    D.arrow(c, padL, 18, padL + 90, 18, col.velocity, { label: 'v = ' + U.sf(v.f * v.lam) + ' m/s' });
-    D.label(c, 'f = ' + U.sf(v.f) + ' Hz', padL + 240, 18, col.ink, { size: 12, bg: RL });
+    var vTxt = 'v = ' + U.sf(v.f * v.lam) + ' m/s', fTxt = 'f = ' + U.sf(v.f) + ' Hz';
+    c.save();
+    c.font = '500 13px Inter, system-ui, -apple-system, "Segoe UI", sans-serif';
+    var vTW = c.measureText(vTxt).width, vW = Math.max(66, vTW + 16);
+    c.font = '500 12px Inter, system-ui, -apple-system, "Segoe UI", sans-serif';
+    var fTW = c.measureText(fTxt).width, fW = Math.max(66, fTW + 16);
+    c.restore();
+    var vX = padL + 90 + 6 + vTW / 2, fX = Math.max(vX + vW / 2 + 20 + fW / 2, padL + 260);
+    scene.vPill = { x: vX, y: 18, w: vW, h: 24 };
+    scene.fPill = { x: fX, y: 18, w: fW, h: 24 };
+    D.arrow(c, padL, 18, padL + 90, 18, col.velocity, { label: vTxt });
+    D.label(c, fTxt, fX, 18, col.ink, { size: 12, bg: RL });
     if (nWaves > 60) { D.label(c, 'Too many wavelengths in view to draw (' + U.sf(nWaves) + '): reduce the length shown or increase λ', W / 2, midY, col.warn, { bold: true, size: 12 }); if (ix) ix.paint(c); return; }
     if (type.get() === 'T') {
       D.line(c, [[padL, midY], [padL + wpx, midY]], col.muted, { dash: [4, 4], width: 1 });
       var pts = [];
       for (var i = 0; i <= 600; i++) { var x = v.Lw * i / 600; pts.push([X(x), midY - yAt(x, t) / v.A * amp]); }
-      if (kindR === 'water') waterSurface(c, pts, H, midY, amp);
+      if (kindR === 'sea') seaSurface(c, pts, W, H, midY, amp, t, v, col, padL, wpx);
+      else if (kindR === 'water') waterSurface(c, pts, H, midY, amp);
       else if (kindR === 'rope') { SC.rope(c, pts, { width: 4.5, color: SC.dark() ? '#d9c6a2' : '#c79f72' }); hand(c, pts[0][0], pts[0][1], false); }
       else D.line(c, pts, col.s1, { width: 2.2 });
       var nP = Math.min(80, Math.max(20, Math.round(nWaves * 12)));
-      for (var j = 0; j <= nP; j++) { var xp = v.Lw * j / nP; c.save(); c.fillStyle = RL ? (j % 2 ? '#f6b7c6' : '#fdf3c4') : col.s1; c.beginPath(); c.arc(X(xp), midY - yAt(xp, t) / v.A * amp, RL ? 3 : 2.6, 0, 2 * Math.PI); c.fill(); if (RL) { c.strokeStyle = 'rgba(90,80,140,.35)'; c.lineWidth = 0.8; c.stroke(); } c.restore(); }
+      for (var j = 0; j <= nP; j++) {
+        if (kindR === 'sea' && j % 2 === 1) continue;   // sparser, natural water-parcel tracers on sea waves
+        var xp = v.Lw * j / nP;
+        c.save();
+        c.fillStyle = kindR === 'sea' ? 'rgba(255,255,255,0.75)' : (RL ? (j % 2 ? '#f6b7c6' : '#fdf3c4') : col.s1);
+        c.beginPath(); c.arc(X(xp), midY - yAt(xp, t) / v.A * amp, kindR === 'sea' ? 2.2 : (RL ? 3 : 2.6), 0, 2 * Math.PI); c.fill();
+        if (RL && kindR !== 'sea') { c.strokeStyle = 'rgba(90,80,140,.35)'; c.lineWidth = 0.8; c.stroke(); }
+        c.restore();
+      }
       [[v.x1, col.s2, 'P'], [v.x2, col.s3, 'Q']].forEach(function (pr) {
         var yy = midY - yAt(pr[0], t) / v.A * amp;
         D.line(c, [[X(pr[0]), midY - amp - 12], [X(pr[0]), midY + amp + 12]], pr[1], { dash: [2, 4], width: 1 });
-        c.save(); c.fillStyle = pr[1]; c.beginPath(); c.arc(X(pr[0]), yy, 6, 0, 2 * Math.PI); c.fill(); c.restore();
+        if (kindR === 'sea') {
+          var slope = (yAt(pr[0] + v.Lw * 0.002, t) - yAt(pr[0] - v.Lw * 0.002, t)) / (v.Lw * 0.004) * (amp / v.A) * (v.Lw / wpx);
+          seaBuoy(c, X(pr[0]), yy, Math.atan(-slope), pr[1], pr[2]);
+        } else {
+          c.save(); c.fillStyle = pr[1]; c.beginPath(); c.arc(X(pr[0]), yy, 6, 0, 2 * Math.PI); c.fill(); c.restore();
+        }
         D.label(c, pr[2], X(pr[0]), midY + amp + 22, pr[1], { bold: true, bg: RL });
       });
       D.label(c, 'vertical scale: A = ' + U.sf(v.A) + ' cm (not to the same scale as x)', W - padR, H - 10, col.muted, { align: 'right', size: 10 });
@@ -199,16 +229,36 @@
   /* ---------- real-life look: a rope shaken by a hand, a ripple tank, a slinky, a loudspeaker ---------- */
   var SC = SIM.scene;
   function real() { return !!(SC && SC.real && SC.real()); }
-  /** which apparatus fits the preset: ripple-tank sizes → water; slow longitudinal → slinky; audible → loudspeaker */
+  /** which apparatus fits the preset: sea waves by default for transverse (or ripple tank for tiny Lw); slow longitudinal → slinky; audible → loudspeaker */
   function realKind() {
     var v = prm.values;
-    if (type.get() === 'T') return v.Lw <= 0.1 ? 'water' : 'rope';
+    if (type.get() === 'T') {
+      var rs = realScene ? realScene.get() : 'auto';
+      if (rs !== 'auto') return rs;
+      return v.Lw <= 0.1 ? 'water' : 'sea';
+    }
     return v.f <= 20 ? 'slinky' : 'speaker';
   }
   function rr(c, x, y, w, h, rad) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, rad); else c.rect(x, y, w, h); }
   function backdrop(c, W, H, midY, amp, kind) {
     var dk = SC.dark();
-    if (kind === 'rope') {
+    if (kind === 'sea') {
+      var hz = Math.max(40, midY - amp * 0.25);
+      SC.sky(c, 0, 0, W, hz + 8, { horizon: hz + 8, seed: 19 });
+      // distant deep-ocean horizon band
+      var hg = c.createLinearGradient(0, hz - 2, 0, H);
+      hg.addColorStop(0, dk ? '#0b2545' : '#4ea8de');
+      hg.addColorStop(0.5, dk ? '#081b33' : '#1b6ca8');
+      hg.addColorStop(1, dk ? '#040f1e' : '#0a3d62');
+      c.save(); c.fillStyle = hg; c.fillRect(0, hz, W, H - hz);
+      // sun/moon shimmer on the distant sea
+      c.fillStyle = dk ? 'rgba(232,230,208,0.14)' : 'rgba(255,248,200,0.28)';
+      for (var s = 0; s < 5; s++) {
+        var sy = hz + 4 + s * 6, sw = 48 - s * 7;
+        c.fillRect(W * 0.86 - sw / 2, sy, sw, 2);
+      }
+      c.restore();
+    } else if (kind === 'rope') {
       var gy = Math.min(H - 4, midY + amp + 40);
       SC.sky(c, 0, 0, W, gy, { horizon: gy }); SC.ground(c, 0, W, gy, { kind: 'grass', depth: Math.max(4, H - gy) });
       SC.tree(c, W * 0.9, gy, 60);
@@ -216,6 +266,75 @@
       c.save(); c.fillStyle = dk ? '#2c3040' : '#f5f1fb'; c.fillRect(0, 0, W, H);   // a soft lab wall
       c.fillStyle = dk ? '#353a4d' : '#ebe5f6'; c.fillRect(0, H * 0.82, W, H * 0.18); c.restore();
     }
+  }
+  function seaSurface(c, pts, W, H, midY, amp, t, v, col, padL, wpx) {
+    var dk = SC.dark(), x0 = pts[0][0], x1 = pts[pts.length - 1][0], bot = H;
+    c.save();
+    // 1. Distant background swell for 3D ocean depth
+    c.beginPath(); c.moveTo(0, bot);
+    for (var i = 0; i <= 120; i++) {
+      var bx = W * i / 120, wx = (bx - padL) / wpx * v.Lw;
+      var by = midY - 6 - 0.42 * amp * Math.sin(2 * Math.PI * (v.f * t - wx / v.lam * 0.72 + 0.35));
+      c.lineTo(bx, by);
+    }
+    c.lineTo(W, bot); c.closePath();
+    c.fillStyle = dk ? 'rgba(14, 58, 92, 0.55)' : 'rgba(56, 152, 206, 0.45)';
+    c.fill();
+
+    // 2. Main sea wave body
+    c.beginPath(); c.moveTo(0, pts[0][1]); c.lineTo(x0, pts[0][1]);
+    pts.forEach(function (p) { c.lineTo(p[0], p[1]); });
+    c.lineTo(W, pts[pts.length - 1][1]); c.lineTo(W, bot); c.lineTo(0, bot); c.closePath();
+    var wg = c.createLinearGradient(0, midY - amp, 0, bot);
+    if (dk) { wg.addColorStop(0, 'rgba(38, 132, 168, 0.88)'); wg.addColorStop(0.45, 'rgba(13, 68, 108, 0.94)'); wg.addColorStop(1, 'rgba(5, 22, 46, 0.98)'); }
+    else { wg.addColorStop(0, 'rgba(72, 202, 228, 0.84)'); wg.addColorStop(0.45, 'rgba(0, 119, 182, 0.90)'); wg.addColorStop(1, 'rgba(3, 45, 92, 0.96)'); }
+    c.fillStyle = wg; c.fill();
+
+    // 3. Subtle underwater sunlight rays (clipped to wave body)
+    c.save(); c.clip();
+    var rayG = c.createLinearGradient(0, midY - amp, 0, bot);
+    rayG.addColorStop(0, dk ? 'rgba(150, 225, 255, 0.11)' : 'rgba(255, 255, 255, 0.18)');
+    rayG.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    c.fillStyle = rayG;
+    for (var r = 0; r < 5; r++) {
+      var rx = W * (0.1 + 0.2 * r);
+      c.beginPath(); c.moveTo(rx, midY - amp); c.lineTo(rx + 26, midY - amp); c.lineTo(rx + 80, bot); c.lineTo(rx + 28, bot); c.closePath(); c.fill();
+    }
+    // Sandy seabed at bottom
+    c.fillStyle = dk ? 'rgba(54, 48, 38, 0.85)' : 'rgba(224, 198, 148, 0.88)';
+    c.fillRect(0, H - 14, W, 14);
+    c.restore();
+
+    // 4. Crisp seafoam crest highlight & crest sparkles
+    c.strokeStyle = dk ? 'rgba(210, 245, 255, 0.88)' : 'rgba(255, 255, 255, 0.95)';
+    c.lineWidth = 3; c.lineCap = 'round'; c.lineJoin = 'round';
+    c.beginPath(); c.moveTo(0, pts[0][1]); pts.forEach(function (p) { c.lineTo(p[0], p[1]); }); c.lineTo(W, pts[pts.length - 1][1]); c.stroke();
+    // Foam flecks near crests (where y is near midY - amp)
+    c.fillStyle = dk ? 'rgba(220, 248, 255, 0.7)' : 'rgba(255, 255, 255, 0.85)';
+    for (var k = 4; k < pts.length - 4; k += 7) {
+      if (pts[k][1] < midY - amp * 0.65) {
+        c.beginPath(); c.arc(pts[k][0] - 3, pts[k][1] + 5, 1.6, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(pts[k][0] + 4, pts[k][1] + 9, 1.1, 0, Math.PI * 2); c.fill();
+      }
+    }
+    c.restore();
+  }
+  function seaBuoy(c, x, y, tilt, color, label) {
+    c.save();
+    c.translate(x, y);
+    c.rotate(U.clamp(tilt, -0.45, 0.45));
+    // submerged keel
+    c.fillStyle = 'rgba(0,0,0,0.28)';
+    c.fillRect(-3, 2, 6, 8);
+    // buoy hull
+    c.fillStyle = color;
+    c.beginPath(); c.ellipse(0, 0, 10, 6, 0, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = '#ffffff'; c.lineWidth = 1.6; c.stroke();
+    // mast & beacon
+    c.beginPath(); c.moveTo(0, -5); c.lineTo(0, -14); c.stroke();
+    c.fillStyle = '#fff5b8';
+    c.beginPath(); c.arc(0, -15, 3, 0, Math.PI * 2); c.fill();
+    c.restore();
   }
   function hand(c, x, y, push) {
     var skin = '#f3c9ab';
@@ -337,11 +456,11 @@
         if (lh) hs.push(lh);
         [['x1', col.s2], ['x2', col.s3]].forEach(function (pr) {
           if (locked(pr[0])) return;
-          hs.push({ id: pr[0], x: sx(v[pr[0]]), y: T_ ? scene.midY + scene.amp + 22 : scene.top - 22, r: 16, color: pr[1] });
+          hs.push({ id: pr[0], kind: 'pill', w: 26, h: 22, x: sx(v[pr[0]]), y: T_ ? scene.midY + scene.amp + 22 : scene.top - 22, color: pr[1] });
         });
       }
-      if (!locked('lam')) hs.push({ id: 'v', x: scene.padL + 135, y: 18, r: 18, color: col.velocity });
-      if (!locked('f')) hs.push({ id: 'f', x: scene.padL + 240, y: 18, r: 18, color: col.ink });
+      if (!locked('lam') && scene.vPill) hs.push({ id: 'v', kind: 'pill', x: scene.vPill.x, y: scene.vPill.y, w: scene.vPill.w, h: scene.vPill.h, color: col.velocity });
+      if (!locked('f') && scene.fPill) hs.push({ id: 'f', kind: 'pill', x: scene.fPill.x, y: scene.fPill.y, w: scene.fPill.w, h: scene.fPill.h, color: col.ink });
       return hs;
     },
     onDrag: function (hd, x, y) {

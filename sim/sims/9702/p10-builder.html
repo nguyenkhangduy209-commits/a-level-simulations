@@ -41,11 +41,12 @@
   var vp = new SIM.view.Viewport(cv, { pad: 6 });
   ui.legend(sceneCard, [{ color: 'var(--c-applied)', label: 'conventional current (brighter wire = larger current)' }, { color: 'var(--c-s1)', label: 'p.d. across a part' },
     { color: 'var(--accent)', label: 'selected part' }, { color: 'var(--warn)', label: 'something to fix' }]);
-  sceneCard.appendChild(ui.h('p', { class: 'cb-hint', html: '<b>Add a part:</b> tap it below, then tap between two dots on the grid (or drag from dot to dot). <b>Wires:</b> drag along the dots. <b>Change a part:</b> tap it.' }));
+  sceneCard.appendChild(ui.h('p', { class: 'cb-hint', html: '<b>Free draw:</b> drag anywhere to draw wires or place a part at any angle (snaps gently to nearby ends & wires). <b>Change a part:</b> tap it, or drag its ends to move.' }));
   var pal = ui.h('div', { class: 'cb-pal', role: 'toolbar', 'aria-label': 'Circuit parts' });
   sceneCard.appendChild(pal);
   var viewRow = ui.h('div', { class: 'cb-row' }); sceneCard.appendChild(viewRow);
   var showIV = ui.toggle(viewRow, { label: 'Show I and V beside each part', value: true }, function () { drawScene(); });
+  var freeMode = ui.toggle(viewRow, { label: 'Free draw (anywhere, not locked to grid)', value: true }, function () { drawScene(); });
 
   var presetCard = pg.card('right', 'Ready-made circuits');
   var envCard = pg.card('right', 'Thermistor and LDR');
@@ -174,7 +175,50 @@
   function G(gx, gy) { return vp.P(gx, -gy); }
   function gridOf(x, y) { var w = vp.toWorld(x, y); return [w[0], -w[1]]; }
   function mid(p) { var e = CB.ends(p), A = G(e[0][0], e[0][1]), B = G(e[1][0], e[1][1]); return [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2]; }
+  function clampWorld(g) { return [U.clamp(g[0], -0.4, W - 0.6), U.clamp(g[1], -0.4, H - 0.6)]; }
   function nearestDot(x, y) { var g = gridOf(x, y); return [U.clamp(Math.round(g[0]), 0, W - 1), U.clamp(Math.round(g[1]), 0, H - 1)]; }
+  /** Magnetic snap in Free draw mode: snaps to existing endpoints, or to a grid dot if very close, otherwise exact world coords */
+  function freePoint(x, y) {
+    var g = clampWorld(gridOf(x, y)), best = null, bd = 0.28;
+    parts.forEach(function (p) {
+      CB.ends(p).forEach(function (pt) {
+        var d = Math.hypot(g[0] - pt[0], g[1] - pt[1]);
+        if (d < bd) { bd = d; best = [pt[0], pt[1]]; }
+      });
+    });
+    if (best) return best;
+    // also snap to wire interiors for T-junctions
+    var wBest = null, wBd = 0.22;
+    parts.forEach(function (p) {
+      if (p.t !== 'wire') return;
+      var e = CB.ends(p), ax = e[0][0], ay = e[0][1], bx = e[1][0], by = e[1][1];
+      var dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy;
+      if (L2 < 1e-6) return;
+      var t = U.clamp(((g[0] - ax) * dx + (g[1] - ay) * dy) / L2, 0.12, 0.88);
+      var px = ax + t * dx, py = ay + t * dy, d = Math.hypot(g[0] - px, g[1] - py);
+      if (d < wBd) { wBd = d; wBest = [Number(px.toFixed(2)), Number(py.toFixed(2))]; }
+    });
+    if (wBest) return wBest;
+    return [Number(g[0].toFixed(2)), Number(g[1].toFixed(2))];
+  }
+  /** Split any wire whose interior passes through point pt so T-junctions connect electrically */
+  function splitWiresAt(pt) {
+    for (var i = parts.length - 1; i >= 0; i--) {
+      var p = parts[i];
+      if (p.t !== 'wire') continue;
+      var e = CB.ends(p), ax = e[0][0], ay = e[0][1], bx = e[1][0], by = e[1][1];
+      if (Math.hypot(pt[0] - ax, pt[1] - ay) < 0.05 || Math.hypot(pt[0] - bx, pt[1] - by) < 0.05) continue;
+      var dx = bx - ax, dy = by - ay, L = Math.hypot(dx, dy);
+      if (L < 0.1) continue;
+      var t = ((pt[0] - ax) * dx + (pt[1] - ay) * dy) / (L * L);
+      if (t > 0.05 && t < 0.95) {
+        var dist = Math.abs((pt[0] - ax) * dy - (pt[1] - ay) * dx) / L;
+        if (dist < 0.06) {
+          parts.splice(i, 1, CB.makeFree('wire', ax, ay, pt[0], pt[1]), CB.makeFree('wire', pt[0], pt[1], bx, by));
+        }
+      }
+    }
+  }
   function nearestEdge(x, y) {
     var g = gridOf(x, y), best = null, bd = Infinity;
     [['h', U.clamp(Math.floor(g[0]), 0, W - 2), U.clamp(Math.round(g[1]), 0, H - 1)], ['v', U.clamp(Math.round(g[0]), 0, W - 1), U.clamp(Math.floor(g[1]), 0, H - 2)]].forEach(function (c) {
@@ -183,7 +227,7 @@
     });
     return bd < 1.2 ? best : null;
   }
-  function partAt(e) { for (var i = 0; i < parts.length; i++) if (parts[i].x === e.x && parts[i].y === e.y && parts[i].d === e.d) return i; return -1; }
+  function partAt(e) { for (var i = 0; i < parts.length; i++) if (!CB.isFree(parts[i]) && parts[i].x === e.x && parts[i].y === e.y && parts[i].d === e.d) return i; return -1; }
   function pathEdges(A, B) { return CB.edgesOf([A, [B[0], A[1]], B]); }
 
   /* ---------- placing parts ---------- */
@@ -209,15 +253,34 @@
   function armPlace() {
     if (!tool) return;
     var nmT = TY[tool].label.toLowerCase();
-    ui.placeMode({ prompt: tool === 'wire' ? 'Tap between two dots, or drag along the dots, to add wire' : 'Tap between two dots to place the ' + nmT,
+    ui.placeMode({ prompt: freeMode.get()
+      ? (tool === 'wire' ? 'Drag anywhere to draw a wire (snaps gently to ends)' : 'Drag anywhere (or tap) to place the ' + nmT)
+      : (tool === 'wire' ? 'Tap between two dots, or drag along the dots, to add wire' : 'Tap between two dots to place the ' + nmT),
       onPlace: function (x, y) { pend = { x0: x, y0: y, moved: false }; },
       onCancel: function () { tool = null; pend = null; preview = null; highlightTool(); drawScene(); } });
+  }
+  function placeFreePart(t, A, B) {
+    if (Math.hypot(B[0] - A[0], B[1] - A[1]) < 0.12) return null;
+    pushUndo();
+    splitWiresAt(A); splitWiresAt(B);
+    var np = CB.makeFree(t, A[0], A[1], B[0], B[1]);
+    parts.push(np);
+    return np;
   }
   function finishPend(x, y) {
     var q = pend; pend = null; preview = null;
     var t = tool, made = null;
     if (!t) return;
-    if (q.moved) {
+    if (freeMode.get()) {
+      if (q.moved) {
+        var A = freePoint(q.x0, q.y0), B = freePoint(x, y);
+        made = placeFreePart(t, A, B);
+      } else {
+        var c0 = freePoint(q.x0, q.y0);
+        if (t !== 'wire') made = placeFreePart(t, [c0[0] - 0.5, c0[1]], [c0[0] + 0.5, c0[1]]);
+        else { var e0 = nearestEdge(q.x0, q.y0); if (e0) made = placePath(t, [e0]); }
+      }
+    } else if (q.moved) {
       var A = nearestDot(q.x0, q.y0), B = nearestDot(x, y);
       if (A[0] !== B[0] || A[1] !== B[1]) made = placePath(t, pathEdges(A, B));
       else { var e0 = nearestEdge(q.x0, q.y0); if (e0) made = placePath(t, [e0]); }
@@ -235,7 +298,14 @@
   });
   cv.addEventListener('pointermove', function (e) {
     var p = pos(e);
-    if (pend) { if (!pend.moved && Math.hypot(p[0] - pend.x0, p[1] - pend.y0) < 6) return; pend.moved = true; preview = { a: nearestDot(pend.x0, pend.y0), b: nearestDot(p[0], p[1]), t: tool }; drawScene(); return; }
+    if (pend) {
+      if (!pend.moved && Math.hypot(p[0] - pend.x0, p[1] - pend.y0) < 6) return;
+      pend.moved = true;
+      preview = freeMode.get()
+        ? { a: freePoint(pend.x0, pend.y0), b: freePoint(p[0], p[1]), t: tool, free: true }
+        : { a: nearestDot(pend.x0, pend.y0), b: nearestDot(p[0], p[1]), t: tool };
+      drawScene(); return;
+    }
     if (downAt && Math.hypot(p[0] - downAt[0], p[1] - downAt[1]) >= 6) downMoved = true;
   });
   function up(e) {
@@ -254,22 +324,56 @@
   }
   /* no tool: tap a part to select it; drag on the dots to draw wires */
   function hr() { return U.clamp(vp.scale * 0.36, 12, 22); }
-  function handles() { var r = hr(); return parts.map(function (p, i) { var m = mid(p); return { id: 'p' + i, i: i, x: m[0], y: m[1], r: r, hidden: true }; }); }
+  function handles() {
+    var r = hr(), hs = parts.map(function (p, i) { var m = mid(p); return { id: 'p' + i, i: i, x: m[0], y: m[1], r: r, hidden: true }; });
+    if (sel && freeMode.get()) {
+      var si = parts.indexOf(sel);
+      if (si >= 0) {
+        var e = CB.ends(sel), A = G(e[0][0], e[0][1]), B = G(e[1][0], e[1][1]);
+        hs.unshift({ id: 'end0', end: 0, i: si, x: A[0], y: A[1], r: 14, color: ui.colors().accent });
+        hs.unshift({ id: 'end1', end: 1, i: si, x: B[0], y: B[1], r: 14, color: ui.colors().accent });
+      }
+    }
+    return hs;
+  }
   function wireDrag(x0, y0, x, y, done) {
+    if (freeMode.get()) {
+      var A = freePoint(x0, y0), B = freePoint(x, y);
+      if (!done) { preview = { a: A, b: B, t: 'wire', free: true }; drawScene(); return; }
+      preview = null;
+      if (Math.hypot(B[0] - A[0], B[1] - A[1]) >= 0.12) { placeFreePart('wire', A, B); update(); } else drawScene();
+      return;
+    }
     var A = nearestDot(x0, y0), B = nearestDot(x, y);
     if (!done) { preview = { a: A, b: B, t: 'wire' }; drawScene(); return; }
     preview = null;
     if (A[0] !== B[0] || A[1] !== B[1]) { placePath('wire', pathEdges(A, B)); update(); } else drawScene();
   }
+  function moveEnd(h, x, y, done) {
+    var p = parts[h.i]; if (!p) return;
+    if (done) pushUndo();
+    var e = CB.ends(p), pt = freePoint(x, y);
+    if (done) splitWiresAt(pt);
+    var a = h.end === 0 ? pt : e[0], b = h.end === 1 ? pt : e[1];
+    if (Math.hypot(b[0] - a[0], b[1] - a[1]) < 0.12) return;
+    if (!CB.isFree(p)) {
+      var np = CB.makeFree(p.t, a[0], a[1], b[0], b[1], p.v, p.rev);
+      parts[h.i] = np; if (sel === p) sel = np;
+    } else {
+      p.x1 = a[0]; p.y1 = a[1]; p.x2 = b[0]; p.y2 = b[1];
+    }
+    if (done) update(); else drawScene();
+  }
   var ix = SIM.view.interact(cv, {
     handles: handles,
     onTap: function (h) {
+      if (h.end !== undefined) return;
       var p = parts[h.i]; if (!p) return;
       if (p.t === 'switch') { pushUndo(); p.v.on = p.v.on > 0 ? 0 : 1; }
       sel = p; update();
     },
-    onDrag: function (h, x, y) { if (downAt) wireDrag(downAt[0], downAt[1], x, y, false); },
-    onDrop: function (h, x, y) { if (downAt) wireDrag(downAt[0], downAt[1], x, y, true); },
+    onDrag: function (h, x, y) { if (h.end !== undefined) { moveEnd(h, x, y, false); return; } if (downAt) wireDrag(downAt[0], downAt[1], x, y, false); },
+    onDrop: function (h, x, y) { if (h.end !== undefined) { moveEnd(h, x, y, true); return; } if (downAt) wireDrag(downAt[0], downAt[1], x, y, true); },
     canDraw: function () { return !tool; },
     onDraw: function (x0, y0, x, y) { wireDrag(x0, y0, x, y, false); },
     onDrawEnd: function (x0, y0, x, y) { wireDrag(x0, y0, x, y, true); },
@@ -400,9 +504,16 @@
       if (halo) { c.save(); c.globalAlpha = halo[1]; c.strokeStyle = halo[0]; c.lineWidth = Math.max(10, u * 0.4); c.beginPath(); c.moveTo(A[0], A[1]); c.lineTo(B[0], B[1]); c.stroke(); c.restore(); }
       c.save(); c.translate(mx, my); c.rotate(Math.atan2(B[1] - A[1], B[0] - A[0]));
       if (TY[p.t].polar && p.rev) c.scale(-1, 1);
-      symbol(c, p, L, col, Ln, { glow: p.t === 'lamp' && Plamp > 0 ? (r.P || 0) / Plamp : 0, on: r.on, blown: r.blown });
+      var symLen = p.t === 'wire' ? L : Math.min(L, u * 1.15);
+      if (p.t !== 'wire' && L > symLen + 1) {
+        c.strokeStyle = Ln; c.lineWidth = 2; c.beginPath();
+        c.moveTo(-L / 2, 0); c.lineTo(-symLen / 2, 0);
+        c.moveTo(symLen / 2, 0); c.lineTo(L / 2, 0);
+        c.stroke();
+      }
+      symbol(c, p, symLen, col, Ln, { glow: p.t === 'lamp' && Plamp > 0 ? (r.P || 0) / Plamp : 0, on: r.on, blown: r.blown });
       c.restore();
-      if (p.t === 'amm' || p.t === 'volt') D.label(c, p.t === 'amm' ? 'A' : 'V', mx, my, Ln, { bold: true, size: U.clamp(L * 0.24, 10, 15), fs: 'none' });
+      if (p.t === 'amm' || p.t === 'volt') D.label(c, p.t === 'amm' ? 'A' : 'V', mx, my, Ln, { bold: true, size: U.clamp(symLen * 0.24, 10, 15), fs: 'none' });
       // current on wires: brighter and thicker for more current, with an arrowhead
       var aI = Math.abs(I), fr = Imax > 0 ? aI / Imax : 0;
       if (p.t === 'wire' || r.link) {
@@ -416,7 +527,7 @@
     });
     // junction dots and loose ends
     Object.keys(res.dotDeg).forEach(function (k) {
-      var n = res.dotDeg[k], x = k % W, y = Math.floor(k / W), q = G(x, y);
+      var n = res.dotDeg[k], pt = CB.coordsOfKey(k), q = G(pt[0], pt[1]);
       if (n >= 3) { c.fillStyle = Ln; c.beginPath(); c.arc(q[0], q[1], Math.max(3, u * 0.06), 0, 7); c.fill(); }
       else if (n === 1) { c.strokeStyle = col.warn; c.lineWidth = 2; c.beginPath(); c.arc(q[0], q[1], Math.max(5, u * 0.1), 0, 7); c.stroke(); }
     });
@@ -428,12 +539,12 @@
       var dots = res.netList[j.net] || [], best = dots[0], bd = -1;
       dots.forEach(function (k) { if (res.dotDeg[k] > bd) { bd = res.dotDeg[k]; best = k; } });
       if (best === undefined) return;
-      var q = G(best % W, Math.floor(best / W));
+      var pt = CB.coordsOfKey(best), q = G(pt[0], pt[1]);
       D.label(c, 'J' + CB.sub(ji + 1), q[0] + 0.2 * u, q[1] - 0.2 * u, col.accent, { bold: true, size: fs + 1, bg: true, align: 'left', fs: 'none' });
     });
     // drag preview
     if (preview) {
-      var pts = [preview.a, [preview.b[0], preview.a[1]], preview.b].map(function (g) { return G(g[0], g[1]); });
+      var pts = (preview.free ? [preview.a, preview.b] : [preview.a, [preview.b[0], preview.a[1]], preview.b]).map(function (g) { return G(g[0], g[1]); });
       D.line(c, pts, col.accent, { width: 3, dash: [6, 5] });
       [preview.a, preview.b].forEach(function (g) { var q2 = G(g[0], g[1]); c.fillStyle = col.accent; c.beginPath(); c.arc(q2[0], q2[1], 5, 0, 7); c.fill(); });
     }
@@ -461,7 +572,7 @@
     return n;
   }
   function labelPart(c, p, i, col, fs, u) {
-    var e = CB.ends(p), A = G(e[0][0], e[0][1]), B = G(e[1][0], e[1][1]), mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, horiz = p.d === 'h', r = res.parts[i];
+    var e = CB.ends(p), A = G(e[0][0], e[0][1]), B = G(e[1][0], e[1][1]), mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, horiz = Math.abs(B[0] - A[0]) >= Math.abs(B[1] - A[1]), r = res.parts[i];
     var meter = p.t === 'amm' || p.t === 'volt', off = 0.36 * u, lh = fs + 3;
     var nameCol = meter ? col.accent : col.ink;
     // name on one side (meters: below / right, so a meter next to a part does not hide its values), I and V on the other
@@ -642,10 +753,10 @@
     powerStep(res.method.live.map(function (e) { return e.i; }), false);
   }
   function acrossName(i) {
-    var a = res.netOf[CB.dkey(parts[i].x, parts[i].y)], e = CB.endB(parts[i]), b = res.netOf[CB.dkey(e[0], e[1])], best = null;
+    var e1 = CB.ends(parts[i]), a = res.netOf[CB.dkey(e1[0][0], e1[0][1])], b = res.netOf[CB.dkey(e1[1][0], e1[1][1])], best = null;
     parts.forEach(function (q, j) {
       if (j === i || q.t === 'wire' || q.t === 'volt' || res.parts[j].link) return;
-      var e2 = CB.endB(q), a2 = res.netOf[CB.dkey(q.x, q.y)], b2 = res.netOf[CB.dkey(e2[0], e2[1])];
+      var e2 = CB.ends(q), a2 = res.netOf[CB.dkey(e2[0][0], e2[0][1])], b2 = res.netOf[CB.dkey(e2[1][0], e2[1][1])];
       if ((a2 === a && b2 === b) || (a2 === b && b2 === a)) if (best === null || CB.isSource(q)) best = j;
     });
     if (best === null) return 'between its two ends';

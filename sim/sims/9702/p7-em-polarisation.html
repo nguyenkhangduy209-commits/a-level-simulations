@@ -256,13 +256,13 @@
       var col = ui.colors(), v = prm.values, hs = [], S = scene;
       if (!locked('logL')) hs.push({ id: 'logL', x: S.BX(v.logL), y: S.by + S.bh / 2, color: col.accent });
       if (!locked('pol') && v.I0 > 0) { var rp = U.rad(v.pol); hs.push({ id: 'pol', x: S.sx + S.seg / 2 + Math.sin(rp) * S.amp0, y: S.y0 - Math.cos(rp) * S.amp0, color: col.s1 }); }
-      if (!locked('I0')) hs.push({ id: 'I0', x: S.sx + S.seg / 2, y: S.y0 + S.amp0 + 14, r: 16, color: col.ink });
+      if (!locked('I0')) hs.push({ id: 'I0', kind: 'pill', w: 84, h: 22, x: S.sx + S.seg / 2, y: S.y0 + S.amp0 + 14, color: col.ink });
       ch.steps.forEach(function (st, i) {
         var k = 'a' + (i + 1); if (locked(k)) return;
         var fx = S.sx + S.seg * (i + 1), r = U.rad(st.axis), L = S.amp0 + 6;
         hs.push({ id: k, fx: fx, x: fx + Math.sin(r) * L * 0.5, y: S.y0 - Math.cos(r) * L, color: col.s3 });
       });
-      if (findAng.get() && !locked('It')) hs.push({ id: 'It', x: S.sx + S.seg * (ch.steps.length + 0.5), y: S.y0 + S.amp0 + 14, r: 16, color: col.ink });
+      if (findAng.get() && !locked('It')) hs.push({ id: 'It', kind: 'pill', w: 84, h: 22, x: S.sx + S.seg * (ch.steps.length + 0.5), y: S.y0 + S.amp0 + 14, color: col.ink });
       return hs;
     },
     onDrag: function (hd, x, y) {

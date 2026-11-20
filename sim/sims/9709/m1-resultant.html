@@ -566,7 +566,7 @@
     if (o.bottom) { t.style.top = 'auto'; t.style.bottom = '10px'; } else t.style.maxWidth = 'calc(100% - ' + o.right + 'px)';
   }
   addBtn = ui.stageAction({ label: 'Add a force', icon: '+', onClick: startAdd });
-  tipClear(ui.stageTip('Press + Add a force, tap where it should point, then type its size · drag a tip to turn a force · tap a tip to change its size or remove it'), { right: 165 });
+  tipClear(ui.stageTip('Press + Add a force, tap where it should point, then type its size · drag a tip to turn a force · tap a tip to change its size or remove it'), { right: 195 });
 
   ui.onTheme(function () { drawScene(); drawPolygon(); });
   vp.onResize = drawScene; vp2.onResize = drawPolygon;

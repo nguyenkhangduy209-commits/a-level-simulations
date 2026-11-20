@@ -37,16 +37,37 @@
   var CODE = {}; Object.keys(TYPES).forEach(function (k) { CODE[TYPES[k].code] = k; });
 
   /* ---------------- geometry ---------------- */
-  function endB(p) { return p.d === 'h' ? [p.x + 1, p.y] : [p.x, p.y + 1]; }
-  function ends(p) { return [[p.x, p.y], endB(p)]; }
-  function dkey(x, y) { return y * W + x; }
-  function ekey(p) { return p.x + '.' + p.y + p.d; }
+  function isFree(p) { return p && p.x1 !== undefined; }
+  function endB(p) { return isFree(p) ? [p.x2, p.y2] : (p.d === 'h' ? [p.x + 1, p.y] : [p.x, p.y + 1]); }
+  function ends(p) { return isFree(p) ? [[p.x1, p.y1], [p.x2, p.y2]] : [[p.x, p.y], endB(p)]; }
+  function dkey(x, y) {
+    if (Number.isInteger(x) && Number.isInteger(y) && x >= 0 && x < W && y >= 0 && y < H) return y * W + x;
+    return 'f:' + Math.round(x * 100) + ',' + Math.round(y * 100);
+  }
+  function coordsOfKey(k) {
+    if (typeof k === 'string' && k.indexOf('f:') === 0) {
+      var pts = k.slice(2).split(',');
+      return [Number(pts[0]) / 100, Number(pts[1]) / 100];
+    }
+    var n = Number(k);
+    return [n % W, Math.floor(n / W)];
+  }
+  function ekey(p) {
+    if (isFree(p)) return p.t + ':' + Math.round(p.x1 * 100) + ',' + Math.round(p.y1 * 100) + '>' + Math.round(p.x2 * 100) + ',' + Math.round(p.y2 * 100);
+    return p.x + '.' + p.y + p.d;
+  }
   function inGrid(x, y, d) { return x >= 0 && y >= 0 && (d === 'h' ? x + 1 < W && y < H : x < W && y + 1 < H); }
   function make(t, x, y, d, vals, rev) {
     var T = TYPES[t], v = {};
     Object.keys(T.def).forEach(function (k) { v[k] = T.def[k]; });
     if (vals) Object.keys(vals).forEach(function (k) { v[k] = vals[k]; });
     return { t: t, x: x, y: y, d: d, v: v, rev: !!rev };
+  }
+  function makeFree(t, x1, y1, x2, y2, vals, rev) {
+    var T = TYPES[t], v = {};
+    Object.keys(T.def).forEach(function (k) { v[k] = T.def[k]; });
+    if (vals) Object.keys(vals).forEach(function (k) { v[k] = vals[k]; });
+    return { t: t, x1: Number(x1.toFixed(2)), y1: Number(y1.toFixed(2)), x2: Number(x2.toFixed(2)), y2: Number(y2.toFixed(2)), v: v, rev: !!rev };
   }
   /** the unit edges along an axis-aligned polyline [[x, y], …] */
   function edgesOf(pts) {
@@ -68,11 +89,12 @@
     return out;
   }
 
-  /* ---------------- share string: "R2.1h_10~E3.0h_6_0.5_r~w1.1v" ---------------- */
+  /* ---------------- share string: "R2.1h_10~E3.0h_6_0.5_r~w1.1v" or free "R1.5,2.3>4.1,2.3_10" ---------------- */
   function fmtN(v) { return String(Number(Number(v).toPrecision(6))); }
   function encode(parts) {
     return parts.map(function (p) {
-      var T = TYPES[p.t], s = T.code + p.x + '.' + p.y + p.d;
+      var T = TYPES[p.t];
+      var s = isFree(p) ? (T.code + fmtN(p.x1) + ',' + fmtN(p.y1) + '>' + fmtN(p.x2) + ',' + fmtN(p.y2)) : (T.code + p.x + '.' + p.y + p.d);
       T.vals.forEach(function (k) { s += '_' + fmtN(p.v[k]); });
       return s + (p.rev ? '_r' : '');
     }).join('~');
@@ -80,11 +102,18 @@
   function decode(str) {
     var out = [], at = {};
     String(str || '').split('~').forEach(function (tok) {
-      var q = tok.split('_'), m = /^([A-Za-z])(\d+)\.(\d+)([hv])$/.exec(q[0]);
-      if (!m || !CODE[m[1]]) return;
-      var t = CODE[m[1]], T = TYPES[t], x = Number(m[2]), y = Number(m[3]), d = m[4];
-      if (!inGrid(x, y, d)) return;
-      var p = make(t, x, y, d), vi = 0;
+      var q = tok.split('_');
+      var mf = /^([A-Za-z])(-?[\d.]+),(-?[\d.]+)>(-?[\d.]+),(-?[\d.]+)$/.exec(q[0]);
+      var m = !mf && /^([A-Za-z])(\d+)\.(\d+)([hv])$/.exec(q[0]);
+      var p = null;
+      if (mf && CODE[mf[1]]) {
+        p = makeFree(CODE[mf[1]], Number(mf[2]), Number(mf[3]), Number(mf[4]), Number(mf[5]));
+      } else if (m && CODE[m[1]]) {
+        var t = CODE[m[1]], x = Number(m[2]), y = Number(m[3]), d = m[4];
+        if (!inGrid(x, y, d)) return;
+        p = make(t, x, y, d);
+      } else return;
+      var T = TYPES[p.t], vi = 0;
       q.slice(1).forEach(function (z) {
         if (z === 'r') p.rev = true;
         else if (z !== '' && isFinite(Number(z)) && vi < T.vals.length) p.v[T.vals[vi++]] = Math.max(0, Number(z));
@@ -137,8 +166,9 @@
     var diodeOn = parts.map(function (p) { return p.t === 'diode'; }), blown = parts.map(function () { return false; }), blowI = {};
     function link(i) { var p = parts[i]; return p.t === 'wire' || (p.t === 'switch' && p.v.on > 0) || (p.t === 'amm' && !(p.v.R > 0)) || (p.t === 'fuse' && !blown[i]); }
 
+    function normKey(k) { return /^\d+$/.test(k) ? Number(k) : k; }
     function solveState() {
-      var uf = UF(), dots = Object.keys(out.dotDeg).map(Number);
+      var uf = UF(), dots = Object.keys(out.dotDeg).map(normKey);
       parts.forEach(function (p, i) { if (link(i)) uf.union(dkey(E[i][0][0], E[i][0][1]), dkey(E[i][1][0], E[i][1][1])); });
       var refDot = null;
       parts.forEach(function (p, i) { if (refDot === null && isSource(p)) { var mi = p.rev ? 0 : 1; refDot = dkey(E[i][mi][0], E[i][mi][1]); } });
@@ -251,7 +281,7 @@
     // loose ends
     var loose = [];
     parts.forEach(function (p, i) { E[i].forEach(function (q) { if (out.dotDeg[dkey(q[0], q[1])] === 1 && loose.indexOf(i) < 0) loose.push(i); }); });
-    out.looseDots = Object.keys(out.dotDeg).filter(function (k) { return out.dotDeg[k] === 1; }).map(Number);
+    out.looseDots = Object.keys(out.dotDeg).filter(function (k) { return out.dotDeg[k] === 1; }).map(normKey);
     if (loose.length) {
       var ln = loose.filter(named);
       issue('warn', 'Loose end' + (out.looseDots.length > 1 ? 's' : '') + ': ' + (ln.length ? list(ln) + (ln.length > 1 ? ' are' : ' is') + ' not joined at one end' : 'a wire stops at a dot with nothing else on it') + '. Current only flows round a complete loop.', loose);
@@ -477,6 +507,6 @@
     return { branches: branches, junctions: J, loops: loops };
   }
 
-  return { W: W, H: H, TYPES: TYPES, ends: ends, endB: endB, dkey: dkey, ekey: ekey, inGrid: inGrid, make: make, build: build, edgesOf: edgesOf,
+  return { W: W, H: H, TYPES: TYPES, ends: ends, endB: endB, dkey: dkey, coordsOfKey: coordsOfKey, ekey: ekey, inGrid: inGrid, isFree: isFree, make: make, makeFree: makeFree, build: build, edgesOf: edgesOf,
     encode: encode, decode: decode, names: names, rName: rName, sub: sub, isSource: isSource, resistance: resistance, analyse: analyse };
 });

@@ -658,7 +658,7 @@
     if (addBtn) addBtn.show(mode.get() !== 'couple' && !!freeSlot());
     var t = mode.get() === 'couple' ? 'Drag an arrow tip to change θ · tap it to type F · drag O · tap the bar end to type d'
       : 'Press + Add a force, tap the beam where it acts, then type its size' + (mode.get() === 'pin' ? ' and direction' : '') + ' · drag a force along the beam · tap its arrow to change or remove it · drag the ' + (mode.get() === 'pin' ? 'pivot' : 'supports') + ' or O';
-    if (t !== lastTip) { lastTip = t; tipClear(ui.stageTip(t), { right: 165 }); }   // only re-show the hint when it actually changes
+    if (t !== lastTip) { lastTip = t; tipClear(ui.stageTip(t), { right: 195 }); }   // only re-show the hint when it actually changes
   }
 
   ui.onTheme(draw);

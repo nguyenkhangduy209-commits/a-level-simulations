@@ -62,7 +62,8 @@
     function py(y) { return T + (Y1 - y) / (Y1 - Y0) * H; }
     this.px = px; this.py = py; this.box = { L: L, T: T, W: W, H: H };
     // grid
-    c.font = '11px system-ui, sans-serif'; c.lineWidth = 1;
+    var FONT_SANS = 'Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+    c.font = '500 11.5px ' + FONT_SANS; c.lineWidth = 1;
     xt.ticks.forEach(function (t) {
       if (t < X0 - 1e-9 || t > X1 + 1e-9) return;
       c.strokeStyle = col.grid; c.beginPath(); c.moveTo(px(t), T); c.lineTo(px(t), T + H); c.stroke();
@@ -79,7 +80,7 @@
     c.beginPath(); c.moveTo(L, zy); c.lineTo(L + W, zy); c.stroke();
     c.beginPath(); c.moveTo(px(Math.max(X0, Math.min(0, X1))), T); c.lineTo(px(Math.max(X0, Math.min(0, X1))), T + H); c.stroke();
     // labels
-    c.fillStyle = col.ink; c.font = '12px system-ui, sans-serif';
+    c.fillStyle = col.ink; c.font = '600 12.5px ' + FONT_SANS;
     c.textAlign = 'right'; c.textBaseline = 'bottom'; c.fillText(xLabel, L + W, T + H + B - 2);
     c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText(yLabel, 6, 4);
     // clip to plot area
@@ -120,7 +121,7 @@
     });
     (spec.markers || []).forEach(function (m) {
       c.fillStyle = m.color || col.ink; c.beginPath(); c.arc(px(m.x), py(m.y), 3.5, 0, Math.PI * 2); c.fill();
-      if (m.label) { c.textAlign = 'left'; c.textBaseline = 'bottom'; c.font = '11px system-ui, sans-serif'; c.fillText(m.label, px(m.x) + 5, py(m.y) - 3); }
+      if (m.label) { c.textAlign = 'left'; c.textBaseline = 'bottom'; c.font = '600 11.5px ' + FONT_SANS; c.fillText(m.label, px(m.x) + 5, py(m.y) - 3); }
     });
     if (spec.cursor !== undefined && isFinite(spec.cursor)) {
       c.strokeStyle = col.accent; c.lineWidth = 1.5; c.beginPath(); c.moveTo(px(spec.cursor), T); c.lineTo(px(spec.cursor), T + H); c.stroke();
@@ -132,11 +133,11 @@
     c.restore();
     // title: top-right beside the y label if there is room, otherwise a caption inside the plot (never on top of the y label)
     if (spec.title) {
-      c.font = '12px system-ui, sans-serif'; c.textBaseline = 'top';
+      c.font = '600 12px ' + FONT_SANS; c.textBaseline = 'top';
       var tw = c.measureText(spec.title).width, lw = c.measureText(yLabel).width;
       if (6 + lw + 14 + tw <= L + W) { c.textAlign = 'right'; c.fillStyle = col.muted; c.fillText(spec.title, L + W, 4); }
       else {
-        c.font = '11px system-ui, sans-serif'; tw = c.measureText(spec.title).width;
+        c.font = '600 11.5px ' + FONT_SANS; tw = c.measureText(spec.title).width;
         var tx = Math.max(L + 4, L + W - 4 - tw), ty = T + 4;
         c.fillStyle = col.panel || col.bg || '#fff'; c.globalAlpha = 0.85; c.fillRect(tx - 3, ty - 2, Math.min(tw, W - 8) + 6, 15); c.globalAlpha = 1;
         c.textAlign = 'left'; c.fillStyle = col.muted; c.fillText(spec.title, tx, ty, W - 8);

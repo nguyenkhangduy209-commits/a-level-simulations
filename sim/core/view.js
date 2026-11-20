@@ -111,7 +111,7 @@
     var fs = opt.fs === 'none' ? null : opt.fs || (/=/.test(text) ? focusState(text) : (focus && hitsLast ? 'dim' : null));
     c.save();
     if (fs === 'dim') c.globalAlpha = 0.35;
-    c.font = (opt.bold || fs === 'hi' ? '650 ' : '500 ') + ((opt.size || 13) + (fs === 'hi' ? 1.5 : 0)) + 'px ' + (opt.mono ? 'ui-monospace, Menlo, monospace' : 'Inter, system-ui, -apple-system, "Segoe UI", sans-serif');
+    c.font = (opt.bold || fs === 'hi' ? '700 ' : '500 ') + ((opt.size || 13) + (fs === 'hi' ? 1.5 : 0)) + 'px Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
     c.textAlign = opt.align || 'center'; c.textBaseline = opt.base || 'middle';
     if (opt.bg) {
       var m = c.measureText(text), w = m.width + 6, hgt = (opt.size || 13) + 4;
@@ -201,11 +201,28 @@
     var drag = null, hover = null, drawing = null, TAP = 6;
     function pos(e) { var r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
     function hit(x, y, touch) {
-      var hs = (opt.handles && opt.handles()) || [], best = null, bd = Infinity;
-      hs.forEach(function (h) { var d = Math.hypot(h.x - x, h.y - y), r = (h.r || 22) + (touch ? 8 : 0); if (d <= r && d < bd) { bd = d; best = h; } });
+      var hs = (opt.handles && opt.handles()) || [], best = null, bd = Infinity, pad = touch ? 8 : 2;
+      hs.forEach(function (h) {
+        if (h.kind === 'pill') {
+          var hw = (h.w || 78) / 2 + pad, hh = (h.h || 24) / 2 + pad;
+          if (Math.abs(x - h.x) <= hw && Math.abs(y - h.y) <= hh) {
+            var d0 = Math.hypot(h.x - x, h.y - y);
+            if (d0 < bd) { bd = d0; best = h; }
+          }
+          return;
+        }
+        var d = Math.hypot(h.x - x, h.y - y), r = (h.r || 22) + (touch ? 8 : 0);
+        if (d <= r && d < bd) { bd = d; best = h; }
+      });
       return best;
     }
-    function setHover(h) { if ((h && h.id) !== (hover && hover.id)) { hover = h; canvas.style.cursor = h ? 'grab' : (opt.canDraw ? 'crosshair' : ''); if (opt.onHover) opt.onHover(h); } }
+    function setHover(h) {
+      if ((h && h.id) !== (hover && hover.id)) {
+        hover = h;
+        canvas.style.cursor = h ? (h.kind === 'pill' ? 'pointer' : 'grab') : (opt.canDraw ? 'crosshair' : '');
+        if (opt.onHover) opt.onHover(h);
+      }
+    }
     canvas.addEventListener('pointerdown', function (e) {
       if (e.button !== undefined && e.button !== 0) return;
       var p = pos(e), h = hit(p[0], p[1], e.pointerType === 'touch');
@@ -230,17 +247,53 @@
     canvas.addEventListener('pointerleave', function (e) { if (!drag && !drawing && e.pointerType !== 'touch') setHover(null); });
     return {
       isDragging: function () { return !!drag || !!drawing; },
-      /** draw grab rings around handles: a faint dashed ring always, a solid glow on hover/drag */
+      /** draw creative handle indicators: sleek pill/underline for label handles, precision diamond reticle for drag handles */
       paint: function (c) {
         var hs = (opt.handles && opt.handles()) || [], col = SIM.ui.colors(), active = drag ? drag.h.id : hover ? hover.id : null;
         c.save();
         hs.forEach(function (h) {
           if (h.hidden) return;
-          var on = h.id === active;
-          c.beginPath(); c.arc(h.x, h.y, on ? 15 : 11, 0, Math.PI * 2);
-          c.lineWidth = on ? 2.5 : 1.5; c.strokeStyle = h.color || col.accent; c.globalAlpha = on ? 0.95 : 0.55;
-          c.setLineDash(on ? [] : [3, 3]); c.stroke();
-          if (on) { c.globalAlpha = 0.18; c.fillStyle = h.color || col.accent; c.fill(); }
+          var on = h.id === active, clr = h.color || col.accent;
+          if (h.kind === 'pill') {
+            var pw = h.w || 78, ph = h.h || 24, px = h.x - pw / 2, py = h.y - ph / 2, pr = Math.min(9, ph / 2);
+            c.save();
+            c.beginPath();
+            if (c.roundRect) c.roundRect(px, py, pw, ph, pr);
+            else c.rect(px, py, pw, ph);
+            if (on) {
+              c.globalAlpha = 0.14; c.fillStyle = clr; c.fill();
+              c.globalAlpha = 0.8; c.strokeStyle = clr; c.lineWidth = 1.6; c.setLineDash([]); c.stroke();
+            } else {
+              c.globalAlpha = 0.22; c.strokeStyle = clr; c.lineWidth = 1; c.setLineDash([]); c.stroke();
+              // subtle underline accent below the label (never obscures digits)
+              c.globalAlpha = 0.72; c.strokeStyle = clr; c.lineWidth = 2; c.lineCap = 'round';
+              c.beginPath(); c.moveTo(px + 8, py + ph - 1); c.lineTo(px + pw - 8, py + ph - 1); c.stroke();
+            }
+            c.restore();
+            return;
+          }
+          // precision corner-bracket reticle + glowing diamond core
+          var r = on ? 13 : 9.5, b = on ? 5.5 : 4;
+          c.save();
+          if (on) {
+            c.globalAlpha = 0.16; c.fillStyle = clr;
+            c.beginPath(); c.arc(h.x, h.y, r + 3, 0, Math.PI * 2); c.fill();
+          }
+          c.strokeStyle = clr; c.lineWidth = on ? 2.2 : 1.5; c.lineCap = 'round'; c.lineJoin = 'round';
+          c.setLineDash([]); c.globalAlpha = on ? 0.95 : 0.62;
+          // 4 corner L-brackets
+          [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(function (d) {
+            var cx = h.x + d[0] * r, cy = h.y + d[1] * r;
+            c.beginPath();
+            c.moveTo(cx - d[0] * b, cy); c.lineTo(cx, cy); c.lineTo(cx, cy - d[1] * b);
+            c.stroke();
+          });
+          // small central diamond node
+          var dr = on ? 4 : 2.6;
+          c.beginPath();
+          c.moveTo(h.x, h.y - dr); c.lineTo(h.x + dr, h.y); c.lineTo(h.x, h.y + dr); c.lineTo(h.x - dr, h.y); c.closePath();
+          c.fillStyle = clr; c.globalAlpha = on ? 0.9 : 0.45; c.fill();
+          c.restore();
         });
         c.restore();
       }

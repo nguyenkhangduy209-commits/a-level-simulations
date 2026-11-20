@@ -109,5 +109,14 @@ module.exports = {
     check(back.length === parts.length && B.encode(back) === s, s);
     check(back[0].rev && back[0].v.r === 0.25 && back[3].v.on === 0);
     check(B.decode('junk~R99.1h~Q1.1h').length === 0, 'bad tokens are ignored');
+  },
+  'builder: free-form off-grid diagonal circuit solves and round-trips': () => {
+    const F = (t, x1, y1, x2, y2, v) => B.makeFree(t, x1, y1, x2, y2, v);
+    const parts = [F('cell', 1.25, 1.5, 3.75, 1.5, { E: 12 }), F('res', 3.75, 1.5, 2.5, 3.8, { R: 4 }), F('wire', 2.5, 3.8, 1.25, 1.5)];
+    const r = B.analyse(parts); check(!r.fatal, r.fatal);
+    approx(Math.abs(r.parts[1].I), 3, 1e-9);
+    const enc = B.encode(parts), dec = B.decode(enc);
+    check(dec.length === 3 && B.encode(dec) === enc, enc);
+    const pt = B.coordsOfKey(B.dkey(2.5, 3.8)); approx(pt[0], 2.5, 1e-9); approx(pt[1], 3.8, 1e-9);
   }
 };

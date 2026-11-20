@@ -311,7 +311,7 @@
       var src = med === 'string' ? { x: S.X(0) - 20, y: S.y0 } : med === 'microwave' ? { x: S.X(0) - 22, y: S.y0 } : { x: S.X(0) - 22, y: S.y0 };
       var srcKey = med === 'microwave' ? 'fG' : 'k';
       if (!locked(srcKey)) hs.push({ id: 'src', x: src.x, y: src.y, r: 18, color: col.muted });
-      if (med !== 'microwave') { var vk = med === 'string' ? 'vs' : 'va'; if (!locked(vk)) hs.push({ id: 'v', x: vp.w / 2, y: 14, r: 18, color: col.ink }); }
+      if (med !== 'microwave') { var vk = med === 'string' ? 'vs' : 'va'; if (!locked(vk)) hs.push({ id: 'v', kind: 'pill', w: 96, h: 22, x: vp.w / 2, y: 14, color: col.ink }); }
       var wt = 2 * Math.PI * clock.t / PERIOD, tp = SP.travellingPair(med, st.lambda, S.L);
       [['pP', 'P'], ['pQ', 'Q']].forEach(function (pq) {
         if (locked(pq[0])) return;

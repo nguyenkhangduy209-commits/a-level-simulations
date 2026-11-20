@@ -274,8 +274,8 @@
         if (x2 > 10 && dpc <= 10) x2 -= dpc;
         if (onScreen(x2, y2) && !(locked('phi') && locked('V2'))) hs.push({ id: 'tr2', x: vp.X(x2), y: vp.Y(y2), color: col.s3 });
       }
-      if (!locked('tb')) hs.push({ id: 'tb', x: labels.tb.x, y: labels.tb.y, r: 16, color: col.muted });
-      if (!locked('yg')) hs.push({ id: 'yg', x: labels.yg.x, y: labels.yg.y, r: 16, color: col.muted });
+      if (!locked('tb')) hs.push({ id: 'tb', kind: 'pill', w: 96, h: 22, x: labels.tb.x, y: labels.tb.y, color: col.muted });
+      if (!locked('yg')) hs.push({ id: 'yg', kind: 'pill', w: 96, h: 22, x: labels.yg.x, y: labels.yg.y, color: col.muted });
       return hs;
     },
     onDrag: function (hd, x, y) {
