@@ -1,0 +1,603 @@
+Cambridge International AS & A Level
+PHYSICS 9702/43
+Paper 4 A Level Structured Questions May/June 2020
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen or correction fluid.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+This document has 28 pages. Blank pages are indicated.
+DC (MS) 198091
+© UCLES 2020 [Turn over
+*0435157258*
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2020 9702/43/M/J/20
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1 at2
+2
+v 2 = u 2+2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω (x 2-x2)
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2020 9702/43/M/J/20 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 (a) State what is meant by a gravitational force.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) A binary star system consists of two stars S and S , each in a circular orbit.
+1 2
+The orbit of each star in the system has a period of rotation T.
+Observations of the binary star from Earth are represented in Fig. 1.1.
+S
+1
+S
+1
+S
+2
+S
+2
+T
+t = 0 t = —
+4
+S
+2
+S S
+1 2
+S
+1
+T 3T
+t = — t = —
+2 4
+S
+1
+S
+2
+t = T
+Fig. 1.1 (not to scale)
+© UCLES 2020 9702/43/M/J/20
+
+5
+Observed from Earth, the angular separation of the centres of S and S is 1.2 × 10–5 rad.
+1 2
+The distance of the binary star system from Earth is 1.5 × 1017 m.
+Show that the separation d of the centres of S and S is 1.8 × 1012 m.
+1 2
+[1]
+(c) The stars S and S rotate with the same angular velocity ω about a point P, as illustrated in
+1 2
+Fig. 1.2.
+d
+P
+S S
+1 2
+x
+Fig. 1.2 (not to scale)
+Point P is at a distance x from the centre of star S .
+1
+The period of rotation of the stars is 44.2 years.
+(i) Calculate the angular velocity ω.
+ω = .............................................. rad s–1 [2]
+© UCLES 2020 9702/43/M/J/20 [Turn over
+
+6
+(ii) By considering the forces acting on the two stars, show that the ratio of the masses of
+the stars is given by
+mass of S
+1 d – x
+= .
+mass of S x
+2
+[2]
+(iii) The mass M of star S is given by the expression
+1 1
+GM = d 2 (d – x) ω 2
+1
+where G is the gravitational constant.
+The ratio in (ii) is found to be 1.5.
+Use data from (b) and your answer in (c)(i) to determine the mass M .
+1
+M = .................................................... kg [3]
+1
+[Total: 9]
+© UCLES 2020 9702/43/M/J/20
+
+7
+2 (a) State what is meant by the internal energy of a system.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) By reference to intermolecular forces, explain why the change in internal energy of an ideal
+gas is equal to the change in total kinetic energy of its molecules.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(c) State and explain the change, if any, in the internal energy of a solid metal ball as it falls
+under gravity in a vacuum.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+[Total: 7]
+© UCLES 2020 9702/43/M/J/20 [Turn over
+
+8
+3 The piston in the cylinder of a car engine moves in the cylinder with simple harmonic motion.
+The piston moves between a position of maximum height in the cylinder to a position of minimum
+height, as illustrated in Fig. 3.1.
+cylinder cylinder
+9.8 cm
+piston
+piston
+maximum height minimum height
+Fig. 3.1
+The distance moved by the piston between the positions shown in Fig. 3.1 is 9.8 cm.
+The mass of the piston is 640 g.
+At one particular speed of the engine, the piston completes 2700 oscillations in 1.0 minute.
+(a) For the oscillations of the piston in the cylinder, determine:
+(i) the amplitude
+amplitude = ................................................... cm [1]
+(ii) the frequency
+frequency = .................................................... Hz [1]
+(iii) the maximum speed
+maximum speed = ................................................ m s–1 [2]
+© UCLES 2020 9702/43/M/J/20
+
+9
+(iv) the speed when the top of the piston is 2.3 cm below its maximum height.
+speed = ............................................... m s–1 [2]
+(b) The acceleration of the piston varies.
+Determine the resultant force on the piston that gives rise to its maximum acceleration.
+force = ..................................................... N [3]
+[Total: 9]
+© UCLES 2020 9702/43/M/J/20 [Turn over
+
+10
+4 (a) (i) By reference to an ultrasound wave, explain what is meant by specific acoustic impedance.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) An ultrasound wave is incident normally on the boundary between two media. The media
+have specific acoustic impedances Z and Z .
+1 2
+State how the ratio
+intensity of ultrasound reflected from boundary
+intensity of ultrasound incident on boundary
+depends on the relative magnitudes of Z and Z .
+1 2
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(b) (i) State what is meant by the attenuation of an ultrasound wave.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) A parallel beam of ultrasound is passing through a medium.
+The incident intensity I is reduced to 0.35 I on passing through a thickness of 0.046 m
+0 0
+of the medium.
+Calculate the linear attenuation coefficient μ of the ultrasound beam in the medium.
+μ = .................................................. m–1 [2]
+[Total: 7]
+© UCLES 2020 9702/43/M/J/20
+
+11
+5 (a) State one similarity and one difference between the fields of force produced by an isolated
+point charge and by an isolated point mass.
+similarity: ...................................................................................................................................
+...................................................................................................................................................
+difference: .................................................................................................................................
+...................................................................................................................................................
+[2]
+(b) An isolated solid metal sphere A of radius R has charge +Q, as illustrated in Fig. 5.1.
+R
+P
+2R
+sphere A
+charge +Q
+Fig. 5.1
+A point P is distance 2R from the surface of the sphere.
+Determine an expression that includes the terms R and Q for the electric field strength E at
+point P.
+E = ......................................................... [2]
+© UCLES 2020 9702/43/M/J/20 [Turn over
+
+12
+(c) A second identical solid metal sphere B is now placed near sphere A. The centres of the
+spheres are separated by a distance 6R, as shown in Fig. 5.2.
+R R
+P
+sphere A sphere B
+charge +Q charge –Q
+6R
+Fig. 5.2
+Point P lies midway between spheres A and B.
+Sphere B has charge –Q.
+Explain why:
+(i) the magnitude of the electric field strength at P is given by the sum of the magnitudes of
+the field strengths due to each sphere
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) the electric field strength at point P due to the charged metal spheres is not, in practice,
+equal to 2E, where E is the electric field strength determined in (b).
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 7]
+© UCLES 2020 9702/43/M/J/20
+
+13
+6 (a) The transmission of signals using optic fibres has, to a great extent, replaced the use of
+coaxial cables.
+Advantages of optic fibres include greater bandwidth and very little crosslinking.
+(i) Suggest an advantage of greater bandwidth.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) State what is meant by crosslinking.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(b) In telecommunications, a signal power of 1.0 mW is used as a reference power.
+Signal powers relative to this reference power and expressed in dB are said to be measured
+in ‘dBm’.
+Show that a signal power of 13 dBm is equivalent to 20 mW.
+[2]
+(c) A signal of input power 20 mW is transmitted along an optic fibre for an uninterrupted distance
+of 45 km.
+The optic fibre has an attenuation per unit length of 0.18 dB km–1.
+Calculate the output power P from the optic fibre.
+P = .................................................. mW [2]
+[Total: 7]
+© UCLES 2020 9702/43/M/J/20 [Turn over
+
+14
+7 The output of a microphone is processed using a non-inverting amplifier. The amplifier incorporates
+an operational amplifier (op-amp).
+(a) State, by reference to the input and output signals, the function of a non-inverting amplifier.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The circuit for the microphone and amplifier is shown in Fig. 7.1.
+15 kΩ
++5 V
+–
+P
++
+–5 V
+V
+OUT
+2.0 kΩ R
+Fig. 7.1
+The output potential difference V is 2.6 V when the potential at point P is 84 mV.
+OUT
+Determine:
+(i) the gain of the amplifier circuit
+gain = ......................................................... [1]
+© UCLES 2020 9702/43/M/J/20
+
+15
+(ii) the resistance of resistor R.
+resistance = ..................................................... Ω [2]
+(c) For the circuit of Fig. 7.1:
+(i) suggest a suitable device to connect to the output such that the shape of the waveform
+of the sound received by the microphone may be examined
+..................................................................................................................................... [1]
+(ii) state and explain the effect on the output potential difference V of increasing the
+OUT
+resistance of resistor R.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 8]
+© UCLES 2020 9702/43/M/J/20 [Turn over
+
+16
+8 (a) Define the tesla.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+(b) A magnet produces a uniform magnetic field of flux density B in the space between its poles.
+A rigid copper wire carrying a current is balanced on a pivot. Part PQLM of the wire is between
+the poles of the magnet, as illustrated in Fig. 8.1.
+5.6 cm
+M
+P
+L
+weight W
+N S
+rigid copper
+Q
+wire
+pivot
+magnet
+Fig. 8.1 (not to scale)
+The wire is balanced horizontally by means of a small weight W.
+© UCLES 2020 9702/43/M/J/20
+
+17
+The section of the wire between the poles of the magnet is shown in Fig. 8.2.
+rigid copper wire
+M
+P
+L
+N S
+Q
+pole of magnet pole of magnet
+Fig. 8.2 (not to scale)
+Explain why:
+(i) section QL of the wire gives rise to a moment about the pivot
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(ii) sections PQ and LM of the wire do not affect the equilibrium of the wire.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+© UCLES 2020 9702/43/M/J/20 [Turn over
+
+18
+(c) Section QL of the wire has length 0.85 cm.
+The perpendicular distance of QL from the pivot is 5.6 cm.
+When the current in the wire is changed by 1.2 A, W is moved a distance of 2.6 cm along the
+wire in order to restore equilibrium. The mass of W is 1.3 × 10–4 kg.
+(i) Show that the change in moment of W about the pivot is 3.3 × 10–5 N m.
+[2]
+(ii) Use the information in (i) to determine the magnetic flux density B between the poles of
+the magnet.
+B = ...................................................... T [3]
+[Total: 13]
+© UCLES 2020 9702/43/M/J/20
+
+19
+BLANK PAGE
+© UCLES 2020 9702/43/M/J/20 [Turn over
+
+20
+9 (a) A coil of wire is situated in a uniform magnetic field of flux density B.
+The coil has diameter 3.6 cm and consists of 350 turns of wire, as illustrated in Fig. 9.1.
+uniform
+magnetic field 3.6 cm
+flux density B
+coil, 350 turns
+Fig. 9.1
+© UCLES 2020 9702/43/M/J/20
+
+21
+The variation with time t of B is shown in Fig. 9.2.
+50
+40
+B / mT
+30
+20
+10
+0
+0 0.2 0.4 0.6 0.8
+t / s
+Fig. 9.2
+(i) Show that, for the time t = 0 to time t = 0.20 s, the electromotive force (e.m.f.) induced in
+the coil is 0.080 V.
+[2]
+(ii) On the axes of Fig. 9.3, show the variation with time t of the induced e.m.f. E for time
+t = 0 to time t = 0.80 s.
+0.2
+E / V
+0.1
+0
+0 0.2 0.4 0.6 0.8
+t / s
+–0.1
+–0.2
+Fig. 9.3
+[4]
+© UCLES 2020 9702/43/M/J/20 [Turn over
+
+22
+(b) A bar magnet is held a small distance above the surface of an aluminium disc by means of a
+rod, as illustrated in Fig. 9.4.
+rotating
+magnet
+fixed
+aluminium
+disc
+Fig. 9.4
+The aluminium disc is supported horizontally and held stationary.
+The magnet is rotated about a vertical axis at constant speed.
+Use laws of electromagnetic induction to explain why there is a torque acting on the aluminium
+disc.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [4]
+[Total: 10]
+© UCLES 2020 9702/43/M/J/20
+
+23
+10 (a) White light passes through a cloud of cool low-pressure gas, as illustrated in Fig. 10.1.
+cool gas
+white emergent
+light light
+Fig. 10.1
+For light that has passed through the gas, its continuous spectrum is seen to contain a
+number of darker lines.
+Use the concept of discrete electron energy levels to explain the existence of these darker
+lines.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [4]
+© UCLES 2020 9702/43/M/J/20 [Turn over
+
+24
+(b) The uppermost electron energy bands in a solid are illustrated in Fig. 10.2.
+conduction band (CB)
+forbidden band (FB)
+valence band (VB)
+Fig. 10.2
+Use band theory to explain the dependence on light intensity of the resistance of a
+light-dependent resistor (LDR).
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [5]
+[Total: 9]
+© UCLES 2020 9702/43/M/J/20
+
+25
+11 An electron, at rest, has mass m and charge –q.
+e
+A positron is a particle that, at rest, has mass m and charge +q.
+e
+A positron interacts with an electron. The electron and the positron may be considered to be at
+rest.
+The outcome of this interaction is that the electron and the positron become two gamma-ray (γ-ray)
+photons, each having the same energy.
+(a) Calculate, for one of the γ-ray photons:
+(i) the photon energy, in J
+energy = ...................................................... J [2]
+(ii) its momentum.
+momentum = ................................................... N s [2]
+(b) State and explain the direction, relative to each other, in which the γ-ray photons are emitted.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 6]
+© UCLES 2020 9702/43/M/J/20 [Turn over
+
+26
+12 (a) The decay of a sample of a radioactive isotope is said to be random and spontaneous.
+Explain what is meant by the decay being:
+(i) random
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) spontaneous.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(b) A radioactive isotope X has a half-life of 1.4 hours.
+Initially, a pure sample of this isotope X has an activity of 3.6 × 105 Bq.
+Determine the activity of the isotope X in the sample after a time of 2.0 hours.
+activity = .................................................... Bq [3]
+© UCLES 2020 9702/43/M/J/20
+
+27
+(c) The variation with time t of the actual activity A of the sample in (b) is shown in Fig. 12.1.
+4
+A / 105 Bq
+3
+2
+1
+0
+0 1 2 3 4 5 6
+t / hours
+Fig. 12.1
+(i) The initial activity of isotope X in the sample is 3.6 × 105 Bq.
+Use information from (b) to sketch, on the axes of Fig. 12.1, the variation with time t of
+the activity of a pure sample of isotope X. [1]
+(ii) Suggest an explanation for any difference between the actual activity of the sample
+shown in Fig. 12.1 and the curve you have drawn for the activity of isotope X.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 8]
+© UCLES 2020 9702/43/M/J/20
+
+28
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of the University of
+Cambridge Local Examinations Syndicate (UCLES), which itself is a department of the University of Cambridge.
+© UCLES 2020 9702/43/M/J/20

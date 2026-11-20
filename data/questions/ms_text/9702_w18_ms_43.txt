@@ -1,0 +1,248 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+PHYSICS 9702/43
+Paper 4 A Level Structured Questions October/November 2018
+MARK SCHEME
+Maximum Mark: 100
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the October/November 2018 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 12 printed pages.
+© UCLES 2018 [Turn over
+
+9702/43 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the
+specific content of the mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these
+marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the
+scope of the syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the
+question as indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently e.g. in situations where candidates have not followed instructions or in the application of generic level
+descriptors.
+© UCLES 2018 Page 2 of 12
+
+9702/43 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may
+be limited according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or
+grade descriptors in mind.
+© UCLES 2018 Page 3 of 12
+
+9702/43 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+1(a)(i) work done per unit mass B1
+work done moving mass from infinity (to the point) B1
+1(a)(ii) (near Earth’s surface change in) height ≪ radius or height much less than radius B1
+potential inversely proportional to radius and radius approximately constant (so potential approximately constant) B1
+1(b) initial kinetic energy = (–) potential energy (at surface) B1
+or
+½mv2 = GMm/r
+v2 = (2 × 6.67 × 10–11 × 7.4 × 1022)/(0.5 × 3.5 × 106) C1
+v = 2.4 × 103ms–1 A1
+Question Answer Marks
+2(a) sum of potential and kinetic energies (of molecules/atoms/particles) B1
+(energy of) molecules/atoms/particles in random motion B1
+2(b)(i) final temperature = initial temperature B1
+no change in internal energy B1
+2(b)(ii) 1. work done on gas (P→Q): 0 A1
+increase in internal energy (P→Q): (+)97.0J A1
+2. increase in internal energy (Q→R): –42.5J A1
+3. increase in internal energy (R→P): –54.5J A1
+thermal energy supplied (R→P): –91.5J A1
+© UCLES 2018 Page 4 of 12
+
+9702/43 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+3(a) ω2 = 2g / L C1
+T = 2π/ω C1
+ω2 = (2 × 9.81) / 0.19 A1
+ω = 10.2 (rad s–1)
+T = 2π/10.2
+= 0.62s
+3(b)(i) e.g. viscosity of liquid/friction within the liquid/viscous drag/friction between walls of tube and liquid B1
+3(b)(ii) (maximum) KE = ½mv 2 and v = ωx C1
+0 0 0
+or
+energy = ½mω2x 2
+0
+change = ½ × 18 × 10–3 × 103 × [(2.0 × 10–2)2 – (0.95 ×10–2)2] C1
+= 2.9 × 10–4J A1
+© UCLES 2018 Page 5 of 12
+
+9702/43 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+4(a) pulses (of ultrasound from generator) B1
+reflected at boundaries (between media) B1
+time delay (between transmission and receipt) gives information about depth B1
+intensity of reflected pulse gives information about nature (of tissues)/type (of tissues)/boundary B1
+Any two from: B2
+• (reflected pulses) detected by the (ultrasound) generator
+• gel used to minimise reflection at skin/maximise transmission into skin
+• degree of reflection depends upon impedances of two media (at boundary)
+4(b)(i) product of density and speed M1
+speed of ultrasound in medium A1
+4(b)(ii) Z about equal to Z results in negligible/no reflection B1
+1 2
+Z ≫ Z (or Z ≪ Z ) results in mostly reflection B1
+1 2 1 2
+© UCLES 2018 Page 6 of 12
+
+9702/43 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+5(a) Any two reasonable suggestions e.g.: B2
+• noise can be eliminated/(signal/data) can be regenerated
+• bits can be added to correct for errors
+• data compression/multiplexing (is possible)
+• signal can be encrypted/better security
+5(b) sketch: series of seven steps B1
+each step width 2ms B1
+correct levels in correct order (2, 5, 14, 4, 9, 11, 7) A2
+(1 mark for 6 levels correct, 2 marks for 7 levels correct)
+5(c)(i) step width reduced B1
+or
+higher frequencies can be reproduced
+5(c)(ii) step height reduced B1
+or
+smaller changes in signal (intensity) can be reproduced
+Question Answer Marks
+6(a)(i) work done per unit charge B1
+work done moving positive charge from infinity (to the point) B1
+6(a)(ii) field strength = potential gradient M1
+‘–’ sign included or directions discussed A1
+6(b)(i) gain in kinetic energy (= loss in potential energy) = charge × p.d. or qV = ½mv2 M1
+so v is independent of separation (because separation not in expressions) A1
+© UCLES 2018 Page 7 of 12
+
+9702/43 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+6(b)(ii) (at x = 0.40cm), potential = (–) 75 × 0.40/1.2 C1
+(= (–) 25V)
+½mv2 = qV C1
+½ × 4 × 1.66 × 10–27 × v2 = 2 × 1.60 × 10–19 × 25
+or
+a = Vq/dm and v2 = 2as (C1)
+v2 = (2 × 75 × 2 × 1.60 × 10–19 × 0.40 × 10–2) / (1.2 × 10–2 × 4 × 1.66 × 10–27) (C1)
+v = 4.9 × 104ms–1 A1
+Question Answer Marks
+7(a)(i) gain is constant M1
+for all frequencies A1
+7(a)(ii) no time delay between input (voltage) and output (voltage) B1
+clear reference to change(s) in input and/or output (voltages) B1
+7(b) diagram: V connected to V+ only B1
+IN
+midpoint between resistors R and R connected to V–only B1
+1 2
+7(c)(i) –3.6V A1
+7(c)(ii) (+)5.0V A1
+© UCLES 2018 Page 8 of 12
+
+9702/43 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+8(a) region where there is a force M1
+experienced by a current-carrying conductor/moving charge/(permanent) magnet A1
+8(b)(i) single path, deflection in ‘upward’ direction B1
+acceptable circular arc in whole field B1
+no ‘kinks’ at start or end of curvature, and straight outside region of field B1
+8(b)(ii) force (on particle) is normal to velocity/direction of motion/direction of speed B1
+8(c) magnetic force provides/is the centripetal force B1
+Bqv = mv2/r or r = mv/Bq C1
+(if q is doubled), new speed = 2v A1
+© UCLES 2018 Page 9 of 12
+
+9702/43 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+9(a) (induced) e.m.f. proportional/equal to rate M1
+of change of (magnetic) flux (linkage) A1
+9(b)(i) induced e.m.f. = (∆B)AN/∆t C1
+= (2 × 0.19 × 1.5 × 10–4 × 120) / 0.13
+= 0.053V A1
+9(b)(ii) reading on voltmeter connected to coil C/V: 0 0.053 0 A1
+(all three values required)
+reading on voltmeter connected to Hall probe/V: zero in middle column B1
+final column correct sign (negative) B1
+final column correct magnitude (0.20) B1
+Question Answer Marks
+10 Any five points from: B5
+• as temperature rises electrons gain energy
+• electrons enter conduction band
+• (positively charged) holes left in valence band
+• more charge carriers (so resistance decreases)
+• (as temperature rises,) lattice vibrations increase
+• effect of increase in number of electrons or holes or charge carriers outweighs effect of increased lattice vibrations (so
+resistance decreases)
+© UCLES 2018 Page 10 of 12
+
+9702/43 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+11(a) discrete amount/quantum/packet of energy M1
+of electromagnetic radiation A1
+11(b)(i) energy = hc/λ C1
+λ = (6.63 × 10–34 × 3.00 × 108)/(0.51 × 106 × 1.60 × 10–19) A1
+= 2.4 × 10–12m
+11(b)(ii) p = h/λ C1
+= (6.63 × 10–34)/(2.44 × 10–12)
+or
+p = E/c
+= (0.51 × 1.60 × 10–13)/(3.00 × 108)
+p = 2.7 × 10–22Ns A1
+11(c)(i) E = c2∆m C1
+∆m = (0.51 × 1.60 × 10–13)/(3.00 × 108)2 A1
+= 9.1 × 10–31kg
+11(c)(ii) (momentum is conserved so) nucleus must have momentum in opposite direction to photon B1
+© UCLES 2018 Page 11 of 12
+
+9702/43 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+12(a) unstable nucleus B1
+emission of particles/photons B1
+emission is spontaneous B1
+or
+(particles/radiation) are ionising
+12(b)(i) tangent drawn and gradient calculation attempted B1
+activity = 1.3 × 106 Bq A2
+(1 mark for answer within ±0.2 × 106 Bq, 2 marks for answer within ±0.1 × 106 Bq)
+12(b)(ii) A = λN C1
+λ = (1.3 × 106)/(3.05 × 1010) = 4.3 × 10–5s–1 (≈ 4 × 10–5s–1) A1
+12(c) A = A e–λt C1
+0
+1.0 × 103 = 4.6 × 103 exp(–5.5 × 10–7 × t)
+ln (4.6) = 5.5 × 10–7 × t C1
+t = 2.78 × 106s A1
+= 32 days
+© UCLES 2018 Page 12 of 12

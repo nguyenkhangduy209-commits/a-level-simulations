@@ -1,0 +1,275 @@
+{
+  "metadata": {
+    "project": "A-Levels Visual Simulation & Guide (9709 & 9702)",
+    "sources": [
+      "https://pastpapers.papacambridge.com/papers/caie/as-and-a-level-mathematics-9709",
+      "https://pastpapers.papacambridge.com/papers/caie/as-and-a-level-physics-9702",
+      "Cambridge International AS & A Level Mathematics 9709 (2026-2027)",
+      "Cambridge International AS & A Level Physics 9702 (2025-2027)"
+    ]
+  },
+  "mathematics_9709": {
+    "code": "9709",
+    "focus_paper": "Paper 4: Mechanics",
+    "exam_format": {
+      "duration_minutes": 75,
+      "total_marks": 50,
+      "questions": "6 to 8 compulsory structured questions"
+    },
+    "topics": [
+      {
+        "id": "9709-M1",
+        "title": "Forces and equilibrium",
+        "subtopics": [
+          "Resolving coplanar forces into horizontal/vertical and parallel/perpendicular components",
+          "Equilibrium of a particle under coplanar forces",
+          "Friction: F <= mu*R, limiting equilibrium (F = mu*R), rough horizontal & inclined planes"
+        ],
+        "common_mistakes": [
+          "Swapping sin(theta) and cos(theta) on inclined planes or when angle is measured from vertical",
+          "Blindly setting F = mu*R when the system is static and not on the verge of sliding",
+          "Forgetting normal reaction R changes when an applied force has a vertical/perpendicular component"
+        ],
+        "simulation_module": "vector-resolution-and-inclined-plane"
+      },
+      {
+        "id": "9709-M2",
+        "title": "Kinematics of motion in a straight line",
+        "subtopics": [
+          "Displacement, velocity, speed, and acceleration",
+          "Displacement-time and velocity-time graphs",
+          "Constant acceleration (SUVAT)",
+          "Variable acceleration using calculus (differentiation & integration with boundary conditions)"
+        ],
+        "common_mistakes": [
+          "Confusing total distance with net displacement when velocity changes sign",
+          "Applying SUVAT equations when acceleration is variable",
+          "Omitting integration constants (+C) or failing to split integrals at turning points (v = 0)"
+        ],
+        "simulation_module": "kinematics-graphs-and-calculus"
+      },
+      {
+        "id": "9709-M3",
+        "title": "Momentum",
+        "subtopics": [
+          "Linear momentum (p = mv)",
+          "Conservation of linear momentum in direct impacts of two bodies in a straight line"
+        ],
+        "common_mistakes": [
+          "Sign errors when particles rebound or move in opposite directions",
+          "Confusing conservation of momentum with conservation of kinetic energy"
+        ],
+        "simulation_module": "1d-collisions-and-momentum"
+      },
+      {
+        "id": "9709-M4",
+        "title": "Newton's laws of motion",
+        "subtopics": [
+          "F = ma on horizontal and inclined planes",
+          "Connected particles: strings, smooth pulleys, lifts, towing"
+        ],
+        "common_mistakes": [
+          "Writing a single F = ma equation for particles moving on different planes",
+          "Sign errors in tension T and acceleration a between connected bodies"
+        ],
+        "simulation_module": "connected-particles-and-pulleys"
+      },
+      {
+        "id": "9709-M5",
+        "title": "Energy, work and power",
+        "subtopics": [
+          "Work done by a constant force (W = Fd cos(theta))",
+          "Kinetic energy (1/2 mv^2) and gravitational potential energy (mgh)",
+          "Work-energy principle including work done against friction",
+          "Power (P = Fv)"
+        ],
+        "common_mistakes": [
+          "Omitting work done against resistance/friction in energy conservation",
+          "Assuming driving force remains constant as velocity changes at constant power"
+        ],
+        "simulation_module": "work-energy-power-lab"
+      }
+    ]
+  },
+  "physics_9702": {
+    "code": "9702",
+    "syllabus_years": "2025-2027",
+    "papers": {
+      "Paper 1": "AS Multiple Choice",
+      "Paper 2": "AS Structured Questions",
+      "Paper 3": "AS Advanced Practical Skills",
+      "Paper 4": "A Level Structured Questions",
+      "Paper 5": "Planning, Analysis and Evaluation"
+    },
+    "as_topics": [
+      {
+        "id": "9702-1",
+        "title": "Physical quantities and units",
+        "note": "includes 1.3 errors and uncertainties",
+        "simulation_module": [
+          "p1-units",
+          "p1-uncertainty",
+          "p1-vectors"
+        ]
+      },
+      {
+        "id": "9702-2",
+        "title": "Kinematics",
+        "simulation_module": [
+          "p2-projectile",
+          "p2-motion-graphs",
+          "p2-freefall-exp"
+        ]
+      },
+      {
+        "id": "9702-3",
+        "title": "Dynamics",
+        "simulation_module": [
+          "p3-momentum",
+          "p3-momentum-2d",
+          "p3-drag"
+        ]
+      },
+      {
+        "id": "9702-4",
+        "title": "Forces, density and pressure",
+        "simulation_module": [
+          "p4-moments",
+          "p4-pressure"
+        ]
+      },
+      {
+        "id": "9702-5",
+        "title": "Work, energy and power",
+        "simulation_module": [
+          "p5-energy",
+          "m4-vehicle?course=9702"
+        ]
+      },
+      {
+        "id": "9702-6",
+        "title": "Deformation of solids",
+        "simulation_module": [
+          "p6-deformation"
+        ]
+      },
+      {
+        "id": "9702-7",
+        "title": "Waves",
+        "simulation_module": [
+          "p7-waves",
+          "p7-cro",
+          "p7-doppler",
+          "p7-em-polarisation"
+        ]
+      },
+      {
+        "id": "9702-8",
+        "title": "Superposition",
+        "simulation_module": [
+          "p8-stationary",
+          "p8-interference",
+          "p8-grating"
+        ]
+      },
+      {
+        "id": "9702-9",
+        "title": "Electricity",
+        "simulation_module": [
+          "p9-current",
+          "p9-iv"
+        ]
+      },
+      {
+        "id": "9702-10",
+        "title": "D.C. circuits",
+        "simulation_module": [
+          "p10-emf",
+          "p10-circuits",
+          "p10-divider"
+        ]
+      },
+      {
+        "id": "9702-11",
+        "title": "Particle physics",
+        "simulation_module": [
+          "p11-alpha",
+          "p11-nuclear"
+        ]
+      }
+    ],
+    "a2_topics": [
+      {
+        "id": "9702-12",
+        "title": "Motion in a circle",
+        "simulation_module": "circular-motion-lab"
+      },
+      {
+        "id": "9702-13",
+        "title": "Gravitational fields",
+        "simulation_module": "gravitational-field-and-potential"
+      },
+      {
+        "id": "9702-14",
+        "title": "Temperature",
+        "simulation_module": "thermal-physics"
+      },
+      {
+        "id": "9702-15",
+        "title": "Ideal gases",
+        "simulation_module": "ideal-gas-kinetic-theory"
+      },
+      {
+        "id": "9702-16",
+        "title": "Thermodynamics",
+        "simulation_module": "first-law-thermodynamics"
+      },
+      {
+        "id": "9702-17",
+        "title": "Oscillations",
+        "simulation_module": "shm-phasor-and-graphs"
+      },
+      {
+        "id": "9702-18",
+        "title": "Electric fields",
+        "simulation_module": "electric-field-and-potential"
+      },
+      {
+        "id": "9702-19",
+        "title": "Capacitance",
+        "simulation_module": "capacitor-charge-discharge"
+      },
+      {
+        "id": "9702-20",
+        "title": "Magnetic fields",
+        "simulation_module": "lorentz-force-and-induction"
+      },
+      {
+        "id": "9702-21",
+        "title": "Alternating currents",
+        "simulation_module": "ac-rms-and-rectification"
+      },
+      {
+        "id": "9702-22",
+        "title": "Quantum physics",
+        "simulation_module": "photoelectric-effect"
+      },
+      {
+        "id": "9702-23",
+        "title": "Nuclear physics",
+        "simulation_module": "radioactive-decay-and-binding"
+      },
+      {
+        "id": "9702-24",
+        "title": "Medical physics",
+        "simulation_module": "ultrasound-and-xray"
+      },
+      {
+        "id": "9702-25",
+        "title": "Astronomy and cosmology",
+        "simulation_module": "hubble-and-luminosity"
+      }
+    ],
+    "numbering_note": "AS topic numbers follow the 2025-2027 syllabus (Kinematics = 2, Particle physics = 11). The 2022-2024 syllabus numbered them differently."
+  }
+}

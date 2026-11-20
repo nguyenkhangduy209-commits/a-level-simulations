@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Current, charge, p.d. and resistivity</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-circuits.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, CI = SIM.circuits;
+  var pg = ui.page({ title: 'Current, charge, potential difference, power and resistivity', g: 9.81,
+    tags: ['9702 9.1 Q = It, I = Anvq', '9702 9.2 V = W/Q, P = VI', '9702 9.3.6 R = ρL/A'] });
+  (function hideG() { try { var t = document.querySelector('header').children[2], l = t.children[t.children.length - 1]; if (l && /g =/.test(l.innerHTML)) l.style.display = 'none'; } catch (e) { /* header layout changed */ } })();
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 12 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 10, loop: true, onFrame: function () { clock.tLabel.textContent = 'animation (drift speeds hugely speeded up)'; drawScene(); } });
+  ui.legend(sceneCard, [{ color: 'var(--c-applied)', label: 'conventional current I' }, { color: 'var(--c-s2)', label: 'free electrons (drift opposite to I)' }, { color: 'var(--muted)', label: 'fixed positive ions' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pQ = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'Q / C (charge passed)', xLabel: 't / s' });
+  var pR = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'R / Ω', xLabel: 'L / m' });
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var byArea = ui.select(paramCard, { label: 'Cross-section given as', value: 'd', options: [{ value: 'd', label: 'diameter' }, { value: 'A', label: 'area' }] }, update);
+  var prm = ui.params(paramCard, [
+    { key: 'I', label: 'Current', sym: 'I', unit: 'A', min: 0, max: 20, step: 0.001, value: 1 },
+    { key: 't', label: 'Time', sym: 't', unit: 's', min: 0, max: 600, step: 1, value: 60 },
+    { key: 'n', label: 'Charge carriers per m³ (× 10<sup>28</sup>)', sym: 'n', unit: '× 10<sup>28</sup> m<sup>−3</sup>', min: 0.1, max: 20, step: 0.1, value: 8.5 },
+    { key: 'd1', label: 'Wire diameter', sym: 'd', unit: 'mm', min: 0.05, max: 5, step: 0.01, value: 0.5 },
+    { key: 'A1', label: 'Cross-sectional area', sym: 'A', unit: 'mm<sup>2</sup>', min: 0.005, max: 20, step: 0.001, value: 1 },
+    { key: 'L', label: 'Wire length', sym: 'L', unit: 'm', min: 0.01, max: 10, step: 0.01, value: 2 },
+    { key: 'rho', label: 'Resistivity (× 10<sup>−8</sup>)', sym: 'ρ', unit: '× 10<sup>−8</sup> Ω m', min: 1, max: 150, step: 0.1, value: 1.7 },
+    { key: 'k2', label: 'Second section: diameter ÷ first diameter', sym: 'd₂/d₁', unit: '', min: 0.2, max: 3, step: 0.05, value: 0.5 },
+    { key: 'Qt', label: 'Test a charge for quantisation (× 10<sup>−19</sup>)', sym: 'Q', unit: '× 10<sup>−19</sup> C', min: 0, max: 20, step: 0.1, value: 4.8 }
+  ], update);
+  var second = ui.toggle(paramCard, { label: 'Join a second section of the same material (same current) to compare drift speeds' }, update);
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Drift speed: copper, n = 8.5 × 10²⁸ m⁻³, A = 1.0 mm², I = 1.0 A', area: 'A', values: { I: 1, n: 8.5, A1: 1, L: 2, rho: 1.7, t: 60 }, note: 'v = I/(nAq) = 1.0 ÷ (8.5 × 10²⁸ × 1.0 × 10⁻⁶ × 1.60 × 10⁻¹⁹) = 7.4 × 10⁻⁵ m s⁻¹ — very slow.' },
+    { name: 'Resistance of copper wire: ρ = 1.7 × 10⁻⁸ Ω m, L = 2.0 m, d = 0.50 mm', area: 'd', values: { I: 1, d1: 0.5, L: 2, rho: 1.7, t: 60 }, note: 'A = πd²/4 = 1.96 × 10⁻⁷ m²; R = ρL/A = 0.173 Ω. Forgetting to square d (or using d instead of r) is the classic error.' },
+    { name: 'Same current through a section of half the diameter', area: 'd', second: true, values: { I: 2, d1: 1, k2: 0.5, n: 8.5, L: 1, rho: 1.7 }, note: 'Same I and n: v ∝ 1/A, and A ∝ d². Half the diameter ⇒ ¼ of the area ⇒ 4× the drift speed.' },
+    { name: '9702/22 M/J 25 Q6(b)(i): 0.030 A for 4.0 minutes', area: 'd', values: { I: 0.03, t: 240, d1: 0.5, L: 2, rho: 1.7 }, note: 'Q = It = 0.030 × 240 = 7.2 C (convert minutes to seconds).' },
+    { name: '9702/23 M/J 25 Q7(a): nichrome, 150 cm, 2.45 × 10⁻⁷ m², ρ = 1.12 × 10⁻⁶ Ω m', area: 'A', values: { I: 0.1, A1: 0.245, L: 1.5, rho: 112, t: 60 }, note: 'R = ρL/A = 1.12 × 10⁻⁶ × 1.50 ÷ 2.45 × 10⁻⁷ = 6.86 Ω.' },
+    { name: 'Double the diameter of a wire: R falls to a quarter', area: 'd', values: { I: 1, d1: 1, L: 2, rho: 1.7 }, note: 'Compare with d = 0.50 mm (0.173 Ω): d doubled ⇒ A × 4 ⇒ R ÷ 4 = 0.0433 Ω.' },
+    { name: 'Is 2.4 × 10⁻¹⁹ C a possible charge?', area: 'd', values: { Qt: 2.4, I: 1, d1: 0.5 }, note: '2.4 × 10⁻¹⁹ ÷ 1.60 × 10⁻¹⁹ = 1.5, not a whole number ⇒ impossible: charge is quantised in units of e.' }
+  ], function (p) { byArea.set(p.area || 'd', true); second.set(!!p.second, true); prm.set(p.values); });
+
+  ui.notes(noteCard, [
+    'Current is the rate of flow of charge: <b>Q = It</b> with t in <b>seconds</b>.',
+    'Charge is <b>quantised</b>: any charge is a whole-number multiple of e = 1.60 × 10⁻¹⁹ C.',
+    'In I = Anvq, n is the number of charge carriers <b>per unit volume</b> (m⁻³) and v is the <b>average drift speed</b> — typically well under 1 mm s⁻¹.',
+    'Series sections carry the <b>same current</b>, so the thinner section has the <b>faster</b> drift speed.',
+    'A = πd²/4 = πr². Convert mm² to m²: 1 mm² = 10⁻⁶ m².',
+    'R = ρL/A: doubling L doubles R; doubling d quarters R. ρ is a property of the material, not of the wire.',
+    'p.d. V = W/Q is energy transferred per unit charge. P = VI = I²R = V²/R all give the same power — pick the one that uses known quantities.'
+  ]);
+
+  /* ---------- model ---------- */
+  var M = null;
+  function update() {
+    var v = prm.values, useA = byArea.get() === 'A';
+    prm.show('d1', !useA); prm.show('A1', useA); prm.show('k2', second.get());
+    var A = useA ? v.A1 * 1e-6 : CI.area(v.d1 * 1e-3), d = useA ? Math.sqrt(4 * A / Math.PI) : v.d1 * 1e-3;
+    var n = v.n * 1e28, rho = v.rho * 1e-8, Rw = CI.resistivityR(rho, v.L, A), V = v.I * Rw, Q = CI.charge(v.I, v.t);
+    var A2 = A * v.k2 * v.k2;
+    M = { A: A, d: d, n: n, rho: rho, R: Rw, V: V, Q: Q, N: CI.carriers(Q), v1: CI.driftSpeed(v.I, n, A), v2: CI.driftSpeed(v.I, n, A2), A2: A2, P: V * v.I, W: V * Q };
+    drawScene(); drawPlots(); readout();
+  }
+
+  /* ---------- scene ---------- */
+  function drawScene() {
+    if (!M) return;
+    var col = ui.colors(), two = second.get(), k2 = prm.values.k2, I = prm.values.I;
+    vp.fit(0, 16, -4.5, 4.5);
+    var c = vp.begin();
+    var h1 = U.clamp(1.6 * Math.sqrt(M.d / 1e-3), 0.5, 3.4), h2 = two ? U.clamp(h1 * k2, 0.25, 3.8) : h1, xm = two ? 8 : 15.5;
+    function body(x0, x1, h) { c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.5; c.fillRect(vp.X(x0), vp.Y(h), vp.X(x1) - vp.X(x0), vp.Y(-h) - vp.Y(h)); c.strokeRect(vp.X(x0), vp.Y(h), vp.X(x1) - vp.X(x0), vp.Y(-h) - vp.Y(h)); }
+    body(0.5, xm, h1); if (two) body(xm, 15.5, h2);
+    // ions (fixed lattice) and electrons drifting
+    function particles(x0, x1, h, speedRel, seed) {
+      var nx = Math.max(4, Math.round((x1 - x0) * 1.6)), ny = Math.max(1, Math.round(2 * h / 0.7)), span = x1 - x0;
+      for (var i = 0; i < nx; i++) for (var j = 0; j < ny; j++) {
+        var yy = -h + (j + 0.5) * 2 * h / ny, xx = x0 + (i + 0.5) * span / nx;
+        c.fillStyle = col.muted; c.beginPath(); c.arc(vp.X(xx), vp.Y(yy), 2.2, 0, 7); c.fill();
+        var off = ((i * 0.37 + j * 0.61 + seed) % 1) * span / nx;
+        var xe = x0 + ((xx - x0 + off - speedRel * clock.t) % span + span) % span;
+        c.fillStyle = col.s2; c.beginPath(); c.arc(vp.X(xe), vp.Y(yy + 0.2), 2.6, 0, 7); c.fill();
+      }
+    }
+    var vmax = Math.max(M.v1, two ? M.v2 : 0, 1e-30), base = I > 0 ? 1.2 : 0;
+    particles(0.5, xm, h1, base * M.v1 / vmax, 0.1);
+    if (two) particles(xm, 15.5, h2, base * M.v2 / vmax, 0.5);
+    if (I > 0) D.arrow(c, vp.X(2), vp.Y(Math.max(h1, h2) + 0.8), vp.X(6), vp.Y(Math.max(h1, h2) + 0.8), col.applied, { label: 'I = ' + U.sf(I) + ' A' });
+    D.label(c, 'v = ' + U.sf(M.v1) + ' m s⁻¹', vp.X((0.5 + xm) / 2), vp.Y(-h1 - 0.8), col.s2, { size: 12, bg: true });
+    if (two) D.label(c, 'v₂ = ' + U.sf(M.v2) + ' m s⁻¹', vp.X((xm + 15.5) / 2), vp.Y(-Math.max(h2, 0.5) - 1.6), col.s2, { size: 12, bg: true });
+    D.label(c, 'electron drift drawn with relative speeds; real drift speeds are tiny', vp.w / 2, vp.h - 10, col.muted, { size: 11 });
+    if (I === 0) D.label(c, 'I = 0: random motion only, no net drift', vp.w / 2, 16, col.muted, { size: 12, bold: true });
+  }
+
+  /* ---------- plots ---------- */
+  function drawPlots() {
+    if (!M) return;
+    var col = ui.colors(), v = prm.values, Tm = Math.max(1, v.t * 1.5), Lm = Math.max(0.1, v.L * 1.5);
+    pQ.draw({ x: [0, Tm], series: [{ fn: function (t) { return v.I * t; }, color: col.s1 }], cursor: v.t, markers: [{ x: v.t, y: M.Q, label: 'Q = ' + U.sf(M.Q) + ' C' }], title: 'gradient = I' });
+    pR.draw({ x: [0, Lm], series: [{ fn: function (L) { return M.rho * L / M.A; }, color: col.s3 }], cursor: v.L, markers: [{ x: v.L, y: M.R, label: 'R = ' + U.sf(M.R) + ' Ω' }], title: 'R ∝ L (gradient ρ/A)' });
+  }
+
+  /* U.sf treats |x| < 1e-12 as zero, so tiny SI values (charges, masses in kg) are formatted here */
+  function sfT(x) {
+    if (!isFinite(x) || x === 0 || Math.abs(x) >= 1e-12) return U.sf(x);
+    var e = Math.floor(Math.log10(Math.abs(x))), m = Number((x / Math.pow(10, e)).toPrecision(3));
+    if (Math.abs(m) >= 10) { m /= 10; e += 1; }
+    return m.toPrecision(3).replace('-', '−') + ' × 10<sup>' + String(e).replace('-', '−') + '</sup>';
+  }
+  /* ---------- live working ---------- */
+  function readout() {
+    if (!M) return;
+    var s3 = U.sf, v = prm.values, e = CI.E_CHARGE;
+    R.clear();
+    R.head('Charge (9.1)');
+    R.eq('Q', 'It = ' + s3(v.I) + ' × ' + U.num(v.t, 4), M.Q, 'C');
+    R.eq('number of electrons', 'Q ÷ e = ' + s3(M.Q) + ' ÷ 1.60 × 10<sup>−19</sup>', M.N);
+    var qt = v.Qt * 1e-19, ratio = qt / e, isInt = Math.abs(ratio - Math.round(ratio)) < 1e-6;
+    R.eq('test charge ÷ e', sfT(qt) + ' ÷ 1.60 × 10<sup>−19</sup> = ' + U.num(ratio, 4), isInt ? 'possible (whole number)' : 'impossible (not a whole number of e)');
+    R.head('Drift speed: I = Anvq');
+    if (byArea.get() === 'd') R.eq('A', 'πd² ÷ 4 = π × (' + s3(M.d) + ')² ÷ 4', M.A, 'm<sup>2</sup>');
+    else R.eq('A', U.num(v.A1, 4) + ' mm² × 10<sup>−6</sup>', M.A, 'm<sup>2</sup>');
+    R.eq('v', 'I ÷ (nAq) = ' + s3(v.I) + ' ÷ (' + s3(M.n) + ' × ' + s3(M.A) + ' × 1.60 × 10<sup>−19</sup>)', M.v1, 'm s<sup>−1</sup>');
+    if (second.get()) {
+      R.eq('A₂', 'A × (d₂/d₁)² = ' + s3(M.A) + ' × ' + U.num(v.k2, 3) + '²', M.A2, 'm<sup>2</sup>');
+      R.eq('v₂', 'same I and n ⇒ v₂ = v × A ÷ A₂', M.v2, 'm s<sup>−1</sup>');
+      R.eq('v₂ ÷ v', 'A ÷ A₂ = 1 ÷ (d₂/d₁)²', M.v2 / M.v1);
+    }
+    R.head('Resistance: R = ρL/A');
+    R.eq('R', s3(M.rho) + ' × ' + U.num(v.L, 4) + ' ÷ ' + s3(M.A), M.R, 'Ω');
+    R.head('p.d., energy and power');
+    R.eq('V', 'IR = ' + s3(v.I) + ' × ' + s3(M.R), M.V, 'V');
+    R.eq('W', 'VQ = ' + s3(M.V) + ' × ' + s3(M.Q) + ' (energy transferred in time t)', M.W, 'J');
+    R.eq('P = VI', s3(M.V) + ' × ' + s3(v.I), M.P, 'W');
+    R.eq('P = I²R', s3(v.I) + '² × ' + s3(M.R), v.I * v.I * M.R, 'W');
+    R.eq('P = V²/R', s3(M.V) + '² ÷ ' + s3(M.R), M.V * M.V / M.R, 'W');
+    R.render();
+  }
+
+  ui.onTheme(function () { drawScene(); drawPlots(); });
+  vp.onResize = drawScene;
+  update();
+  clock.seek(0);
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

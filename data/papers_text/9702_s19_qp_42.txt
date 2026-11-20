@@ -1,0 +1,606 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+This document consists of 27 printed pages and 1 blank page.
+DC (LEG/TP) 162132/3
+© UCLES 2019 [Turn over
+*9318541237*
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions May/June 2019
+2 hours
+Candidates answer on the Question Paper.
+No Additional Materials are required.
+READ THESE INSTRUCTIONS FIRST
+Write your centre number, candidate number and name on all the work you hand in.
+Write in dark blue or black pen.
+You may use an HB pencil for any diagrams or graphs.
+Do not use staples, paper clips, glue or correction fluid.
+DO NOT WRITE IN ANY BARCODES.
+Answer all questions.
+Electronic calculators may be used.
+You may lose marks if you do not show your working or if you do not use appropriate units.
+At the end of the examination, fasten all your work securely together.
+The number of marks is given in brackets [ ] at the end of each question or part question.
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2019 9702/42/M/J/19
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1
+2
+at2
+v 2 = u 2 + 2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω (x 2-x2)
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ωt
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2019 9702/42/M/J/19 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 (a) Two point masses are separated by a distance x in a vacuum.
+State an expression for the force F between the two masses M and m.
+State the name of any other symbol used.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[1]
+(b) A small sphere S is attached to one end of a rod, as shown in Fig. 1.1.
+thread
+rod
+small sphere S
+8.0 cm
+view from side
+Fig. 1.1 (not to scale)
+The rod hangs from a vertical thread and is horizontal.
+The distance from the centre of sphere S to the thread is 8.0 cm.
+A large sphere L is placed near to sphere S, as shown in Fig. 1.2.
+large sphere L
+initial position
+of rod
+6.0 cm
+final position
+of rod θ
+1.2 mm
+small sphere S
+8.0 cm
+thread
+view from above
+Fig. 1.2 (not to scale)
+© UCLES 2019 9702/42/M/J/19
+
+5
+There is a force of attraction between spheres S and L, causing sphere S to move through a
+distance of 1.2 mm.
+The line joining the centres of S and L is normal to the rod.
+(i) Show that the angle θ through which the rod rotates is 1.5 × 10–2 rad.
+[1]
+(ii) The rotation of the rod causes the thread to twist.
+The torque T (in N m) required to twist the thread through an angle β (in rad) is given by
+T = 9.3 × 10–10 × β.
+Calculate the torque in the thread when sphere L is positioned as shown in Fig. 1.2.
+torque = .................................................. N m [1]
+(c) The distance between the centres of spheres S and L is 6.0 cm.
+The mass of sphere S is 7.5 g and the mass of sphere L is 1.3 kg.
+(i) By equating the torque in (b)(ii) to the moment about the thread produced by gravitational
+attraction between the spheres, calculate a value for the gravitational constant.
+gravitational constant = ............................................... N m2 kg–2 [3]
+© UCLES 2019 9702/42/M/J/19 [Turn over
+
+6
+(ii) Suggest why the total force between the spheres may not be equal to the force calculated
+using Newton’s law of gravitation.
+...........................................................................................................................................
+.......................................................................................................................................[1]
+[Total: 7]
+© UCLES 2019 9702/42/M/J/19
+
+7
+2 (a) The first law of thermodynamics may be expressed in the form
+ΔU = q + w.
+(i) State, for a system, what is meant by:
+1. +q
+...........................................................................................................................................
+...........................................................................................................................................
+2. +w.
+...........................................................................................................................................
+...........................................................................................................................................
+[2]
+(ii) State what is represented by a negative value of ΔU.
+...........................................................................................................................................
+.......................................................................................................................................[1]
+© UCLES 2019 9702/42/M/J/19 [Turn over
+
+8
+(b) An ideal gas, sealed in a container, undergoes the cycle of changes shown in Fig. 2.1.
+7.0
+8.7 × 10–4 m3
+B
+6.6 × 105 Pa
+450 K
+6.0
+pressure
+/ 105 Pa
+5.0
+4.0
+2.4 × 10–3 m3
+3.0 1.6 × 105 Pa
+8.7 × 10–4 m3
+300 K
+1.6 × 105 Pa
+110 K
+2.0
+C A
+1.0
+0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50
+volume / 10–3 m3
+Fig. 2.1
+At point A, the gas has volume 2.4 × 10–3 m3, pressure 1.6 × 105 Pa and temperature 300 K.
+The gas is compressed suddenly so that no thermal energy enters or leaves the gas during
+the compression. The amount of work done is 480 J so that, at point B, the gas has volume
+8.7 × 10–4 m3, pressure 6.6 × 105 Pa and temperature 450 K.
+The gas is now cooled at constant volume so that, between points B and C, 1100 J of thermal
+energy is transferred. At point C, the gas has pressure 1.6 × 105 Pa and temperature 110 K.
+Finally, the gas is returned to point A.
+© UCLES 2019 9702/42/M/J/19
+
+9
+(i) State and explain the total change in internal energy of the gas for one complete
+cycle ABCA.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) Calculate the external work done on the gas during the expansion from point C to
+point A.
+work done = ...................................................... J [2]
+(iii) Complete Fig. 2.2 for the changes from:
+1. point A to point B
+2. point B to point C
+3. point C to point A.
+change +q / J +w / J ΔU / J
+A B .................... .................... ....................
+B C .................... .................... ....................
+C A .................... .................... ....................
+Fig. 2.2
+[4]
+[Total: 11]
+© UCLES 2019 9702/42/M/J/19 [Turn over
+
+10
+3 A spring is hung vertically from a fixed point. A mass M is hung from the other end of the spring, as
+illustrated in Fig. 3.1.
+spring
+L
+mass M
+Fig. 3.1
+The mass is displaced downwards and then released. The subsequent motion of the mass is
+simple harmonic.
+The variation with time t of the length L of the spring is shown in Fig. 3.2.
+16
+L / cm
+14
+12
+10
+8
+0 0.2 0.4 0.6 0.8 1.0
+t / s
+Fig. 3.2
+(a) State:
+(i) one time at which the mass is moving with maximum speed
+time = ..................................................... s [1]
+(ii) one time at which the spring has maximum elastic potential energy.
+time = ...................................................... s [1]
+© UCLES 2019 9702/42/M/J/19
+
+11
+(b) Use data from Fig. 3.2 to determine, for the motion of the mass:
+(i) the angular frequency ω
+ω = .............................................. rad s–1 [2]
+(ii) the maximum speed
+maximum speed = ................................................ m s–1 [2]
+(iii) the magnitude of the maximum acceleration.
+maximum acceleration = ................................................ m s–2 [2]
+© UCLES 2019 9702/42/M/J/19 [Turn over
+
+12
+(c) The mass M is now suspended from two springs, each identical to that in Fig. 3.1, as shown
+in Fig. 3.3.
+mass M
+Fig. 3.3
+Suggest and explain the change, if any, in the period of oscillation of the mass. A numerical
+answer is not required.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+[Total: 10]
+© UCLES 2019 9702/42/M/J/19
+
+13
+4 (a) State what is meant by the specific acoustic impedance of a medium.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) A parallel beam of ultrasound of intensity I is incident on the boundary between two media
+0
+A and B, as illustrated in Fig. 4.1.
+medium A medium B
+specific acoustic impedance Z specific acoustic impedance Z
+A B
+incident transmitted
+intensity I intensity I
+0 T
+Fig. 4.1
+The two media A and B have specific acoustic impedances Z and Z respectively.
+A B
+The intensity of the beam transmitted through the boundary is I .
+T
+State how the ratio
+intensity I of transmitted beam
+T
+intensity I of incident beam
+0
+depends on the relative magnitudes of Z and Z .
+A B
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(c) The linear absorption (attenuation) coefficient μ of medium B is 23 m–1.
+Calculate the thickness of medium B required to reduce the intensity of the ultrasound beam
+to 34% of its initial intensity in medium B.
+thickness = ..................................................... m [3]
+[Total: 7]
+© UCLES 2019 9702/42/M/J/19 [Turn over
+
+14
+5 (a) For a signal transmitted along an optic fibre, state what is meant by:
+(i) attenuation
+...........................................................................................................................................
+.......................................................................................................................................[1]
+(ii) noise.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(b) The initial section of the transmission line for a signal from a telephone exchange is illustrated
+in Fig. 5.1.
+52 km
+exchange amplifier
+gain 115 dB
+Fig. 5.1
+At the exchange, the input signal to the transmission line has a power of 2.5 × 10–3 W.
+After the signal has travelled a distance of 52 km along the transmission line, the power of the
+signal is 7.8 × 10–16 W. The signal is then amplified.
+(i) Calculate the attenuation per unit length, in dB km–1, in the transmission line.
+attenuation per unit length = ........................................... dB km–1 [3]
+© UCLES 2019 9702/42/M/J/19
+
+15
+(ii) The gain of the amplifier is 115 dB.
+Calculate the power of the signal at the output of the amplifier.
+power = ..................................................... W [2]
+[Total: 8]
+© UCLES 2019 9702/42/M/J/19 [Turn over
+
+16
+6 (a) State what is meant by electric potential at a point.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) Two parallel metal plates A and B are held a distance d apart in a vacuum, as illustrated
+in Fig. 6.1.
+plate B
++V
+0
+x
+P
+d
+0 V
+plate A
+Fig. 6.1
+Plate A is earthed and plate B is at a potential of +V .
+0
+Point P is situated in the centre region between the plates at a distance x from plate B.
+The potential at point P is V.
+On Fig. 6.2, show the variation with x of the potential V for values of x from x = 0 to
+x = d.
++V
+0
+potential
+V
+0
+0 d
+distance x
+Fig. 6.2
+[3]
+© UCLES 2019 9702/42/M/J/19
+
+17
+(c) Two isolated solid metal spheres M and N, each of radius R, are situated in a vacuum. Their
+centres are a distance D apart, as illustrated in Fig. 6.3.
+D
+sphere M sphere N
+charge +Q charge +Q
+P
+R R
+y
+Fig. 6.3
+Each sphere has charge +Q.
+Point P lies on the line joining the centres of the two spheres, and is a distance y from the
+centre of sphere M.
+On Fig. 6.4, show the variation with distance y of the electric potential at point P, for values of
+y from y = 0 to y = D.
++
+potential
+0
+0 R (D – R) D
+y
+–
+Fig. 6.4
+[4]
+[Total: 9]
+© UCLES 2019 9702/42/M/J/19 [Turn over
+
+18
+7 (a) Use band theory to explain why the resistance of an intrinsic semiconductor decreases as its
+temperature rises.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[5]
+(b) The variation with temperature t of the resistance R of a thermistor is shown in Fig. 7.1.
+3.5
+3.0
+R / kΩ
+2.5
+2.0
+1.5
+1.0
+0 5 10 15 20 25 30
+t / °C
+Fig. 7.1
+© UCLES 2019 9702/42/M/J/19
+
+19
+The thermistor is connected into the circuit shown in Fig. 7.2.
+12.0 kΩ
+9.00 V A
+R
+B
+Fig. 7.2
+The battery has electromotive force (e.m.f.) 9.00 V and negligible internal resistance.
+When the temperature of the thermistor is 25 °C, the potential difference between the
+terminals A and B is 1.00 V.
+The temperature of the thermistor changes from 25 °C to 10 °C.
+Determine, to two significant figures, the change in potential difference between A and B.
+change = ...................................................... V [3]
+(c) The temperature of the thermistor in (b) changes from 25 °C to 10 °C at a constant rate.
+State two reasons why the potential difference between A and B does not change at a
+constant rate.
+1. ...............................................................................................................................................
+...................................................................................................................................................
+2. ...............................................................................................................................................
+...................................................................................................................................................
+[2]
+[Total: 10]
+© UCLES 2019 9702/42/M/J/19 [Turn over
+
+20
+8 An electron is travelling in a vacuum at a speed of 3.4 × 107 m s–1. The electron enters a region of
+uniform magnetic field of flux density 3.2 mT, as illustrated in Fig. 8.1.
+region of uniform
+magnetic flux
+density 3.2 mT
+30°
+electron
+speed 3.4 × 107 m s–1
+Fig. 8.1
+The initial direction of the electron is at an angle of 30° to the direction of the magnetic field.
+(a) When the electron enters the magnetic field, the component of its velocity v normal to the
+N
+direction of the magnetic field causes the electron to begin to follow a circular path.
+Calculate:
+(i) v
+N
+v = ................................................ m s–1 [1]
+N
+(ii) the radius of this circular path.
+radius = ..................................................... m [3]
+(b) State the magnitude of the force, if any, on the electron in the magnetic field due to the
+component of its velocity along the direction of the field.
+...............................................................................................................................................[1]
+© UCLES 2019 9702/42/M/J/19
+
+21
+(c) Use information from (a) and (b) to describe the resultant path of the electron in the magnetic
+field.
+...................................................................................................................................................
+...............................................................................................................................................[1]
+[Total: 6]
+© UCLES 2019 9702/42/M/J/19 [Turn over
+
+22
+9 Part of a circuit incorporating an operational amplifier (op-amp) is shown in Fig. 9.1.
++5 V
+device
+–
+4.5 V +
+–5 V
+Fig. 9.1
+(a) A relay is connected to the output of the op-amp circuit so that a lamp may be switched on
+or off.
+(i) Complete Fig. 9.1 to show the relay connected into the circuit. [2]
+(ii) State and explain whether the output of the op-amp is positive or negative for the lamp to
+be switched on.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(b) State the device in Fig. 9.1 that could be used so that the circuit indicates a change in:
+(i) the bending of a rod
+.......................................................................................................................................[1]
+(ii) the level of daylight to switch on a street light.
+.......................................................................................................................................[1]
+[Total: 6]
+© UCLES 2019 9702/42/M/J/19
+
+23
+10 (a) State Faraday’s law of electromagnetic induction.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) An ideal transformer is illustrated in Fig. 10.1.
+soft-iron
+core
+load
+E
+resistor
+primary coil secondary coil
+2700 turns 450 turns
+Fig. 10.1
+Explain why, when there is an alternating current in the primary coil, there is a current in the
+load resistor.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[3]
+© UCLES 2019 9702/42/M/J/19 [Turn over
+
+24
+(c) The primary coil in (b) has 2700 turns. The secondary coil has 450 turns.
+The e.m.f. E applied across the primary coil is given by the expression
+E = 220 sin(100πt )
+where E is measured in volts and t is the time in seconds.
+Calculate the root-mean-square (r.m.s.) e.m.f. induced in the secondary coil.
+r.m.s. e.m.f. = ...................................................... V [3]
+[Total: 8]
+© UCLES 2019 9702/42/M/J/19
+
+25
+11 (a) State what is meant by a photon.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) A stationary cobalt-60 (60Co) nucleus emits a γ-ray photon of energy 1.18 MeV.
+27
+(i) Calculate the wavelength of the photon.
+wavelength = ..................................................... m [2]
+(ii) Show that the momentum of the photon is 6.3 × 10–22 N s.
+[2]
+(c) Use information in (b)(ii) to determine the recoil speed of the cobalt-60 nucleus when the
+γ-ray photon is emitted.
+speed = ................................................ m s–1 [2]
+[Total: 8]
+© UCLES 2019 9702/42/M/J/19 [Turn over
+
+26
+12 (a) State what is meant by the binding energy of a nucleus.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) Some masses are shown in Fig. 12.1.
+mass / u
+proton (1p) 1.007
+1
+neutron (1n) 1.009
+0
+lanthanum-141 (141La) nucleus 140.911
+57
+Fig. 12.1
+Calculate the binding energy of a nucleus of lanthanum-141.
+binding energy = ....................................................... J [4]
+(c) The nuclide lanthanum-141 (141La) has a half-life of 3.9 hours.
+57
+Initially, a radioactive source contains only lanthanum-141. The initial activity of the source
+is A .
+0
+(i) Calculate the time for the activity of the lanthanum-141 to be reduced to 0.40A .
+0
+time = .............................................. hours [3]
+© UCLES 2019 9702/42/M/J/19
+
+27
+(ii) Suggest why the total activity of the radioactive source measured at the time calculated
+in (i) may be greater than 0.40A .
+0
+...........................................................................................................................................
+.......................................................................................................................................[1]
+[Total: 10]
+© UCLES 2019 9702/42/M/J/19
+
+28
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of the University of
+Cambridge Local Examinations Syndicate (UCLES), which itself is a department of the University of Cambridge.
+© UCLES 2019 9702/42/M/J/19

@@ -1,0 +1,358 @@
+Cambridge International AS & A Level
+MATHEMATICS 9709/41
+Paper 4 Mechanics October/November 2021
+MARK SCHEME
+Maximum Mark: 50
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the October/November 2021 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 15 printed pages.
+© UCLES 2021 [Turn over
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the specific content of the
+mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the scope of the
+syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the question as
+indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently, e.g. in situations where candidates have not followed instructions or in the application of generic level descriptors.
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may be limited
+according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or grade descriptors in
+mind.
+© UCLES 2021 Page 2 of 15
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Mathematics Specific Marking Principles
+1 Unless a particular method has been specified in the question, full marks may be awarded for any correct method. However, if a calculation is required then
+no marks will be awarded for a scale drawing.
+2 Unless specified in the question, answers may be given as fractions, decimals or in standard form. Ignore superfluous zeros, provided that the degree of
+accuracy is not affected.
+3 Allow alternative conventions for notation if used consistently throughout the paper, e.g. commas being used as decimal points.
+4 Unless otherwise indicated, marks once gained cannot subsequently be lost, e.g. wrong working following a correct form of answer is ignored (isw).
+5 Where a candidate has misread a number in the question and used that value consistently throughout, provided that number does not alter the difficulty or
+the method required, award all marks earned and deduct just 1 mark for the misread.
+6 Recovery within working is allowed, e.g. a notation error in the working where the following line of working makes the candidate’s intent clear.
+© UCLES 2021 Page 3 of 15
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Mark Scheme Notes
+The following notes are intended to aid interpretation of mark schemes in general, but individual mark schemes may include marks awarded for specific reasons
+outside the scope of these notes.
+Types of mark
+M Method mark, awarded for a valid method applied to the problem. Method marks are not lost for numerical errors, algebraic slips or errors in units.
+However, it is not usually sufficient for a candidate just to indicate an intention of using some method or just to quote a formula; the formula or idea
+must be applied to the specific problem in hand, e.g. by substituting the relevant quantities into the formula. Correct application of a formula
+without the formula being quoted obviously earns the M mark and in some cases an M mark can be implied from a correct answer.
+A Accuracy mark, awarded for a correct answer or intermediate step correctly obtained. Accuracy marks cannot be given unless the associated method
+mark is earned (or implied).
+B Mark for a correct result or statement independent of method marks.
+DM or DB When a part of a question has two or more ‘method’ steps, the M marks are generally independent unless the scheme specifically says otherwise;
+and similarly, when there are several B marks allocated. The notation DM or DB is used to indicate that a particular M or B mark is dependent on
+an earlier M or B (asterisked) mark in the scheme. When two or more steps are run together by the candidate, the earlier marks are implied and full
+credit is given.
+FT Implies that the A or B mark indicated is allowed for work correctly following on from previously incorrect results. Otherwise, A or B marks are
+given for correct work only.
+• A or B marks are given for correct work only (not for results obtained from incorrect working) unless follow through is allowed (see abbreviation FT above).
+• For a numerical answer, allow the A or B mark if the answer is correct to 3 significant figures or would be correct to 3 significant figures if rounded (1
+decimal place for angles in degrees).
+• The total number of marks available for each question is shown at the bottom of the Marks column.
+• Wrong or missing units in an answer should not result in loss of marks unless the guidance indicates otherwise.
+• Square brackets [ ] around text or numbers show extra information not needed for the mark to be awarded.
+© UCLES 2021 Page 4 of 15
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Abbreviations
+AEF/OE Any Equivalent Form (of answer is equally acceptable) / Or Equivalent
+AG Answer Given on the question paper (so extra checking is needed to ensure that the detailed working leading to the result is valid)
+CAO Correct Answer Only (emphasising that no ‘follow through’ from a previous error is allowed)
+CWO Correct Working Only
+ISW Ignore Subsequent Working
+SOI Seen Or Implied
+SC Special Case (detailing the mark to be given for a specific wrong solution, or a case where some standard marking practice is to be varied in the
+light of a particular circumstance)
+WWW Without Wrong Working
+AWRT Answer Which Rounds To
+© UCLES 2021 Page 5 of 15
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+1(a) 6V +30V +3V =585 M1 Use of constant acceleration equations or a v-t graph.
+0.5 ( 30+48 ) V =585 Complete method to set up an equation in V using constant
+acceleration equations or correct area formula in v-t graph.
+Speed of the bus = 15 ms–1 A1 Must be positive.
+2
+1(b) Magnitude of deceleration = 2.5 B1 FT OE. Do not allow a = –2.5.
+1
+© UCLES 2021 Page 6 of 15
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+2(a) Attempt at use of conservation of momentum M1 4 terms implied, i.e. m and km included before and after
+collision. Velocity after collision is the same for m and km.
+km×6−m×2=( km+m )×4 A1
+k =3 A1
+3
+2(b)
+KE initial =
+1 ×km×62 + 1 ×m×(−2 )2 M1 Attempt at any of the three possible KE terms, unsimplified.
+k need not be substituted here.
+2 2
+KE after =
+1 ×( km+m )×42
+2
+Loss of KE = 24mJ A1 FT KE loss = 56m – 32m
+FT on their k, KE loss =( 10k−6 ) m, k >0.6.
+2
+© UCLES 2021 Page 7 of 15
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+3 Attempt at resolving in any direction M1 Correct number of terms. No substitution for α required.
+Pcosθ=( 36−24 ) cos36.9 A1
+or
+Pcosθ=( 36−24 )×0.8
+Psinθ+20=( 24+36 ) sin36.9=14.4+21.6 A1
+or
+Psinθ+20=60×0.6=36
+Pcosθ=9.6, Psinθ=16 P= 162 +9.62 M1 Correct method for solving equations for P.
+OE
+θ=tan −1 
+
+16 
+
+M1 Correct method for solving equations for θ.
+9.6 OE e.g. θ=tan −1 
+
+5
+
+3
+P =18.7 A1 16 34
+θ=59 [ .0 ] Allow P= .
+5
+Allow P =18.6.
+6
+© UCLES 2021 Page 8 of 15
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+4(a) Correct 4 force diagram B1 Angles shown. F either up/down slope.
+1
+4(b) Attempt to resolve forces parallel to the plane M1 Three terms, allow sign errors.
+[ ]
+P+F =12gsin25 =50.7 A1 Must have correct direction of F here.
+R=12gcos25 [= 108.8] B1
+[ ]
+F =120cos25×0.35 =38.1 M1 Attempt to solve for P using equations with the correct
+number of terms.
+P+38.1=120sin25
+R must be a single-term component of 12g.
+P =12.6 A1 P = 12.64926… Allow P =12.7
+5
+© UCLES 2021 Page 9 of 15
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+5(a) s=30×20 B1
+PE change=1 600 × g × s × 0.12 M1 Attempt change in PE. May use angle = 6.9º.
+[ PE change=1 600 × g × 20 × 30 × 0.12 ] Allow sin/cos error only.
+Change in PE =1152000 J A1
+3
+5(b) 1960000=WD +their PE M1 Using work-energy, allow sign error.
+res
+[ ]
+1960000=WD +1152000
+res
+[ ]
+WD =808000J
+res
+R=WD ÷600 B1 Using WD =R×600.
+res res
+Force resisting motion= R=1350 N to 3sf A1 4040
+Allow R = N. Allow R negative.
+3
+Alternative method for question 5(b)
+DF −R−1600g×0.12=0 M1 R is the resisting force.
+196000  9800 B1
+DF = =
+20×30   3  
+4040 A1 Allow R negative.
+Force resisting motion = R= =1350 N to 3sf
+3
+3
+© UCLES 2021 Page 10 of 15
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+5(c) 4040  M1 For using P = DF×v.
+P=
+
++1600×g×0.12
+
+×20
+Allow use of their R.
+ 3 
+ 196000
+=
+ 
+ 3 
+P =65.3kW A1
+Alternative method for question 5(c)
+1960000 M1 For using P = Work done÷Time.
+P=
+30
+P = 65.3 kW A1
+Alternative method for question 5(c)
+9800 M1 For using P = DF×v.
+P= ×20
+Allow use of their DF.
+3
+P = 65.3 kW A1
+2
+© UCLES 2021 Page 11 of 15
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+5(d) 196000 B1 FT  8330
+0.85× =DF×20 P=DF×v DF =
+ 
+3  3 
+FT on their P.
+DF −R−1600g×0.12=1600a M1 Newton’s 2nd law, four terms, allow sin/cos error, their R and
+their DF.
+8330 4040 
+− −1920=1600a
+ 
+ 3 3 
+a= [ − ] 0.306 ms −2 A1 490 49
+a=[-] =[-]
+1600 160
+Alternative method for question 5(d)
+9800= DF×20 B1 FT Using the reduction in power as the cause of the
+deceleration.
+9800=0.15×their P = DF×v
+DF =1600d M1
+9800 
+=1600d
+ 
+ 20 
+a= [ − ] 0.306 ms −2 A1 490 49
+a=[-] =[-]
+1600 160
+3
+© UCLES 2021 Page 12 of 15
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+6(a) a=2pt−q *M1 Attempt to differentiate v.
+36p−6q=36 DM1 For attempting to set up 2 equations using a = 0 at t = 2 and
+4p−q=0 matching the velocities at t = 6 and solve for p or q.
+p=3, q=12 A1 Both correct.
+3
+6(b) Correct quadratic from t = 0 to t = 6 B1 No labelling necessary for this mark.
+or
+Correct straight line from 6 to 14
+Both quadratic and straight line correct B1 Must join and no labelling needed.
+All correct and key points shown B1 All correct, labelled at (4, 0), (6, 36) and (14, 0).
+3
+6(c) Attempt to integrate v *M1 Allow in terms of p and q.
+s=t3 −6t2 A1 FT FT on their p and q values.
+[ ]
+s ( quadratic )=t3 −6t2  4 +t3 −6t2 6 DM1 =32+32
+   
+0 4 Using limits correctly for t = 0 to t = 6.
+Allow in terms of p and q.
+s ( triangle )=63t−2.25t2 14 =144 B1
+ 
+6
+or area of triangle =144
+Total distance travelled in 14 s = 208m A1
+5
+© UCLES 2021 Page 13 of 15
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+7 Particle A: 2g−T =2a M1 Apply Newton’s 2nd law to either particle A, or to particle B
+Particle B: T −3gsin18=T −9.27= 3a or the system.
+System: 2g−3gsin18=2g−9.27=( 2+3 ) a Correct number of terms.
+A1 A and B correct or system correct.
+a =2.145898034 M1 Attempt to find a using equations with correct number of
+[ ]
+5a=10.72949017 terms.
+v2 =2×a×0.45 M1 Use of constant acceleration equations with their
+a≠±g
+to
+find v2 when A reaches the ground.
+v2 =2×2.145898034×0.45=1.931308 A1 Allow unsimplified.
+[ ]
+v=1.389715162
+T =0, ±3gsin18=3a M1 Attempt to find a for the motion of B when string becomes
+[ a=±3.0901699 ] slack. Allow sin/cos error, no extra terms.
+[ 0=1.93−2×3.09×s ] [ s=0.312 ] M1 Use constant acceleration equations, using a new a≠±g, to
+find the further distance, s, travelled by B before coming to
+rest.
+Total distance moved by B = 0.45 + 0.312 = 0.762m A1
+Alternative method for question 7
+Attempt PE loss as A reaches the ground M1 Allow sin/cos error.
+PE loss = 2g×0.45−3g×0.45sin18 A1 Correct unsimplified.
+[ ]
+=4.82827
+2g×0.45−3g×0.45sin18= 1 ×( 2+3 ) v2 *M1 Apply work-energy equation as
+PE loss = KE gain,
+2
+allow sign error, sin/cos error, 4 terms implied.
+© UCLES 2021 Page 14 of 15
+
+9709/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+7 Solve for v2 DM1
+v2 =1.931308… [ v=1.389715162 ] A1
+PE gain = 3g×ssin18 M1 Attempt PE gain for B after string breaks, allow sign error,
+sin/cos mix,
+s = extra distance travelled by B along the plane.
+1 [ ] M1 Work energy equation for B as
+3g×ssin18= ×3×1.931308 s=0.312
+PE gain = KE loss, 2 terms.
+2
+Total distance moved by B = 0.45 + 0.312 = 0.762m A1
+8
+© UCLES 2021 Page 15 of 15

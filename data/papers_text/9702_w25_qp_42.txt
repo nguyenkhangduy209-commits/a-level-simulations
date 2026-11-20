@@ -1,0 +1,1353 @@
+Cambridge International AS & A Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions October/November 2025
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen or correction fluid.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+This document has 24 pages. Any blank pages are indicated.
+DC (CE/CT) 342398/4
+© UCLES 2025 [Turn over
+*6179287153*
+* 0000800000001 * DFD
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:44)
+(cid:172)(cid:79)(cid:138)(cid:62)(cid:160)(cid:52)(cid:109)(cid:72)(cid:117)(cid:79)(cid:170)(cid:69)(cid:138)(cid:95)(cid:122)(cid:53)(cid:128)(cid:87)
+(cid:172)(cid:64)(cid:140)(cid:115)(cid:86)(cid:171)(cid:136)(cid:123)(cid:104)(cid:116)(cid:125)(cid:113)(cid:52)(cid:76)(cid:69)(cid:147)(cid:149)(cid:130)
+(cid:165)(cid:85)(cid:101)(cid:149)(cid:117)(cid:53)(cid:101)(cid:117)(cid:149)(cid:117)(cid:133)(cid:69)(cid:69)(cid:117)(cid:101)(cid:149)(cid:149)(cid:85)
+
+* 0000800000002 *
+2
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:44)
+Data
+acceleration of free fall g = 9.81 m s–2
+speed of light in free space c = 3.00 × 108 m s–1
+elementary charge e = 1.60 × 10–19 C
+unified atomic mass unit 1 u = 1.66 × 10–27 kg
+rest mass of proton m = 1.67 × 10–27 kg
+p
+rest mass of electron m = 9.11 × 10–31 kg
+e
+Avogadro constant N = 6.02 × 1023 mol–1
+A
+molar gas constant R = 8.31 J K–1 mol–1
+Boltzmann constant k = 1.38 × 10–23 J K–1
+gravitational constant G = 6.67 × 10–11 N m2 kg–2
+permittivity of free space ε = 8.85 × 10–12 F m–1
+0
+1
+( = 8.99 × 109 m F–1)
+4rf
+0
+Planck constant h = 6.63 × 10–34 J s
+Stefan–Boltzmann constant σ = 5.67 × 10–8 W m–2 K–4
+Formulae
+uniformly accelerated motion s = ut + 1at 2
+2
+v 2 = u 2 + 2as
+hydrostatic pressure ∆p = ρg∆h
+upthrust F = ρgV
+f v
+Doppler effect for sound waves f = s
+o v!v
+s
+electric current I = Anvq
+resistors in series R = R + R + ...
+1 2
+1 1 1
+resistors in parallel = + + ...
+R R R
+1 2
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:252)(cid:183)(cid:254)(cid:215)
+© UCLES 2025 (cid:300)(cid:192)(cid:266)(cid:244)(cid:215)(cid:287)(cid:260)(cid:269)(cid:207)(cid:253)(cid:251)(cid:270)(cid:268)(cid:178)(cid:245)(cid:235)(cid:269)(cid:258) 9702/42/O/N/25
+(cid:293)(cid:261)(cid:181)(cid:277)(cid:181)(cid:213)(cid:293)(cid:277)(cid:229)(cid:181)(cid:213)(cid:261)(cid:197)(cid:181)(cid:197)(cid:213)(cid:181)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000003 *
+32
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:4)(cid:44)
+GM
+gravitational potential ϕ = –
+r
+GMm
+gravitational potential energy E = –
+P r
+Nm
+pressure of an ideal gas p = 1 〈c2〉
+3 V
+simple harmonic motion a = – ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ! ω (x 2-x2)
+0
+Q
+electric potential V =
+4rf r
+0
+Qq
+electrical potential energy E =
+P 4rf r
+0
+1 1 1
+capacitors in series = + + ...
+C C C
+1 2
+capacitors in parallel C = C + C + ...
+1 2
+t
+discharge of a capacitor x = x e- RC
+0
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ωt
+0
+radioactive decay x = x e– λt
+0
+0.693
+decay constant λ =
+t
+1
+2
+I (Z -Z )2
+intensity reflection coefficient R = 1 2
+I (Z +Z )2 0 1 2
+Stefan–Boltzmann law L = 4πσr 2T 4
+∆λ Df v
+Doppler redshift á á
+λ f c
+© UCLES 2025 (cid:300) (cid:300) (cid:207) (cid:192) (cid:266) (cid:265) (cid:190) (cid:243) (cid:288) (cid:207) (cid:180) (cid:297) (cid:237) (cid:256) (cid:200) (cid:285) (cid:245) (cid:234) (cid:207) (cid:251) (cid:298) (cid:262) (cid:197) (cid:219) (cid:266) (cid:208) (cid:222) (cid:202) (cid:250) (cid:225) (cid:183) (cid:235) (cid:254) (cid:285) (cid:215) (cid:258) 9702/42/O/N/25 [Turn over
+(cid:293)(cid:261)(cid:197)(cid:213)(cid:245)(cid:181)(cid:261)(cid:245)(cid:181)(cid:197)(cid:261)(cid:261)(cid:197)(cid:213)(cid:229)(cid:277)(cid:229)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000004 *
+4
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:5)(cid:44)
+1 The Earth may be considered as a uniform sphere of radius 6.37 × 106m.
+Cambridge is at a point on the Earth’s surface that has a latitude of 52.2° north of the Equator, as
+shown in Fig. 1.1.
+North Pole
+Earth
+Cambridge
+52.2°
+Equator
+axis
+South Pole
+Fig. 1.1
+As the Earth spins on its axis, Cambridge moves in a circle that is parallel to the Equator but with
+a smaller radius.
+(a) (i) Show that the radius of the circle around which Cambridge moves is 3.90 × 106 m.
+[1]
+(ii) Calculate the speed at which Cambridge moves around the circle.
+speed = ................................................ m s–1 [3]
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:252)(cid:183)(cid:256)(cid:215)
+© UCLES 2025 (cid:300)(cid:192)(cid:265)(cid:242)(cid:207)(cid:291)(cid:238)(cid:300)(cid:205)(cid:245)(cid:253)(cid:212)(cid:238)(cid:294)(cid:259)(cid:187)(cid:277)(cid:258) 9702/42/O/N/25
+(cid:293)(cid:181)(cid:277)(cid:213)(cid:181)(cid:181)(cid:261)(cid:213)(cid:213)(cid:293)(cid:245)(cid:261)(cid:261)(cid:213)(cid:261)(cid:277)(cid:181)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000005 *
+5
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:6)(cid:44)
+(b) A student of mass 58.6 kg stands on horizontal ground in Cambridge.
+(i) Determine the magnitude of the resultant force that acts to cause the circular motion of
+the student.
+resultant force = ..................................................... N [2]
+(ii) On Fig. 1.2, draw an arrow to show the direction of the resultant force that acts on the
+student.
+student
+Cambridge
+Earth’s surface
+Fig. 1.2 (not to scale)
+[1]
+(iii) On Fig. 1.3, draw labelled arrows from the student to show the directions of the forces
+that act on the student to cause the resultant force in (b)(ii).
+Fig. 1.3 (not to scale)
+[2]
+[Total: 9]
+© UCLES 2025 (cid:300) (cid:300) (cid:207) (cid:192) (cid:266) (cid:266) (cid:190) (cid:241) (cid:288) (cid:215) (cid:180) (cid:293) (cid:237) (cid:242) (cid:200) (cid:284) (cid:245) (cid:236) (cid:207) (cid:259) (cid:298) (cid:244) (cid:197) (cid:277) (cid:266) (cid:234) (cid:224) (cid:270) (cid:250) (cid:215) (cid:183) (cid:187) (cid:256) (cid:293) (cid:215) (cid:258) 9702/42/O/N/25 [Turn over
+(cid:293)(cid:181)(cid:293)(cid:277)(cid:245)(cid:213)(cid:293)(cid:181)(cid:197)(cid:277)(cid:229)(cid:261)(cid:261)(cid:181)(cid:293)(cid:213)(cid:229)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000006 *
+6
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:7)(cid:44)
+2 (a) State Newton’s law of gravitation.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) One of the basic assumptions of the kinetic theory of gases is that there are no forces exerted
+between the molecules of the gas except during collisions.
+State two other basic assumptions of the kinetic theory of gases.
+1 ................................................................................................................................................
+...................................................................................................................................................
+2 ................................................................................................................................................
+...................................................................................................................................................
+[2]
+(c) Hydrogen gas consists of molecules that each have a mass of 3.34 × 10 –27 kg. Hydrogen
+may be considered to be an ideal gas.
+A spherical balloon contains 0.0160 mol of hydrogen gas at a temperature of 282 K. At this
+temperature, the volume of gas in the balloon is 1.87 × 10– 4 m3.
+(i) Determine the pressure of the gas.
+pressure = .................................................... Pa [2]
+(ii) Estimate the average separation of the hydrogen molecules in the gas.
+average separation = ..................................................... m [2]
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:250)(cid:182)(cid:254)(cid:215)
+© UCLES 2025 (cid:300)(cid:192)(cid:265)(cid:241)(cid:220)(cid:287)(cid:282)(cid:274)(cid:228)(cid:264)(cid:257)(cid:288)(cid:202)(cid:294)(cid:182)(cid:275)(cid:277)(cid:258) 9702/42/O/N/25
+(cid:293)(cid:293)(cid:197)(cid:277)(cid:245)(cid:245)(cid:293)(cid:277)(cid:261)(cid:245)(cid:261)(cid:261)(cid:197)(cid:181)(cid:197)(cid:277)(cid:245)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000007 *
+7
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:8)(cid:44)
+(d) (i) Use your answer in (c)(ii) to calculate the average gravitational force between adjacent
+molecules in hydrogen gas.
+average force = ..................................................... N [2]
+(ii) By considering the weight of a molecule, suggest with a reason whether your answer in
+(d)(i) is consistent with the assumption of the kinetic theory of gases that there are no
+forces exerted between molecules.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [1]
+[Total: 11]
+© UCLES 2025 (cid:300) (cid:300) (cid:211) (cid:192) (cid:266) (cid:266) (cid:190) (cid:242) (cid:288) (cid:212) (cid:180) (cid:297) (cid:237) (cid:278) (cid:200) (cid:290) (cid:245) (cid:213) (cid:207) (cid:242) (cid:298) (cid:240) (cid:197) (cid:233) (cid:266) (cid:270) (cid:221) (cid:270) (cid:252) (cid:290) (cid:182) (cid:275) (cid:254) (cid:293) (cid:215) (cid:258) 9702/42/O/N/25 [Turn over
+(cid:293)(cid:293)(cid:181)(cid:213)(cid:181)(cid:277)(cid:261)(cid:245)(cid:277)(cid:261)(cid:213)(cid:261)(cid:197)(cid:213)(cid:229)(cid:213)(cid:293)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000008 *
+8
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:44)
+3 (a) State what is meant by two objects being in thermal equilibrium.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Fig. 3.1 shows a type of thermometer called a constant volume gas thermometer.
+vacuum
+fixed glass tube scale
+movable
+glass tube
+Y
+Δh
+gas
+X
+liquid
+rubber tube
+glass bulb
+Fig. 3.1 (not to scale)
+The thermometer is used to determine the thermodynamic temperature T of the gas in the
+glass bulb.
+The glass bulb is immersed in the environment for which the temperature is to be measured.
+The height of the movable glass tube is then adjusted so that the lev el of the liquid on the
+left-hand side aligns with the reference line X marked on the fixed glass tube. The reference
+line Y is marked on the side of the movable glass tube. The level of the liquid at Y is higher
+than at X as a result of the pressure of the gas in the glass bulb.
+The dif ference in height Δh between the liquid levels at X and Y is then measured using the
+scale. The thermodynamic temperature T of the gas is directly proportional to the pressure of
+the gas. This pressure is directly proportional to Δh.
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:250)(cid:182)(cid:256)(cid:215)
+© UCLES 2025 (cid:300)(cid:192)(cid:266)(cid:243)(cid:212)(cid:291)(cid:296)(cid:295)(cid:226)(cid:240)(cid:247)(cid:226)(cid:176)(cid:178)(cid:196)(cid:259)(cid:269)(cid:258) 9702/42/O/N/25
+(cid:293)(cid:213)(cid:293)(cid:213)(cid:245)(cid:277)(cid:261)(cid:213)(cid:245)(cid:229)(cid:229)(cid:261)(cid:261)(cid:213)(cid:261)(cid:213)(cid:245)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000009 *
+9
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:10)(cid:44)
+(i) The value of Δh can be used to calculate the pressure of the gas. In order to do this, the
+gravitational field strength is used, along with a property of the liquid.
+State the property of the liquid that is used to calculate the pressure.
+..................................................................................................................................... [1]
+(ii) Before the measurement of Δh can be made, the glass bulb needs to reach thermal
+equilibrium with the environment for which the temperature is to be measured.
+State two disadvantages of using a constant volume gas thermometer to measure
+temperature.
+1 ........................................................................................................................................
+...........................................................................................................................................
+2 ........................................................................................................................................
+...........................................................................................................................................
+[2]
+(iii) Suggest one situation in which a constant volume gas thermometer would be an
+appropriate type of thermometer to choose for measuring temperature.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(iv) Level X aligns with 2.31 cm on the scale. At 0 °C, level Y aligns with 8.69 cm.
+At temperature θ, level Y aligns with 7.83 cm on the scale.
+Determine a value for θ in °C.
+θ = .................................................... °C [3]
+[Total: 9]
+© UCLES 2025 (cid:300) (cid:300) (cid:211) (cid:192) (cid:266) (cid:265) (cid:190) (cid:244) (cid:288) (cid:220) (cid:180) (cid:293) (cid:237) (cid:300) (cid:200) (cid:279) (cid:245) (cid:215) (cid:207) (cid:266) (cid:298) (cid:266) (cid:197) (cid:295) (cid:266) (cid:300) (cid:223) (cid:202) (cid:252) (cid:280) (cid:182) (cid:259) (cid:256) (cid:285) (cid:215) (cid:258) 9702/42/O/N/25 [Turn over
+(cid:293)(cid:213)(cid:277)(cid:277)(cid:181)(cid:245)(cid:293)(cid:181)(cid:293)(cid:213)(cid:245)(cid:261)(cid:261)(cid:181)(cid:293)(cid:277)(cid:293)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000010 *
+10
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:1)(cid:44)
+4 A cylinder contains a fixed mass of an ideal gas at pressure 2Y and volume 6X.
+The gas undergoes a sequence of changes from its initial state A, through states B, C and D, then
+finally back to its initial state A, as shown in Fig. 4.1.
+6Y
+pressure C D
+4Y
+2Y B A
+0
+0 2X 4X 6X 8X
+volume
+Fig. 4.1
+Fig. 4.2 shows the variation with time of the internal energy of the gas.
+60XY
+internal energy
+D
+40XY
+20XY
+A A
+C
+B
+0
+time
+Fig. 4.2
+(a) State the first law of thermodynamics.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:250)(cid:184)(cid:254)(cid:215)
+© UCLES 2025 (cid:300)(cid:192)(cid:267)(cid:243)(cid:217)(cid:289)(cid:288)(cid:241)(cid:224)(cid:247)(cid:240)(cid:268)(cid:212)(cid:180)(cid:232)(cid:187)(cid:293)(cid:258) 9702/42/O/N/25
+(cid:293)(cid:261)(cid:261)(cid:277)(cid:245)(cid:277)(cid:229)(cid:213)(cid:213)(cid:277)(cid:229)(cid:197)(cid:261)(cid:245)(cid:261)(cid:213)(cid:197)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000011 *
+11
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:2)(cid:44)
+(b) (i) Use Fig. 4.1 and Fig. 4.2 to determine the general expression for the internal energy U of
+the gas when it has pressure p and volume V.
+U = ......................................................... [1]
+(ii) An ideal gas at thermodynamic temperature T contains N molecules.
+Use your answer in (b)(i) and the equation of state for an ideal gas to deduce an
+expression for U in terms of N and T. Identify any other symbols you use.
+U = ......................................................... [2]
+(c) Determine expressions, in terms of X and Y, for the work W done on the gas during:
+(i) change AB
+W = ......................................................... [1]
+(ii) change CD.
+W = ......................................................... [1]
+(d) Use your answers in (c) and the first law of thermodynamics to determine an expression,
+in terms of X and Y, for the net thermal energy Q supplied to the gas during one full cycle
+ABCDA. Explain your reasoning.
+Q = ......................................................... [3]
+[Total: 10]
+© UCLES 2025 (cid:300) (cid:300) (cid:211) (cid:192) (cid:266) (cid:268) (cid:190) (cid:244) (cid:288) (cid:209) (cid:180) (cid:295) (cid:237) (cid:292) (cid:200) (cid:257) (cid:245) (cid:217) (cid:207) (cid:257) (cid:298) (cid:257) (cid:197) (cid:189) (cid:266) (cid:264) (cid:222) (cid:204) (cid:252) (cid:244) (cid:184) (cid:187) (cid:254) (cid:277) (cid:215) (cid:258) 9702/42/O/N/25 [Turn over
+(cid:293)(cid:261)(cid:245)(cid:213)(cid:181)(cid:245)(cid:197)(cid:181)(cid:197)(cid:293)(cid:245)(cid:197)(cid:261)(cid:277)(cid:293)(cid:277)(cid:213)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000012 *
+12
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:3)(cid:44)
+5 A steel ball on the end of a thin string oscillates with small oscillations, as shown in Fig. 5.1.
+thin string
+equilibrium position steel ball
+x
+oscillations
+Fig. 5.1 (not to scale)
+The displacement of the centre of the ball from its equilibrium position is x.
+(a) Fig. 5.2 shows the variation with x of the acceleration a of the ball.
+15
+a / cm s–2
+10
+5
+0
+– 2 – 1 0 1 2
+x / cm
+– 5
+– 10
+– 15
+Fig. 5.2
+(i) Explain how Fig. 5.2 shows that the oscillations of the ball are simple harmonic.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:250)(cid:184)(cid:256)(cid:215)
+© UCLES 2025 (cid:300)(cid:192)(cid:268)(cid:241)(cid:209)(cid:285)(cid:274)(cid:264)(cid:222)(cid:255)(cid:266)(cid:198)(cid:230)(cid:296)(cid:210)(cid:235)(cid:285)(cid:258) 9702/42/O/N/25
+(cid:293)(cid:181)(cid:229)(cid:213)(cid:245)(cid:245)(cid:197)(cid:277)(cid:229)(cid:197)(cid:261)(cid:197)(cid:197)(cid:277)(cid:197)(cid:277)(cid:197)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000013 *
+13
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:4)(cid:44)
+(ii) Determine the period T of the oscillations.
+T = ...................................................... s [3]
+(b) At time t = 0, when the displacement of the ball has its maximum value, the ball is immersed
+in a trough containing thick oil so that the ball is just below the surface of the oil. This results
+in the subsequent motion of the ball being heavily damped.
+(i) State what is meant by damping.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) On Fig. 5.3, sketch a possible variation of the displacement x of the ball with t between
+t = 0 and t = 2T.
+1.5
+1.0
+x / cm
+0.5
+0
+0 T 2T
+t
+– 0.5
+– 1.0
+– 1.5
+Fig. 5.3
+[3]
+[Total: 10]
+© UCLES 2025 (cid:300) (cid:300) (cid:211) (cid:192) (cid:266) (cid:267) (cid:190) (cid:242) (cid:288) (cid:217) (cid:180) (cid:299) (cid:237) (cid:270) (cid:200) (cid:248) (cid:245) (cid:219) (cid:207) (cid:249) (cid:298) (cid:247) (cid:197) (cid:259) (cid:266) (cid:242) (cid:224) (cid:272) (cid:252) (cid:262) (cid:184) (cid:235) (cid:256) (cid:269) (cid:215) (cid:258) 9702/42/O/N/25 [Turn over
+(cid:293)(cid:181)(cid:213)(cid:277)(cid:181)(cid:277)(cid:229)(cid:245)(cid:181)(cid:181)(cid:213)(cid:197)(cid:197)(cid:245)(cid:229)(cid:213)(cid:213)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000014 *
+14
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:5)(cid:44)
+6 (a) Define electric field at a point.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) An isolated conducting sphere in a vacuum has a capacitance of 69 pF.
+The charge on the sphere is +83 pC.
+(i) On Fig. 6.1, draw field lines to represent the electric field outside the sphere due to the
+charge on the sphere.
+Fig. 6.1
+[2]
+(ii) Calculate the electric potential at the surface of the sphere.
+electric potential = ...................................................... V [2]
+(iii) Determine the radius of the sphere.
+radius = ..................................................... m [2]
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:251)(cid:181)(cid:258)(cid:215)
+© UCLES 2025 (cid:300)(cid:192)(cid:268)(cid:244)(cid:220)(cid:293)(cid:289)(cid:256)(cid:233)(cid:239)(cid:244)(cid:224)(cid:206)(cid:197)(cid:258)(cid:283)(cid:277)(cid:258) 9702/42/O/N/25
+(cid:293)(cid:277)(cid:213)(cid:213)(cid:245)(cid:245)(cid:293)(cid:213)(cid:213)(cid:229)(cid:213)(cid:261)(cid:261)(cid:181)(cid:261)(cid:277)(cid:261)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000015 *
+15
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:6)(cid:44)
+(iv) Calculate the electric field strength E at the surface of the sphere. Give a unit with your
+answer.
+E = ...................................... unit ............ [2]
+(c) The sphere in (b) is discharged by connecting it to earth (0 V) through a resistor of resistance
+120 MΩ.
+Calculate the time taken for the charge to fall to 26 pC.
+time = ...................................................... s [2]
+[Total: 11]
+© UCLES 2025 (cid:300) (cid:300) (cid:207) (cid:192) (cid:266) (cid:267) (cid:190) (cid:243) (cid:288) (cid:212) (cid:180) (cid:291) (cid:237) (cid:285) (cid:200) (cid:240) (cid:245) (cid:208) (cid:207) (cid:265) (cid:298) (cid:253) (cid:197) (cid:297) (cid:266) (cid:266) (cid:223) (cid:173) (cid:249) (cid:214) (cid:181) (cid:283) (cid:258) (cid:293) (cid:215) (cid:258) 9702/42/O/N/25 [Turn over
+(cid:293)(cid:277)(cid:229)(cid:277)(cid:181)(cid:277)(cid:261)(cid:181)(cid:197)(cid:213)(cid:261)(cid:261)(cid:261)(cid:213)(cid:293)(cid:213)(cid:277)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000016 *
+16
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:7)(cid:44)
+7 An alternating voltage V varies with time t according to
+V = 18 cos 40 πt
+where V is in V and t is in s.
+(a) For the alternating voltage:
+(i) show that the period is 0.050 s
+[1]
+(ii) determine the root-mean-square (r.m.s.) voltage.
+r.m.s. voltage = ...................................................... V [1]
+(b) On Fig. 7.1, sketch the variation of V with t for values of t from t = 0 to t = 100 ms.
+20
+V / V
+0
+0 25 50 75 100
+t / ms
+– 20
+Fig. 7.1
+[3]
+(c) The alternating voltage is rectified to produce an output voltage across a load resistor R, as
+shown in Fig. 7.2.
+rectification
+V R output voltage
+circuit
+Fig. 7.2
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:251)(cid:181)(cid:260)(cid:215)
+© UCLES 2025 (cid:300)(cid:192)(cid:267)(cid:242)(cid:212)(cid:297)(cid:271)(cid:249)(cid:235)(cid:263)(cid:262)(cid:290)(cid:236)(cid:273)(cid:248)(cid:267)(cid:269)(cid:258) 9702/42/O/N/25
+(cid:293)(cid:229)(cid:245)(cid:277)(cid:245)(cid:277)(cid:261)(cid:277)(cid:229)(cid:245)(cid:245)(cid:261)(cid:197)(cid:213)(cid:197)(cid:213)(cid:261)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000017 *
+17
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:8)(cid:44)
+Fig. 7.3 shows the variation with t of the power P in the load resistor .
+30
+P / W
+20
+10
+0
+0 25 50 75 100
+t / ms
+Fig. 7.3
+State three conclusions that can be drawn from Fig. 7.3. The conclusions may be qualitative
+or quantitative. Use the space for any working.
+1 ................................................................................................................................................
+...................................................................................................................................................
+2 ................................................................................................................................................
+...................................................................................................................................................
+3 ................................................................................................................................................
+...................................................................................................................................................
+[3]
+[Total: 8]
+© UCLES 2025 (cid:300) (cid:300) (cid:207) (cid:192) (cid:266) (cid:268) (cid:190) (cid:241) (cid:288) (cid:220) (cid:180) (cid:287) (cid:237) (cid:275) (cid:200) (cid:265) (cid:245) (cid:206) (cid:207) (cid:241) (cid:298) (cid:251) (cid:197) (cid:231) (cid:266) (cid:240) (cid:221) (cid:297) (cid:249) (cid:228) (cid:181) (cid:267) (cid:260) (cid:285) (cid:215) (cid:258) 9702/42/O/N/25 [Turn over
+(cid:293)(cid:229)(cid:261)(cid:213)(cid:181)(cid:245)(cid:293)(cid:245)(cid:181)(cid:261)(cid:229)(cid:261)(cid:197)(cid:181)(cid:229)(cid:277)(cid:277)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000018 *
+18
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:9)(cid:44)
+8 Fig. 8.1 shows the three lowest-frequency lines in the part of the emission spectrum for hydrogen
+that relates to electron transitions to the ground state (level n = 1).
+3.09 2.92 2.47
+Fig. 8.1 (not to scale)
+The numbers represent the frequencies, in 1015 Hz, associated with the spectral lines.
+(a) Use the photon model of electromagnetic radiation to explain how the ex istence of spectral
+lines in the emission spectrum provides evidence for discrete electron energy levels in the
+hydrogen atom.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+(b) The energy of the ground state (level n = 1) in a hydrogen atom is –13.6 eV.
+(i) Calculate the energy, in J, of the ground state.
+energy = ...................................................... J [1]
+(ii) Show that the energy difference between levels n = 1 and n = 2 is 10.2 eV.
+[2]
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:251)(cid:183)(cid:258)(cid:215)
+© UCLES 2025 (cid:300)(cid:192)(cid:266)(cid:242)(cid:217)(cid:299)(cid:279)(cid:287)(cid:229)(cid:256)(cid:253)(cid:204)(cid:200)(cid:275)(cid:276)(cid:179)(cid:293)(cid:258) 9702/42/O/N/25
+(cid:293)(cid:245)(cid:277)(cid:213)(cid:245)(cid:277)(cid:229)(cid:277)(cid:261)(cid:197)(cid:245)(cid:197)(cid:197)(cid:245)(cid:197)(cid:213)(cid:181)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000019 *
+19
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:10)(cid:44)
+(iii) Complete Table 8.1 to show the energy dif ferences from the ground state, and the
+energies of the levels up to n = 4, in the hydrogen atom. Use the space for any working.
+Table 8.1
+(energy difference
+level energy / eV
+from n = 1) / eV
+n = 4
+n = 3
+n = 2 10.2
+n = 1 0.0 –13.6
+[4]
+[Total: 10]
+© UCLES 2025 (cid:300) (cid:300) (cid:207) (cid:192) (cid:266) (cid:265) (cid:190) (cid:241) (cid:288) (cid:209) (cid:180) (cid:285) (cid:237) (cid:283) (cid:200) (cid:271) (cid:245) (cid:212) (cid:207) (cid:250) (cid:298) (cid:244) (cid:197) (cid:253) (cid:266) (cid:276) (cid:224) (cid:299) (cid:249) (cid:200) (cid:183) (cid:179) (cid:258) (cid:277) (cid:215) (cid:258) 9702/42/O/N/25 [Turn over
+(cid:293)(cid:245)(cid:293)(cid:277)(cid:181)(cid:245)(cid:197)(cid:245)(cid:277)(cid:181)(cid:229)(cid:197)(cid:197)(cid:277)(cid:229)(cid:277)(cid:229)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000020 *
+20
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:1)(cid:44)
+9 (a) State what is meant by the mass defect of a nucleus.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The nuclear fusion reaction for the formation of helium-4 from deuterium is represented by
+2H + 2H 4He.
+1 1 2
+T able 9.1 shows the masses of the nuclides involved in this reaction.
+Table 9.1
+nuclide nuclide mass / u
+2H 2.013 553
+1
+4He 4.001 505
+2
+Calculate the energy released in the formation of 1.00 mol of helium-4.
+energy = ...................................................... J [4]
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:251)(cid:183)(cid:260)(cid:215)
+© UCLES 2025 (cid:300)(cid:192)(cid:265)(cid:244)(cid:209)(cid:295)(cid:297)(cid:282)(cid:231)(cid:248)(cid:251)(cid:262)(cid:178)(cid:199)(cid:294)(cid:227)(cid:285)(cid:258) 9702/42/O/N/25
+(cid:293)(cid:197)(cid:181)(cid:277)(cid:245)(cid:245)(cid:197)(cid:213)(cid:245)(cid:277)(cid:213)(cid:197)(cid:261)(cid:277)(cid:261)(cid:277)(cid:181)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000021 *
+21
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:2)(cid:44)
+(c) The star Sirius has a radius of 1.19 × 109 m and loses mass due to nuclear fusion at a rate of
+1.09 × 1011 kg s–1. Assume that the power of the radiation emitted by the star is equal to the
+power released by this process.
+(i) Determine a value for the luminosity of Sirius. Give a unit with your answer.
+luminosity = ..................................... unit ............ [2]
+(ii) Use your answer in (c)(i) to determine the surface temperature of Sirius.
+surface temperature = ...................................................... K [2]
+(d) Explain how cosmologists use standard candles to estimate the distance of a galaxy from the
+Earth.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+[Total: 13]
+© UCLES 2025 (cid:300) (cid:300) (cid:207) (cid:192) (cid:266) (cid:266) (cid:190) (cid:243) (cid:288) (cid:217) (cid:180) (cid:289) (cid:237) (cid:293) (cid:200) (cid:298) (cid:245) (cid:210) (cid:207) (cid:258) (cid:298) (cid:262) (cid:197) (cid:195) (cid:266) (cid:294) (cid:222) (cid:175) (cid:249) (cid:178) (cid:183) (cid:227) (cid:260) (cid:269) (cid:215) (cid:258) 9702/42/O/N/25 [Turn over
+(cid:293)(cid:197)(cid:197)(cid:213)(cid:181)(cid:277)(cid:229)(cid:181)(cid:293)(cid:293)(cid:261)(cid:197)(cid:261)(cid:245)(cid:293)(cid:213)(cid:229)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000022 *
+22
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:3)(cid:44)
+10 (a) State what is meant by contrast in an X-ray image.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) X-rays of intensity I are incident normally on a structure, as shown in Fig. 10.1.
+0
+2.1 cm
+material P
+material Q
+A
+incident X-rays, detected
+intensity I X-rays
+0
+B
+5.8 cm
+Fig. 10.1
+Material P has a linear attenuation coefficient of 0.35 cm–1.
+The X-rays emerging from the structure in region A have an intensity of 0.053I .
+0
+(i) Show that the intensity of the X-rays emerging in region B is 0.13I .
+0
+[1]
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:249)(cid:182)(cid:258)(cid:215)
+© UCLES 2025 (cid:300)(cid:192)(cid:265)(cid:243)(cid:214)(cid:299)(cid:253)(cid:292)(cid:218)(cid:261)(cid:247)(cid:186)(cid:262)(cid:199)(cid:211)(cid:267)(cid:285)(cid:258) 9702/42/O/N/25
+(cid:293)(cid:277)(cid:293)(cid:213)(cid:181)(cid:181)(cid:229)(cid:277)(cid:229)(cid:261)(cid:229)(cid:197)(cid:197)(cid:245)(cid:197)(cid:277)(cid:245)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000023 *
+23
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:4)(cid:44)
+(ii) Determine the linear attenuation coefficient μ of material Q.
+μ = ................................................ cm–1 [3]
+(iii) Use the information in (b)(i) to suggest why the X-rays emerging from the structure form
+an image that has poor contrast.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(c) Explain how X-rays are used in computed tomography (CT) scanning to produce a
+three-dimensional image of an internal structure.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+[Total: 9]
+(cid:300)(cid:211)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:251)(cid:182)(cid:258)(cid:215)
+© UCLES 2025 (cid:300)(cid:192)(cid:266)(cid:244)(cid:206)(cid:285)(cid:257)(cid:276)(cid:223)(cid:243)(cid:266)(cid:239)(cid:210)(cid:175)(cid:263)(cid:267)(cid:269)(cid:258) 9702/42/O/N/25
+(cid:293)(cid:277)(cid:277)(cid:277)(cid:245)(cid:213)(cid:197)(cid:245)(cid:181)(cid:245)(cid:245)(cid:197)(cid:197)(cid:277)(cid:229)(cid:213)(cid:293)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+
+* 0000800000024 *
+24
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:5)(cid:44)
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of Cambridge Assessment. Cambridge Assessment is the brand name of the University of Cambridge
+Local Examinations Syndicate (UCLES), which is a department of the University of Cambridge.
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:249)(cid:182)(cid:260)(cid:215)
+© UCLES 2025 (cid:300)(cid:192)(cid:266)(cid:241)(cid:206)(cid:295)(cid:243)(cid:277)(cid:220)(cid:237)(cid:257)(cid:248)(cid:244)(cid:275)(cid:229)(cid:283)(cid:293)(cid:258) 9702/42/O/N/25
+(cid:293)(cid:229)(cid:197)(cid:277)(cid:181)(cid:213)(cid:197)(cid:213)(cid:213)(cid:213)(cid:261)(cid:197)(cid:261)(cid:277)(cid:261)(cid:213)(cid:245)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD

@@ -1,0 +1,613 @@
+Cambridge International AS & A Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions February/March 2021
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen or correction fluid.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+This document has 28 pages. Any blank pages are indicated.
+*6250050850*
+DC (LK/SW) 197654/3
+© UCLES 2021 [Turn over
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2021 9702/42/F/M/21
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1 at2
+2
+v2 = u2+2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω (x 2-x2)
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2021 9702/42/F/M/21 [Turn over
+
+4
+Answer all questions in the spaces provided.
+1 (a) State Newton’s law of gravitation.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Planets have been observed orbiting a star in another solar system. Measurements are made
+of the orbital radius r and the time period T of each of these planets.
+The variation with R3 of T2 is shown in Fig. 1.1.
+2.6
+2.4
+2.2
+T2 / year2
+2.0
+1.8
+1.6
+1.4
+1.2
+1.0
+0.8
+0.6
+0.4
+0.2
+0
+0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2
+R3 / 1034 m3
+Fig. 1.1
+© UCLES 2021 9702/42/F/M/21
+
+5
+The relationship between T and R is given by
+T2 = 4π2R3
+GM
+where G is the gravitational constant and M is the mass of the star.
+Determine the mass M.
+M = .................................................... kg [3]
+(c) A rock of mass m is also in orbit around the star in (b). The radius of the orbit is r.
+(i) Explain why the gravitational potential energy of the rock is negative.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(ii) Show that the kinetic energy E of the rock is given by
+k
+E =
+GMm
+.
+k
+2r
+[2]
+(iii) Use the expression in (c)(ii) to derive an expression for the total energy of the rock.
+[2]
+[Total: 12]
+© UCLES 2021 9702/42/F/M/21 [Turn over
+
+6
+2 A fixed mass of an ideal gas is at a temperature of 21 °C. The pressure of the gas is 2.3 × 105 Pa
+and its volume is 3.5 × 10–3 m3.
+(a) (i) Calculate the number N of molecules in the gas.
+N = ......................................................... [2]
+(ii) The mass of one molecule of the gas is 40 u.
+Determine the root-mean-square (r.m.s.) speed of the gas molecules.
+r.m.s. speed = ................................................ m s–1 [2]
+© UCLES 2021 9702/42/F/M/21
+
+7
+(b) The temperature of the gas is increased by 84 °C.
+Calculate the value of the ratio
+new r.m.s. speed of molecules
+.
+original r.m.s. speed of molecules
+ratio = ......................................................... [2]
+[Total: 6]
+© UCLES 2021 9702/42/F/M/21 [Turn over
+
+8
+3 (a) Using a simple kinetic model of matter, describe the structure of a solid.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The specific latent heat of vaporisation is much greater than the specific latent heat of fusion
+for the same substance.
+Explain this, in terms of the spacing of molecules.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(c) A heater supplies energy at a constant rate to 0.045 kg of a substance. The variation with time
+of the temperature of the substance is shown in Fig. 3.1. The substance is perfectly insulated
+from its surroundings.
+80 Q
+60
+temperature
+/ °C 40
+20
+0
+P
+–20
+–40
+–60
+–80
+–100
+–120
+0 1 2 3 4 5 6 7 8 9 10
+time / min
+Fig. 3.1
+© UCLES 2021 9702/42/F/M/21
+
+9
+(i) Determine the temperature at which the substance melts.
+temperature = .................................................... °C [1]
+(ii) The power of the heater is 150 W.
+Use data from Fig. 3.1 to calculate, in kJ kg–1, the specific latent heat of vaporisation L of
+the substance.
+L = ..............................................kJ kg–1 [3]
+(iii) Suggest what can be deduced from the fact that section Q on the graph is less steep
+than section P.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+[Total: 8]
+© UCLES 2021 9702/42/F/M/21 [Turn over
+
+10
+4 (a) The defining equation of simple harmonic motion is
+a = – ω 2x.
+State the significance of the minus (–) sign in the equation.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) A trolley rests on a bench. Two identical stretched springs are attached to the trolley as shown
+in Fig. 4.1. The other end of each spring is attached to a fixed support.
+support support
+18.0 cm
+bench
+trolley
+spring spring
+Fig. 4.1
+The unstretched length of each spring is 12.0 cm. The spring constant of each spring is
+8.0 N m–1. When the trolley is in equilibrium the length of each spring is 18.0 cm.
+The trolley is displaced 4.8 cm to one side and then released. Assume that resistive forces on
+the trolley are negligible.
+(i) Show that the resultant force on the trolley at the moment of release is 0.77 N.
+[2]
+© UCLES 2021 9702/42/F/M/21
+
+11
+(ii) The mass of the trolley is 250 g.
+Calculate the maximum acceleration a of the trolley.
+a = ................................................ m s–2 [1]
+(iii) Use your answer in (ii) to determine the period T of the subsequent oscillation.
+T = ...................................................... s [3]
+(iv) The experiment is repeated with an initial displacement of the trolley of 2.4 cm.
+State and explain the effect, if any, this change has on the period of the oscillation of the
+trolley.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 9]
+© UCLES 2021 9702/42/F/M/21 [Turn over
+
+12
+5 (a) (i) State what is meant by the amplitude modulation (AM) of a radio wave.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) State two advantages of AM transmissions when compared with frequency modulation
+(FM) transmissions.
+1. .......................................................................................................................................
+...........................................................................................................................................
+2. .......................................................................................................................................
+...........................................................................................................................................
+[2]
+(b) The variation with frequency f of the amplitude A of a transmitted radio wave after amplitude
+modulation by an audio signal is shown in Fig. 5.1.
+A
+0
+1490 1500 1510
+f / kHz
+Fig. 5.1
+For this transmission, determine:
+(i) the wavelength of the carrier wave
+wavelength = ..................................................... m [1]
+(ii) the maximum frequency of the transmitted audio signal.
+frequency = .................................................. kHz [1]
+© UCLES 2021 9702/42/F/M/21
+
+13
+(c) Another audio signal with the same maximum frequency is transmitted using a different
+carrier wave frequency. The lowest frequency of this modulated wave is equal to the highest
+frequency of the modulated wave in (b).
+Determine the frequency of this carrier wave.
+frequency = .................................................. kHz [1]
+[Total: 7]
+© UCLES 2021 9702/42/F/M/21 [Turn over
+
+14
+6 (a) State a similarity between the gravitational field lines around a point mass and the electric
+field lines around a point charge.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) The variation with radius r of the electric field strength E due to an isolated charged sphere in
+a vacuum is shown in Fig. 6.1.
+1.3
+1.2
+1.1
+E / 105 V m–1
+1.0
+0.9
+0.8
+0.7
+0.6
+0.5
+0.4
+0.3
+0.2
+0.1
+0
+0 1 2 3 4 5 6
+r / cm
+Fig. 6.1
+Use data from Fig. 6.1 to:
+(i) state the radius of the sphere
+radius = ................................................... cm [1]
+© UCLES 2021 9702/42/F/M/21
+
+15
+(ii) calculate the charge on the sphere.
+charge = ..................................................... C [2]
+(c) Using the formula for the electric potential due to an isolated point charge, determine the
+capacitance of the sphere in (b).
+capacitance = ...................................................... F [3]
+[Total: 7]
+© UCLES 2021 9702/42/F/M/21 [Turn over
+
+16
+7 (a) Fig. 7.1 shows the circuit diagram containing an operational amplifier (op-amp).
+3.6 kΩ
++ 3.0 V
+–
++
+– 3.0 V
+V
+V 0.72 kΩ OUT
+IN
+Fig. 7.1
+(i) State the name of this type of amplifier.
+..................................................................................................................................... [1]
+(ii) Show that the gain of the amplifier is 6.0.
+[1]
+© UCLES 2021 9702/42/F/M/21
+
+17
+(iii) At time t = 0 the input potential V is zero. V then gradually increases with time t as
+IN IN
+shown in Fig. 7.2.
+6
+5
+potential
+/ V
+4
+3
+2
+1
+0
+T
+t
+Fig. 7.2
+On Fig. 7.2 sketch a line to show the variation with time t of the output potential
+V from time t = 0 to time t = T. [2]
+OUT
+(iv) State how the circuit of Fig. 7.1 may be changed so that the gain of the amplifier is
+dependent on light intensity.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(b) An op-amp is to be used to switch on a high-voltage heater.
+(i) State the name of the component used as the output device of the op-amp.
+..................................................................................................................................... [1]
+(ii) Complete Fig. 7.3 using the device named in (i) and a diode so that the heater may be
+switched on when the output of the op-amp is positive.
++
+–
++
+– connections to
+high-voltage heater
+Fig. 7.3
+[3]
+[Total: 9]
+© UCLES 2021 9702/42/F/M/21 [Turn over
+
+18
+8 (a) Two long straight wires P and Q are parallel to each other, as shown in Fig. 8.1. There is a
+current in each wire in the direction shown.
+The pattern of the magnetic field lines in a plane normal to wire P due to the current in the
+wire is also shown.
+wire P wire Q
+plane
+direction of
+current
+magnetic field
+pattern
+Fig. 8.1
+(i) Draw arrows on the magnetic field lines in Fig. 8.1 around wire P to show the direction of
+the field. [1]
+(ii) Determine the direction of the force on wire Q due to the magnetic field from wire P.
+..................................................................................................................................... [1]
+(iii) The current in wire Q is less than the current in wire P.
+State and explain whether the magnitude of the force on wire P is less than, equal to, or
+greater than the magnitude of the force on wire Q.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+© UCLES 2021 9702/42/F/M/21
+
+19
+(b) Nuclear magnetic resonance imaging (NMRI) is used to obtain diagnostic information about
+internal structures in the human body.
+Radio waves are produced and directed towards the body. The radio waves affect the protons
+within the body.
+(i) Explain why radio waves are used.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) Explain why the radio waves are applied in pulses.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 8]
+© UCLES 2021 9702/42/F/M/21 [Turn over
+
+20
+9 (a) Define magnetic flux linkage.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A solenoid of diameter 6.0 cm and 540 turns is placed in a uniform magnetic field as shown in
+Fig. 9.1.
+solenoid
+540 turns
+diameter
+6.0 cm
+magnetic field
+Fig. 9.1
+The variation with time t of the magnetic flux density is shown in Fig. 9.2.
+250
+200
+flux density
+/ mT
+150
+100
+50
+0
+0 1 2 3 4 5 6 7 8
+t / s
+Fig. 9.2
+Calculate the maximum magnitude of the induced electromotive force (e.m.f.) in the solenoid.
+e.m.f. = ...................................................... V [3]
+© UCLES 2021 9702/42/F/M/21
+
+21
+(c) A thin copper sheet X is supported on a rigid rod so that it hangs between the poles of a
+magnet as shown in Fig. 9.3.
+rod
+copper sheet
+X
+poles of magnet
+Fig. 9.3
+Sheet X is displaced to one side and then released so that it oscillates. A motion sensor is
+used to record the displacement of X.
+A second thin copper sheet Y replaces sheet X. Sheet Y has the same overall dimensions as
+X but is cut into the shape shown in Fig. 9.4.
+copper sheet
+Y
+Fig. 9.4
+The motion sensor is again used to record the displacement.
+The graph in Fig. 9.5 shows the variation with time t of the displacement s of each copper
+sheet.
+s
+0
+t
+Fig. 9.5
+© UCLES 2021 9702/42/F/M/21 [Turn over
+
+22
+(i) State the name of the phenomenon illustrated by the gradual reduction in the amplitude
+of the dashed line.
+..................................................................................................................................... [1]
+(ii) Deduce which copper sheet is represented by the dashed line. Explain your answer
+using the principles of electromagnetic induction.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [4]
+[Total: 10]
+© UCLES 2021 9702/42/F/M/21
+
+23
+10 The output potential difference (p.d.) of an alternating power supply is represented by
+V = 320 sin(100 πt)
+where V is the p.d. in volts and t is the time in seconds.
+(a) Determine the root-mean-square (r.m.s.) p.d. of the power supply.
+r.m.s. p.d. = ...................................................... V [1]
+(b) Determine the period T of the output.
+T = ...................................................... s [2]
+(c) The power supply is connected to resistor R and a diode in the circuit shown in Fig. 10.1.
+V R
+Fig. 10.1
+(i) State the name of the type of rectification produced by the diode in Fig. 10.1.
+..................................................................................................................................... [1]
+© UCLES 2021 9702/42/F/M/21 [Turn over
+
+24
+(ii) On Fig. 10.2 sketch the variation with time t of the p.d. V across R from time t = 0 to
+R
+time t = 40 ms.
+400
+300
+V / V
+200
+100
+0
+0 10 20 30 40
+t / ms
+–100
+–200
+–300
+–400
+Fig. 10.2
+[3]
+(iii) On Fig. 10.1, draw the symbol for a component that may be connected to produce
+smoothing of V .
+R
+[1]
+[Total: 8]
+© UCLES 2021 9702/42/F/M/21
+
+25
+11 (a) Electrons are accelerated through a potential difference of 15 kV. The electrons collide with a
+metal target and a spectrum of X-rays is produced.
+(i) Explain why a continuous spectrum of energies of X-ray photons is produced.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(ii) Calculate the wavelength of the highest energy X-ray photon produced.
+wavelength = ..................................................... m [3]
+© UCLES 2021 9702/42/F/M/21 [Turn over
+
+26
+(b) A beam of X-rays has an initial intensity I . The beam is directed into some body tissue. After
+o
+passing through a thickness x of tissue the intensity is I. The graph in Fig. 11.1 shows the
+variation with x of ln (I/I ).
+o
+x / cm
+0 1 2 3 4 5 6 7 8 9 10 11
+0
+–0.2
+–0.4
+–0.6
+In (I/I )
+o
+–0.8
+–1.0
+–1.2
+–1.4
+–1.6
+–1.8
+–2.0
+–2.2
+–2.4
+Fig. 11.1
+(i) Determine the linear attenuation (absorption) coefficient μ for this beam of X-rays in the
+tissue.
+μ = ................................................ cm–1 [2]
+(ii) Determine the thickness of tissue that the X-ray beam must pass through so that the
+intensity of the beam is reduced to 5.0% of its initial value.
+thickness = ................................................... cm [2]
+[Total: 10]
+© UCLES 2021 9702/42/F/M/21
+
+27
+12 (a) Radioactive decay is both spontaneous and random.
+State what is meant by:
+1. spontaneous decay ...........................................................................................................
+...........................................................................................................................................
+2. random decay. ...................................................................................................................
+...........................................................................................................................................
+[2]
+(b) Strontium-90 (90Sr) is an unstable nuclide.
+38
+The activity of a sample of 1.0 × 10–9 kg of strontium-90 is 5.2 MBq.
+(i) Determine the decay constant λ of strontium-90.
+λ = ................................................... s–1 [3]
+(ii) The activity of the sample after a time of 1.0 half lives is found to be greater than the
+expected 2.6 MBq.
+Suggest a possible reason for this.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+[Total: 6]
+© UCLES 2021 9702/42/F/M/21
+
+28
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of the University of
+Cambridge Local Examinations Syndicate (UCLES), which itself is a department of the University of Cambridge.
+© UCLES 2021 9702/42/F/M/21

@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Momentum in two dimensions</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-dynamics.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, DY = SIM.dynamics;
+  var course = ui.course('9702'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Collisions and explosions in two dimensions', g: g, tags: ['9702 3.3.2 Momentum in 2D', '9702 3.3.3–3.3.4 Elastic / inelastic', '9702 1.4 Vectors'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 16 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 4, onFrame: function () { drawAll(); } });
+  ui.legend(sceneCard, [{ color: 'var(--c-s1)', label: 'disc / fragment 1' }, { color: 'var(--c-s2)', label: 'disc / fragment 2' }, { color: 'var(--c-s3)', label: 'fragment 3' },
+    { color: 'var(--c-velocity)', label: 'velocity' }, { color: 'var(--c-accel)', label: 'centre of mass (straight line, constant speed)' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var cM = ui.canvas(plotWrap), cK = ui.canvas(plotWrap);
+  var vpM = new SIM.view.Viewport(cM, { pad: 26 }), vpK = new SIM.view.Viewport(cK, { pad: 10 });
+  var tblCard = pg.card('left', 'Momentum components');
+  var tblEl = ui.h('div', { style: 'overflow-x:auto' }); tblCard.appendChild(tblEl);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var mode = ui.select(paramCard, { label: 'Collision', value: 'elastic', options: [
+    { value: 'elastic', label: 'Elastic: smooth discs, kinetic energy conserved' },
+    { value: 'stick', label: 'Perfectly inelastic: discs stick together' },
+    { value: 'one', label: 'Exam: final velocity of body 1 given, find body 2' },
+    { value: 'dirs', label: 'Exam: both final directions given, find both speeds' },
+    { value: 'explode', label: 'Explosion into 2 or 3 fragments' }] }, update);
+  var prm = ui.params(paramCard, [
+    { key: 'm1', label: 'Mass 1', sym: 'm<sub>1</sub>', unit: 'kg', min: 0.1, max: 2000, step: 0.1, value: 1 },
+    { key: 'm2', label: 'Mass 2', sym: 'm<sub>2</sub>', unit: 'kg', min: 0.1, max: 2000, step: 0.1, value: 1 },
+    { key: 'm3', label: 'Mass 3', sym: 'm<sub>3</sub>', unit: 'kg', min: 0.1, max: 2000, step: 0.1, value: 1 },
+    { key: 'r1', label: 'Radius of disc 1', sym: 'r<sub>1</sub>', unit: 'm', min: 0.05, max: 3, step: 0.01, value: 0.5 },
+    { key: 'r2', label: 'Radius of disc 2', sym: 'r<sub>2</sub>', unit: 'm', min: 0.05, max: 3, step: 0.01, value: 0.5 },
+    { key: 'b', label: 'Impact parameter (sideways offset of the centres)', sym: 'b', unit: 'm', min: 0, max: 0.99, step: 0.001, value: 0.5 },
+    { key: 'u1', label: 'Speed of body 1 before', sym: 'u<sub>1</sub>', unit: 'm s<sup>−1</sup>', min: 0, max: 50, step: 0.01, value: 4 },
+    { key: 'tu1', label: 'Direction of body 1 before', sym: 'α<sub>1</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: 0 },
+    { key: 'u2', label: 'Speed of body 2 before', sym: 'u<sub>2</sub>', unit: 'm s<sup>−1</sup>', min: 0, max: 50, step: 0.01, value: 0 },
+    { key: 'tu2', label: 'Direction of body 2 before', sym: 'α<sub>2</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: 90 },
+    { key: 'v1', label: 'Speed of 1 after', sym: 'v<sub>1</sub>', unit: 'm s<sup>−1</sup>', min: 0, max: 50, step: 0.01, value: 3 },
+    { key: 'tv1', label: 'Direction of 1 after', sym: 'β<sub>1</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: 60 },
+    { key: 'v2', label: 'Speed of 2 after', sym: 'v<sub>2</sub>', unit: 'm s<sup>−1</sup>', min: 0, max: 50, step: 0.01, value: 6 },
+    { key: 'tv2', label: 'Direction of 2 after', sym: 'β<sub>2</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: -30 },
+    { key: 'dts', label: 'Strobe interval', sym: 'Δt', unit: 's', min: 0.05, max: 1, step: 0.05, value: 0.2 }
+  ], update);
+  var three = ui.toggle(paramCard, { label: 'Three fragments (otherwise two)', value: true }, update);
+  var trails = ui.toggle(paramCard, { label: 'Show fading trails', value: true }, drawAll);
+  var strobe = ui.toggle(paramCard, { label: 'Show strobe positions at equal time intervals', value: true }, drawAll);
+
+  ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  function P(o) { return Object.assign({ m1: 1, m2: 1, m3: 1, r1: 0.5, r2: 0.5, b: 0, u1: 4, tu1: 0, u2: 0, tu2: 90, v1: 3, tv1: 60, v2: 6, tv2: -30, dts: 0.2 }, o); }
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Elastic, equal masses, one at rest: paths at 90°', m: 'elastic', v: P({ b: 0.5 }), note: 'b = 0.5 m with r₁ + r₂ = 1.0 m: the line of centres is at 30°. The target leaves along it at 4 cos 30° = 3.46 m s<sup>−1</sup>; the striker at 4 sin 30° = 2.00 m s<sup>−1</sup>, at 90° to the target.' },
+    { name: 'Elastic, head-on (b = 0): 2.0 kg at 3.0 m s⁻¹ on 1.0 kg at rest', m: 'elastic', v: P({ m1: 2, m2: 1, u1: 3, b: 0, r1: 0.4, r2: 0.3 }), note: 'Same as the 1-D result: v₁ = 1.0, v₂ = 4.0 m s<sup>−1</sup> along the original line.' },
+    { name: 'Elastic glancing: light puck on a heavy one', m: 'elastic', v: P({ m1: 1, m2: 3, u1: 5, b: 0.6, r1: 0.5, r2: 0.5 }), note: 'Momentum and KE are both conserved; the light puck is deflected through a large angle.' },
+    { name: 'Cars collide at a junction and lock together', m: 'stick', v: P({ m1: 1200, m2: 1500, u1: 15, tu1: 0, u2: 10, tu2: 90, r1: 2, r2: 2, b: 0 }), note: 'p = (18 000, 15 000) N s ⇒ v = 23 400 ÷ 2700 = 8.68 m s<sup>−1</sup> at 39.8°. KE falls from 210 kJ to 102 kJ.' },
+    { name: 'Pucks stick: 0.20 kg at 3.0 m s⁻¹ meets 0.30 kg at 2.0 m s⁻¹ at 90°', m: 'stick', v: P({ m1: 0.2, m2: 0.3, u1: 3, tu1: 0, u2: 2, tu2: 90, r1: 0.1, r2: 0.12, b: 0.05 }), note: 'p = (0.60, 0.60) N s ⇒ V = 1.70 m s<sup>−1</sup> at 45°. KE 1.50 J → 0.72 J.' },
+    { name: '2.0 kg at 5.0 m s⁻¹ hits 3.0 kg at rest; 2.0 kg leaves at 3.0 m s⁻¹ at 60°', m: 'one', v: P({ m1: 2, m2: 3, u1: 5, tu1: 0, u2: 0, v1: 3, tv1: 60, r1: 0.4, r2: 0.45 }), note: 'x: 10 = 3.0 + 3v cos β; y: 0 = 5.20 + 3v sin β ⇒ 2.91 m s<sup>−1</sup> at 36.6° below the original line.' },
+    { name: '2m at 5.0 m s⁻¹ hits 3m at rest; both leave at 30° (9702/21 M/J 24 Q3)', m: 'dirs', v: P({ m1: 2, m2: 3, u1: 5, tu1: 0, u2: 0, tv1: 30, tv2: -30, r1: 0.4, r2: 0.45 }), note: 'Take m = 1 kg (it cancels). y: 2v sin 30° = 3w sin 30°; x: 10 = (2v + 3w) cos 30° ⇒ v = 2.9, w = 1.9 m s<sup>−1</sup>.' },
+    { name: 'Firework at rest: 3m at 4.0, 2m at 6.0 at 90° (9702/23 M/J 23 Q3)', m: 'explode', three: true, v: P({ m1: 3, m2: 2, m3: 1, u1: 0, tu1: 0, v1: 4, tv1: 0, v2: 6, tv2: 90, r1: 0.6 }), note: 'Total momentum stays zero: fragment C has momentum (−12m, −12m) ⇒ θ = 45°, v = 17 m s<sup>−1</sup>.' },
+    { name: 'Moving 4.0 kg body splits in two: 1.0 kg sideways', m: 'explode', three: false, v: P({ m1: 1, m2: 3, u1: 3, tu1: 0, v1: 6, tv1: 90, r1: 0.6 }), note: 'Total momentum (12, 0) N s stays the same: the 3.0 kg piece has momentum (12, −6) ⇒ 4.47 m s<sup>−1</sup> at −26.6°.' }
+  ], function (p) { clock.pause(); mode.set(p.m, true); if (p.three !== undefined) three.set(p.three, true); prm.set(p.v, true); update(); clock.seek(0); });
+
+  ui.notes(noteCard, [
+    'Momentum is a vector: conserve the <b>x</b> and <b>y</b> components separately, or draw a closed momentum vector diagram (p before = p after).',
+    'The centre of mass moves in a straight line at constant velocity throughout — before, during and after — because no external force acts.',
+    'Elastic: total KE is conserved. For smooth discs only the velocity components along the line of centres change, and along that line the relative speed of approach equals the relative speed of separation.',
+    'Equal masses, one at rest, elastic: the two final velocities are at 90° to each other.',
+    'Sticking together (perfectly inelastic): common velocity = total momentum ÷ total mass. KE is lost but momentum is not.',
+    'An explosion from rest: total momentum after is still zero, but KE increases (stored chemical energy is released).',
+    'Kinetic energy is a scalar: add ½mv² for each body without directions.'
+  ]);
+
+  /* ---------- model ---------- */
+  var res = null, info = null, tc = 1, T = 2, bodiesAt = null, view = null;
+  function V(m, t) { return DY.polar(m, t); }
+  function update() {
+    var md = mode.get(), v = prm.values, ex = md === 'explode', disc = md === 'elastic' || md === 'stick', cols = ui.colors();
+    // visibility
+    prm.show('m3', ex && three.get()); three.el.style.display = ex ? '' : 'none';
+    prm.show('u2', !ex); prm.show('tu2', !ex); prm.show('r2', !ex); prm.show('b', disc);
+    prm.label('r1', ex ? 'Radius of the whole body <span class="sym">r</span>' : 'Radius of disc 1 <span class="sym">r<sub>1</sub></span>');
+    prm.label('u1', ex ? 'Speed of the whole body before <span class="sym">u</span>' : 'Speed of body 1 before <span class="sym">u<sub>1</sub></span>');
+    prm.label('tu1', ex ? 'Direction of the whole body before <span class="sym">α</span>' : 'Direction of body 1 before <span class="sym">α<sub>1</sub></span>');
+    prm.show('v1', md === 'one' || ex); prm.show('tv1', md === 'one' || md === 'dirs' || ex);
+    prm.show('v2', ex && three.get()); prm.show('tv2', md === 'dirs' || (ex && three.get()));
+    if (disc) prm.range('b', 0, Math.round(0.99 * (v.r1 + v.r2) * 1000) / 1000, 0.001);
+    v = prm.values;
+    var u1 = V(v.u1, v.tu1), u2 = V(v.u2, v.tu2);
+    info = { md: md };
+    if (ex) {
+      var Mx = v.m1 + v.m2 + (three.get() ? v.m3 : 0), ms = three.get() ? [v.m1, v.m2, v.m3] : [v.m1, v.m2];
+      if (three.get()) res = DY.collide2D({ mode: 'explode', m1: v.m1, m2: v.m2, m3: v.m3, uC: u1, v1: V(v.v1, v.tv1), v2: V(v.v2, v.tv2) });
+      else { res = DY.collide2D({ mode: 'explode', m1: v.m1, m2: 0, m3: v.m2, uC: u1, v1: V(v.v1, v.tv1), v2: [0, 0] }); res.two = true; }
+      var vs = res.two ? [res.v1, res.v3] : [res.v1, res.v2, res.v3];
+      var radii = ms.map(function (m) { return v.r1 * Math.cbrt(m / Mx); });
+      tc = 1; T = 2.5;
+      bodiesAt = function (t) {
+        var dt = t - tc, cm = DY.scale(u1, dt);
+        if (t < tc) return { list: [{ id: 'w', x: cm, v: u1, r: v.r1, m: Mx, c: cols.resultant, n: 'whole' }], cm: cm, after: false };
+        return { list: vs.map(function (w, i) { return { id: 'f' + i, x: DY.scale(w, dt), v: w, r: radii[i], m: ms[i], c: [cols.s1, cols.s2, cols.s3][i], n: String(i + 1) }; }), cm: cm, after: true };
+      };
+      info.vs = vs; info.ms = ms; info.M = Mx;
+    } else {
+      var w = DY.add(u1, DY.scale(u2, -1)), wm = Math.hypot(w[0], w[1]), Rs = v.r1 + v.r2, d;
+      if (disc) {
+        res = DY.discCollision({ m1: v.m1, m2: v.m2, r1: v.r1, r2: v.r2, u1: u1, u2: u2, b: v.b, mode: md });
+        d = res.noCollision ? [0, 1.5 * Rs] : res.d;
+      } else {
+        res = DY.collide2D({ mode: md, m1: v.m1, m2: v.m2, u1: u1, u2: u2, v1: V(v.v1, v.tv1), a1: v.tv1, a2: v.tv2 });
+        if (wm < 1e-12) res.noCollision = 'Same velocity: the bodies never meet';
+        d = wm > 1e-12 ? DY.scale(w, Rs / wm) : [0, 1.5 * Rs];
+      }
+      tc = wm > 1e-12 ? U.clamp(6 * Rs / wm, 0.4, 6) : 1; T = 2 * tc;
+      var nc = !!res.noCollision || !!res.invalid;
+      var tr = DY.pairTrack(v.m1, v.m2, u1, u2, nc ? u1 : res.v1, nc ? u2 : res.v2, d, nc ? 1e9 : tc);
+      bodiesAt = function (t) {
+        var s = tr(t);
+        return { list: [{ id: 'a', x: s.x1, v: s.v1, r: v.r1, m: v.m1, c: cols.s1, n: '1' }, { id: 'b', x: s.x2, v: s.v2, r: v.r2, m: v.m2, c: cols.s2, n: '2' }], cm: s.cm, after: s.after };
+      };
+      info.d = d; info.contact = DY.scale(d, (v.m1 / (v.m1 + v.m2)) - v.r2 / Rs);   // contact point at tc (centre of mass at origin)
+    }
+    clock.setDuration(T);
+    // world bounds over the whole run (fixed while playing)
+    var x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (var i = 0; i <= 80; i++) bodiesAt(T * i / 80).list.forEach(function (b) { x0 = Math.min(x0, b.x[0] - b.r); x1 = Math.max(x1, b.x[0] + b.r); y0 = Math.min(y0, b.x[1] - b.r); y1 = Math.max(y1, b.x[1] + b.r); });
+    var sp = Math.max(x1 - x0, y1 - y0, 1e-3), mg = sp * 0.08;
+    view = [x0 - mg, x1 + mg, y0 - mg, y1 + mg];
+    var vmax = 1e-9; for (var j = 0; j <= 4; j++) bodiesAt(T * j / 4).list.forEach(function (b) { vmax = Math.max(vmax, Math.hypot(b.v[0], b.v[1])); });
+    info.vmax = vmax;
+    readout(); drawAll();
+  }
+
+  /* ---------- drawing ---------- */
+  function drawAll() { drawScene(); drawMomentum(); drawKE(); readout(); }
+  function drawScene() {
+    if (!bodiesAt) return;
+    var col = ui.colors(), t = clock.t, v = prm.values;
+    vp.fit(view[0], view[1], view[2], view[3]);
+    var c = vp.begin();
+    // surface grid (top view)
+    var gt = U.niceTicks(view[0], view[1], 8);
+    c.strokeStyle = col.grid; c.lineWidth = 1;
+    gt.ticks.forEach(function (x) { c.beginPath(); c.moveTo(vp.X(x), 0); c.lineTo(vp.X(x), vp.h); c.stroke(); });
+    U.niceTicks(view[2], view[3], 6).ticks.forEach(function (y) { c.beginPath(); c.moveTo(0, vp.Y(y)); c.lineTo(vp.w, vp.Y(y)); c.stroke(); });
+    D.label(c, 'top view, smooth horizontal surface · grid ' + U.num(gt.step, 4) + ' m', 8, 12, col.muted, { align: 'left', size: 11 });
+    // centre-of-mass path over the whole run
+    var cA = bodiesAt(0).cm, cB = bodiesAt(T).cm;
+    D.line(c, [vp.P(cA[0], cA[1]), vp.P(cB[0], cB[1])], col.accel, { dash: [3, 5], width: 1.2 });
+    // trails
+    if (trails.get() && t > 0) {
+      var N = 80, groups = {};
+      for (var k = 0; k <= N; k++) { var tk = t * k / N; bodiesAt(tk).list.forEach(function (b) { (groups[b.id] = groups[b.id] || { c: b.c, pts: [] }).pts.push(vp.P(b.x[0], b.x[1])); }); }
+      Object.keys(groups).forEach(function (id) {
+        var gp = groups[id], pts = gp.pts;
+        c.save(); c.strokeStyle = gp.c; c.lineWidth = 2;
+        for (var q = 1; q < pts.length; q++) { c.globalAlpha = 0.08 + 0.6 * q / pts.length; c.beginPath(); c.moveTo(pts[q - 1][0], pts[q - 1][1]); c.lineTo(pts[q][0], pts[q][1]); c.stroke(); }
+        c.restore();
+      });
+    }
+    // strobe positions
+    if (strobe.get()) {
+      var dts = v.dts;
+      for (var s = 0; s <= t + 1e-9 && s <= T; s += dts) {
+        var st = bodiesAt(s);
+        st.list.forEach(function (b) { c.fillStyle = b.c; c.globalAlpha = 0.55; c.beginPath(); c.arc(vp.X(b.x[0]), vp.Y(b.x[1]), 2.6, 0, 2 * Math.PI); c.fill(); c.globalAlpha = 1; });
+        c.strokeStyle = col.accel; c.lineWidth = 1; c.beginPath(); c.arc(vp.X(st.cm[0]), vp.Y(st.cm[1]), 2, 0, 2 * Math.PI); c.stroke();
+      }
+    }
+    // line of centres at contact (disc modes)
+    var now = bodiesAt(t);
+    if ((info.md === 'elastic' || info.md === 'stick') && res && !res.noCollision && now.after) {
+      var n = res.n, cp = info.contact, L = (v.r1 + v.r2) * 1.6;
+      D.line(c, [vp.P(cp[0] - n[0] * L, cp[1] - n[1] * L), vp.P(cp[0] + n[0] * L, cp[1] + n[1] * L)], col.component, { dash: [6, 4], width: 1.2 });
+      D.label(c, 'line of centres at impact', vp.X(cp[0] + n[0] * L), vp.Y(cp[1] + n[1] * L) - 10, col.component, { size: 11 });
+    }
+    // bodies
+    var ks = 0.22 * Math.min(vp.w, vp.h) / info.vmax;
+    now.list.forEach(function (b) {
+      var X = vp.X(b.x[0]), Y = vp.Y(b.x[1]), rp = Math.max(3, b.r * vp.scale);
+      c.save(); c.fillStyle = b.c; c.globalAlpha = 0.35; c.beginPath(); c.arc(X, Y, rp, 0, 2 * Math.PI); c.fill(); c.globalAlpha = 1;
+      c.strokeStyle = b.c; c.lineWidth = 2; c.stroke(); c.restore();
+      D.label(c, b.n, X, Y, col.ink, { bold: true, size: 12 });
+      var sp = Math.hypot(b.v[0], b.v[1]);
+      if (sp > 1e-9) D.arrow(c, X, Y, X + b.v[0] * ks, Y - b.v[1] * ks, col.velocity, { width: 2, label: U.num(sp, 2) + ' m/s' });
+    });
+    // centre of mass marker
+    var cx = vp.X(now.cm[0]), cy = vp.Y(now.cm[1]);
+    c.strokeStyle = col.accel; c.lineWidth = 2; c.beginPath(); c.moveTo(cx - 7, cy - 7); c.lineTo(cx + 7, cy + 7); c.moveTo(cx - 7, cy + 7); c.lineTo(cx + 7, cy - 7); c.stroke();
+    D.label(c, now.after ? 'after impact' : 'before impact (t<sub>impact</sub> = ' + tc.toFixed(2) + ' s)'.replace(/<[^>]+>/g, ''), vp.w - 8, 12, now.after ? col.ok : col.muted, { align: 'right', size: 11, bold: true });
+    if (res && (res.noCollision || res.invalid)) D.label(c, res.noCollision || res.invalid, vp.w / 2, vp.h - 14, col.warn, { bold: true, size: 12 });
+    else if (info.md === 'one' || info.md === 'dirs') D.label(c, 'Exam mode: impact geometry is schematic (only momentum is used)', vp.w / 2, vp.h - 14, col.muted, { size: 11 });
+  }
+
+  /** momentum vectors before/after: [{p, c, n}] */
+  function momenta() {
+    var v = prm.values, cols = ui.colors();
+    if (!res || res.invalid) return null;
+    if (info.md === 'explode') {
+      return { before: [{ p: res.P0, c: cols.resultant, n: 'p' }], after: info.vs.map(function (w, i) { return { p: DY.scale(w, info.ms[i]), c: [cols.s1, cols.s2, cols.s3][i], n: 'p' + (i + 1) + '′' }; }) };
+    }
+    var u1 = V(v.u1, v.tu1), u2 = V(v.u2, v.tu2), nc = !!res.noCollision;
+    return { before: [{ p: DY.scale(u1, v.m1), c: cols.s1, n: 'p₁' }, { p: DY.scale(u2, v.m2), c: cols.s2, n: 'p₂' }],
+      after: [{ p: DY.scale(nc ? u1 : res.v1, v.m1), c: cols.s1, n: 'p₁′' }, { p: DY.scale(nc ? u2 : res.v2, v.m2), c: cols.s2, n: 'p₂′' }] };
+  }
+  function drawMomentum() {
+    var col = ui.colors(), mm = momenta(), after = clock.t >= tc;
+    var pts = [[0, 0]], acc = [0, 0];
+    if (mm) { mm.before.forEach(function (q) { acc = DY.add(acc, q.p); pts.push(acc.slice()); }); acc = [0, 0]; mm.after.forEach(function (q) { acc = DY.add(acc, q.p); pts.push(acc.slice()); }); }
+    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys), sp = Math.max(x1 - x0, y1 - y0, 1e-9);
+    vpM.fit(x0 - sp * 0.1, x1 + sp * 0.1, y0 - sp * 0.1, y1 + sp * 0.1);
+    var c = vpM.begin();
+    D.label(c, 'momentum vector diagram: before (dashed) = after (solid)', vpM.w / 2, 10, col.muted, { size: 11 });
+    if (!mm) return;
+    function chain(list, dashed) {
+      var cur = vpM.P(0, 0);
+      list.forEach(function (q) { var nx = cur[0] + q.p[0] * vpM.scale, ny = cur[1] - q.p[1] * vpM.scale; if (Math.hypot(nx - cur[0], ny - cur[1]) > 0.5) D.arrow(c, cur[0], cur[1], nx, ny, q.c, { dash: dashed ? [5, 4] : null, width: dashed ? 1.6 : 2.4, label: q.n }); cur = [nx, ny]; });
+    }
+    chain(mm.before, true);
+    if (after) chain(mm.after, false);
+    var O = vpM.P(0, 0), Pt = res.P0;
+    if (Math.hypot(Pt[0], Pt[1]) > 1e-9) D.arrow(c, O[0], O[1], O[0] + Pt[0] * vpM.scale, O[1] - Pt[1] * vpM.scale, col.resultant, { width: 1.4, label: 'total p' });
+    else D.label(c, 'total momentum = 0: the vectors form a closed shape', vpM.w / 2, vpM.h - 10, col.resultant, { size: 11 });
+    if (!after) D.label(c, 'after-impact vectors appear when t ≥ ' + tc.toFixed(2) + ' s', vpM.w / 2, vpM.h - 24, col.muted, { size: 11 });
+  }
+  function drawKE() {
+    var col = ui.colors(), c = vpK.begin(), W = vpK.w, H = vpK.h, after = clock.t >= tc;
+    if (!res || res.invalid) return;
+    var mm = momenta(), v = prm.values;
+    var keB = info.md === 'explode' ? [DY.ke(info.M, V(v.u1, v.tu1))] : [DY.ke(v.m1, V(v.u1, v.tu1)), DY.ke(v.m2, V(v.u2, v.tu2))];
+    var keA = info.md === 'explode' ? info.vs.map(function (w, i) { return DY.ke(info.ms[i], w); }) : (res.noCollision ? keB : [DY.ke(v.m1, res.v1), DY.ke(v.m2, res.v2)]);
+    var sB = keB.reduce(function (a, b) { return a + b; }, 0), sA = keA.reduce(function (a, b) { return a + b; }, 0), mx = Math.max(sB, sA, 1e-12);
+    var base = H - 40, top = 34, bw = Math.min(70, W * 0.2), cols = info.md === 'explode' ? [[col.resultant], [col.s1, col.s2, col.s3]] : [[col.s1, col.s2], [col.s1, col.s2]];
+    D.label(c, 'kinetic energy (stacked by body)', W / 2, 12, col.muted, { size: 11 });
+    [[keB, 'before', W * 0.3], [keA, 'after', W * 0.7]].forEach(function (bar, j) {
+      var y = base, x = bar[2] - bw / 2, show = j === 0 || after;
+      bar[0].forEach(function (e, i) { var hgt = (base - top) * e / mx; c.fillStyle = cols[j][i]; c.globalAlpha = show ? 0.8 : 0.15; c.fillRect(x, y - hgt, bw, hgt); y -= hgt; });
+      c.globalAlpha = 1;
+      var tot = bar[0].reduce(function (a, b) { return a + b; }, 0);
+      D.label(c, bar[1] + ': ' + U.sf(tot).replace(/<[^>]+>/g, '') + ' J', bar[2], base + 14, show ? col.ink : col.muted, { size: 12 });
+    });
+    c.strokeStyle = col.muted; c.setLineDash([4, 4]); c.beginPath(); c.moveTo(W * 0.15, base - (base - top) * sB / mx); c.lineTo(W * 0.85, base - (base - top) * sB / mx); c.stroke(); c.setLineDash([]);
+    if (after) {
+      var dK = sA - sB, tol = 1e-6 * Math.max(1, sB);
+      D.label(c, Math.abs(dK) <= tol ? 'KE conserved (elastic)' : dK < 0 ? 'KE lost: ' + U.sf(-dK).replace(/<[^>]+>/g, '') + ' J' : 'KE gained: ' + U.sf(dK).replace(/<[^>]+>/g, '') + ' J', W / 2, base + 30, Math.abs(dK) <= tol ? col.ok : col.warn, { size: 12, bold: true });
+    }
+  }
+
+  /* ---------- live working ---------- */
+  function Pn(x) { return x < 0 ? '(' + U.sf(x) + ')' : U.sf(x); }
+  function dirR(vec) { var m = DY.magAng(vec); return m.mag > 1e-9 ? U.dp(m.ang, 1) + '°' : 'none (zero velocity)'; }
+  function dirT(vec) { var m = DY.magAng(vec); return m.mag > 1e-9 ? U.dp(m.ang, 1) + '°' : '—'; }
+  function readout() {
+    if (!res) return;
+    var v = prm.values, md = info.md, ms = 'm s<sup>−1</sup>';
+    R.clear();
+    R.badge('Angles anticlockwise from +x. ' + (md === 'explode' ? 'Explosion' : 'Impact') + ' at t = ' + tc.toFixed(2) + ' s; now t = ' + clock.t.toFixed(2) + ' s (' + (clock.t >= tc ? 'after' : 'before') + ')', 'info');
+    if (res.invalid) { R.badge(res.invalid, 'warn').render(); tblEl.innerHTML = ''; return; }
+    if (res.noCollision) R.badge(res.noCollision, 'warn');
+    R.head('Total momentum before');
+    if (md === 'explode') {
+      R.eq('p<sub>x</sub>', 'M u cos α = ' + U.num(info.M, 4) + ' × ' + U.num(v.u1, 4) + ' × cos ' + U.dp(v.tu1, 1) + '°', res.P0[0], 'N s');
+      R.eq('p<sub>y</sub>', 'M u sin α', res.P0[1], 'N s');
+    } else {
+      R.eq('p<sub>x</sub>', 'm₁u₁ cos α₁ + m₂u₂ cos α₂ = ' + U.num(v.m1, 4) + ' × ' + U.num(v.u1, 4) + ' cos ' + U.dp(v.tu1, 1) + '° + ' + U.num(v.m2, 4) + ' × ' + U.num(v.u2, 4) + ' cos ' + U.dp(v.tu2, 1) + '°', res.P0[0], 'N s');
+      R.eq('p<sub>y</sub>', 'm₁u₁ sin α₁ + m₂u₂ sin α₂', res.P0[1], 'N s');
+    }
+    if (!res.noCollision) {
+      if (md === 'elastic') {
+        var na = U.deg(Math.atan2(res.n[1], res.n[0]));
+        R.head('Smooth discs: resolve along the line of centres n (at ' + U.dp(na, 1) + '°) and perpendicular to it');
+        R.eq('angle of n to relative velocity', 'sin⁻¹(b ÷ (r₁ + r₂)) = sin⁻¹(' + U.num(v.b, 4) + ' ÷ ' + U.num(v.r1 + v.r2, 4) + ')', U.dp(res.alpha, 1) + '°', '');
+        R.eq('along n before', 'u₁ₙ = ' + U.sf(res.a1) + ', u₂ₙ = ' + U.sf(res.a2), '', '');
+        R.eq('along n after', '1-D elastic: ((m₁ − m₂)u₁ₙ + 2m₂u₂ₙ) ÷ (m₁ + m₂), …', U.sf(res.b1) + ', ' + U.sf(res.b2), ms);
+        R.eq('approach = separation', 'u₁ₙ − u₂ₙ = ' + U.sf(res.approach) + '; v₂ₙ − v₁ₙ = ' + U.sf(res.separation), '', '');
+        R.eq('perpendicular to n', 'unchanged (smooth discs): ' + U.sf(res.perp1) + ', ' + U.sf(res.perp2), '', '');
+      } else if (md === 'stick') {
+        R.head('Bodies stick: common velocity = total momentum ÷ total mass');
+        R.eq('V', '|p| ÷ (m₁ + m₂) = ' + U.sf(Math.hypot(res.P0[0], res.P0[1])) + ' ÷ ' + U.num(v.m1 + v.m2, 4), DY.magAng(res.v1).mag, ms);
+        R.eq('direction', 'tan⁻¹(p<sub>y</sub> ÷ p<sub>x</sub>)', dirR(res.v1), '');
+      } else if (md === 'one') {
+        var p1 = DY.scale(res.v1, v.m1), p2 = DY.scale(res.v2, v.m2);
+        R.head('Momentum of 2 after = total − momentum of 1 after');
+        R.eq('p₂<sub>x</sub>', U.sf(res.P0[0]) + ' − ' + Pn(p1[0]), p2[0], 'N s');
+        R.eq('p₂<sub>y</sub>', U.sf(res.P0[1]) + ' − ' + Pn(p1[1]), p2[1], 'N s');
+      } else if (md === 'dirs') {
+        R.head('Two equations, two unknown speeds');
+        R.eq('x', 'm₁v₁ cos β₁ + m₂v₂ cos β₂ = ' + U.sf(res.P0[0]), '', '');
+        R.eq('y', 'm₁v₁ sin β₁ + m₂v₂ sin β₂ = ' + U.sf(res.P0[1]), '', '');
+        if (res.warn) R.badge(res.warn, 'warn');
+      } else {
+        var last = res.two ? '2' : '3', lm = res.two ? v.m2 : v.m3, pl = DY.scale(res.v3, lm), pk = DY.add(DY.scale(res.v1, v.m1), res.two ? [0, 0] : DY.scale(res.v2, v.m2));
+        R.head('Momentum of fragment ' + last + ' = total − momentum of the others');
+        R.eq('p' + last + '<sub>x</sub>', U.sf(res.P0[0]) + ' − ' + Pn(pk[0]), pl[0], 'N s');
+        R.eq('p' + last + '<sub>y</sub>', U.sf(res.P0[1]) + ' − ' + Pn(pk[1]), pl[1], 'N s');
+      }
+      R.head('Velocities after');
+      var outs = md === 'explode' ? info.vs : [res.v1, res.v2];
+      outs.forEach(function (w, i) { R.eq('v' + (i + 1), 'speed, direction', U.sf(DY.magAng(w).mag) + ' ' + ms + ', ' + dirR(w), ''); });
+      if (md !== 'explode' && md !== 'stick') { var ab = DY.angleBetween(res.v1, res.v2); R.eq('angle between final velocities', '', ab === null ? 'undefined (a body is at rest)' : U.dp(ab, 1) + '°', ''); }
+    }
+    R.head('Energy');
+    R.eq('KE before', 'Σ ½mv²', res.KE0, 'J'); R.eq('KE after', 'Σ ½mv²', res.KE1, 'J');
+    var dK = res.KE1 - res.KE0, tol = 1e-6 * Math.max(1, res.KE0);
+    R.badge(Math.abs(dK) <= tol ? 'KE conserved: elastic' : dK < 0 ? 'KE lost (' + U.sf(-dK) + ' J): inelastic' : 'KE gained (' + U.sf(dK) + ' J): stored energy released', Math.abs(dK) <= tol ? 'ok' : dK < 0 ? 'info' : 'warn');
+    R.eq('p after', 'check (x, y)', '(' + U.sf(res.P1[0]) + ', ' + U.sf(res.P1[1]) + ') N s', '');
+    R.render();
+    // table
+    var rows = [], mm = momenta();
+    if (md === 'explode') {
+      rows.push(['before: whole body', info.M, V(v.u1, v.tu1)]);
+      info.vs.forEach(function (w, i) { rows.push(['after: ' + (i + 1), info.ms[i], w]); });
+    } else {
+      var nc = !!res.noCollision;
+      rows.push(['before: 1', v.m1, V(v.u1, v.tu1)], ['before: 2', v.m2, V(v.u2, v.tu2)], ['after: 1', v.m1, nc ? V(v.u1, v.tu1) : res.v1], ['after: 2', v.m2, nc ? V(v.u2, v.tu2) : res.v2]);
+    }
+    var sum = function (pre) { var sx = 0, sy = 0; rows.forEach(function (r) { if (r[0].indexOf(pre) === 0) { sx += r[1] * r[2][0]; sy += r[1] * r[2][1]; } }); return [sx, sy]; };
+    var sb = sum('before'), sa = sum('after');
+    tblEl.innerHTML = '<table class="tbl"><tr><th>body</th><th>m / kg</th><th>speed / m s⁻¹</th><th>direction</th><th>p<sub>x</sub> / N s</th><th>p<sub>y</sub> / N s</th><th>KE / J</th></tr>' +
+      rows.map(function (r) { var m = DY.magAng(r[2]); return '<tr><td>' + r[0] + '</td><td>' + U.sf(r[1]) + '</td><td>' + U.sf(m.mag) + '</td><td>' + dirT(r[2]) + '</td><td>' + U.sf(r[1] * r[2][0]) + '</td><td>' + U.sf(r[1] * r[2][1]) + '</td><td>' + U.sf(DY.ke(r[1], r[2])) + '</td></tr>'; }).join('') +
+      '<tr><th>total before</th><td></td><td></td><td></td><th>' + U.sf(sb[0]) + '</th><th>' + U.sf(sb[1]) + '</th><th>' + U.sf(res.KE0) + '</th></tr>' +
+      '<tr><th>total after</th><td></td><td></td><td></td><th>' + U.sf(sa[0]) + '</th><th>' + U.sf(sa[1]) + '</th><th>' + U.sf(res.noCollision ? res.KE0 : res.KE1) + '</th></tr></table>';
+  }
+
+  ui.onTheme(drawAll);
+  vp.onResize = drawScene; vpM.onResize = drawMomentum; vpK.onResize = drawKE;
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

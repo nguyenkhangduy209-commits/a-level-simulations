@@ -1,0 +1,560 @@
+*4161715495*
+Cambridge International Examinations
+Cambridge International Advanced Subsidiary and Advanced Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions May/June 2018
+2 hours
+Candidates answer on the Question Paper.
+No Additional Materials are required.
+READ THESE INSTRUCTIONS FIRST
+Write your Centre number, candidate number and name on all the work you hand in.
+Write in dark blue or black pen.
+You may use an HB pencil for any diagrams or graphs.
+Do not use staples, paper clips, glue or correction fluid.
+DO NOT WRITE IN ANY BARCODES.
+Answer all questions.
+Electronic calculators may be used.
+You may lose marks if you do not show your working or if you do not use appropriate units.
+At the end of the examination, fasten all your work securely together.
+The number of marks is given in brackets [ ] at the end of each question or part question.
+This document consists of 25 printed pages and 3 blank pages.
+DC (KN/SG) 144290/4
+© UCLES 2018 [Turn over
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2018 9702/42/M/J/18
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1
+2
+at2
+v 2 = u 2 + 2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω (x 2-x2)
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2018 9702/42/M/J/18 [Turn over
+
+4
+BLANK PAGE
+© UCLES 2018 9702/42/M/J/18
+
+5
+Answer all the questions in the spaces provided.
+1 (a) (i) A gravitational field may be represented by lines of gravitational force.
+State what is meant by a line of gravitational force.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[1]
+(ii) By reference to lines of gravitational force near to the surface of the Earth, explain why
+the gravitational field strength g close to the Earth’s surface is approximately constant.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[3]
+(b) The Moon may be considered to be a uniform sphere of diameter 3.4 × 103 km and mass
+7.4 × 1022 kg. The Moon has no atmosphere.
+During a collision of the Moon with a meteorite, a rock is thrown vertically up from the surface
+of the Moon with a speed of 2.8 km s–1.
+Assuming that the Moon is isolated in space, determine whether the rock will travel out into
+distant space or return to the Moon’s surface.
+[4]
+[Total: 8]
+© UCLES 2018 9702/42/M/J/18 [Turn over
+
+6
+2 (a) Use one of the assumptions of the kinetic theory of gases to explain why the potential energy
+of the molecules of an ideal gas is zero.
+...................................................................................................................................................
+...............................................................................................................................................[1]
+(b) The average translational kinetic energy E of a molecule of an ideal gas is given by the
+K
+expression
+1 3
+E = m 〈c2〉 = kT
+K 2 2
+where m is the mass of a molecule and k is the Boltzmann constant.
+State the meaning of the symbol
+(i) 〈c2〉,
+.......................................................................................................................................[1]
+(ii) T.
+.......................................................................................................................................[1]
+(c) A cylinder of constant volume 4.7 × 104 cm3 contains an ideal gas at pressure 2.6 × 105 Pa
+and temperature 173 °C.
+The gas is heated. The thermal energy transferred to the gas is 2900 J. The final temperature
+and pressure of the gas are T and p, as illustrated in Fig. 2.1.
+4.7 × 104 cm3 4.7 × 104 cm3
+2900 J
+2.6 × 105 Pa p
+173 °C T
+Fig. 2.1
+(i) Calculate
+1. the number N of molecules in the cylinder,
+N = ...........................................................[3]
+© UCLES 2018 9702/42/M/J/18
+
+7
+2. the increase in average kinetic energy of a molecule during the heating process.
+increase = ....................................................... J [1]
+(ii) Use your answer in (i) part 2 to determine the final temperature T, in kelvin, of the gas in
+the cylinder.
+T = .......................................................K [3]
+[Total: 10]
+© UCLES 2018 9702/42/M/J/18 [Turn over
+
+8
+3 (a) During melting, a solid becomes liquid with little or no change in volume.
+Use kinetic theory to explain why, during the melting process, thermal energy is required
+although there is no change in temperature.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[3]
+(b) An aluminium can of mass 160 g contains a mass of 330 g of warm water at a temperature of
+38 °C, as illustrated in Fig. 3.1.
+ice
+warm water
+aluminium can
+Fig. 3.1
+A mass of 48 g of ice at –18 °C is taken from a freezer and put in to the water. The ice melts
+and the final temperature of the can and its contents is 23 °C.
+Data for the specific heat capacity c of aluminium, ice and water are given in Fig. 3.2.
+c / J g–1 K–1
+aluminium 0.910
+ice 2.10
+water 4.18
+Fig. 3.2
+© UCLES 2018 9702/42/M/J/18
+
+9
+Assuming no exchange of thermal energy with the surroundings,
+(i) show that the loss in thermal energy of the can and the warm water is 2.3 × 104 J,
+[2]
+(ii) use the information in (i) to calculate a value L for the specific latent heat of fusion of ice.
+L = .................................................. J g–1 [2]
+[Total: 7]
+© UCLES 2018 9702/42/M/J/18 [Turn over
+
+10
+4 (a) State two conditions necessary for a mass to be undergoing simple harmonic motion.
+1. ...............................................................................................................................................
+...................................................................................................................................................
+2. ...............................................................................................................................................
+...................................................................................................................................................
+[2]
+(b) A trolley of mass 950 g is held on a horizontal surface by means of two springs attached to
+fixed points P and Q, as shown in Fig. 4.1.
+trolley
+mass 950 g
+spring
+P Q
+Fig. 4.1
+The springs, each having a spring constant k of 230 N m–1, are always extended.
+The trolley is displaced along the line of the springs and then released.
+The variation with time t of the displacement x of the trolley is shown in Fig. 4.2.
+x
+0
+0 t t
+1
+Fig. 4.2
+© UCLES 2018 9702/42/M/J/18
+
+11
+(i) 1. S tate and explain whether the oscillations of the trolley are heavily damped, critically
+damped or lightly damped.
+....................................................................................................................................
+....................................................................................................................................
+2. Suggest the cause of the damping.
+....................................................................................................................................
+....................................................................................................................................
+....................................................................................................................................
+[3]
+(ii) The acceleration a of the trolley of mass m may be assumed to be given by the expression
+2k
+a = – x.
+dmn
+1. Calculate the angular frequency ω of the oscillations of the trolley.
+ω = ...............................................rad s–1 [3]
+2. Determine the time t shown on Fig. 4.2.
+1
+t = ....................................................... s [2]
+1
+[Total: 10]
+© UCLES 2018 9702/42/M/J/18 [Turn over
+
+12
+5 (a) In radio communication, the bandwidth of an FM transmission is greater than the bandwidth
+of an AM transmission.
+State
+(i) what is meant by bandwidth,
+...........................................................................................................................................
+.......................................................................................................................................[1]
+(ii) one advantage and one disadvantage of a greater bandwidth.
+advantage: ........................................................................................................................
+...........................................................................................................................................
+disadvantage: ....................................................................................................................
+...........................................................................................................................................
+[2]
+(b) A carrier wave has a frequency of 650 kHz and is measured to have an amplitude of 5.0 V.
+The carrier wave is frequency modulated by a signal of frequency 10 kHz and amplitude 3.0 V.
+The frequency deviation of the carrier wave is 8.0 kHz V–1.
+Determine, for the frequency modulated carrier wave,
+(i) the measured amplitude,
+amplitude = .......................................................V [1]
+(ii) the maximum and the minimum frequencies,
+maximum frequency = ........................................................ kHz
+minimum frequency = ........................................................ kHz
+[2]
+© UCLES 2018 9702/42/M/J/18
+
+13
+(iii) the minimum time between a maximum and a minimum transmitted frequency.
+time = ........................................................s [1]
+[Total: 7]
+© UCLES 2018 9702/42/M/J/18 [Turn over
+
+14
+6 (a) Explain what is meant by the capacitance of a parallel plate capacitor.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[3]
+(b) Three parallel plate capacitors each have a capacitance of 6.0 μF.
+Draw circuit diagrams, one in each case, to show how the capacitors may be connected
+together to give a combined capacitance of
+(i) 9.0 μF,
+[1]
+(ii) 4.0 μF.
+[1]
+(c) Two capacitors of capacitances 3.0 μF and 2.0 μF are connected in series with a battery of
+electromotive force (e.m.f.) 8.0 V, as shown in Fig. 6.1.
+3.0 μF 2.0 μF
+8.0 V
+Fig. 6.1
+© UCLES 2018 9702/42/M/J/18
+
+15
+(i) Calculate the combined capacitance of the capacitors.
+capacitance = .....................................................μF [1]
+(ii) Use your answer in (i) to determine, for the capacitor of capacitance 3.0 μF,
+1. the charge on one plate of the capacitor,
+charge = ..........................................................μC
+2. the energy stored in the capacitor.
+energy = ............................................................ J
+[4]
+[Total: 10]
+© UCLES 2018 9702/42/M/J/18 [Turn over
+
+16
+7 (a) Negative feedback is often used in amplifiers.
+State
+(i) what is meant by negative feedback,
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) two effects of negative feedback on the gain of an amplifier.
+1. .......................................................................................................................................
+...........................................................................................................................................
+2. .......................................................................................................................................
+...........................................................................................................................................
+[2]
+(b) An ideal operational amplifier (op-amp) is incorporated into the circuit shown in Fig. 7.1.
+6400 Ω
++9.0 V
+–
++
+–9.0 V
+V V
+IN 800 Ω OUT
+Fig. 7.1
+(i) Calculate the gain G of the amplifier circuit.
+G = ...........................................................[1]
+© UCLES 2018 9702/42/M/J/18
+
+17
+(ii) Determine the output potential difference V for an input potential difference V of
+OUT IN
+1. +0.60 V,
+V = ............................................................V
+OUT
+2. –2.1 V.
+V = ............................................................V
+OUT
+[2]
+(iii) The gain of the amplifier shown in Fig. 7.1 is constant.
+State one change that may be made to the circuit of Fig. 7.1 so that the amplifier circuit
+monitors temperature with the gain decreasing as the temperature rises.
+...........................................................................................................................................
+.......................................................................................................................................[1]
+[Total: 8]
+© UCLES 2018 9702/42/M/J/18 [Turn over
+
+18
+8 (a) Explain how a uniform magnetic field and a uniform electric field may be used as a velocity
+selector for charged particles.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[3]
+© UCLES 2018 9702/42/M/J/18
+
+19
+(b) Particles having mass m and charge +1.6 × 10–19 C pass through a velocity selector.
+They then enter a region of uniform magnetic field of magnetic flux density 94 mT with speed
+3.4 × 104 m s–1, as shown in Fig. 8.1.
+path of charged particle
+velocity
+selector
+15.0 cm
+uniform
+magnetic field
+into page
+Fig. 8.1
+The direction of the uniform magnetic field is into the page and normal to the direction in
+which the particles are moving.
+The particles are moving in a vacuum in a circular arc of diameter 15.0 cm.
+Show that the mass of one of the particles is 20 u.
+[4]
+(c) On Fig. 8.1, sketch the path in the uniform magnetic field of a particle of mass 22 u having the
+same charge and speed as the particle in (b). [2]
+[Total: 9]
+© UCLES 2018 9702/42/M/J/18 [Turn over
+
+20
+9 (a) State what is meant by the magnetic flux linkage of a coil.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[3]
+(b) A coil of wire has 160 turns and diameter 2.4 cm. The coil is situated in a uniform magnetic
+field of flux density 7.5 mT, as shown in Fig. 9.1.
+magnetic field
+flux density
+2.4 cm
+7.5 mT
+coil
+160 turns
+Fig. 9.1
+The direction of the magnetic field is along the axis of the coil.
+The magnetic flux density is reduced to zero in a time of 0.15 s.
+Show that the average e.m.f. induced in the coil is 3.6 mV.
+[2]
+© UCLES 2018 9702/42/M/J/18
+
+21
+(c) The magnetic flux density B in the coil in (b) is now varied with time t as shown in Fig. 9.2.
+10
+B / mT
+5
+0
+0 0.1 0.2 0.3 0.4 0.5 0.6
+t / s
+–5
+–10
+Fig. 9.2
+Use data in (b) to show, on Fig. 9.3, the variation with time t of the e.m.f. E induced in the coil.
+8
+E / mV 6
+4
+2
+0
+0 0.1 0.2 0.3 0.4 0.5 0.6
+t / s
+–2
+–4
+–6
+–8
+Fig. 9.3
+[4]
+[Total: 9]
+© UCLES 2018 9702/42/M/J/18 [Turn over
+
+22
+BLANK PAGE
+© UCLES 2018 9702/42/M/J/18
+
+23
+10 (a) Describe the photoelectric effect.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) Data for the work function energy Φ of two metals are shown in Fig. 10.1.
+Φ / J
+sodium 3.8 × 10–19
+zinc 5.8 × 10–19
+Fig. 10.1
+Light of wavelength 420 nm is incident on the surface of each of the metals.
+(i) State what is meant by a photon.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) Calculate the energy of a photon of the incident light.
+energy = ....................................................... J [2]
+(iii) State whether photoelectric emission will occur from each of the metals.
+sodium: ..............................................................................................................................
+zinc: ...................................................................................................................................
+[1]
+[Total: 7]
+© UCLES 2018 9702/42/M/J/18 [Turn over
+
+24
+11 (a) Describe the basic principles of CT scanning (computed tomography).
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[5]
+© UCLES 2018 9702/42/M/J/18
+
+25
+(b) By reference to your answer in (a), suggest why
+(i) CT scanning was not possible before fast computers with large memories were available,
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[1]
+(ii) the radiation dose for a CT scan is much larger than for an X-ray image of a leg bone.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[1]
+[Total: 7]
+© UCLES 2018 9702/42/M/J/18 [Turn over
+
+26
+12 (a) State what is meant by radioactive decay.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) An unstable nuclide P has decay constant λ and decays to form a nuclide D.
+P
+This nuclide D is unstable and decays with decay constant λ to form a stable nuclide S. The
+D
+decay chain is illustrated in Fig. 12.1.
+decay constant decay constant
+λ λ
+P D
+nuclide P nuclide D nuclide S
+Fig. 12.1
+The symbols P, D and S are not the nuclide symbols.
+Initially, a radioactive sample contains only nuclide P.
+The variation with time t of the number of nuclei of each of the three nuclides in the sample is
+shown in Fig. 12.2.
+number
+0
+0
+t
+Fig. 12.2
+© UCLES 2018 9702/42/M/J/18
+
+27
+(i) On Fig. 12.2, use the symbols P, D and S to identify the curve for each of the three
+nuclides. [2]
+(ii) The half-life of nuclide P is 60.0 minutes.
+Calculate the decay constant λ, in s–1, of this nuclide.
+P
+λ = .....................................................s–1 [2]
+P
+(c) In the decay chain shown in Fig. 12.1, λ is approximately equal to 5λ .
+P D
+The decay chain of a different nuclide E is illustrated in Fig. 12.3.
+decay constant decay constant
+λ λ
+E F
+nuclide E nuclide F nuclide G
+Fig. 12.3
+The decay constant λ of nuclide F is very much larger than the decay constant λ of
+F E
+nuclide E.
+By reference to the half-life of nuclide F, explain why the number of nuclei of nuclide F in the
+sample is always small.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+[Total: 8]
+© UCLES 2018 9702/42/M/J/18
+
+28
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge International
+Examinations Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download at www.cie.org.uk after
+the live examination series.
+Cambridge International Examinations is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of University of Cambridge Local
+Examinations Syndicate (UCLES), which is itself a department of the University of Cambridge.
+© UCLES 2018 9702/42/M/J/18

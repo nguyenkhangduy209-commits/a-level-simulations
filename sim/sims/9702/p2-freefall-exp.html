@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Measuring g</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-measure.js"></script>
+<script src="../../engine/phys-motion.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, MO = SIM.motion;
+  var course = ui.course('9702'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Experiment: determining the acceleration of free fall', g: g, tags: ['9702 2.1.8 Free-fall experiment', '9702 1.3 Errors'] });
+
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 18 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 1, onFrame: function () { drawScene(); } });
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var c1 = ui.canvas(plotWrap), c2 = ui.canvas(plotWrap);
+  var p1 = new SIM.plot.Plot(c1, {}), p2 = new SIM.plot.Plot(c2, {});
+  var tblCard = pg.card('left', 'Results table');
+  var tblEl = ui.h('div', { style: 'overflow-x:auto' }); tblCard.appendChild(tblEl);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var method = ui.select(paramCard, { label: 'Method', value: 'trapdoor', options: [
+    { value: 'trapdoor', label: 'Electromagnet release + trapdoor timer (time t for height h)' },
+    { value: 'lightgate', label: 'Card falling through a light gate (speed v after falling h)' }] }, update);
+  var prm = ui.params(paramCard, [
+    { key: 'h0', label: 'Smallest height', sym: 'h<sub>min</sub>', unit: 'm', min: 0.1, max: 1, step: 0.01, value: 0.2 },
+    { key: 'h1', label: 'Largest height', sym: 'h<sub>max</sub>', unit: 'm', min: 0.5, max: 2, step: 0.01, value: 1.4 },
+    { key: 'N', label: 'Number of heights', sym: 'N', unit: '', min: 4, max: 8, step: 1, value: 6 },
+    { key: 'rep', label: 'Repeat readings at each height', sym: 'n', unit: '', min: 1, max: 5, step: 1, value: 3 },
+    { key: 'sig', label: 'Random timing error (spread of one reading)', sym: 'σ<sub>t</sub>', unit: 's', min: 0, max: 0.05, step: 0.001, value: 0.002 },
+    { key: 'sigG', label: 'Random error in the light-gate time', sym: 'σ<sub>Δt</sub>', unit: 'ms', min: 0, max: 2, step: 0.01, value: 0.02 },
+    { key: 'delay', label: 'Systematic: timer keeps running extra (magnet releases late)', sym: 'δ', unit: 's', min: 0, max: 0.1, step: 0.001, value: 0 },
+    { key: 'hErr', label: 'Systematic: recorded h − true fall distance', sym: 'e', unit: 'm', min: -0.05, max: 0.05, step: 0.001, value: 0 },
+    { key: 'L', label: 'Length of the card', sym: 'L', unit: 'm', min: 0.01, max: 0.1, step: 0.001, value: 0.05 }
+  ], update);
+  var btnRow = ui.h('div', { class: 'row' }); paramCard.appendChild(btnRow);
+  var seed = 13;
+  btnRow.appendChild(ui.h('button', { class: 'btn', text: 'Take a new set of readings', onclick: function () { seed = (seed * 16807) % 2147483647; update(); } }));
+
+  ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Trapdoor method, small random error only', m: 'trapdoor', v: { sig: 0.002, delay: 0, hErr: 0, rep: 3 }, note: 'Plot h against t²: a straight line through the origin with gradient g/2.' },
+    { name: 'Trapdoor: electromagnet releases 0.02 s late (systematic)', m: 'trapdoor', v: { sig: 0.001, delay: 0.02, hErr: 0, rep: 3 }, note: 'Every time is 0.02 s too long. On the t–√h graph the intercept is 0.02 s and the gradient still gives g.' },
+    { name: 'Trapdoor: h measured to the top of the ball (2 cm too large)', m: 'trapdoor', v: { sig: 0.001, delay: 0, hErr: 0.02, rep: 3 }, note: 'h = ½gt² + 0.02: the h–t² line has intercept 0.02 m, but its gradient is still g/2.' },
+    { name: 'Hand-held stopwatch: large random error', m: 'trapdoor', v: { sig: 0.05, delay: 0, hErr: 0, rep: 3 }, note: 'Reaction time makes the points scatter: repeat and average, use larger heights.' },
+    { name: 'Light gate and card: v² against h', m: 'lightgate', v: { sigG: 0.02, hErr: 0, L: 0.05, rep: 3 }, note: 'v = L ÷ Δt, v² = 2gh: gradient 2g. The intercept is about gL because h was measured to the card’s lower edge.' },
+    { name: 'Light gate with a long card (10 cm)', m: 'lightgate', v: { sigG: 0.02, hErr: 0, L: 0.1, rep: 3 }, note: 'L ÷ Δt is the average speed while the card passes, so a longer card shifts the line up (intercept ≈ gL).' }
+  ], function (p) { clock.pause(); method.set(p.m, true); prm.set(Object.assign({ h0: 0.2, h1: 1.4, N: 6 }, p.v)); clock.seek(0); });
+
+  ui.notes(noteCard, [
+    'Free fall from rest: h = ½gt². Plotting h against t² gives a straight line of gradient <b>g/2</b>, so g = 2 × gradient (not the gradient itself).',
+    'A <b>systematic</b> error in h (e.g. measured to the wrong part of the ball) shifts the line: it gives an <b>intercept</b>, not a wrong gradient.',
+    'A constant timing delay δ: t = √(2/g)·√h + δ. Plot t against √h: the intercept is δ, the gradient is √(2/g).',
+    'Repeating and averaging reduces <b>random</b> error; it does not remove systematic error.',
+    'Use a small dense ball so air resistance is negligible (3.2: air resistance reduces the acceleration).',
+    'Light gate: v = L ÷ Δt is an average speed over the length of the card.'
+  ]);
+
+  var res = null, hs = [];
+  function update() {
+    var v = prm.values, lg = method.get() === 'lightgate';
+    prm.show('sig', !lg); prm.show('delay', !lg); prm.show('sigG', lg); prm.show('L', lg);
+    var N = Math.round(v.N), lo = Math.min(v.h0, v.h1), hi = Math.max(v.h0, v.h1);
+    hs = []; for (var i = 0; i < N; i++) hs.push(Math.round((lo + (hi - lo) * i / (N - 1)) * 1000) / 1000);
+    res = MO.freefallExp({ method: method.get(), hs: hs, g: g, delay: v.delay, hErr: v.hErr, sigma: lg ? v.sigG / 1000 : v.sig, repeats: Math.round(v.rep), L: v.L, seed: seed });
+    clock.setDuration(Math.sqrt(2 * hi / g) + 0.3);
+    drawScene(); drawPlots(); readout();
+  }
+
+  function drawScene() {
+    var c, col = ui.colors(), v = prm.values, hi = Math.max(v.h0, v.h1), lg = method.get() === 'lightgate';
+    vp.fit(-1.2, 1.6, -0.25, hi + 0.35); c = vp.begin();
+    // stand
+    D.line(c, [vp.P(-0.9, -0.15), vp.P(-0.9, hi + 0.25)], col['object-line'], { width: 4 });
+    D.ground(c, vp.X(-1.2), vp.Y(-0.15), vp.X(1.4), vp.Y(-0.15));
+    // electromagnet at top
+    c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
+    c.fillRect(vp.X(-0.2), vp.Y(hi + 0.2), vp.X(0.2) - vp.X(-0.2), vp.Y(hi + 0.05) - vp.Y(hi + 0.2)); c.strokeRect(vp.X(-0.2), vp.Y(hi + 0.2), vp.X(0.2) - vp.X(-0.2), vp.Y(hi + 0.05) - vp.Y(hi + 0.2));
+    D.label(c, lg ? 'release' : 'electromagnet', vp.X(0.25), vp.Y(hi + 0.13), col.muted, { align: 'left', size: 11 });
+    D.line(c, [vp.P(-0.9, hi + 0.13), vp.P(-0.2, hi + 0.13)], col['object-line'], { width: 2 });
+    var t = clock.t, tf = Math.sqrt(2 * hi / g), drop = 0.5 * g * Math.min(t, tf) * Math.min(t, tf), yb = hi - drop;
+    if (lg) {
+      // light gate at y = 0, card
+      c.fillStyle = col.s1; c.globalAlpha = 0.7;
+      var ch = Math.max(v.L, 0.02); c.fillRect(vp.X(-0.06), vp.Y(yb + ch), vp.X(0.06) - vp.X(-0.06), vp.Y(yb) - vp.Y(yb + ch)); c.globalAlpha = 1;
+      D.label(c, 'card L', vp.X(0.1), vp.Y(yb + ch / 2), col.s1, { align: 'left', size: 11 });
+      c.fillStyle = col.surface; c.fillRect(vp.X(-0.4), vp.Y(0.04), vp.X(-0.15) - vp.X(-0.4), vp.Y(-0.04) - vp.Y(0.04)); c.fillRect(vp.X(0.15), vp.Y(0.04), vp.X(0.4) - vp.X(0.15), vp.Y(-0.04) - vp.Y(0.04));
+      D.line(c, [vp.P(-0.15, 0), vp.P(0.15, 0)], col.warn, { dash: [3, 3] });
+      D.label(c, 'light gate → timer (Δt)', vp.X(0.45), vp.Y(0), col.muted, { align: 'left', size: 11 });
+    } else {
+      var r = Math.max(5, vp.scale * 0.04);
+      D.particle(c, vp.X(0), vp.Y(yb) - r, r, {});
+      c.fillStyle = col.surface; c.fillRect(vp.X(-0.3), vp.Y(0), vp.X(0.3) - vp.X(-0.3), 6);
+      D.label(c, 'trapdoor → stops timer', vp.X(0.35), vp.Y(0) + 3, col.muted, { align: 'left', size: 11 });
+    }
+    // ruler with h
+    D.arrow(c, vp.X(0.8), vp.Y(hi), vp.X(0.8), vp.Y(0), col.component, { width: 1.4 });
+    D.arrow(c, vp.X(0.8), vp.Y(0), vp.X(0.8), vp.Y(hi), col.component, { width: 1.4 });
+    D.label(c, 'h = ' + U.num(hi, 3) + ' m', vp.X(0.85), vp.Y(hi / 2), col.component, { align: 'left', size: 12 });
+    D.label(c, 't = ' + Math.min(t, tf).toFixed(3) + ' s (true)', vp.X(0.85), vp.Y(hi / 2) + 18, col.muted, { align: 'left', size: 11 });
+  }
+
+  function drawPlots() {
+    if (!res || res.invalid) return;
+    var col = ui.colors(), lg = method.get() === 'lightgate', rows = res.rows;
+    if (lg) {
+      c2.style.display = 'none';
+      var f = res.fitV2, xmax = Math.max.apply(null, rows.map(function (r) { return r.h; })) * 1.1;
+      p1.draw({ x: [0, xmax], xLabel: 'h / m', yLabel: 'v² / m² s⁻²', series: f ? [{ fn: function (x) { return f.m * x + f.c; }, color: col.s1 }, { fn: function (x) { return 2 * g * x; }, color: col.component, dash: [4, 4], width: 1.2 }] : [],
+        markers: rows.map(function (r) { return { x: r.h, y: r.v2, color: col.s2 }; }), title: 'best fit (solid), ideal 2gh (dashed)' });
+    } else {
+      c2.style.display = '';
+      var fh = res.fitH, ft = res.fitT;
+      var t2max = Math.max.apply(null, rows.map(function (r) { return r.t2; })) * 1.1, smax = Math.max.apply(null, rows.map(function (r) { return r.sqrtH; })) * 1.1;
+      p1.draw({ x: [0, t2max], xLabel: 't² / s²', yLabel: 'h / m', series: fh ? [{ fn: function (x) { return fh.m * x + fh.c; }, color: col.s1 }, { fn: function (x) { return g / 2 * x; }, color: col.component, dash: [4, 4], width: 1.2 }] : [],
+        markers: rows.map(function (r) { return { x: r.t2, y: r.h, color: col.s2 }; }), title: 'best fit (solid), ideal ½gt² (dashed)' });
+      p2.draw({ x: [0, smax], xLabel: '√h / m^½', yLabel: 't / s', series: ft ? [{ fn: function (x) { return ft.m * x + ft.c; }, color: col.s3 }, { fn: function (x) { return Math.sqrt(2 / g) * x; }, color: col.component, dash: [4, 4], width: 1.2 }] : [],
+        markers: rows.map(function (r) { return { x: r.sqrtH, y: r.t, color: col.s2 }; }), title: 'best fit (solid), ideal √(2/g)·√h (dashed)' });
+    }
+  }
+
+  function readout() {
+    var v = prm.values, lg = method.get() === 'lightgate';
+    R.clear();
+    if (res.invalid) { R.badge(res.invalid, 'warn').render(); tblEl.innerHTML = ''; return; }
+    if (res.warn) R.badge(res.warn, 'warn');
+    var pct = function (x) { return U.sf(100 * (x - g) / g, 2) + '%'; };
+    if (lg) {
+      var f = res.fitV2;
+      R.head('Theory: v = L ÷ Δt and v² = 2gh, so the gradient of v² against h is 2g');
+      R.eq('gradient', 'best-fit line', f.m, 'm s<sup>−2</sup>');
+      R.eq('g', 'gradient ÷ 2 = ' + U.sf(f.m, 4) + ' ÷ 2', res.gFromV2, 'm s<sup>−2</sup>');
+      R.eq('difference from 9.81', '', pct(res.gFromV2), '');
+      R.eq('intercept', 'v² when h = 0', f.c, 'm<sup>2</sup> s<sup>−2</sup>');
+      R.eq('compare gL', g + ' × ' + U.num(v.L, 3) + ' (card average-speed effect)', g * v.L, 'm<sup>2</sup> s<sup>−2</sup>');
+      if (Math.abs(v.hErr) > 1e-9) R.eq('shift from h error', '−2g × e = −2 × ' + g + ' × ' + U.num(v.hErr, 3), -2 * g * v.hErr, 'm<sup>2</sup> s<sup>−2</sup>');
+    } else {
+      var fh = res.fitH, ft = res.fitT;
+      R.head('Graph 1: h = ½g t² + c (gradient g/2)');
+      R.eq('gradient', 'best-fit line of h against t²', fh.m, 'm s<sup>−2</sup>');
+      R.eq('g', '2 × gradient = 2 × ' + U.sf(fh.m, 4), res.gFromH, 'm s<sup>−2</sup>');
+      R.eq('difference from 9.81', '', pct(res.gFromH), '');
+      R.eq('intercept', 'h when t = 0 (expected: the h error e = ' + U.num(v.hErr, 3) + ' m)', fh.c, 'm');
+      R.head('Graph 2: t = √(2/g)·√h + δ');
+      R.eq('gradient', 'best-fit line of t against √h', ft.m, 's m<sup>−½</sup>');
+      R.eq('g', '2 ÷ gradient² = 2 ÷ ' + U.sf(ft.m, 4) + '²', res.gFromT, 'm s<sup>−2</sup>');
+      R.eq('intercept', 't when h = 0 (expected: delay δ = ' + U.num(v.delay, 3) + ' s)', ft.c, 's');
+      if (v.delay > 0 && Math.abs(v.hErr) < 1e-9) R.badge('A timing delay makes the h–t² graph slightly curved and its gradient wrong; the t–√h graph is straight and its intercept shows the delay', 'warn');
+      if (Math.abs(v.hErr) > 1e-9 && v.delay === 0) R.badge('An error in h gives an intercept on the h–t² graph; the gradient (and g) is unaffected', 'ok');
+    }
+    if (Math.round(v.rep) === 1) R.badge('Single readings: no way to judge the random error. Repeat and average.', 'info');
+    R.render();
+    var head = lg ? '<th>h / m</th>' + res.rows[0].reps.map(function (x, i) { return '<th>Δt' + (i + 1) + ' / ms</th>'; }).join('') + '<th>mean Δt / ms</th><th>v / m s⁻¹</th><th>v² / m² s⁻²</th>'
+      : '<th>h / m</th>' + res.rows[0].reps.map(function (x, i) { return '<th>t' + (i + 1) + ' / s</th>'; }).join('') + '<th>mean t / s</th><th>t² / s²</th>';
+    tblEl.innerHTML = '<table class="tbl"><tr>' + head + '</tr>' + res.rows.map(function (r) {
+      return '<tr><td>' + r.h.toFixed(3) + '</td>' + r.reps.map(function (x) { return '<td>' + (lg ? (1000 * x).toFixed(2) : x.toFixed(3)) + '</td>'; }).join('') +
+        (lg ? '<td>' + (1000 * r.t).toFixed(2) + '</td><td>' + U.sf(r.v) + '</td><td>' + U.sf(r.v2) + '</td>' : '<td>' + r.t.toFixed(3) + '</td><td>' + U.sf(r.t2) + '</td>') + '</tr>';
+    }).join('') + '</table>';
+  }
+
+  ui.onTheme(function () { drawScene(); drawPlots(); });
+  vp.onResize = drawScene;
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

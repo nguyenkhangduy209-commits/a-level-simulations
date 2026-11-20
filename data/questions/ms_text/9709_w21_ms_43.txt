@@ -1,0 +1,297 @@
+Cambridge International AS & A Level
+MATHEMATICS 9709/43
+Paper 4 Mechanics October/November 2021
+MARK SCHEME
+Maximum Mark: 50
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the October/November 2021 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 11 printed pages.
+© UCLES 2021 [Turn over
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the specific content of the
+mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the scope of the
+syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the question as
+indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently, e.g. in situations where candidates have not followed instructions or in the application of generic level descriptors.
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may be limited
+according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or grade descriptors in
+mind.
+© UCLES 2021 Page 2 of 11
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Mathematics Specific Marking Principles
+1 Unless a particular method has been specified in the question, full marks may be awarded for any correct method. However, if a calculation is required
+then no marks will be awarded for a scale drawing.
+2 Unless specified in the question, answers may be given as fractions, decimals or in standard form. Ignore superfluous zeros, provided that the degree of
+accuracy is not affected.
+3 Allow alternative conventions for notation if used consistently throughout the paper, e.g. commas being used as decimal points.
+4 Unless otherwise indicated, marks once gained cannot subsequently be lost, e.g. wrong working following a correct form of answer is ignored (isw).
+5 Where a candidate has misread a number in the question and used that value consistently throughout, provided that number does not alter the difficulty or
+the method required, award all marks earned and deduct just 1 mark for the misread.
+6 Recovery within working is allowed, e.g. a notation error in the working where the following line of working makes the candidate’s intent clear.
+© UCLES 2021 Page 3 of 11
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Mark Scheme Notes
+The following notes are intended to aid interpretation of mark schemes in general, but individual mark schemes may include marks awarded for specific reasons
+outside the scope of these notes.
+Types of mark
+M Method mark, awarded for a valid method applied to the problem. Method marks are not lost for numerical errors, algebraic slips or errors in units.
+However, it is not usually sufficient for a candidate just to indicate an intention of using some method or just to quote a formula; the formula or idea
+must be applied to the specific problem in hand, e.g. by substituting the relevant quantities into the formula. Correct application of a formula
+without the formula being quoted obviously earns the M mark and in some cases an M mark can be implied from a correct answer.
+A Accuracy mark, awarded for a correct answer or intermediate step correctly obtained. Accuracy marks cannot be given unless the associated method
+mark is earned (or implied).
+B Mark for a correct result or statement independent of method marks.
+DM or DB When a part of a question has two or more ‘method’ steps, the M marks are generally independent unless the scheme specifically says otherwise;
+and similarly, when there are several B marks allocated. The notation DM or DB is used to indicate that a particular M or B mark is dependent on
+an earlier M or B (asterisked) mark in the scheme. When two or more steps are run together by the candidate, the earlier marks are implied and full
+credit is given.
+FT Implies that the A or B mark indicated is allowed for work correctly following on from previously incorrect results. Otherwise, A or B marks are
+given for correct work only.
+• A or B marks are given for correct work only (not for results obtained from incorrect working) unless follow through is allowed (see abbreviation FT above).
+• For a numerical answer, allow the A or B mark if the answer is correct to 3 significant figures or would be correct to 3 significant figures if rounded (1
+decimal place for angles in degrees).
+• The total number of marks available for each question is shown at the bottom of the Marks column.
+• Wrong or missing units in an answer should not result in loss of marks unless the guidance indicates otherwise.
+• Square brackets [ ] around text or numbers show extra information not needed for the mark to be awarded.
+© UCLES 2021 Page 4 of 11
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Abbreviations
+AEF/OE Any Equivalent Form (of answer is equally acceptable) / Or Equivalent
+AG Answer Given on the question paper (so extra checking is needed to ensure that the detailed working leading to the result is valid)
+CAO Correct Answer Only (emphasising that no ‘follow through’ from a previous error is allowed)
+CWO Correct Working Only
+ISW Ignore Subsequent Working
+SOI Seen Or Implied
+SC Special Case (detailing the mark to be given for a specific wrong solution, or a case where some standard marking practice is to be varied in the
+light of a particular circumstance)
+WWW Without Wrong Working
+AWRT Answer Which Rounds To
+© UCLES 2021 Page 5 of 11
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+1(a) 120×8=120v+40v M1 Applying conservation of momentum.
+v=6 ms −1 A1
+2
+1(b) 1600−4800=160a leading to a = –20 M1 Applying Newton’s 2nd law to the system.
+0 = 62 + 2 × (–20) × s M1 Use of constant acceleration equations such as
+v2 = u2 + 2as.
+Distance travelled by post = 0.9m A1
+Alternative method for question 1(b)
+Initial KE = 1 × 160 × 62 M1 Use of KE = 1 mv2 for combined mass.
+2 2
+1 × 160 × 62 + 160 × 10 × s = 4800s M1 Forms work/energy equation.
+2
+Distance travelled by post = 0.9m A1
+3
+© UCLES 2021 Page 6 of 11
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+2(a) Correct 3 force diagram, including angles shown B1
+1
+2(b) T cos60=T cos45 M1 Resolving forces horizontally.
+1 2
+T sin60+T sin45=8g M1 Resolving forces vertically.
+1 2
+T cos60=T cos45 and T sin60+T sin45=8g A1
+1 2 1 2
+Attempting to solve for either T or T M1
+1 2
+T = 58.6 N A1
+1
+T = 41.4 N A1
+2
+Alternative method for question 2(b)
+T = T = 80 M1 Applies Lami’s Theorem – at least two terms correct.
+1 2
+sin135 sin150 sin75
+A1
+80sin135 M1 Solves for T .
+1
+T =
+1
+sin75
+T = 58.6 N A1
+1
+80sin150 M1 Solves for T .
+2
+T =
+2
+sin75
+T = 41.4 N A1
+2
+6
+© UCLES 2021 Page 7 of 11
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+3(a) PE = 1.6 × 10 × 5 [= 80J] B1 Either finds PE loss
+or or
+v↓= (2´10´5) [= 10] uses v2 = u2 + 2as to find the velocity and hence the
+kinetic energy on reaching the ground
+KE = 1 × 1.6 × 102 [= 80 J]
+2
+1.6 × 10 × 5 = 1.6 × 10 × h + 8 M1 Using Initial PE = Final PE + Loss in KE
+or or
+1 × 1.6 × v2 = 80 – 8, v↑ = 90 , using KE = 1 mv2 to find initial velocity upwards and
+2 2
+0 = 90 + 2× (–10) × h leading to h = … either v2 = u2 + 2as or KE loss = PE gain to form
+or equation in h.
+1 × 1.6 × v2 = 80 – 8, v↑ = 90 ,
+2
+1 m × 90 = m × 10 × h leading to h = …
+2
+h=4.5m A1
+3
+3(b) 5 = 0 + 1 × 10 × t2 leading to t = 1 M1 Use of s = ut + 1 gt2 for downward motion
+2 2
+or or
+5 = 1 × (0 + 10) × t leading to t = 1 use of s = 1 (u + v)t for downward motion
+2 2
+or or
+10 = 10t leading to t = 1 use of v = u + gt for downward motion.
+4.5 = 0 – 1 × (–10) × t2 leading to t = 0.9 M1 Use of s = vt – 1 (– g)t2 for upward motion
+2 2
+or or
+4.5 = 1 × ( 90 + 0) × t leading to t = 0.9 use of s = 1 (u + v)t for upward motion
+2 2
+or or
+0 = 90 – 10t leading to t = 0.9 use of v = u – gt for upward motion.
+t = 1.95s A1
+3
+© UCLES 2021 Page 8 of 11
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+4(a)(i) [WD = 1250 × 36 × 8] M1 For using Work Done = Force × Distance.
+WD = 360000 J A1 or 360kJ
+2
+4(a)(ii) 360000 B1 FT a(i)
+Power = 1250 × 36 or P = [= 45000 J] FT Work Done from .
+8 8
+= 45kW B1
+2
+4(a)(iii) 57000 M1 Use changed Power in P = DF × v.
+DF = [= 1583.3..]
+36
+57000 M1 For using Newton’s 2nd law applied to the car.
+−1250=1400a
+36
+a=0.238ms −2 A1
+3
+4(b) 64000 M1 For using DF = resistance + component of the weight of
+= 1250 + 1400g sin θ
+the car.
+32
+θ = 3.1 [3.0708…] A1
+2
+© UCLES 2021 Page 9 of 11
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+5(a) 1 M1 Uses v = ∫a dt.
+a=16k−kt2, v=16kt− kt3
+3
+8 = 16k × 4 – 1 k × 43 leading to k = … M1 Substitutes t = 4, v = 8.
+3
+kt3 3 A1 OE
+v = 16kt- and k =
+3 16
+1 24 3 M1 Uses s = ∫vdt and attempts to find s in terms of t only.
+s=8kt2 − kt4 leading to s= t2 − t4
+12 16 192 May be using v = 3t – 1 t 3.
+16
+1 A1 AG, no errors seen.
+s= t2(96−t2)
+64
+5
+5(b) s = 0, t2 = 96, t = 4 6 M1 Attempt to find t when s = 0.
+3 3 1 M1 Attempt to find v at this t value
+v=16× × 96− × × 963
+16 16 3
+Speed is 29.4 ms-1 A1 Do not condone v=−29.4.
+3
+5(c) v = 0, t2 = 48, t = 4 3 M1 Determine the time, t (or t2) at which v = 0
+1 M1 Use substitution of the t or t2 value to find s.
+s= ×48×(96−48)
+64
+s=36 m A1
+3
+© UCLES 2021 Page 10 of 11
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks Guidance
+6(a) R = 5g, F = 6g – 4g M1 For resolving forces to find F and R.
+2g A1 AG
+μ= =0.4
+5g
+2
+6(b) T – 4g = 4a or 8g – T = 8a M1 For applying Newton’s 2nd law to the 4kg particle or the
+1 2
+8kg particle.
+T – 4g = 4a and 8g – T = 8a A1 Both equations correct.
+1 2
+T – T – F = 5a and F = 0.4 × 5g B1
+2 1
+Adding gives 8g – 4g – 2g = 17a leading to a = …. M1 Attempt to solve for a, T or T .
+1 2
+a = 1.18ms–2, T = 44.7 N, T = 70.6 N A1
+1 2
+5
+6(c) T – 4g = 4a, -T – F = 5a, F = 2g or –4g – 2g = 9a M1 Applying Newton’s 2nd law to both active particles.
+60 A1
+a = -
+9
+20 20 M1 Use of v2 = u2 + 2as or equivalent to find v or v2 when the
+v2 =2´ ´0.5= leading to v = … [v = 1.0846…]
+8kg particle reaches the ground.
+17 17
+20 60 M1 Use of v = u + at or equivalent to find t.
+0= − t
+17 9
+t =0.163s A1 From t = 0.1626978…
+5
+© UCLES 2021 Page 11 of 11

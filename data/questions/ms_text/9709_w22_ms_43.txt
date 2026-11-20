@@ -1,0 +1,270 @@
+Cambridge International AS & A Level
+MATHEMATICS 9709/43
+Paper 4 Mechanics October/November 2022
+MARK SCHEME
+Maximum Mark: 50
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the October/November 2022 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 12 printed pages.
+© UCLES 2022 [Turn over
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the specific content of the
+mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the scope of the
+syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the question as
+indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently, e.g. in situations where candidates have not followed instructions or in the application of generic level descriptors.
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may be limited
+according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or grade descriptors in
+mind.
+© UCLES 2022 Page 2 of 12
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Mathematics Specific Marking Principles
+1 Unless a particular method has been specified in the question, full marks may be awarded for any correct method. However, if a calculation is required
+then no marks will be awarded for a scale drawing.
+2 Unless specified in the question, answers may be given as fractions, decimals or in standard form. Ignore superfluous zeros, provided that the degree of
+accuracy is not affected.
+3 Allow alternative conventions for notation if used consistently throughout the paper, e.g. commas being used as decimal points.
+4 Unless otherwise indicated, marks once gained cannot subsequently be lost, e.g. wrong working following a correct form of answer is ignored (isw).
+5 Where a candidate has misread a number in the question and used that value consistently throughout, provided that number does not alter the difficulty or
+the method required, award all marks earned and deduct just 1 mark for the misread.
+6 Recovery within working is allowed, e.g. a notation error in the working where the following line of working makes the candidate’s intent clear.
+© UCLES 2022 Page 3 of 12
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Mark Scheme Notes
+The following notes are intended to aid interpretation of mark schemes in general, but individual mark schemes may include marks awarded for specific reasons
+outside the scope of these notes.
+Types of mark
+M Method mark, awarded for a valid method applied to the problem. Method marks are not lost for numerical errors, algebraic slips or errors in units.
+However, it is not usually sufficient for a candidate just to indicate an intention of using some method or just to quote a formula; the formula or idea
+must be applied to the specific problem in hand, e.g. by substituting the relevant quantities into the formula. Correct application of a formula
+without the formula being quoted obviously earns the M mark and in some cases an M mark can be implied from a correct answer.
+A Accuracy mark, awarded for a correct answer or intermediate step correctly obtained. Accuracy marks cannot be given unless the associated method
+mark is earned (or implied).
+B Mark for a correct result or statement independent of method marks.
+DM or DB When a part of a question has two or more ‘method’ steps, the M marks are generally independent unless the scheme specifically says otherwise;
+and similarly, when there are several B marks allocated. The notation DM or DB is used to indicate that a particular M or B mark is dependent on
+an earlier M or B (asterisked) mark in the scheme. When two or more steps are run together by the candidate, the earlier marks are implied and full
+credit is given.
+FT Implies that the A or B mark indicated is allowed for work correctly following on from previously incorrect results. Otherwise, A or B marks are
+given for correct work only.
+• A or B marks are given for correct work only (not for results obtained from incorrect working) unless follow through is allowed (see abbreviation FT above).
+• For a numerical answer, allow the A or B mark if the answer is correct to 3 significant figures or would be correct to 3 significant figures if rounded (1
+decimal place for angles in degrees).
+• The total number of marks available for each question is shown at the bottom of the Marks column.
+• Wrong or missing units in an answer should not result in loss of marks unless the guidance indicates otherwise.
+• Square brackets [ ] around text or numbers show extra information not needed for the mark to be awarded.
+© UCLES 2022 Page 4 of 12
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Abbreviations
+AEF/OE Any Equivalent Form (of answer is equally acceptable) / Or Equivalent
+AG Answer Given on the question paper (so extra checking is needed to ensure that the detailed working leading to the result is valid)
+CAO Correct Answer Only (emphasising that no ‘follow through’ from a previous error is allowed)
+CWO Correct Working Only
+ISW Ignore Subsequent Working
+SOI Seen Or Implied
+SC Special Case (detailing the mark to be given for a specific wrong solution, or a case where some standard marking practice is to be varied in the
+light of a particular circumstance)
+WWW Without Wrong Working
+AWRT Answer Which Rounds To
+© UCLES 2022 Page 5 of 12
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+1(a) u = 30 B1 From v = u + at or equivalent.
+1
+1(b) 0=302 −210s M1 Use of suvat formulae.
+Greatest height =45m A1 FT FT u2/2g with their u from (a).
+2
+Question Answer Marks Guidance
+2(a) PE = 5g151.8 sin 20 M1 Attempt to find PE gain.
+PE = 462J A1 From 461.727…
+2
+2(b) WD = 5g151.8 sin 20+40151.8 M1 Uses WD by pulling force = PE gain + WD against
+friction or WD = Fs.
+or
+WD =
+(5gsin 20+40)151.8
+WD = 1540J A1 FT From 1541.727… FT ‘1080 + PE from (a)’.
+2
+© UCLES 2022 Page 6 of 12
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+3 T cos 25 = 40 + R cos 50 M1 Resolving in any direction e.g. horizontal, vertical,
+along radius or tangent.
+R sin 50 = T sin 25 M1 Resolving in a second direction.
+Radially: T cos 25 = R + 40 cos 50 A1 Two correct equations.
+Tangentially: T sin 25 = 40 sin 50
+Parallel to T: T = R cos 25 + 40 cos 25
+Perpendicular to T: R sin 25 = 40 sin 25
+Vertically: T cos 25 = 40 + R cos 50
+Horizontally: R sin 50 = T sin 25
+Solving equation(s) to find either T or R M1
+T = 72.5 N A1 From 72.504….
+R = 40 N A1
+6
+© UCLES 2022 Page 7 of 12
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+4(a) 52=u(2)+0.5a(2)2
+-
+( u(1)+0.5a(1)2) M1 Use of s = ut + ½ at2 or equivalent to form equation
+for 2nd or 4th second .
+or
+64=u(4)+0.5a(4)2
+-
+(u(3)+0.5a(3)2
+M1 Second equation in u and a.
+52=u+1.5a and 64=u+3.5a A1 Two correct equations in u and a.
+12=2a leading to a=6 M1 Solves simultaneous equations to find either u or a.
+Initial speed =43ms−1 and acceleration =6 ms−2 A1
+5
+4(b) s=4310+0.56102 M1 Use of s = ut + ½ at2 or equivalent.
+Distance =730m A1 FT FT 10u+50a with u and a from part (a).
+2
+© UCLES 2022 Page 8 of 12
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+5(a) v=12t+12dt , v =6t2 +12t or v=24t−8dt, v =12t2 −8t M1 Uses v= a dt.
+X Y
+v =6t2 +12t v =12t2 −8t A1 All correct.
+X Y
+10 B1 Solves v =v .
+6t2 +12t=12t2 −8t leading to t = X Y
+3
+s =6t2 +12tdt s =2t3+6t2 *M1 Uses s = v dt.
+X X
+s =12t2 −8tdt s =4t3 −4t2
+Y Y
+10 3 10 2 10 3 10 2 DM1 10
+s =2   +6   s =4   −4   Evaluates s   for each particle.
+X  3   3  Y  3   3   3 
+3800 2800 1000 A1
+AB = − = Distance AB = 37 m
+27 27 27
+6
+5(b) AB =−2t3+10t2 =−233+1032 M1 Calculates distance AB.
+[t =3], AB = 36 m A1 AG
+2
+© UCLES 2022 Page 9 of 12
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+6(a)(i) P = (650 + 150)  24 M1 Use of P = DF × v.
+19200W or 19.2kW A1
+2
+6(a)(ii) 40000 = DF  24 B1 Correct use of P = DF × v.
+40000 M1 Use of Newton’s Second Law for the system or for
+−800=2250a
+the caravan or for the car.
+24
+T−150=500a A1 Two correct equations.
+40000  M1 Solves for a or for T.
+a =  −800  2250 leading to a =
+ 24 
+Acceleration =0.385 ms−2 and Tension =343N A1 52
+From a= = 0.38518…. and
+135
+9250
+T = = 342.59…
+27
+5
+6(b) DF = 800+2250g0.14 M1 Resolving up hill using DF = Total resistances.
+31000 M1 Use of P = DF × v to form equation in v.
+=800+2250g0.14
+v
+v=7.85 A1 620
+From v = = 7.848…
+79
+3
+© UCLES 2022 Page 10 of 12
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+7(a) R=3gcos = 3 10  0.8 B1
+F =3gsin = 3 10  0.6 M1 Resolving parallel to plane.
+18 3g sin A1 F
+= =0.75 or = =tan=0.75 Uses = AG.
+24 3gcos R
+3
+7(b) a= gsin or PE loss=1.5gxsin for AB and a=0 for BC B1 Accelerations for AB and BC.
+4.5g sin−0.754.5gcos=4.5a leading to a=0
+v2 =2gsin x ] or [1.5g xsin=0.51.5v2 M1 Uses ’suvat’ or PE loss = KE gain for AB.
+1 1
+v2 =20xsin =12x leading to v = 12x A1
+1 1
+1 M1 Conservation of momentum.
+1.5 12x+0=4.5v leading to v = 12x
+2 2 3
+2 M1 Use of s=vton BC since a = 0.
+4=  12x
+3
+x=3 A1
+© UCLES 2022 Page 11 of 12
+
+9709/43 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+7(b) Alternative Method for 7(b)
+a= gsin or PE loss=1.5gxsin for AB and a=0 for BC B1 Accelerations for AB and BC.
+4.5g sin−0.754.5gcos=4.5a leading to a=0
+4= 2v leading to v =2 M1 Uses s=vton BC since a = 0.
+2 2
+1.5v +0=4.52 M1 Conservation of momentum.
+1
+v =6 A1 Velocity before collision.
+1
+62 =2gsin x or 1.5g xsin=0.51.562 M1 Uses suvat or PE loss = KE gain for AB.
+x=3 A1
+6
+7(c) KE = 0.54.522 =9J B1 KE gain for AC.
+3 3 M1 Evaluates PE loss for AC.
+PE loss = 15 (4+3) +304 =135 J
+5 5
+Loss of energy = 126J A1
+3
+© UCLES 2022 Page 12 of 12

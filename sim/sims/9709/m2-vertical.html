@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vertical motion under gravity</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/mech-kinematics.js"></script>
+<style>.subtle { color: var(--muted); font-size: 12.5px; } .tblwrap { overflow-x: auto; }</style>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, K = SIM.kin;
+  var course = ui.course('9709'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Vertical motion: two particles, bouncing and mid-air collisions', g: g,
+    tags: course === '9709' ? ['9709 4.2 Kinematics (vertical motion)', '9709 4.3 Momentum (mid-air collision)'] : ['9702 2 Kinematics'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 16 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 6, onFrame: function () { drawScene(); drawPlots(); readout(); } });
+  ui.legend(sceneCard, [{ color: 'var(--c-s1)', label: 'particle A' }, { color: 'var(--c-s2)', label: 'particle B' }, { color: 'var(--c-s3)', label: 'combined particle C' },
+    { color: 'var(--c-velocity)', label: 'velocity' }, { color: 'var(--accent)', label: 'shaded: query bands (speed ≥ V on v–t, height ≥ H on y–t)' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pY = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'y / m (height above ground)' });
+  var pV = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'v / m s⁻¹ (up +)' });
+  var evCard = pg.card('left', 'Event timeline');
+  var evDiv = ui.h('div', { class: 'tblwrap' }); evCard.appendChild(evDiv);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var queryCard = pg.card('right', 'Questions to ask');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  paramCard.appendChild(ui.h('div', { class: 'subtle', html: '<b>Particle A</b>' }));
+  var pa = ui.params(paramCard, [
+    { key: 'uA', label: 'Initial velocity of A (up +)', sym: 'u<sub>A</sub>', unit: 'm s<sup>−1</sup>', min: -50, max: 100, step: 0.1, value: 30 },
+    { key: 'hA', label: 'Starting height of A', sym: 'h<sub>A</sub>', unit: 'm', min: 0, max: 300, step: 0.1, value: 0 },
+    { key: 'mA', label: 'Mass of A', sym: 'm<sub>A</sub>', unit: 'kg', min: 0.01, max: 10, step: 0.01, value: 1 }
+  ], update);
+  var bOn = ui.toggle(paramCard, { label: '<b>Second particle B</b> in the same vertical line' }, function () { update(); });
+  var pb = ui.params(paramCard, [
+    { key: 'uB', label: 'Initial velocity of B (up +)', sym: 'u<sub>B</sub>', unit: 'm s<sup>−1</sup>', min: -50, max: 100, step: 0.1, value: 0 },
+    { key: 'hB', label: 'Starting height of B', sym: 'h<sub>B</sub>', unit: 'm', min: 0, max: 300, step: 0.1, value: 20 },
+    { key: 'delay', label: 'B is projected after a delay', sym: 'τ', unit: 's', min: 0, max: 10, step: 0.01, value: 0 },
+    { key: 'mB', label: 'Mass of B', sym: 'm<sub>B</sub>', unit: 'kg', min: 0.01, max: 10, step: 0.01, value: 1 }
+  ], update);
+  var ground = ui.select(paramCard, { label: 'At the ground', value: 'stop', options: [
+    { value: 'stop', label: 'comes to rest (no rebound)' }, { value: 'rebound', label: 'rebounds with k × its impact speed (given data)' }] }, function () { update(); });
+  var pk = ui.params(paramCard, [{ key: 'k', label: 'Rebound speed ÷ impact speed (given in the question — not a coefficient of restitution)', sym: 'k', unit: '', min: 0, max: 1, step: 0.01, value: 0.5 }], update);
+  var collide = ui.select(paramCard, { label: 'When A and B meet', value: 'off', options: [
+    { value: 'off', label: 'pass (just find where they meet)' }, { value: 'Arest', label: 'collide: A is brought to rest' }, { value: 'Brest', label: 'collide: B is brought to rest' },
+    { value: 'coalesce', label: 'collide and coalesce' }, { value: 'vA', label: 'collide: velocity of A after is given' }, { value: 'vB', label: 'collide: velocity of B after is given' }] }, function () { update(); });
+  var pc = ui.params(paramCard, [{ key: 'vAfter', label: 'Velocity just after the collision (up +)', sym: 'v′', unit: 'm s<sup>−1</sup>', min: -100, max: 100, step: 0.1, value: 0 }], update);
+
+  var pq = ui.params(queryCard, [
+    { key: 'V', label: 'Time for which speed ≥ V', sym: 'V', unit: 'm s<sup>−1</sup>', min: 0, max: 100, step: 0.1, value: 10 },
+    { key: 'H', label: 'Time for which height ≥ H (and speed at height H)', sym: 'H', unit: 'm', min: 0, max: 300, step: 0.1, value: 20 }
+  ], update);
+  var who = ui.select(queryCard, { label: 'Ask about particle', value: 'A', options: [{ value: 'A', label: 'A (or C after coalescing)' }, { value: 'B', label: 'B' }] }, function () { update(); });
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var PRESETS = [
+    { name: '9709/43 M/J 22 Q2: greatest height 45 m; time with speed ≥ 10 m s⁻¹', v: { uA: 30, hA: 0, mA: 1, V: 10, H: 45 }, b: false, ground: 'stop',
+      note: '0 = u² − 2g(45) ⇒ u = 30. Speed ≥ 10 for 0 ≤ t ≤ 2 and 4 ≤ t ≤ 6: total 4 s. It stops on landing, so no more time counts.' },
+    { name: '9709/41 O/N 24 Q5: A at 80, B at 100 one second later; coalesce', v: { uA: 80, hA: 0, mA: 1, uB: 100, hB: 0, delay: 1, mB: 1, V: 10, H: 218.75 }, b: true, ground: 'stop', collide: 'coalesce',
+      note: '80T − 5T² = 100(T − 1) − 5(T − 1)² ⇒ T = 3.5, height 218.75 m. Momentum: 45m + 75m = 2mv ⇒ v = 60; C returns to O at t = 18.4 s.' },
+    { name: '9709/42 O/N 23 Q5: A (0.5 kg) up at 25; meets B (0.3 kg) at 20 m; B brought to rest', v: { uA: 25, hA: 0, mA: 0.5, uB: -22.5, hB: 47.5, delay: 0, mB: 0.3, V: 15, H: 20 }, b: true, ground: 'stop', collide: 'Brest',
+      note: 'A has speed 15 at 20 m (t = 1). B is set up so that it is moving down at 32.5 m s⁻¹ at that moment. 0.5(15) + 0.3(−32.5) = 0.5v ⇒ v = −4.5. A lands after 1.6 s, B after 2 s: interval 0.4 s.' },
+    { name: '9709/42 F/M 23 Q2: P up at 15 from the ground, Q dropped from 18 m', v: { uA: 15, hA: 0, mA: 1, uB: 0, hB: 18, delay: 0, mB: 1, V: 5, H: 10 }, b: true, ground: 'stop', collide: 'off',
+      note: 'Speed at 10 m: v² = 15² − 2(10)(10) ⇒ 5. Relative motion: 18 m closed at 15 m s⁻¹ ⇒ t = 1.2 s, height 18 − 5(1.2)² = 10.8 m.' },
+    { name: '9709/42 O/N 24 Q5: P (2m) up at 2 from 1 m, Q (m) released at 2 m; Q down at 3.5 after', v: { uA: 2, hA: 1, mA: 2, uB: 0, hB: 2, delay: 0, mB: 1, vAfter: -3.5, V: 3, H: 0.75 }, b: true, ground: 'stop', collide: 'vB',
+      note: 'Meet at t = 0.5: speeds 3 and 5. Momentum 2m(−3) + m(−5) = 2m v + m(−3.5) ⇒ v = −3.75; P reaches the ground at 5.39 m s⁻¹.' },
+    { name: '9709/42 O/N 25 Q4: P (0.1 kg) up at 30, Q (0.4 kg) up at 10 from 15 m; coalesce', v: { uA: 30, hA: 0, mA: 0.1, uB: 10, hB: 15, delay: 0, mB: 0.4, V: 20, H: 19.6875 }, b: true, ground: 'stop', collide: 'coalesce',
+      note: '30t − 5t² = 15 + 10t − 5t² ⇒ t = 0.75, height 19.6875 m. Speeds 22.5 and 2.5 ⇒ combined 6.5 m s⁻¹ upwards; ground speed √436 = 20.9 m s⁻¹.' },
+    { name: '9709/43 M/J 18 Q2: thrown down at 5 from 7.2 m; rebounds with half its speed', v: { uA: -5, hA: 7.2, mA: 1, V: 10, H: 2 }, b: false, ground: 'rebound', k: 0.5,
+      note: 'V² = 5² + 2(10)(7.2) ⇒ V = 13; 0.8 s down. Rebounds at 6.5 m s⁻¹, rises for 0.65 s to B: total 1.45 s. “½V” is given data, not restitution.' },
+    { name: 'Projected up from a cliff 40 m high at 15 m s⁻¹', v: { uA: 15, hA: 40, mA: 1, V: 20, H: 40 }, b: false, ground: 'stop',
+      note: 'Greatest height 40 + 15²/20 = 51.25 m at t = 1.5 s. Lands when 0 = 40 + 15t − 5t² ⇒ t = (3 + √41)/2 = 4.70 s (take the positive root), at √(15² + 2(10)(40)) = 32.0 m s⁻¹.' }
+  ];
+  var presetCtl = ui.presets(presetCard, PRESETS, function (p) {
+    clock.pause();
+    bOn.set(!!p.b, true);
+    ground.set(p.ground || 'stop', true);
+    collide.set(p.collide || 'off', true);
+    who.set('A', true);
+    pk.set({ k: p.k !== undefined ? p.k : 0.5 }, true);
+    var base = { uA: 0, hA: 0, mA: 1, uB: 0, hB: 20, delay: 0, mB: 1, vAfter: 0, V: 10, H: 20 };
+    var v = Object.assign(base, p.v);
+    pa.set({ uA: v.uA, hA: v.hA, mA: v.mA }, true); pb.set({ uB: v.uB, hB: v.hB, delay: v.delay, mB: v.mB }, true);
+    pc.set({ vAfter: v.vAfter }, true); pq.set({ V: v.V, H: v.H }, true);
+    update(); clock.seek(0);
+  });
+
+  ui.notes(noteCard, [
+    'Choose a positive direction (here <b>up</b>) and use a = −g throughout the flight — also on the way down.',
+    's = ut − ½gt² gives two times for the same height: one going up, one coming down.',
+    'Two particles in flight have the same acceleration, so their <b>relative</b> velocity is constant: time to meet = gap ÷ closing speed (once both are moving).',
+    'With a delay, write B’s height in terms of (t − τ), not t.',
+    'In a collision use momentum with signs: down is negative. “Comes to rest without rebounding” means v = 0 after landing.',
+    '“Rebounds with half its speed” is given data — do not invent a coefficient of restitution (not in 9709 P4).',
+    'Take g = ' + g + ' m s<sup>−2</sup>' + (course === '9709' ? ' (no air resistance).' : '.')
+  ]);
+
+  /* ---------- model ---------- */
+  var sim = null, tWin = 1, q = null, focus = 'A';
+  function update() {
+    var two = bOn.get();
+    ['uB', 'hB', 'delay', 'mB'].forEach(function (k) { pb.show(k, two); });
+    collide.row.style.display = two ? '' : 'none';
+    var cm = collide.get();
+    pc.show('vAfter', two && (cm === 'vA' || cm === 'vB'));
+    pc.label('vAfter', 'Velocity of ' + (cm === 'vB' ? 'B' : 'A') + ' just after the collision (up +) <span class="sym">v′</span>');
+    pk.show('k', ground.get() === 'rebound');
+    who.row.style.display = two ? '' : 'none';
+    var o = { g: g, A: { h: pa.values.hA, u: pa.values.uA, m: pa.values.mA }, ground: ground.get(), k: pk.values.k, collide: two ? (cm === 'vB' ? 'vA' : cm) : 'off' };
+    if (two) o.B = { h: pb.values.hB, u: pb.values.uB, m: pb.values.mB, delay: pb.values.delay };
+    if (two && cm === 'vB') {
+      // velocity of B after is given: convert to A's velocity after via momentum at the meeting (found by a first pass)
+      var pre = K.vertical(Object.assign({}, o, { collide: 'off' }));
+      var m0 = pre.events.filter(function (e) { return e.type === 'meet'; })[0];
+      if (m0) { var M = o.A.m * m0.vA + o.B.m * m0.vB; o.vA = (M - o.B.m * pc.values.vAfter) / o.A.m; }
+      else o.vA = 0;
+    } else o.vA = pc.values.vAfter;
+    sim = K.vertical(o); sim.opts = o; sim.mode = cm;
+    tWin = sim.tEnd > 1e-6 ? sim.tEnd * 1.04 : 1;
+    if (two && pb.values.delay > tWin) tWin = pb.values.delay * 1.04;
+    clock.setDuration(tWin);
+    focus = two ? who.get() : 'A';
+    var tr = sim.tracks[focus];
+    q = { speed: K.timeSpeedAtLeast(tr, pq.values.V, sim.tEnd), height: K.timeHeightAtLeast(tr, pq.values.H, sim.tEnd),
+      atH: K.timesAtHeight(tr, pq.values.H, sim.tEnd), apex: K.apexes(tr, sim.tEnd) };
+    ui.writeHash(Object.assign({}, pa.values, pb.values, pq.values, pk.values, pc.values, { two: +two, ground: ground.get(), collide: cm }));
+    drawScene(); drawPlots(); readout(); drawEvents();
+  }
+
+  /* ---------- scene: column view ---------- */
+  function drawScene() {
+    if (!sim) return;
+    var col = ui.colors(), ymax = 1;
+    ['A', 'B'].forEach(function (n) { if (!sim.tracks[n] || !sim.tracks[n].length) return; for (var i = 0; i <= 300; i++) { var st = sim.stateAt(tWin * i / 300)[n]; if (st) ymax = Math.max(ymax, st.y); } });
+    ymax *= 1.12;
+    var c = vp.begin(), W = vp.w, H = vp.h, top = 20, bot = H - 26;
+    function Y(y) { return bot - (y / ymax) * (bot - top); }
+    var cx = W * 0.5;
+    D.ground(c, 40, bot, W - 20, bot);
+    // height axis
+    var tk = U.niceTicks(0, ymax, 6);
+    c.strokeStyle = col.muted; c.lineWidth = 1; c.beginPath(); c.moveTo(46, Y(0)); c.lineTo(46, top); c.stroke();
+    tk.ticks.forEach(function (v) { if (v > ymax) return; c.beginPath(); c.moveTo(42, Y(v)); c.lineTo(50, Y(v)); c.stroke(); D.label(c, U.num(v, 6), 38, Y(v), col.muted, { size: 11, align: 'right' }); });
+    D.label(c, 'y / m', 50, 10, col.muted, { size: 11, align: 'left' });
+    // the vertical line
+    D.line(c, [[cx, Y(0)], [cx, top]], col.grid, { dash: [3, 5] });
+    // apex / H line
+    if (pq.values.H <= ymax) { D.line(c, [[60, Y(pq.values.H)], [W - 20, Y(pq.values.H)]], col.accent, { dash: [6, 4], width: 1 }); D.label(c, 'H = ' + U.sf(pq.values.H) + ' m', W - 22, Y(pq.values.H) - 8, col.accent, { size: 11, align: 'right' }); }
+    var st = sim.stateAt(clock.t);
+    function drawP(s, name, colr, dx) {
+      if (!s) return;
+      var x = cx + dx, y = Y(s.y) - 9;
+      D.particle(c, x, y, 9, { fill: colr, label: name });
+      if (Math.abs(s.v) > 1e-9) D.arrow(c, x + (dx >= 0 ? 18 : -18), y, x + (dx >= 0 ? 18 : -18), y - U.sgn(s.v) * (12 + Math.min(70, Math.abs(s.v) * 1.5)), col.velocity, { label: U.sf(Math.abs(s.v)) + ' m/s', width: 2 });
+    }
+    var merged = st.B && st.B.mode === 'merged';
+    if (merged) drawP(st.A, 'C', col.s3, 0);
+    else {
+      drawP(st.A, 'A', col.s1, st.B ? -14 : 0);
+      if (st.B) drawP(st.B, 'B', col.s2, 14);
+    }
+    if (st.B && st.B.mode === 'held' && sim.opts.B && sim.opts.B.delay > 0) D.label(c, 'B waits until t = ' + U.sf(sim.opts.B.delay) + ' s', cx + 30, Y(st.B.y) - 24, col.muted, { size: 11, align: 'left' });
+    D.label(c, 'up = positive', W - 22, 12, col.muted, { size: 11, align: 'right' });
+  }
+
+  /* ---------- plots ---------- */
+  function bandOverlay(P, iv) {
+    if (!P.px || !iv) return;
+    var c = P.ctx, col = ui.colors(), b = P.box;
+    c.save(); c.beginPath(); c.rect(b.L, b.T, b.W, b.H); c.clip(); c.globalAlpha = 0.14; c.fillStyle = col.accent;
+    iv.intervals.forEach(function (x) { c.fillRect(P.px(x[0]), b.T, P.px(x[1]) - P.px(x[0]), b.H); });
+    c.restore();
+  }
+  pY.draw = function (spec) { SIM.plot.Plot.prototype.draw.call(this, spec); bandOverlay(this, q && q.height); };
+  pV.draw = function (spec) { SIM.plot.Plot.prototype.draw.call(this, spec); bandOverlay(this, q && q.speed); };
+  function drawPlots() {
+    if (!sim) return;
+    var col = ui.colors(), br = sim.events.map(function (e) { return e.t; });
+    var serY = [], serV = [];
+    function ser(n, colr, dash) {
+      if (!sim.tracks[n] || !sim.tracks[n].length) return;
+      serY.push({ fn: function (t) { var s = sim.stateAt(t)[n]; return s ? s.y : NaN; }, color: colr, breaks: br, steps: 600, dash: dash });
+      serV.push({ fn: function (t) { var s = sim.stateAt(t)[n]; return s ? s.v : NaN; }, color: colr, breaks: br, steps: 600, dash: dash });
+    }
+    ser('A', col.s1);
+    if (sim.opts.B) ser('B', col.s2, [6, 4]);
+    var mk = [];
+    sim.events.forEach(function (e) {
+      if (e.type === 'meet') mk.push({ x: e.t, y: e.y, label: (e.collision ? 'collide ' : 'meet ') + U.sf(e.y).replace(/<[^>]+>/g, '') + ' m', color: col.ink });
+      if (e.type === 'bounce') mk.push({ x: e.t, y: 0, label: 'bounce', color: col.muted });
+    });
+    (q ? q.apex : []).forEach(function (a) { mk.push({ x: a.t, y: a.y, label: 'top ' + U.sf(a.y).replace(/<[^>]+>/g, ''), color: col.muted }); });
+    pY.draw({ x: [0, tWin], series: serY, cursor: clock.t, markers: mk, hlines: [{ y: pq.values.H, label: 'H', color: col.accent }] });
+    pV.draw({ x: [0, tWin], series: serV, cursor: clock.t, hlines: [{ y: pq.values.V, label: '+V', color: col.accent }, { y: -pq.values.V, label: '−V', color: col.accent }] });
+  }
+
+  /* ---------- events table ---------- */
+  function drawEvents() {
+    var s3 = U.sf;
+    var rows = sim.events.map(function (e) {
+      var what = e.type === 'launch' ? e.who + ' projected (v = ' + s3(e.v) + ')' :
+        e.type === 'bounce' ? e.who + ' bounces: ' + s3(e.vBefore) + ' → ' + s3(e.vAfter) :
+        e.type === 'land' ? e.who + ' lands at ' + s3(Math.abs(e.vBefore)) + ' m s⁻¹ and stops' :
+        e.collision ? 'collision: v<sub>A</sub> ' + s3(e.vA) + ' → ' + s3(e.vA2) + ', v<sub>B</sub> ' + s3(e.vB) + ' → ' + s3(e.vB2) :
+        'A and B level (v<sub>A</sub> = ' + s3(e.vA) + ', v<sub>B</sub> = ' + s3(e.vB) + ')';
+      return '<tr><td>' + s3(e.t) + '</td><td>' + s3(e.y) + '</td><td style="text-align:left">' + what + '</td></tr>';
+    }).join('');
+    evDiv.innerHTML = '<table class="tbl"><tr><th>t / s</th><th>y / m</th><th style="text-align:left">event</th></tr>' + rows + '</table>' +
+      (sim.events.filter(function (e) { return e.type === 'bounce'; }).length >= 20 ? '<div class="subtle">Stopped after 20 bounces.</div>' : '');
+  }
+
+  /* ---------- live working ---------- */
+  function br(x) { return x < 0 ? '(' + U.sf(x) + ')' : U.sf(x); }
+  /** 3 s.f., plus the exact value when it is a short exact decimal that 3 s.f. would round */
+  function pr(x) {
+    if (!isFinite(x)) return U.sf(x);
+    var t = U.sf(x);
+    for (var k = 0; k <= 3; k++) {
+      var m = x * Math.pow(10, k);
+      if (Math.abs(m - Math.round(m)) < 1e-7 * Math.max(1, Math.abs(m))) {
+        var ex = (Math.round(m) / Math.pow(10, k)).toFixed(k).replace('-', '−');
+        return Number(ex.replace('−', '-')) === Number(t.replace('−', '-')) ? t : t + ' (= ' + ex + ')';
+      }
+    }
+    return t;
+  }
+  function readout() {
+    if (!sim) return;
+    var s3 = U.sf, o = sim.opts;
+    R.clear();
+    R.badge('Up is positive; y = height above the ground; a = −' + g + ' m s⁻² in flight.', 'info');
+    sim.warnings.forEach(function (w) { R.badge(w, 'warn'); });
+    function flight(name, spec, t0) {
+      var u = spec.u, h = spec.h;
+      R.head('Particle ' + name + (t0 > 0 ? ' (projected at t = ' + s3(t0) + ' s)' : ''));
+      var T = t0 > 0 ? '(t − ' + U.num(t0, 4) + ')' : 't';
+      var uT = u === 0 ? '' : (u < 0 ? ' − ' : ' + ') + U.num(Math.abs(u), 4) + T;
+      R.eq('y', U.num(h, 4) + uT + ' − ½(' + g + ')' + T + '²', '', 'm');
+      R.eq('v', (u === 0 ? '' : (u < 0 ? '−' : '') + U.num(Math.abs(u), 4) + ' ') + '− ' + g + T, '', 'm s<sup>−1</sup>');
+      if (u > 0) {
+        R.eq('greatest height', 'h + u² ÷ (2g) = ' + s3(h) + ' + ' + s3(u) + '² ÷ ' + (2 * g), h + u * u / (2 * g), 'm');
+        R.eq('reached at t', (t0 > 0 ? U.num(t0, 4) + ' + ' : '') + 'u ÷ g = ' + (t0 > 0 ? U.num(t0, 4) + ' + ' : '') + s3(u) + ' ÷ ' + g, t0 + u / g, 's');
+      }
+      if (h > 0 || u > 0) {
+        var tg = (u + Math.sqrt(u * u + 2 * g * h)) / g;
+        R.eq('reaches the ground', 'if nothing else happens: t = [u + √(u² + 2gh)] ÷ g', t0 + tg, 's');
+        R.eq('impact speed', '√(u² + 2gh) = √(' + br(u) + '² + 2(' + g + ')(' + s3(h) + '))', Math.sqrt(u * u + 2 * g * h), 'm s<sup>−1</sup>');
+      }
+    }
+    flight('A', o.A, 0);
+    if (o.B) flight('B', o.B, o.B.delay);
+    var nb = 0;
+    sim.events.forEach(function (e) {
+      if (e.type === 'bounce' && ++nb === 4) R.badge('Further bounces are listed in the event timeline.', 'info');
+      if (e.type === 'bounce' && nb <= 3) {
+        R.head('Bounce at t = ' + s3(e.t) + ' s');
+        R.eq('speed after', 'k × impact speed = ' + s3(o.k) + ' × ' + s3(Math.abs(e.vBefore)), e.vAfter, 'm s<sup>−1</sup> (up)');
+        R.eq('next greatest height', 'v² ÷ (2g) = ' + s3(e.vAfter) + '² ÷ ' + (2 * g), e.vAfter * e.vAfter / (2 * g), 'm');
+      }
+      if (e.type === 'meet') {
+        R.head((e.collision ? 'Collision' : 'A and B at the same height') + ' at t = ' + s3(e.t) + ' s');
+        R.eq('y', 'y<sub>A</sub> = y<sub>B</sub> (solve for t, then substitute)', pr(e.y), 'm');
+        R.eq('v<sub>A</sub>, v<sub>B</sub>', 'just before', s3(e.vA) + ', ' + s3(e.vB), 'm s<sup>−1</sup>');
+        if (e.collision) {
+          var mA = o.A.m, mB = o.B.m, Mom = mA * e.vA + mB * e.vB;
+          R.eq('momentum before', s3(mA) + '(' + s3(e.vA) + ') + ' + s3(mB) + '(' + s3(e.vB) + ')', pr(Mom), 'N s');
+          if (e.collision === 'coalesce') R.eq('v<sub>C</sub>', 'momentum ÷ (m<sub>A</sub> + m<sub>B</sub>) = ' + s3(Mom) + ' ÷ ' + s3(mA + mB), e.vA2, 'm s<sup>−1</sup>');
+          else if (e.collision === 'Arest') R.eq('v<sub>B</sub> after', 'momentum ÷ m<sub>B</sub> = ' + s3(Mom) + ' ÷ ' + s3(mB), e.vB2, 'm s<sup>−1</sup>');
+          else if (e.collision === 'Brest') R.eq('v<sub>A</sub> after', 'momentum ÷ m<sub>A</sub> = ' + s3(Mom) + ' ÷ ' + s3(mA), e.vA2, 'm s<sup>−1</sup>');
+          else if (sim.mode === 'vB') R.eq('v<sub>A</sub> after', '(momentum − m<sub>B</sub>v<sub>B</sub>′) ÷ m<sub>A</sub> = (' + s3(Mom) + ' − ' + s3(mB) + '(' + s3(e.vB2) + ')) ÷ ' + s3(mA), e.vA2, 'm s<sup>−1</sup>');
+          else R.eq('v<sub>B</sub> after', '(momentum − m<sub>A</sub>v<sub>A</sub>′) ÷ m<sub>B</sub> = (' + s3(Mom) + ' − ' + s3(mA) + '(' + s3(e.vA2) + ')) ÷ ' + s3(mB), e.vB2, 'm s<sup>−1</sup>');
+          R.eq('KE lost', '½Σmv² before − after = ' + pr(e.keBefore) + ' − ' + pr(e.keAfter), pr(e.keBefore - e.keAfter), 'J');
+        }
+      }
+      if (e.type === 'land') { R.head(e.who + ' lands at t = ' + s3(e.t) + ' s'); R.eq('impact speed', '|v| just before landing', Math.abs(e.vBefore), 'm s<sup>−1</sup>'); }
+    });
+    if (o.B && !sim.events.some(function (e) { return e.type === 'meet'; })) R.badge('A and B are never at the same height while both are in the air.', 'info');
+    var lands = sim.events.filter(function (e) { return e.type === 'land'; });
+    if (lands.length === 2) R.eq('time between landings', s3(lands[1].t) + ' − ' + s3(lands[0].t), lands[1].t - lands[0].t, 's');
+
+    var nm = focus === 'A' && sim.merged ? 'A / C' : focus;
+    R.head('Questions about ' + nm);
+    R.eq('time with speed ≥ ' + s3(pq.values.V), q.speed.intervals.length ? q.speed.intervals.map(function (x) { return s3(x[0]) + ' ≤ t ≤ ' + s3(x[1]); }).join(', ') : 'never', q.speed.total, 's');
+    R.eq('time with height ≥ ' + s3(pq.values.H), q.height.intervals.length ? q.height.intervals.map(function (x) { return s3(x[0]) + ' ≤ t ≤ ' + s3(x[1]); }).join(', ') : 'never', q.height.total, 's');
+    if (q.atH.length) q.atH.forEach(function (x) { R.eq('at height ' + s3(pq.values.H), 't = ' + s3(x.t) + ' s, moving ' + (x.v > 1e-12 ? 'up' : x.v < -1e-12 ? 'down' : '— at the top'), Math.abs(x.v), 'm s<sup>−1</sup> (speed)'); });
+    else R.eq('at height ' + s3(pq.values.H), 'never reached in flight', '—');
+    q.apex.slice(0, 4).forEach(function (a) { R.eq('top of a flight', 't = ' + s3(a.t) + ' s', pr(a.y), 'm'); });
+    if (q.apex.length > 4) R.badge((q.apex.length - 4) + ' more (smaller) flights not listed.', 'info');
+
+    var st = sim.stateAt(clock.t);
+    R.head('At t = ' + clock.t.toFixed(2) + ' s');
+    if (st.B && st.B.mode === 'merged') R.eq('C', 'y = ' + s3(st.A.y) + ' m', st.A.v, 'm s<sup>−1</sup>');
+    else {
+      R.eq('A', 'y = ' + s3(st.A.y) + ' m' + (st.A.mode === 'ground' ? ' (at rest on the ground)' : ''), st.A.v, 'm s<sup>−1</sup>');
+      if (st.B) R.eq('B', 'y = ' + s3(st.B.y) + ' m' + (st.B.mode === 'held' ? ' (not yet projected)' : st.B.mode === 'ground' ? ' (at rest on the ground)' : ''), st.B.v, 'm s<sup>−1</sup>');
+    }
+    R.render();
+  }
+
+  ui.onTheme(function () { drawScene(); drawPlots(); });
+  vp.onResize = drawScene;
+  var hsh = ui.readHash(), init1 = {}, init2 = {};
+  ['uA', 'hA', 'mA'].forEach(function (k) { if (typeof hsh[k] === 'number') init1[k] = hsh[k]; });
+  ['uB', 'hB', 'delay', 'mB'].forEach(function (k) { if (typeof hsh[k] === 'number') init2[k] = hsh[k]; });
+  pa.set(init1, true); pb.set(init2, true);
+  ['V', 'H'].forEach(function (k) { if (typeof hsh[k] === 'number') { var o = {}; o[k] = hsh[k]; pq.set(o, true); } });
+  if (typeof hsh.k === 'number') pk.set({ k: hsh.k }, true);
+  if (typeof hsh.vAfter === 'number') pc.set({ vAfter: hsh.vAfter }, true);
+  if (hsh.two) bOn.set(true, true);
+  if (hsh.ground === 'rebound') ground.set('rebound', true);
+  if (typeof hsh.collide === 'string' && ['off', 'Arest', 'Brest', 'coalesce', 'vA', 'vB'].indexOf(hsh.collide) >= 0) collide.set(hsh.collide, true);
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

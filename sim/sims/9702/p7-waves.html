@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Progressive waves</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-waves.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  // Cambridge rounding: exact halves round away from zero (49.05 → 49.1); toPrecision alone can round 49.05 down (binary floating point)
+  (function (sf, dp) { SIM.util.sf = function (x, n) { return typeof x === 'number' && isFinite(x) ? sf(x * (1 + 1e-12), n) : sf(x, n); };
+    SIM.util.dp = function (x, d) { return typeof x === 'number' && isFinite(x) ? dp(x * (1 + 1e-12), d) : dp(x, d); }; })(SIM.util.sf, SIM.util.dp);
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, WV = SIM.waves;
+  var course = ui.course('9702'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Progressive waves: transverse and longitudinal, phase, v = fλ, intensity',
+    tags: ['9702 7.1 Progressive waves', '9702 7.2 Transverse and longitudinal waves'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 20 });
+  var SLOW = 2;   // animation seconds per wave period
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 4 * SLOW, loop: true, onFrame: function () { frame(); } });
+  ui.legend(sceneCard, [
+    { color: 'var(--c-s1)', label: 'wave / particles' }, { color: 'var(--c-s2)', label: 'probe P (x₁)' }, { color: 'var(--c-s3)', label: 'probe Q (x₂)' },
+    { color: 'var(--c-velocity)', label: 'direction of wave travel (energy transfer)' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pX = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'displacement y / cm', xLabel: 'distance x / m' });
+  var pT = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'displacement y / cm', xLabel: 't / s' });
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var type = ui.select(paramCard, { label: 'Wave type', value: 'T', options: [
+    { value: 'T', label: 'transverse (rope, ripple tank, light)' }, { value: 'L', label: 'longitudinal (sound, slinky pushed along its length)' }] }, function () { update('*'); });
+  var areaMode = ui.select(paramCard, { label: 'Area for intensity', value: 'given', options: [
+    { value: 'given', label: 'power falls on a given area S' }, { value: 'sphere', label: 'spreads out uniformly: area 4πr²' }] }, function () { update('*'); });
+  var prm = ui.params(paramCard, [
+    { key: 'A', label: 'Amplitude', sym: 'A', unit: 'cm', min: 0.1, max: 20, step: 0.1, value: 2 },
+    { key: 'f', label: 'Frequency', sym: 'f', unit: 'Hz', min: 0.1, max: 2000, step: 0.1, value: 50 },
+    { key: 'lam', label: 'Wavelength', sym: 'λ', unit: 'm', min: 0.005, max: 20, step: 0.001, value: 0.4 },
+    { key: 'Lw', label: 'Length of medium shown', sym: '', unit: 'm', min: 0.02, max: 40, step: 0.01, value: 1.2 },
+    { key: 'x1', label: 'Position of probe P', sym: 'x<sub>1</sub>', unit: 'm', min: 0, max: 1.2, step: 0.001, value: 0.1 },
+    { key: 'x2', label: 'Position of probe Q', sym: 'x<sub>2</sub>', unit: 'm', min: 0, max: 1.2, step: 0.001, value: 0.4 },
+    { key: 'P', label: 'Power carried by the wave', sym: 'P', unit: 'W', min: 0, max: 100, step: 0.001, value: 0.5 },
+    { key: 'S', label: 'Area receiving the power', sym: 'S', unit: 'm<sup>2</sup>', min: 0.0001, max: 100, step: 0.0001, value: 0.01 },
+    { key: 'r', label: 'Distance from a point source', sym: 'r', unit: 'm', min: 0.01, max: 100, step: 0.01, value: 2 },
+    { key: 'A2', label: 'Compare: new amplitude', sym: 'A<sub>2</sub>', unit: 'cm', min: 0, max: 20, step: 0.1, value: 4 }
+  ], update);
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Wave on a rope: f = 50 Hz, λ = 0.40 m ⇒ speed', type: 'T', values: { A: 2, f: 50, lam: 0.4, Lw: 1.2, x1: 0.1, x2: 0.4, P: 0.5, S: 0.01, A2: 4 },
+      note: 'v = fλ = 50 × 0.40 = 20 m s⁻¹.' },
+    { name: 'Two points 0.30 m apart, λ = 0.40 m: phase difference', type: 'T', values: { A: 2, f: 50, lam: 0.4, Lw: 1.2, x1: 0.1, x2: 0.4, P: 0.5, S: 0.01, A2: 4 },
+      note: 'Δφ = 360° × 0.30 ÷ 0.40 = 270° (equivalently 90° the other way round).' },
+    { name: 'Points half a wavelength apart: antiphase', type: 'T', values: { A: 2, f: 5, lam: 0.4, Lw: 1.2, x1: 0.2, x2: 0.4, P: 0.5, S: 0.01, A2: 4 },
+      note: 'Δx = λ/2 ⇒ Δφ = 180°: one is at a crest when the other is at a trough.' },
+    { name: 'Sound in air: 850 Hz, 340 m/s (longitudinal)', type: 'L', values: { A: 1, f: 850, lam: 0.4, Lw: 1.2, x1: 0.1, x2: 0.5, P: 0.5, S: 0.01, A2: 2 },
+      note: 'λ = v/f = 340 ÷ 850 = 0.40 m. Compressions are 0.40 m apart. Q is one wavelength from P: in phase.' },
+    { name: 'Slinky: longitudinal wave, 2.0 Hz, λ = 0.50 m', type: 'L', values: { A: 3, f: 2, lam: 0.5, Lw: 1.5, x1: 0.25, x2: 0.375, P: 0.5, S: 0.01, A2: 6 },
+      note: 'Each coil oscillates along the length of the slinky. Δφ = 360° × 0.125 ÷ 0.50 = 90°.' },
+    { name: 'Ripple tank: 12 Hz, wavefronts 1.5 cm apart', type: 'T', values: { A: 0.2, f: 12, lam: 0.015, Lw: 0.06, x1: 0.01, x2: 0.0175, P: 0.5, S: 0.01, A2: 0.4 },
+      note: 'v = fλ = 12 × 0.015 = 0.18 m s⁻¹. Wavefront spacing = λ.' },
+    { name: 'Amplitude doubles: intensity × 4', type: 'T', values: { A: 2, A2: 4, f: 5, lam: 0.4, Lw: 1.2, x1: 0.1, x2: 0.4, P: 0.5, S: 0.01 }, area: 'given',
+      note: 'I ∝ A² ⇒ I₂/I₁ = (4 ÷ 2)² = 4.' },
+    { name: 'Point source 0.50 W, intensity 2.0 m away', type: 'L', values: { A: 1, f: 850, lam: 0.4, Lw: 1.2, x1: 0.1, x2: 0.3, P: 0.5, r: 2, A2: 1 }, area: 'sphere',
+      note: 'Spreads uniformly over a sphere: I = P/(4πr²) = 0.50 ÷ (4π × 2.0²) = 9.95×10⁻³ W m⁻².' }
+  ], function (p) { type.set(p.type, true); areaMode.set(p.area || 'given', true); if (p.values.Lw) { prm.range('x1', 0, p.values.Lw, 0.001); prm.range('x2', 0, p.values.Lw, 0.001); } prm.set(p.values); clock.seek(0); });
+
+  ui.notes(noteCard, [
+    'Phase difference = 360° × Δx/λ (or 2π Δx/λ rad). Give the unit: degrees or radians. Points one whole wavelength apart are in phase (Δφ = 0° = 360°).',
+    'A displacement–<b>distance</b> graph (snapshot) shows λ; a displacement–<b>time</b> graph (one point) shows T. Don’t read a wavelength off a y–t graph.',
+    'v = fλ: the frequency is set by the source; the speed by the medium.',
+    'Amplitude is measured from the equilibrium position to a crest, not crest to trough.',
+    'Intensity ∝ amplitude²: double the amplitude ⇒ four times the intensity. Intensity = power ÷ area (W m<sup>−2</sup>).',
+    'Longitudinal: particles oscillate <b>parallel</b> to the direction of energy transfer; with displacement to the right taken as positive, compressions are where the displacement is zero and the y–x graph slopes downwards.',
+    'The particles do not travel with the wave; energy is transferred.'
+  ]);
+
+  /* ---------- model ---------- */
+  function T() { return 1 / prm.values.f; }
+  function tPhys() { return clock.t * T() / SLOW; }
+  function yAt(x, t) { var v = prm.values; return WV.y(v.A, v.lam, v.f, x, t); }
+  function update(key) {
+    var v = prm.values;
+    if (key === 'Lw' || key === '*') { prm.range('x1', 0, v.Lw, 0.001); prm.range('x2', 0, v.Lw, 0.001); }
+    prm.show('S', areaMode.get() === 'given'); prm.show('r', areaMode.get() === 'sphere');
+    frame();
+  }
+  function fmtT(t) { var a = Math.abs(t); return a === 0 ? '0 s' : a < 1e-3 ? U.sf(t * 1e6) + ' µs' : a < 1 ? U.sf(t * 1e3) + ' ms' : U.sf(t) + ' s'; }
+  function frame() {
+    clock.tLabel.textContent = 't = ' + fmtT(tPhys()).replace(/<[^>]+>/g, '') + ' (slow motion: 1 period per ' + SLOW + ' s)';
+    draw(); plots(); readout();
+  }
+
+  /* ---------- drawing ---------- */
+  function draw() {
+    var col = ui.colors(), v = prm.values, t = tPhys();
+    vp.fit(0, 1, 0, 0.5625);
+    var c = vp.begin(), W = vp.w, H = vp.h, padL = 30, padR = 30, wpx = W - padL - padR;
+    function X(x) { return padL + x / v.Lw * wpx; }
+    var nWaves = v.Lw / v.lam;
+    var midY = H * 0.5, amp = H * 0.28;
+    D.arrow(c, padL, 18, padL + 90, 18, col.velocity, { label: 'v = ' + U.sf(v.f * v.lam) + ' m/s' });
+    if (nWaves > 60) { D.label(c, 'Too many wavelengths in view to draw (' + U.sf(nWaves) + '): reduce the length shown or increase λ', W / 2, midY, col.warn, { bold: true, size: 12 }); return; }
+    if (type.get() === 'T') {
+      D.line(c, [[padL, midY], [padL + wpx, midY]], col.muted, { dash: [4, 4], width: 1 });
+      var pts = [];
+      for (var i = 0; i <= 600; i++) { var x = v.Lw * i / 600; pts.push([X(x), midY - yAt(x, t) / v.A * amp]); }
+      D.line(c, pts, col.s1, { width: 2.2 });
+      var nP = Math.min(80, Math.max(20, Math.round(nWaves * 12)));
+      for (var j = 0; j <= nP; j++) { var xp = v.Lw * j / nP; c.save(); c.fillStyle = col.s1; c.beginPath(); c.arc(X(xp), midY - yAt(xp, t) / v.A * amp, 2.6, 0, 2 * Math.PI); c.fill(); c.restore(); }
+      [[v.x1, col.s2, 'P'], [v.x2, col.s3, 'Q']].forEach(function (pr) {
+        var yy = midY - yAt(pr[0], t) / v.A * amp;
+        D.line(c, [[X(pr[0]), midY - amp - 12], [X(pr[0]), midY + amp + 12]], pr[1], { dash: [2, 4], width: 1 });
+        c.save(); c.fillStyle = pr[1]; c.beginPath(); c.arc(X(pr[0]), yy, 6, 0, 2 * Math.PI); c.fill(); c.restore();
+        D.label(c, pr[2], X(pr[0]), midY + amp + 22, pr[1], { bold: true });
+      });
+      D.label(c, 'vertical scale: A = ' + U.sf(v.A) + ' cm (not to the same scale as x)', W - padR, H - 10, col.muted, { align: 'right', size: 10 });
+    } else {
+      // longitudinal: rows of particles displaced along x (exaggerated)
+      var spacing = v.Lw / Math.min(140, Math.max(40, Math.round(nWaves * 24)));
+      var ex = Math.min(0.18 * v.lam, 2.5 * spacing) / v.A;   // world metres of drawn shift per cm of displacement
+      var rows = 6, top = midY - amp, rowH = 2 * amp / (rows - 1);
+      for (var r = 0; r < rows; r++) {
+        var yy = top + r * rowH;
+        for (var x0 = 0; x0 <= v.Lw + 1e-12; x0 += spacing) {
+          var xd = x0 + yAt(x0, t) * ex;
+          if (xd < 0 || xd > v.Lw) continue;
+          c.save(); c.fillStyle = col.s1; c.globalAlpha = 0.85; c.beginPath(); c.arc(X(xd), yy + ((Math.round(x0 / spacing) % 2) ? 2 : -2), 2.2, 0, 2 * Math.PI); c.fill(); c.restore();
+        }
+      }
+      var cr = WV.compressions(v.lam, v.f, t, 0, v.Lw);
+      cr.C.forEach(function (x) { D.label(c, 'C', X(x), midY + amp + 18, col.warn, { bold: true, size: 12 }); });
+      cr.R.forEach(function (x) { D.label(c, 'R', X(x), midY + amp + 18, col.muted, { bold: true, size: 12 }); });
+      [[v.x1, col.s2, 'P'], [v.x2, col.s3, 'Q']].forEach(function (pr) {
+        var xd = pr[0] + yAt(pr[0], t) * ex;
+        D.line(c, [[X(pr[0]), top - 14], [X(pr[0]), top + 2 * amp + 4]], pr[1], { dash: [2, 4], width: 1 });
+        c.save(); c.fillStyle = pr[1]; c.beginPath(); c.arc(X(xd), midY, 6, 0, 2 * Math.PI); c.fill(); c.restore();
+        D.label(c, pr[2], X(pr[0]), top - 22, pr[1], { bold: true });
+      });
+      D.label(c, 'C = compression, R = rarefaction; particle displacements exaggerated', W - padR, H - 8, col.muted, { align: 'right', size: 10 });
+    }
+  }
+  function plots() {
+    var col = ui.colors(), v = prm.values, t = tPhys(), Tp = T();
+    var vl = [{ x: v.x1, label: 'P', color: col.s2 }, { x: v.x2, label: 'Q', color: col.s3 }];
+    if (type.get() === 'L') {
+      var cr = WV.compressions(v.lam, v.f, t, 0, v.Lw);
+      if (cr.C.length <= 12) cr.C.forEach(function (x) { vl.push({ x: x, label: 'C', color: col.warn }); });
+    }
+    var tooMany = v.Lw / v.lam > 100;
+    pX.draw({ x: [0, v.Lw], y: [-1.25 * v.A, 1.25 * v.A], series: tooMany ? [] : [{ fn: function (x) { return yAt(x, t); }, color: col.s1, steps: 1200 }], vlines: tooMany ? [] : vl,
+      markers: tooMany ? [] : [{ x: v.x1, y: yAt(v.x1, t), color: col.s2 }, { x: v.x2, y: yAt(v.x2, t), color: col.s3 }],
+      yLabel: type.get() === 'L' ? 'displacement (→ +) / cm' : 'displacement y / cm', title: tooMany ? 'too many wavelengths to plot: shorten the length shown' : 'snapshot at t = ' + fmtT(t).replace(/<[^>]+>/g, '') });
+    var span = 2 * Tp, unit = Tp < 1e-3 ? 1e6 : Tp < 1 ? 1e3 : 1, un = unit === 1e6 ? 'µs' : unit === 1e3 ? 'ms' : 's';
+    pT.draw({ x: [0, span * unit], y: [-1.25 * v.A, 1.25 * v.A], xLabel: 't / ' + un, series: [
+      { fn: function (tt) { return yAt(v.x1, tt / unit); }, color: col.s2 }, { fn: function (tt) { return yAt(v.x2, tt / unit); }, color: col.s3, dash: [6, 4] }],
+      cursor: (t % span) * unit, title: 'P solid, Q dashed' });
+  }
+
+  /* ---------- working ---------- */
+  function readout() {
+    var v = prm.values, s3 = U.sf, t = tPhys(), speed = WV.speed(v.f, v.lam), dx = Math.abs(v.x2 - v.x1), ph = WV.phaseDiff(dx, v.lam);
+    R.clear();
+    R.head('Speed, period');
+    R.eq('v', 'fλ = ' + s3(v.f) + ' × ' + s3(v.lam), speed, 'm s<sup>−1</sup>');
+    R.eq('T', '1 ÷ f = 1 ÷ ' + s3(v.f), WV.period(v.f), 's');
+    R.html('<div class="head">Derivation: in one period T the wave moves one wavelength λ, so v = λ/T = fλ.</div>');
+    R.head('Phase difference between P and Q');
+    R.eq('Δx', '|x<sub>2</sub> − x<sub>1</sub>| = |' + s3(v.x2) + ' − ' + s3(v.x1) + '|', dx, 'm');
+    R.eq('Δx ÷ λ', s3(dx) + ' ÷ ' + s3(v.lam), dx / v.lam, 'wavelengths');
+    R.eq('Δφ', '360° × Δx/λ', U.dp(ph.deg, 1) + '°');
+    if (ph.deg >= 360 - 1e-9) R.eq('Δφ (0–360°)', 'subtract whole cycles', U.dp(ph.mod, 1) + '°');
+    R.eq('Δφ', 'in radians (0 to 2π): 2π × Δx/λ', s3(ph.modRad) + ' rad');
+    if (ph.inPhase) R.badge('In phase (Δx is a whole number of wavelengths)', 'ok');
+    else if (ph.anti) R.badge('Antiphase: Δφ = 180° (π rad)', 'warn');
+    else if (dx > 1e-12) R.badge((v.x2 > v.x1 ? 'Q' : 'P') + ' lags behind ' + (v.x2 > v.x1 ? 'P' : 'Q') + ' by ' + U.dp(ph.mod, 1) + '° (equivalently leads by ' + U.dp(360 - ph.mod, 1) + '°)', 'info');
+    R.eq('time lag', 'Δt = Δx ÷ v = ' + s3(dx) + ' ÷ ' + s3(speed), dx / speed, 's');
+    R.head('Displacements now (t = ' + fmtT(t) + ')');
+    R.eq('y<sub>P</sub>', 'A sin 2π(ft − x₁/λ)', yAt(v.x1, t), 'cm');
+    R.eq('y<sub>Q</sub>', 'A sin 2π(ft − x₂/λ)', yAt(v.x2, t), 'cm');
+    R.head('Intensity');
+    var area = areaMode.get() === 'sphere' ? 4 * Math.PI * v.r * v.r : v.S, I = WV.intensity(v.P, area);
+    if (areaMode.get() === 'sphere') R.eq('area', '4πr² = 4π × ' + s3(v.r) + '²', area, 'm<sup>2</sup>');
+    R.eq('I', 'P ÷ area = ' + s3(v.P) + ' ÷ ' + s3(area), I, 'W m<sup>−2</sup>');
+    R.eq('I<sub>2</sub> ÷ I', '(A<sub>2</sub> ÷ A)² = (' + s3(v.A2) + ' ÷ ' + s3(v.A) + ')²', WV.intensityScale(1, v.A, v.A2));
+    R.eq('I<sub>2</sub>', 'I × (A<sub>2</sub>/A)²', WV.intensityScale(I, v.A, v.A2), 'W m<sup>−2</sup>');
+    R.html('<div class="head">' + (type.get() === 'T' ? 'Transverse: particles oscillate perpendicular to the direction of energy transfer (can be polarised).' : 'Longitudinal: particles oscillate parallel to the direction of energy transfer (compressions and rarefactions; cannot be polarised).') + '</div>');
+    R.render();
+  }
+
+  ui.onTheme(frame);
+  vp.onResize = frame;
+  update('*');
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

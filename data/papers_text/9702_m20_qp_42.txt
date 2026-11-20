@@ -1,0 +1,586 @@
+Cambridge International AS & A Level
+This document has 28 pages. Blank pages are indicated.
+DC (ST/CT) 180485/4
+© UCLES 2020 [Turn over
+*8983458344*
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions February/March 2020
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen or correction fluid.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2020 9702/42/F/M/20
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1 at2
+2
+v2 = u2+2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω (x 2-x2)
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2020 9702/42/F/M/20 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 (a) Define gravitational potential at a point.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) TESS is a satellite of mass 360 kg in a circular orbit about the Earth as shown in Fig. 1.1.
+Earth satellite TESS
+radius of orbit
+radius of Earth
+6.4 × 106 m
+Fig. 1.1 (not to scale)
+The radius of the Earth is 6.4 × 106 m and the mass of the Earth, considered to be a point
+mass at its centre, is 6.0 × 1024 kg.
+(i) It takes TESS 13.7 days to orbit the Earth.
+Show that the radius of orbit of TESS is 2.4 × 108 m.
+[3]
+© UCLES 2020 9702/42/F/M/20
+
+5
+(ii) Calculate the change in gravitational potential energy between TESS in orbit and TESS
+on a launch pad on the surface of the Earth.
+change in gravitational potential energy = ...................................................... J [3]
+(iii) Use the information in (b)(i) to calculate the ratio:
+gravitational field strength on surface of Earth
+.
+gravitational field strength at location of TESS in orbit
+ratio = ......................................................... [2]
+[Total: 10]
+© UCLES 2020 9702/42/F/M/20 [Turn over
+
+6
+2 A large container of volume 85 m3 is filled with 110 kg of an ideal gas. The pressure of the gas is
+1.0 × 105 Pa at temperature T.
+The mass of 1.0 mol of the gas is 32 g.
+(a) Show that the temperature T of the gas is approximately 300 K.
+[3]
+(b) The temperature of the gas is increased to 350 K at constant volume. The specific heat
+capacity of the gas for this change is 0.66 J kg−1 K−1.
+Calculate the energy supplied to the gas by heating.
+energy = ...................................................... J [2]
+(c) Explain how movement of the gas molecules causes pressure in the container.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+© UCLES 2020 9702/42/F/M/20
+
+7
+(d) The temperature of a gas depends on the root-mean-square (r.m.s.) speed of its molecules.
+Calculate the ratio:
+r.m.s. speed of gas molecules at 350 K
+.
+r.m.s. speed of gas molecules at 300 K
+ratio = ......................................................... [2]
+[Total: 10]
+© UCLES 2020 9702/42/F/M/20 [Turn over
+
+8
+3 (a) A body undergoes simple harmonic motion.
+The variation with displacement x of its velocity v is shown in Fig. 3.1.
+0.4
+v / m s–1
+0.3
+0.2
+0.1
+0
+– 0.06 – 0.04 – 0.02 0 0.02 0.04 0.06
+x / m
+– 0.1
+– 0.2
+– 0.3
+– 0.4
+Fig. 3.1
+(i) State the amplitude x of the oscillations.
+o
+x = ..................................................... m [1]
+o
+(ii) Calculate the period T of the oscillations.
+T = ...................................................... s [3]
+(iii) On Fig. 3.1, label with a P a point where the body has maximum potential energy. [1]
+© UCLES 2020 9702/42/F/M/20
+
+9
+(b) A bar magnet is suspended from the free end of a spring, as shown in Fig. 3.2.
+spring
+magnet
+coil
+Fig. 3.2
+One pole of the magnet is situated in a coil of wire. The coil is connected in series with a
+switch and a resistor. The switch is open.
+The magnet is displaced vertically and then released. The magnet oscillates with simple
+harmonic motion.
+(i) State Faraday’s law of electromagnetic induction.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) The switch is now closed. Explain why the oscillations of the magnet are damped.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+[Total: 10]
+© UCLES 2020 9702/42/F/M/20 [Turn over
+
+10
+4 (a) (i) Explain why ultrasound used in medical diagnosis is emitted in pulses.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) Explain the principles of the detection of ultrasound waves used in medical diagnosis.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(b) The specific acoustic impedances Z of some media are given in Table 4.1.
+Table 4.1
+media Z / kg m−2 s−1
+air 4.3 × 102
+gel 1.5 × 106
+soft tissue 1.6 × 106
+(i) The specific acoustic impedances of two media are Z and Z . The intensity reflection
+1 2
+coefficient α for the boundary of these two media is given by:
+(Z – Z )2
+1 2
+α = .
+(Z + Z )2
+1 2
+Calculate, to three significant figures, the fraction of the ultrasound intensity that is
+reflected at a boundary between air and soft tissue.
+α = ......................................................... [1]
+© UCLES 2020 9702/42/F/M/20
+
+11
+(ii) Use your value in (b)(i) to explain why gel is applied to the surface of the skin during an
+ultrasound scan.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 8]
+© UCLES 2020 9702/42/F/M/20 [Turn over
+
+12
+5 (a) State two advantages of the transmission of data in digital form, rather than analogue form.
+1. ..............................................................................................................................................
+...................................................................................................................................................
+2. ..............................................................................................................................................
+...................................................................................................................................................
+[2]
+(b) Optic fibres are used for the transmission of data.
+(i) A signal in an optic fibre is carried by an electromagnetic wave of frequency
+1.36 × 1014 Hz. The speed of the wave in the fibre is 2.07 × 108 m s−1.
+For this electromagnetic wave, determine the ratio:
+wavelength in free space
+.
+wavelength in fibre
+ratio = ......................................................... [2]
+(ii) The attenuation per unit length of the signal in the fibre is 0.40 dB km−1. The input power
+is 1.5 mW and the output power is 0.060 mW.
+Calculate the length of the fibre.
+length = ................................................... km [3]
+[Total: 7]
+© UCLES 2020 9702/42/F/M/20
+
+13
+BLANK PAGE
+© UCLES 2020 9702/42/F/M/20 [Turn over
+
+14
+6 Two positively charged identical metal spheres A and B have their centres separated by a distance
+of 24 cm, as shown in Fig. 6.1.
+24 cm
+x
+sphere A sphere B
+Fig. 6.1 (not to scale)
+The variation with distance x from the centre of A of the electric field strength E due to the two
+spheres, along the line joining their centres, is represented in Fig. 6.2.
+9
+8
+E / 104 N C–1
+7
+6
+5
+4
+3
+2
+1
+0
+0 2 4 6 8 10 12 14 16 18 20 22 24
+– 1 x / cm
+– 2
+Fig. 6.2
+(a) State the radius of the two spheres.
+radius = ................................................... cm [1]
+© UCLES 2020 9702/42/F/M/20
+
+15
+(b) The charge on sphere A is 3.6 × 10−9 C. Determine the charge Q on sphere B.
+B
+Assume that spheres A and B can be treated as point charges at their centres.
+Explain your working.
+Q = ..................................................... C [3]
+B
+(c) (i) Sphere B is removed.
+Use information from (b) to determine the electric potential on the surface of sphere A.
+electric potential = ...................................................... V [2]
+(ii) Calculate the capacitance of sphere A.
+capacitance = ...................................................... F [2]
+[Total: 8]
+© UCLES 2020 9702/42/F/M/20 [Turn over
+
+16
+7 (a) On Fig. 7.1, sketch the temperature characteristic of a negative temperature coefficient (n.t.c.)
+thermistor. Label the axes with quantity and unit.
+0
+0
+Fig. 7.1
+[2]
+(b) An n.t.c. thermistor and a resistor are connected as shown in Fig. 7.2.
+V
+Fig. 7.2
+The temperature of the thermistor is increased.
+State and explain the change, if any, to the reading on the voltmeter.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+© UCLES 2020 9702/42/F/M/20
+
+17
+(c) The variation with the fractional change in length Δx /x of the fractional change in resistance
+ΔR /R for a strain gauge is shown in Fig. 7.3.
+10
+∆R/R
+8
+10–2
+6
+4
+2
+0
+0 0.5 1.0 1.5 2.0 2.5 3.0
+∆x/x
+10–2
+Fig. 7.3
+The unstrained resistance of the gauge is 120 Ω. Calculate the new resistance of the gauge
+when it is extended to a strain of 0.020.
+resistance = ..................................................... Ω [3]
+[Total: 7]
+© UCLES 2020 9702/42/F/M/20 [Turn over
+
+18
+8 (a) Explain what is meant by a magnetic field.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) The apparatus shown in Fig. 8.1 is used in an experiment to find the magnetic flux density B
+between the poles of a horseshoe magnet. Assume the magnetic field is uniform between the
+poles of the magnet and zero elsewhere.
+45
+m
+m
+horseshoe
+magnet
+300
+m
+m
+metal rod
+balance pan
+Fig. 8.1
+The rigid metal rod of length 300 mm is fixed in position perpendicular to the direction of the
+magnetic field. The poles of the magnet are both 45 mm long. There is a current in the rod
+that causes a force on the rod. The balance is used to determine the magnitude of the force.
+The variation with current I of the force F on the rod is shown in Fig. 8.2.
+© UCLES 2020 9702/42/F/M/20
+
+19
+10.0
+8.0
+F / mN
+6.0
+4.0
+2.0
+0
+0 1.0 2.0 3.0 4.0 5.0
+I / A
+Fig. 8.2
+Calculate the magnetic flux density B.
+B = ...................................................... T [2]
+© UCLES 2020 9702/42/F/M/20 [Turn over
+
+20
+(c) In a different experiment, electrons are accelerated through a potential difference and then
+enter a region of magnetic field. The magnetic field is into the plane of the paper and is
+perpendicular to the direction of travel of the electrons, as illustrated in Fig. 8.3.
+region of magnetic
+field into the plane of
+the paper
+electron beam
+Fig. 8.3
+(i) Explain why the electrons follow a circular path when inside the region of the magnetic
+field.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(ii) State the measurements needed in order to determine the charge to mass ratio, e /m , of
+e
+an electron.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 8]
+© UCLES 2020 9702/42/F/M/20
+
+21
+9 (a) The output of a power supply is represented by:
+V = 9.0 sin 20t
+where V is the potential difference in volts and t is the time in seconds.
+Determine, for the output of the supply:
+(i) the root-mean-square (r.m.s.) voltage, V
+r.m.s.
+V = .......................................................V [1]
+r.m.s
+(ii) the period T.
+T = ...................................................... s [2]
+(b) The variations with time t of the output potential difference V from two different power supplies
+are shown in Fig. 9.1 and Fig. 9.2.
+V V
+o o
+V V
+0 0
+0 t 0 t
+Fig. 9.1 Fig. 9.2
+The graphs are drawn to the same scale.
+State and explain whether the same power would be dissipated in a 1.0 Ω resistor connected
+to each power supply.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [1]
+© UCLES 2020 9702/42/F/M/20 [Turn over
+
+22
+(c) (i) The power supply in (a) is connected to a transformer. The input power to the transformer
+is 80 W.
+The secondary coil is connected to a resistor. The r.m.s. voltage across the resistor is
+120 V. The r.m.s. current in the secondary coil is 0.64 A.
+Calculate the efficiency of the transformer.
+efficiency = ......................................................... [3]
+(ii) State one reason why the transformer is not 100% efficient.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+[Total: 8]
+© UCLES 2020 9702/42/F/M/20
+
+23
+10 (a) By reference to the photoelectric effect, explain what is meant by work function energy.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) In an experiment, electromagnetic radiation of frequency f is incident on a metal surface.
+The results in Fig. 10.1 show the variation with frequency f of the maximum kinetic energy
+E of electrons emitted from the surface.
+MAX
+1.4
+E /10–19 J
+MAX
+1.2
+1.0
+0.8
+0.6
+0.4
+0.2
+0
+5.0 5.5 6.0 6.5 7.0 7.5
+f / 1014 Hz
+Fig. 10.1
+(i) Determine the work function energy in J of the metal used in the experiment.
+work function energy = ...................................................... J [2]
+© UCLES 2020 9702/42/F/M/20 [Turn over
+
+24
+(ii) The work function energy in eV for some metals is given in Table 10.1.
+Table 10.1
+metal work function / eV
+tungsten 4.49
+magnesium 3.68
+potassium 2.26
+Determine the metal used in the experiment. Show your working.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(c) The intensity of the electromagnetic radiation for one particular frequency in (b) is increased.
+State and explain the change, if any, in:
+(i) the maximum kinetic energy of the emitted electrons
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) the rate of emission of photoelectrons.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+[Total: 7]
+© UCLES 2020 9702/42/F/M/20
+
+25
+11 Electrons are accelerated through a potential difference of 100 kV. They are then incident on a
+metal target, they decelerate, and X-ray photons are emitted.
+(a) Calculate the maximum possible frequency of the emitted X-ray photons.
+frequency = .................................................... Hz [2]
+(b) Explain why an aluminium filter may be placed in the X-ray beam when producing an X-ray
+image of a patient.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+(c) The linear attenuation (absorption) coefficients μ for X-rays in bone, blood and muscle are
+given in Table 11.1.
+Table 11.1
+μ / cm−1
+bone 3.0
+blood 0.23
+muscle 0.22
+(i) A beam of these X-rays is incident on a person.
+Calculate the percentage of the intensity of the X-ray beam that has been absorbed after
+passing through 0.80 cm of blood.
+percentage of intensity absorbed = ..................................................... % [2]
+© UCLES 2020 9702/42/F/M/20 [Turn over
+
+26
+(ii) In an X-ray image, white regions show greater absorption of X-rays than dark regions.
+State and explain the difference between the X-ray image of bone compared to that of
+muscle.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 9]
+© UCLES 2020 9702/42/F/M/20
+
+27
+12 (a) Explain what is meant by the binding energy of a nucleus.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The following nuclear reaction takes place:
+235U + 1n 144Cs + 90Rb + y1n
+92 0 55 x 0
+(i) Determine the values of x and y.
+x = ...............................................................
+y = ...............................................................
+[1]
+(ii) State the name of this type of nuclear reaction.
+..................................................................................................................................... [1]
+(iii) Compare the binding energy per nucleon of uranium-235 with the binding energy per
+nucleon of caesium-144.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(c) Yttrium-90 decays into zirconium-90, a stable isotope.
+A sample initially consists of pure yttrium-90.
+Calculate the time, in days, when the ratio of the number of yttrium-90 nuclei to the number of
+zirconium-90 nuclei would be 2.0.
+The half-life of yttrium-90 is 2.7 days.
+time = ................................................ days [3]
+[Total: 8]
+© UCLES 2020 9702/42/F/M/20
+
+28
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of the University of
+Cambridge Local Examinations Syndicate (UCLES), which itself is a department of the University of Cambridge.
+© UCLES 2020 9702/42/F/M/20

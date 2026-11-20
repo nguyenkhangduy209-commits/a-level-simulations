@@ -1,0 +1,291 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+MATHEMATICS 9709/42
+Paper 4 Mechanics March 2018
+MARK SCHEME
+Maximum Mark: 50
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the March 2018 series for most
+Cambridge IGCSE®, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+® IGCSE is a registered trademark.
+This document consists of 9 printed pages.
+© UCLES 2018 [Turn over
+
+9709/42 Cambridge International AS/A Level – Mark Scheme March 2018
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers.
+They should be applied alongside the specific content of the mark scheme or generic level descriptors
+for a question. Each question paper and mark scheme will also comply with these marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit
+is given for valid answers which go beyond the scope of the syllabus and mark scheme,
+referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these
+features are specifically assessed by the question as indicated by the mark scheme. The
+meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently e.g. in situations where candidates have not followed
+instructions or in the application of generic level descriptors.
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question
+(however; the use of the full mark range may be limited according to the quality of the candidate
+responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should
+not be awarded with grade thresholds or grade descriptors in mind.
+© UCLES 2018 Page 2 of 9
+
+9709/42 Cambridge International AS/A Level – Mark Scheme March 2018
+PUBLISHED
+Mark Scheme Notes
+Marks are of the following three types:
+M Method mark, awarded for a valid method applied to the problem. Method marks are not lost
+for numerical errors, algebraic slips or errors in units. However, it is not usually sufficient for a
+candidate just to indicate an intention of using some method or just to quote a formula; the
+formula or idea must be applied to the specific problem in hand, e.g. by substituting the
+relevant quantities into the formula. Correct application of a formula without the formula being
+quoted obviously earns the M mark and in some cases an M mark can be implied from a
+correct answer.
+A Accuracy mark, awarded for a correct answer or intermediate step correctly obtained.
+Accuracy marks cannot be given unless the associated method mark is earned (or implied).
+B Mark for a correct result or statement independent of method marks.
+• When a part of a question has two or more “method” steps, the M marks are generally
+independent unless the scheme specifically says otherwise; and similarly when there are several
+B marks allocated. The notation DM or DB (or dep*) is used to indicate that a particular M or B
+mark is dependent on an earlier M or B (asterisked) mark in the scheme. When two or more
+steps are run together by the candidate, the earlier marks are implied and full credit is given.
+• The symbol FT implies that the A or B mark indicated is allowed for work correctly following on
+from previously incorrect results. Otherwise, A or B marks are given for correct work only. A and
+B marks are not given for fortuitously “correct” answers or results obtained from incorrect
+working.
+• Note: B2 or A2 means that the candidate can earn 2 or 0.
+B2/1/0 means that the candidate can earn anything from 0 to 2.
+The marks indicated in the scheme may not be subdivided. If there is genuine doubt whether a
+candidate has earned a mark, allow the candidate the benefit of the doubt. Unless otherwise
+indicated, marks once gained cannot subsequently be lost, e.g. wrong working following a correct
+form of answer is ignored.
+• Wrong or missing units in an answer should not lead to the loss of a mark unless the scheme
+specifically indicates otherwise.
+• For a numerical answer, allow the A or B mark if a value is obtained which is correct to 3 s.f., or
+which would be correct to 3 s.f. if rounded (1 d.p. in the case of an angle). As stated above, an A
+or B mark is not given if a correct numerical answer arises fortuitously from incorrect working. For
+Mechanics questions, allow A or B marks for correct answers which arise from taking g equal to
+9.8 or 9.81 instead of 10.
+© UCLES 2018 Page 3 of 9
+
+9709/42 Cambridge International AS/A Level – Mark Scheme March 2018
+PUBLISHED
+The following abbreviations may be used in a mark scheme or used on the scripts:
+AEF/OE Any Equivalent Form (of answer is equally acceptable) / Or Equivalent
+AG Answer Given on the question paper (so extra checking is needed to ensure that the
+detailed working leading to the result is valid)
+CAO Correct Answer Only (emphasising that no “follow through” from a previous error is
+allowed)
+CWO Correct Working Only – often written by a ‘fortuitous’ answer
+ISW Ignore Subsequent Working
+SOI Seen or implied
+SR Special Ruling (detailing the mark to be given for a specific wrong solution, or a case
+where some standard marking practice is to be varied in the light of a particular
+circumstance)
+Penalties
+MR –1 A penalty of MR –1 is deducted from A or B marks when the data of a question or part
+question are genuinely misread and the object and difficulty of the question remain
+unaltered. In this case all A and B marks then become “follow through” marks. MR is not
+applied when the candidate misreads his own figures – this is regarded as an error in
+accuracy. An MR –2 penalty may be applied in particular cases if agreed at the
+coordination meeting.
+PA –1 This is deducted from A or B marks in the case of premature approximation. The PA –1
+penalty is usually discussed at the meeting.
+© UCLES 2018 Page 4 of 9
+
+9709/42 Cambridge International AS/A Level – Mark Scheme March 2018
+PUBLISHED
+Question Answer Marks Guidance
+1 [T – 2 = 0.2a 8 – T = 0.8a] M1 Attempt Newton’s 2nd law for
+System is 0.8g – 0.2g = (0.2 + 0.8)a either particle or use a formula for
+and T = 2(0.2)(0.8)g/(0.8 + 0.2) the system for a and/or T
+A1 Two correct equations
+Attempt to solve for a or T M1
+a = 6 T = 3.2 A1 Both correct NB a = 6 AG
+4
+Question Answer Marks Guidance
+2 EITHER: (M1 Resolve vertically (2 terms)
+2P sin θ = P sin 60
+θ = 25.7 A1
+2P cos θ + P cos 60 = 10 M1 Resolve horizontally (3 terms)
+P = 4.34 A1)
+OR1: (M1 Attempt Lami’s theorem using one
+ 2P P 10  pair of terms
+ = = 
+ sin120 sin(180−θ) sin(60+θ) 
+θ = 25.7 A1 Solve for θ
+Use a second Lami equation M1
+P = 4.34 A1)
+OR2: (M1
+Use sine or cosine rule with triangle of forces
+using forces P, 2P and 10 and with angles 60,
+θ and 120 – θ between
+θ = 25.7 A1
+Use a second relationship from the triangle of M1
+forces
+P = 4.34 A1)
+4
+© UCLES 2018 Page 5 of 9
+
+9709/42 Cambridge International AS/A Level – Mark Scheme March 2018
+PUBLISHED
+Question Answer Marks Guidance
+3(i) 1 M1 Use of KE gain = PE loss
+×40×v2 =40×g×7.2
+2
+v=12 m s–1 A1
+2
+3(ii) Work done against friction(WDF) M1 May be calculated as
+1 1 1
+WDF=40×g×7.2− ×40×102 [=880] ×40×122 − ×40×102
+2 2 2
+1 1 M1 For 4-term work-energy equation
+×40×V2 +40×g×7.2= ×40×112 +880
+with numerical attempt at work
+2 2
+done
+or
+or
+using the fact that WDF is the same
+1 1 1
+×40×V2 = ×40×112 − ×40×102 in both cases, extra initial KE =
+2 2 2
+difference in final KEs
+V = 21=4.58 A1
+3
+Question Answer Marks Guidance
+4 [R = 12g cos 25 + P sin 25 M1 Attempt resolving of forces in any
+P cos 25 = F + 12g sin 25] one direction, parallel to,
+or perpendicular to plane
+[P = F cos 25 + R sin 25 or
+R cos 25 = F sin 25 + 12g] horizontally, vertically
+A1 Any one correct equation
+A1 Any second correct equation
+F = 0.8R M1 Use of F = µR
+Complete method to find P from 2 M1
+equations(3 terms each)
+P = 242 A1
+6
+© UCLES 2018 Page 6 of 9
+
+9709/42 Cambridge International AS/A Level – Mark Scheme March 2018
+PUBLISHED
+Question Answer Marks Guidance
+5(i) 200 = ½ × (0 + v) × 10 M1 Use of suvat
+v = 40 m s–1 A1 AG
+200 = ½ × a × 102 M1 Second use of suvat
+a = 4 m s–2 A1
+4
+5(ii) 0 = 402 – 2 × g × s M1 Use of suvat with a = g
+s = 80 so height above ground = 280 m A1
+2
+5(iii) EITHER: (M1 Use of suvat to find extra time to
+0 = 40 – gt highest point
+1
+t = 4 A1
+1
+280 = ½gt 2 M1 Use of suvat to find time from
+2
+highest point to ground
+t = √56 = 7.48... so total time = 21.5 s A1)
+2
+OR: (M1 Use of s = ut + ½at2
+−200 = 40t − ½gt 2 with 200, 40 and g used
+3 3
+5t 2 – 40t – 200 = 0 o.e. A1 Correct quadratic for time under
+3 3
+[t 2 – 8t – 40 = 0] gravity
+3 3
+[t = 4 ± √56 = 4 ± 7.48] M1 Solution of relevant 3-term
+3
+quadratic
+t = 11.48 so total time is 21.5 s A1)
+3
+4
+Question Answer Marks Guidance
+6(i) Driving force = 35 × 60 M1
+Power = 35 × 602 = 126000 W A1
+2
+© UCLES 2018 Page 7 of 9
+
+9709/42 Cambridge International AS/A Level – Mark Scheme March 2018
+PUBLISHED
+Question Answer Marks Guidance
+6(ii) 126000 B1FT
+Driving force is DF=
+30
+DF−35×30=1200a M1 For 3-term Newton’s 2nd law
+equation, dimensionally correct
+3150 21 A1 AG
+a= = =2.625 m s–2
+1200 8
+3
+6(iii) 126000 M1 P
+DF = For F =
+v v
+126000 7 M1 For 3-term force equation, or
+=35v+1200g×
+equivalent
+v 48
+A1 For correct (unsimplified) equation
+35v2 +1750v−126000=0 M1 For simplifying and solving of a 3-
+term quadratic attempted
+or v2 +50v−3600=0
+v=40 ms-1 A1 v=−90 rejected or ignored
+5
+Question Answer Marks Guidance
+7(i) 0.2 (m s–2) B1
+1
+7(ii) a=−1600t−3 M1 For attempted differentiation of
+800
+−2+
+t2
+Acceleration at t = 20 is –0.2 (m s–2) A1
+2
+7(iii) Straight line joining B1
+t = 0, v = 4 to t = 10, v = 6
+Curve with correct concavity joining end of B1
+line to t = 20, v = 0
+Correct labelling on axes provided the curves B1
+pass through (0,4), (10,6), (20,0)
+3
+© UCLES 2018 Page 8 of 9
+
+9709/42 Cambridge International AS/A Level – Mark Scheme March 2018
+PUBLISHED
+Question Answer Marks Guidance
+7(iv) Trapezium area = 50 B1 or from integration of 4 + 0.2t
+∫ ( −2+800t−2) dt =−2t−800t−1 M1 Integration attempted
+A1 Correct indefinite integral
+20 M1 Correct use of the limits
+−2t−800t−1
+  10 t = 10 and t = 20
+=−40−40+20+80
+Distance is 50 + 20 = 70 m A1 Correct total
+5
+© UCLES 2018 Page 9 of 9

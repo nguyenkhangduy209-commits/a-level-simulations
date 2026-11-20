@@ -1,0 +1,264 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions October/November 2019
+MARK SCHEME
+Maximum Mark: 100
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the October/November 2019 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 14 printed pages.
+© UCLES 2019 [Turn over
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the
+specific content of the mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these
+marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond
+the scope of the syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the
+question as indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently e.g. in situations where candidates have not followed instructions or in the application of generic level
+descriptors.
+© UCLES 2019 Page 2 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range
+may be limited according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or
+grade descriptors in mind.
+© UCLES 2019 Page 3 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+1(a) force proportional to product of masses and inversely proportional to square of separation B1
+idea of (gravitational) force between point masses B1
+1(b) gravitational force provides/is the centripetal force B1
+GM / R2 = Rω2 or GM / R2 = v2 / R M1
+ω = 2π / T or v = 2πR / T M1
+algebra leading to R3/T2 = GM / 4π2 A1
+1(c) (6.67 × 10–11 × M) / 4π2 = (4.38 × 106)3 / (2.44 × 3600)2 C1
+M = 6.45 × 1023 kg A1
+© UCLES 2019 Page 4 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+2(a)(i) specks of light moving haphazardly B1
+2(a)(ii) (gas) molecules collide with (smoke) particles M1
+or
+random motion of the (gas) molecules
+causes the (haphazard) motion of the smoke particles A1
+or
+causes the smoke particles to change direction
+2(b)(i) pV = nRT C1
+n = (3.51 × 105 × 2.40 × 10–3) / (8.31 × 290) C1
+or
+n = (3.75 × 105 × 2.40 × 10–3) / (8.31 × 310)
+or
+pV = NkT (C1)
+n = (3.51 × 105 × 2.40 × 10–3) / (1.38 × 10–23 × 6.02 × 1023 × 290) (C1)
+or
+n = (3.75 × 105 × 2.40 × 10–3) / (1.38 × 10–23 × 6.02 × 1023 × 310)
+n = 0.350 mol or 0.349 mol A1
+2(b)(ii) energy transfer = (0.349 or 0.35) × 12.5 × (310 – 290) C1
+= 87.3 J or 87.5 J A1
+2(c)(i) zero A1
+2(c)(ii) 87.3 J or 87.5 J A1
+increase B1
+© UCLES 2019 Page 5 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+3(a) (thermal) energy per unit mass (to change state) B1
+change of state without any change of temperature B1
+3(b)(i) 140 g A1
+3(b)(ii) temperature difference (between apparatus and surroundings) does not change B1
+3(b)(iii) VIt = mL C1
+({15.1 × 3.6} + R) × 600 = 140 × L C1
+or
+({7.3 × 1.8} + R) × 600 = 65 × L
+41.22 × 600 = 75 × L C1
+L = 330 J g–1 A1
+3(b)(iv) 15.1 × 3.6 × 600 = (140 × 330) – H C1
+or
+7.3 × 1.8 × 600 = (65 × 330) – H
+H = 13600 A1
+rate of gain = 13600 / 600
+= 23 W
+© UCLES 2019 Page 6 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+4(a)(i) loss of energy B1
+4(a)(ii) amplitude (of oscillations) decreases (with time) B1
+4(b)(i) ω = 2π / T C1
+T = 0.80 s, so ω = 2π / 0.80 A1
+ω = 7.9 rad s–1
+4(b)(ii) ω2 = 2k / M C1
+7.92 = 2k / 1.2 A1
+k = 37 N m–1
+4(c)(i) (one) smooth curve, not touching the f-axis, with two concave sides meeting at a peak in between them B1
+(one) peak at 1.0ω B1
+4(c)(ii) • lower peak/(whole) line is lower B2
+• flatter peak/peak is less sharp
+• peak at (slightly) lower angular frequency/peak moves to left
+any two points, one mark each
+© UCLES 2019 Page 7 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+5(a)(i) product of density and speed M1
+speed of sound in the medium A1
+5(a)(ii) Z = 1.8 × 103 × 4.1 × 103 A1
+B
+= 7.4 × 106 kg m2 s–1
+5(b) α = (1.7 – 1.3)2 / (1.7 + 1.3)2 = 0.018 A1
+fraction = 0.98
+5(c)(i) reduction in power/intensity (of wave) M1
+as the wave passes through the medium A1
+5(c)(ii) 1. ratio = e–µx C1
+= 0.90 A1
+2. ratio = 0.62 A1
+5(d) fraction = 0.898 × 0.617 × 0.98 A1
+= 0.54
+© UCLES 2019 Page 8 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+6(a) period = 5.0 µs, so A1
+frequency = 2.0 × 105 Hz
+6(b) sketch: three equally spaced vertical lines sitting on f-axis B1
+two outer vertical lines of equal length and central line longer B1
+three vertical lines (and no others) shown at frequencies 190 kHz, 200 kHz and 210 kHz B1
+Question Answer Marks
+7 X-rays are used B1
+section (of object) is scanned B1
+scans/images taken at many angles/directions B1
+or
+images of each section are 2-dimensional
+images of (many) sections are combined B1
+(to give) 3-dimensional image of (whole) structure B1
+© UCLES 2019 Page 9 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+8(a) magnitude: (force =) Bqv B1
+direction: P→Q or E→F or S→R or H→G B1
+8(b)(i) EHSP and FGRQ B1
+8(b)(ii) PE or QF or RG or SH B1
+8(c)(i) any one correct starting point from: C1
+• (mass of 1 atom =) 27 × 1.66 × 10–27
+• (amount of substance per unit volume =) 2.7 / 27
+• 27 g (of substance) contains 6.02 × 1023 atoms
+• (2.7 g mass contains) 0.1 mol
+• (1 cm3 volume contains) 0.1 mol
+• (1 m3 volume contains) 105 mol
+n = (2.7 × 103) / (27 × 1.66 × 10–27) = 6.0 × 1028 A1
+or
+n = (2.7 / 27) × 106 × 6.02 × 1023 = 6.0 × 1028
+8(c)(ii) V = (0.15 × 4.6) / (6.0 × 1028 × 0.090 × 10–3 × 1.60 × 10–19) C1
+H
+= 8.0 × 10–7 V A1
+© UCLES 2019 Page 10 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+9(a) work done per unit charge B1
+(work done) moving positive charge from infinity B1
+9(b)(i) energy = 4.8 × 1.60 × 10–13 A1
+= 7.7 × 10–13 J
+9(b)(ii) E = Qq / 4πεd C1
+P 0
+Q = 79e and q = 2e C1
+7.68 × 10–13 = (79 × 2 × {1.60 × 10–19}2 / (4π × 8.85 × 10–12 × d) C1
+d = 4.7 × 10–14 m A1
+9(c) (diameter must be) less than/equal to 10–13 or 10–14 m B1
+© UCLES 2019 Page 11 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+10(a) (as temperature rises) electrons in valence band gain energy B1
+electrons jump to conduction band B1
+holes are left in the valence band B1
+increased number (density) of charge carriers causes lower resistance B1
+10(b)(i) V– = V+ C1
+1.50 / 1.20 = R / 1.76 C1
+T
+R = 2.2 (kΩ) C1
+T
+temperature = 14 °C A1
+10(b)(ii) (For LED to conduct,) V must be negative B1
+OUT
+V– > V+ B1
+R must be lower so temperature must be above (b)(i) value B1
+T
+© UCLES 2019 Page 12 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+11(a) (induced) e.m.f. proportional to rate M1
+of change of (magnetic) flux (linkage) A1
+11(b)(i) any two from t , t , t , t A1
+1 3 5 7
+11(b)(ii) t and t A1
+2 4
+or
+t and t
+4 6
+11(c) e.m.f. = N∆Φ / ∆t C1
+= (2 × 9.4 × 10–4 × 5.0 × π × (1.8 × 10–2)2 × 63) / (6.0 × 10–3) C1
+= 0.10 V A1
+© UCLES 2019 Page 13 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+12(a)(i) (decay is) unpredictable/cannot be predicted B1
+12(a)(ii) probability of decay (of a nucleus) M1
+per unit time A1
+12(b) A = λN C1
+(for 1.00 m3) A = 0.600 / 4.80 × 10–3 (= 125 Bq) C1
+N = 125 / ([7.55 × 10–3] / 3600) (= 5.96 × 107) C1
+so ratio = (2.52 × 1025) / (5.96 × 107) C1
+or
+(for 4.80 × 10–3 m3) N for air = 2.52 × 1025 × 4.80 × 10–3 (= 1.21 × 1023) (C1)
+N for radon = 0.600 / ([7.55 × 10–3] / 3600) (= 2.86 × 105) (C1)
+so ratio = (1.21 × 1023) / (2.86 × 105) (C1)
+ratio = 4.2 × 1017 A1
+© UCLES 2019 Page 14 of 14

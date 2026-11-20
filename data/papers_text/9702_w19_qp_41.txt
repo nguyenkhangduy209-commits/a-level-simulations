@@ -1,0 +1,568 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+This document consists of 25 printed pages and 3 blank pages.
+DC (CJ) 184817
+© UCLES 2019 [Turn over
+*2292759248*
+PHYSICS 9702/41
+Paper 4 A Level Structured Questions October/November 2019
+2 hours
+Candidates answer on the Question Paper.
+No Additional Materials are required.
+READ THESE INSTRUCTIONS FIRST
+Write your centre number, candidate number and name on all the work you hand in.
+Write in dark blue or black pen.
+You may use an HB pencil for any diagrams or graphs.
+Do not use staples, paper clips, glue or correction fluid.
+DO NOT WRITE IN ANY BARCODES.
+Answer all questions.
+Electronic calculators may be used.
+You may lose marks if you do not show your working or if you do not use appropriate units.
+At the end of the examination, fasten all your work securely together.
+The number of marks is given in brackets [ ] at the end of each question or part question.
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2019 9702/41/O/N/19
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1
+2
+at2
+v2 = u2 + 2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω √ (x 2 –   x 2)
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2019 9702/41/O/N/19 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 (a) State Newton’s law of gravitation.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A geostationary satellite orbits the Earth. The orbit of the satellite is circular and the period of
+the orbit is 24 hours.
+(i) State two other features of this orbit.
+1. .......................................................................................................................................
+...........................................................................................................................................
+2. .......................................................................................................................................
+...........................................................................................................................................
+[2]
+(ii) The radius of the orbit of the satellite is 4.23 × 104 km.
+Determine a value for the mass of the Earth. Explain your working.
+mass = .....................................................kg [4]
+[Total: 8]
+© UCLES 2019 9702/41/O/N/19
+
+5
+2 (a) The kinetic theory of gases is based on a number of assumptions about the molecules of a
+gas.
+State the assumption that is related to the volume of the molecules of the gas.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) An ideal gas occupies a volume of 2.40 × 10–2 m3 at a pressure of 4.60 × 105 Pa and a
+temperature of 23 °C.
+(i) Calculate the number of molecules in the gas.
+number = ......................................................... [3]
+(ii) Each molecule has a diameter of approximately 3 × 10–10 m.
+Estimate the total volume of the gas molecules.
+volume = ....................................................m3 [3]
+(c) By reference to your answer in (b)(ii), suggest why the assumption in (a) is justified.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+[Total: 9]
+© UCLES 2019 9702/41/O/N/19 [Turn over
+
+6
+BLANK PAGE
+© UCLES 2019 9702/41/O/N/19
+
+7
+3 (a) State what is meant by specific latent heat.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A student determines the specific latent heat of vaporisation of a liquid using the apparatus
+illustrated in Fig. 3.1.
++
+V
+liquid A –
+heater
+pan of balance
+Fig. 3.1
+The heater is switched on. When the liquid is boiling at a constant rate, the balance reading is
+noted at 2.0 minute intervals.
+After 10 minutes, the current in the heater is reduced and the balance readings are taken for
+a further 12 minutes.
+© UCLES 2019 9702/41/O/N/19 [Turn over
+
+8
+The readings of the ammeter and of the voltmeter are given in Fig. 3.2.
+ammeter reading voltmeter reading
+/ A / V
+from time 0 to time 10 minutes 1.2 230
+after time 10 minutes 1.0 190
+Fig. 3.2
+The variation with time of the balance reading is shown in Fig. 3.3.
+500
+480
+balance reading / g
+460
+440
+420
+400
+380
+0 4 8 12 16 20 24
+time / minutes
+Fig. 3.3
+© UCLES 2019 9702/41/O/N/19
+
+9
+(i) From time 0 to time 10.0 minutes, the mass of liquid evaporated is 56 g.
+Use Fig. 3.3 to determine the mass of liquid evaporated from time 12.0 minutes to time
+22.0 minutes.
+mass = .......................................................g [1]
+(ii) Explain why, although the power of the heater is changed, the rate of loss of thermal
+energy to the surroundings may be assumed to be constant.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(iii) Determine a value for the specific latent heat of vaporisation L of the liquid.
+L = ................................................. J g–1 [4]
+(iv) Calculate the rate at which thermal energy is transferred to the surroundings.
+rate = ..................................................... W [2]
+[Total: 10]
+© UCLES 2019 9702/41/O/N/19 [Turn over
+
+10
+4 A mass is suspended vertically from a fixed point by means of a spring, as illustrated in Fig. 4.1.
+spring
+mass
+Fig. 4.1
+The mass is oscillating vertically. The variation with displacement x of the acceleration a of the
+mass is shown in Fig. 4.2.
+1.5
+a / m s–2
+1.0
+0.5
+0
+–1.5 –1.0 –0.5 0 0.5 1.0 1.5
+x / cm
+–0.5
+–1.0
+–1.5
+Fig. 4.2
+(a) (i) State what is meant by the displacement of the mass on the spring.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+© UCLES 2019 9702/41/O/N/19
+
+11
+(ii) Suggest how Fig. 4.2 shows that the mass is not performing simple harmonic motion.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(b) (i) The amplitude of oscillation of the mass may be changed.
+State the maximum amplitude x for which the oscillations are simple harmonic.
+0
+x = ....................................................cm [1]
+0
+(ii) For the simple harmonic oscillations of the mass, use Fig. 4.2 to determine the frequency
+of the oscillations.
+frequency = .................................................... Hz [3]
+(c) The maximum speed of the mass when oscillating with simple harmonic motion of amplitude
+x is v .
+0 0
+On Fig. 4.3, show the variation with displacement x of the velocity v of the mass for
+displacements from +x to –x .
+0 0
+v
+v
+0
+0
+–x 0 x
+0 0
+x
+–v
+0
+Fig. 4.3
+[2]
+[Total: 8]
+© UCLES 2019 9702/41/O/N/19 [Turn over
+
+12
+5 (a) A section of a coaxial cable is shown in Fig. 5.1.
+copper braid
+insulation
+copper
+wire
+plastic covering
+Fig. 5.1
+(i) Suggest two functions of the copper braid.
+1. .......................................................................................................................................
+...........................................................................................................................................
+2. .......................................................................................................................................
+...........................................................................................................................................
+[2]
+(ii) Suggest one application of a coaxial cable for the transmission of electrical signals.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(b) (i) The constant noise power in a transmission cable is 7.6 μW. The minimum acceptable
+signal-to-noise ratio is 32 dB.
+Calculate the minimum acceptable signal power P in the cable.
+MIN
+P = ......................................................W [2]
+MIN
+© UCLES 2019 9702/41/O/N/19
+
+13
+(ii) The input power of the signal to the transmission cable is 2.6 W. The attenuation per unit
+length of the cable is 6.3 dB km–1.
+Use your answer in (i) to determine the maximum uninterrupted length L of cable along
+which the signal may be transmitted.
+L = ....................................................km [2]
+[Total: 7]
+© UCLES 2019 9702/41/O/N/19 [Turn over
+
+14
+6 (a) State an expression for the electric field strength E at a distance r from a point charge Q in a
+vacuum.
+State the name of any other symbol used.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Two point charges A and B are situated a distance 10.0 cm apart in a vacuum, as illustrated in
+Fig. 6.1.
+charge A charge B
+P
+x
+10.0 cm
+Fig. 6.1
+A point P lies on the line joining the charges A and B. Point P is a distance x from A.
+The variation with distance x of the electric field strength E at point P is shown in Fig. 6.2.
+2.5
+E / 10–2 N C–1
+2.0
+1.5
+1.0
+0 2 4 6 8 10
+x / cm
+Fig. 6.2
+© UCLES 2019 9702/41/O/N/19
+
+15
+State and explain whether the charges A and B:
+(i) have the same, or opposite, signs
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) have the same, or different, magnitudes.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(c) An electron is situated at point P.
+Without calculation, state and explain the variation in the magnitude of the acceleration of the
+electron as it moves from the position where x = 3 cm to the position where x = 7 cm.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [4]
+[Total: 10]
+© UCLES 2019 9702/41/O/N/19 [Turn over
+
+16
+7 (a) An ideal operational amplifier (op-amp) has infinite bandwidth and zero output impedance.
+State what is meant by:
+(i) infinite bandwidth
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) zero output impedance.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(b) The circuit for a non-inverting amplifier incorporating an ideal op-amp is shown in Fig. 7.1.
+4.0 kΩ
++5.0 V
+–
++
+–5.0 V V
+OUT
+V IN 800 Ω
+R
+Fig. 7.1
+The light-emitting diode (LED) emits light when the potential difference across it is at
+least 2.0 V.
+The current in the LED must not be greater than 20 mA.
+(i) Calculate the gain of the amplifier circuit.
+gain = ......................................................... [2]
+© UCLES 2019 9702/41/O/N/19
+
+17
+(ii) Determine the value of V for which the value of V is +2.0 V.
+IN OUT
+V = ...................................................... V [1]
+IN
+(iii) State the maximum value of the output potential V .
+OUT
+maximum potential = ...................................................... V [1]
+(iv) When the op-amp is saturated, the potential difference across the LED is 2.2 V.
+Calculate the minimum resistance of resistor R so that the current in the LED is limited to
+20 mA.
+resistance = ......................................................Ω [2]
+[Total: 8]
+© UCLES 2019 9702/41/O/N/19 [Turn over
+
+18
+8 (a) A long straight vertical wire carries a current I. The wire passes through a horizontal card
+EFGH, as shown in Fig. 8.1 and Fig. 8.2.
+current out of
+plane of paper
+H G
+I wire
+H G
+E F
+E F
+Fig. 8.1 Fig. 8.2 (view from above)
+On Fig. 8.2, draw the pattern of the magnetic field produced by the current-carrying wire on
+the plane EFGH. [3]
+(b) Two long straight parallel wires P and Q are situated a distance 3.1 cm apart, as illustrated in
+Fig. 8.3.
+6.2 A 8.5 A
+wire P wire Q
+3.1cm
+Fig. 8.3
+The current in wire P is 6.2 A. The current in wire Q is 8.5 A.
+The magnetic flux density B at a distance x from a long straight wire carrying current I is
+given by the expression
+μI
+0
+B =
+2πx
+where μ is the permeability of free space.
+0
+© UCLES 2019 9702/41/O/N/19
+
+19
+Calculate:
+(i) the magnetic flux density at wire Q due to the current in wire P
+flux density = ...................................................... T [2]
+(ii) the force per unit length, in N m–1, acting on wire Q due to the current in wire P.
+force per unit length = ............................................... N m–1 [2]
+(c) The currents in wires P and Q are different in magnitude.
+State and explain whether the forces per unit length on the two wires will be different.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 9]
+© UCLES 2019 9702/41/O/N/19 [Turn over
+
+20
+BLANK PAGE
+© UCLES 2019 9702/41/O/N/19
+
+21
+9 Diagnosis using nuclear magnetic resonance imaging (NMRI) requires the use of a non-uniform
+magnetic field superimposed on a constant magnetic field of large magnitude.
+Explain the purpose of:
+(a) the large constant magnetic field
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) the non-uniform magnetic field.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 4]
+© UCLES 2019 9702/41/O/N/19 [Turn over
+
+22
+10 A bridge rectifier using four ideal diodes is shown in Fig. 10.1.
+A
+B
+R
+Fig. 10.1
+The sinusoidal alternating electromotive force (e.m.f.) applied between points A and B has a root-
+mean-square (r.m.s.) value of 7.0 V.
+(a) (i) On Fig. 10.1, circle the diodes that conduct when point B is positive with respect to
+point A. [1]
+(ii) Calculate the maximum potential difference V across resistor R.
+MAX
+V = ...................................................... V [1]
+MAX
+© UCLES 2019 9702/41/O/N/19
+
+23
+(b) A capacitor is connected into the circuit to produce smoothing of the potential difference
+across resistor R.
+The variation with time t of the potential difference V across resistor R is shown in Fig. 10.2.
+V magnitude of
+ripple
+0
+t
+Fig. 10.2
+(i) On Fig. 10.1, draw the symbol for a capacitor, connected so as to produce smoothing.
+[1]
+(ii) State the effect, if any, on the magnitude of the ripple on V when, separately:
+1. a capacitor of larger capacitance is used
+...........................................................................................................................................
+2. the resistor R has a smaller resistance.
+...........................................................................................................................................
+[2]
+[Total: 5]
+© UCLES 2019 9702/41/O/N/19 [Turn over
+
+24
+11 (a) With reference to the photoelectric effect, state what is meant by work function energy.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The work function energy of a clean metal surface is 5.5 × 10–19 J.
+Electromagnetic radiation of wavelength 280 nm is incident on the metal surface. The metal is
+in a vacuum.
+(i) Calculate:
+1. the photon energy
+photon energy = .......................................................J [2]
+2. the maximum speed v of the electrons emitted from the surface.
+MAX
+v = ................................................ m s–1 [3]
+MAX
+(ii) Explain why most of the emitted electrons will have a speed lower than v .
+MAX
+...........................................................................................................................................
+..................................................................................................................................... [1]
+© UCLES 2019 9702/41/O/N/19
+
+25
+(c) The electromagnetic radiation incident on the metal surface may change in intensity or in
+frequency.
+Complete Fig. 11.1 by inserting either ‘increases’ or ‘decreases’ or ‘no change’ to describe
+the effects of the changes shown on the maximum speed and on the rate of emission of
+electrons.
+maximum speed of rate of emission
+change
+electrons of electrons
+reduced intensity at constant
+frequency ................................... ...................................
+increased frequency at constant
+intensity ................................... ...................................
+Fig. 11.1
+[4]
+[Total: 12]
+© UCLES 2019 9702/41/O/N/19 [Turn over
+
+26
+12 One possible nuclear reaction that takes place is
+235U + 1n 95Mo + 139La + 21n + 7 0e
+92 0 42 57 0 –1
+Data for nuclei in this reaction are given in Fig. 12.1.
+total mass of separate binding energy
+nucleus mass / u mass defect / u
+nucleons / u per nucleon / MeV
+95Mo 94.906 95.765 0.859 8.443
+42
+139La 138.906 140.125 1.219 8.189
+57
+235U 235.044 236.909 1.865 ..................................
+92
+Fig. 12.1
+(a) Show that the energy equivalent to a mass of 1.00 u is 934 MeV.
+[2]
+(b) (i) Use data from Fig. 12.1 to calculate the binding energy per nucleon of a nucleus of
+uranium-235 (235U). Complete Fig. 12.1.
+92
+[2]
+(ii) The nucleon number of an isotope of the element rutherfordium is 267.
+State whether the binding energy per nucleon of this isotope will be greater than, equal
+to or less than the binding energy per nucleon of uranium-235.
+..................................................................................................................................... [1]
+© UCLES 2019 9702/41/O/N/19
+
+27
+(c) Calculate the total energy, in MeV, released in this nuclear reaction.
+energy = ................................................. MeV [2]
+(d) The nuclei in 1.2 × 10–7 mol of uranium-235 all undergo this reaction in a time of 25 ms.
+Calculate the average power release during the time of 25 ms.
+power = ..................................................... W [3]
+[Total: 10]
+© UCLES 2019 9702/41/O/N/19
+
+28
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of the University of
+Cambridge Local Examinations Syndicate (UCLES), which itself is a department of the University of Cambridge.
+© UCLES 2019 9702/41/O/N/19

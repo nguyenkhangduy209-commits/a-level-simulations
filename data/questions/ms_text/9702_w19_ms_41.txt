@@ -1,0 +1,282 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+PHYSICS 9702/41
+Paper 4 A Level Structured Questions October/November 2019
+MARK SCHEME
+Maximum Mark: 100
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the October/November 2019 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 15 printed pages.
+© UCLES 2019 [Turn over
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the
+specific content of the mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these
+marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond
+the scope of the syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the
+question as indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently e.g. in situations where candidates have not followed instructions or in the application of generic level
+descriptors.
+© UCLES 2019 Page 2 of 15
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range
+may be limited according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or
+grade descriptors in mind.
+© UCLES 2019 Page 3 of 15
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+1(a) force proportional to product of masses and inversely proportional to square of separation B1
+idea of (gravitational) force between point masses B1
+1(b)(i) above the equator B1
+from west to east B1
+1(b)(ii) gravitational force provides/is the centripetal force B1
+GM / r2 = r (2π / T)2 C1
+(6.67 × 10–11 × M) = {(4.23 × 107)3 × 4π2} / (24 × 3600)2 C1
+M = 6.0 × 1024 kg A1
+© UCLES 2019 Page 4 of 15
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+2(a) (total volume of molecules is) negligible M1
+compared with volume occupied by the gas A1
+2(b)(i) pV = NkT C1
+4.60 × 105 × 2.40 × 10–2 = N × 1.38 × 10–23 × (273 + 23) C1
+or
+pV = nRT (C1)
+4.60 × 105 × 2.40 × 10–2 = n × 8.31 × (273 + 23) (C1)
+n = 4.49 (mol)
+N = nN
+A
+= 4.49 × 6.02 × 1023
+N = 2.7 × 1024 A1
+© UCLES 2019 Page 5 of 15
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+2(b)(ii) volume of one atom = d3 (= 2.7 × 10–29 m3) C1
+volume of all atoms = 2.7 × 10–29 × 2.7 × 1024 C1
+= 7 × 10–5 m3 A1
+or
+volume of one atom = (4 / 3)πr3 (= 1.41 × 10–29 m3) (C1)
+volume of all atoms = 2.7 × 1024 × 1.41 × 10–29 (C1)
+= 4 × 10–5 m3 (A1)
+2(c) numerical comparison between answer to (b)(ii) and 2.4 × 10–2 (m3) showing (b)(ii) is much less than 2.4 × 10–2 (m3) B1
+© UCLES 2019 Page 6 of 15
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+3(a) (thermal) energy per (unit) mass (to change state) B1
+(heat transfer during) change of state at constant temperature B1
+3(b)(i) 32 g A1
+3(b)(ii) temperature difference (between liquid and surroundings) does not change B1
+3(b)(iii) VIt = mL C1
+230 × 1.2 × 60 × 10 = (56 × L) + H C1
+or
+190 × 1.0 × 60 × 10 = (32 × L) + H
+86 × 600 = (56 – 32) × L C1
+or
+230 × 1.2 = (56 × L) / (60 × 10) + P (C1)
+or
+190 × 1.0 = (32 × L) / (60 × 10) + P
+276 – 190 = (24 × L) / 600 (C1)
+L = 2200 J g–1 A1
+© UCLES 2019 Page 7 of 15
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+3(b)(iv) 230 × 1.2 × 600 = (56 × 2150) + H C1
+or
+190 × 1.0 × 600 = (32 × 2150) + H
+H = 45200 A1
+rate = 45200 / 600
+= 75 W
+or
+230 × 1.2 = (56 × 2150) / (60 × 10) + P (C1)
+or
+190 × 1.0 = (32 × 2150) / (60 × 10) + P
+rate (= P) = 75 W (A1)
+Question Answer Marks
+4(a)(i) distance from a (reference) point in a given direction B1
+4(a)(ii) line is not straight or gradient is not constant B1
+4(b)(i) 0.85–0.90 cm A1
+4(b)(ii) a = – (2πf )2 x C1
+e.g. 1.2 = 4π2 × f 2 × (0.90 × 10–2) C1
+f = 1.8 Hz A1
+4(c) complete circle/ellipse enclosing the origin B1
+closed shape passing through (0, ±v ) and (±x , 0) B1
+0 0
+© UCLES 2019 Page 8 of 15
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+5(a)(i) provides return for the signal B1
+shields signal from noise B1
+5(a)(ii) e.g. connection between aerial and TV set B1
+5(b)(i) gain / dB = 10 lg (P / P ) C1
+1 2
+32 = 10 lg {P / (7.6 × 10–6)} A1
+MIN
+P = 0.012 W
+MIN
+5(b)(ii) attenuation per unit length = (1 / L) × 10 lg (P / P ) C1
+1 2
+6.3 = (1 / L) × 10 lg (2.6 / 0.012)
+L = 3.7 km A1
+© UCLES 2019 Page 9 of 15
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+6(a) (E =) Q / 4πεr2 M1
+0
+where ε is permittivity (of free space) A1
+0
+6(b)(i) field does not change direction/field does not become zero M1
+so (charges have) opposite (sign) A1
+6(b)(ii) minimum is at the midpoint (between the charges) M1
+so (magnitudes are the) same A1
+6(c) force = field strength × charge and force = mass × acceleration B1
+or
+acceleration is proportional to field strength
+(from x = 3.0 cm) to x = 5.0 cm: acceleration decreases B1
+at x = 5.0 cm: acceleration is a minimum B1
+from x = 5.0 cm (to x = 7.0 cm): acceleration increases B1
+© UCLES 2019 Page 10 of 15
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+7(a)(i) all frequencies are amplified equally B1
+7(a)(ii) no drop in output voltage (when there is a current) B1
+7(b)(i) gain = 1 + R / R C1
+F IN
+gain = 1 + (4000 / 800)
+gain = 6.0 A1
+7(b)(ii) 2.0 / V = 6.0 A1
+IN
+V = (+)0.33 V
+IN
+7(b)(iii) 5.0 V A1
+7(b)(iv) V = 5.0 – 2.2 (= 2.8 V) C1
+R = V / I A1
+= 2.8 / 0.020
+= 140 Ω
+© UCLES 2019 Page 11 of 15
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+8(a) concentric circles (around the wire) M1
+at least 3 circles shown, all with increasing separation A1
+direction anticlockwise B1
+8(b)(i) B = (4π × 10–7 × 6.2) / (2π × 3.1 × 10–2) C1
+B = 4.0 × 10–5 T A1
+8(b)(ii) F = BIL or F / L = BI C1
+F / L = 4.0 × 10–5 × 8.5F / L A1
+= 3.4 × 10–4 N m–1
+8(c) correct application of Newton’s 3rd law to the forces M1
+or
+F / L is proportional to the product of the two currents
+so same magnitude A1
+Question Answer Marks
+9(a) nuclei precess B1
+precession is about (direction of magnetic) field B1
+or
+frequency of precession is in radio-frequency range
+9(b) • frequency (of precession) depends on field strength B2
+• to locate/find position of (spinning) nuclei
+• to change region where nuclei are detected
+any two points, one mark each
+© UCLES 2019 Page 12 of 15
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+10(a)(i) lower right and upper left diodes circled B1
+10(a)(ii) maximum = 7.0√2 A1
+maximum = 9.9 V
+10(b)(i) correct symbol for capacitor, shown connected in parallel with R B1
+10(b)(ii) 1. (ripple) decreases B1
+2. (ripple) increases B1
+© UCLES 2019 Page 13 of 15
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+11(a) energy (of photon) required to remove electron M1
+from a surface A1
+or
+reference to minimum energy
+or
+reference to zero kinetic energy
+11(b)(i) 1. photon energy = hc / λ C1
+= (6.63 × 10–34 × 3.00 × 108) / (280 × 10–9) A1
+= 7.1 × 10–19 J
+2. electron energy = (7.1 – 5.5) × 10–19 J C1
+½ × 9.11 × 10–31 × v2 = (7.1 – 5.5) × 10–19 C1
+v = 5.9 × 105 m s–1 A1
+11(b)(ii) energy is required to bring electron to the surface B1
+11(c) no change decreases B4
+increases decreases
+© UCLES 2019 Page 14 of 15
+
+9702/41 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks
+12(a) E = (3.0 × 108)2 × 1.66 × 10–27 (= 1.49 × 10–10 J) M1
+E = (1.49 × 10–10) / (1.60 × 10–19) = 9.34 × 108 = 934 MeV A1
+or
+binding energy = 8.443 × 95 [or equivalent using La-139 nucleus] (M1)
+binding energy / mass defect = (8.443 × 95) / 0.859 = 934 MeV (A1)
+12(b)(i) binding energy = 1.865 × 934 (= 1741.91 MeV) C1
+binding energy per nucleon = 1741.91 / 235 A1
+= 7.41 (MeV)
+12(b)(ii) less (than) B1
+12(c) energy = {(1.219 + 0.859) – 1.865)} × 934 C1
+or
+energy = (95 × 8.443) + (139 × 8.189) – (235 × 7.412)
+= 199 MeV A1
+12(d) number of reactions = 1.2 × 10–7 × 6.02 × 1023 C1
+= 7.22 × 1016
+energy release (for one reaction) = 199 × 1.60 × 10–13 (= 3.18 × 10–11 J) C1
+power = (7.22 × 1016 × 3.18 × 10–11) / (25 × 10–3) A1
+= 9.2 × 107 W
+© UCLES 2019 Page 15 of 15

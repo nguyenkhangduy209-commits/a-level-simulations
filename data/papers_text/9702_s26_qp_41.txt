@@ -1,0 +1,1497 @@
+Cambridge International AS & A Level
+This document has 24 pages. Any blank pages are indicated.
+[Turn over
+*5843964524*
+* 0000800000001 * DFD
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:44)
+(cid:172)(cid:79)(cid:138)(cid:62)(cid:160)(cid:52)(cid:109)(cid:72)(cid:117)(cid:79)(cid:170)(cid:69)(cid:138)(cid:93)(cid:122)(cid:54)(cid:128)(cid:87)
+(cid:172)(cid:167)(cid:112)(cid:113)(cid:80)(cid:172)(cid:146)(cid:161)(cid:89)(cid:118)(cid:115)(cid:63)(cid:101)(cid:62)(cid:153)(cid:90)(cid:118)(cid:130)
+(cid:165)(cid:53)(cid:101)(cid:149)(cid:53)(cid:53)(cid:165)(cid:149)(cid:69)(cid:149)(cid:101)(cid:133)(cid:133)(cid:117)(cid:133)(cid:53)(cid:85)(cid:85)
+PHYSICS 9702/41
+Paper 4 A Level Structured Questions May/June 2026
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen. Do not use correction fluid or tape.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+DC (EV/SW) 356123/4
+© Cambridge University Press & Assessment 2026
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000002 *
+2
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:44)
+Data
+acceleration of free fall g = 9.81 m s–2
+speed of light in free space c = 3.00 × 108 m s–1
+elementary charge e = 1.60 × 10–19 C
+unified atomic mass unit 1 u = 1.66 × 10–27 kg
+rest mass of proton m = 1.67 × 10–27 kg
+p
+rest mass of electron m = 9.11 × 10–31 kg
+e
+Avogadro constant N = 6.02 × 1023 mol–1
+A
+molar gas constant R = 8.31 J K–1 mol–1
+Boltzmann constant k = 1.38 × 10–23 J K–1
+gravitational constant G = 6.67 × 10–11 N m2 kg–2
+permittivity of free space ε = 8.85 × 10–12 F m–1
+0
+1
+( = 8.99 × 109 m F–1)
+4rf
+0
+Planck constant h = 6.63 × 10–34 J s
+Stefan–Boltzmann constant σ = 5.67 × 10–8 W m–2 K–4
+Formulae
+uniformly accelerated motion s = ut + 1at 2
+2
+v 2 = u 2 + 2as
+hydrostatic pressure ∆p = ρg∆h
+upthrust F = ρgV
+f v
+Doppler effect for sound waves f = s
+o v!v
+s
+electric current I = Anvq
+resistors in series R = R + R + ...
+1 2
+1 1 1
+resistors in parallel = + + ...
+R R R
+1 2
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:252)(cid:184)(cid:254)(cid:215)
+(cid:300)(cid:295)(cid:238)(cid:242)(cid:205)(cid:288)(cid:278)(cid:263)(cid:226)(cid:267)(cid:261)(cid:228)(cid:269)(cid:184)(cid:233)(cid:290)(cid:238)(cid:258)
+(cid:293)(cid:293)(cid:181)(cid:277)(cid:245)(cid:213)(cid:229)(cid:245)(cid:245)(cid:213)(cid:245)(cid:197)(cid:261)(cid:181)(cid:293)(cid:245)(cid:245)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000003 *
+32
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:4)(cid:44)
+GM
+gravitational potential ϕ = –
+r
+GMm
+gravitational potential energy E = –
+P r
+Nm
+pressure of an ideal gas p = 1 〈c2〉
+3 V
+simple harmonic motion a = – ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ! ω (x 2-x2)
+0
+Q
+electric potential V =
+4rf r
+0
+Qq
+electrical potential energy E =
+P 4rf r
+0
+1 1 1
+capacitors in series = + + ...
+C C C
+1 2
+capacitors in parallel C = C + C + ...
+1 2
+t
+discharge of a capacitor x = x e-
+RC
+0
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ωt
+0
+radioactive decay x = x e– λt
+0
+0.693
+decay constant λ =
+t
+1
+2
+I (Z -Z )2
+intensity reflection coefficient R = 1 2
+I (Z +Z )2
+0 1 2
+Stefan–Boltzmann law L = 4πσr 2T 4
+∆λ Df v
+Doppler redshift á á
+λ f c
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26 [Turn over
+(cid:300)(cid:207)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:250)(cid:184)(cid:254)(cid:215)
+(cid:300)(cid:295)(cid:237)(cid:241)(cid:213)(cid:298)(cid:282)(cid:247)(cid:215)(cid:237)(cid:252)(cid:293)(cid:201)(cid:192)(cid:237)(cid:290)(cid:254)(cid:258)
+(cid:293)(cid:293)(cid:197)(cid:213)(cid:181)(cid:181)(cid:197)(cid:277)(cid:293)(cid:229)(cid:229)(cid:197)(cid:261)(cid:213)(cid:261)(cid:181)(cid:293)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000004 *
+4
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:5)(cid:44)
+1 (a) Define gravitational potential at a point.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A uniform spherical planet has radius R. The gravitational potential at its surface is –Φ.
+P is a point on a line that passes through the centre of the planet, at variable displacement x
+from the centre, as shown in Figure 1.1.
+planet
+R
+P
+x
+Figure 1.1
+Figure 1.2 shows the variation with x of the gravitational potential φ due to the planet in the
+region outside the planet close to its surface.
+0
+–3R –2R –R 0 R 2R 3R
+x
+-1Φ
+2
+φ
+–Φ
+Figure 1.2
+(i) Explain why φ is negative for all values of x.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:252)(cid:184)(cid:256)(cid:215)
+(cid:300)(cid:295)(cid:237)(cid:244)(cid:213)(cid:292)(cid:300)(cid:242)(cid:228)(cid:243)(cid:243)(cid:286)(cid:299)(cid:292)(cid:207)(cid:242)(cid:246)(cid:258)
+(cid:293)(cid:213)(cid:277)(cid:213)(cid:245)(cid:181)(cid:197)(cid:181)(cid:261)(cid:261)(cid:213)(cid:197)(cid:197)(cid:213)(cid:229)(cid:181)(cid:245)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000005 *
+5
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:6)(cid:44)
+(ii) State an expression, in terms of Φ and R, for the mass M of the planet. Identify any
+other symbols that you use.
+M = ......................................................... [2]
+(iii) Determine an expression, in terms of Φ and R, for the gravitational field strength g at
+0
+the surface of the planet.
+g = ......................................................... [1]
+0
+(iv) On Figure 1.3, sketch the variation of the gravitational field g with x between x = – 3R
+and x = 3R. Do not include the region inside the sphere between x = – R and x = R.
+g
+0
+g
+1g
+2 0
+0
+–3R –2R –R 0 R 2R 3R
+x
+-1g
+2 0
+–g
+0
+Figure 1.3
+[3]
+[Total: 10]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26 [Turn over
+(cid:300)(cid:207)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:250)(cid:184)(cid:256)(cid:215)
+(cid:300)(cid:295)(cid:238)(cid:243)(cid:205)(cid:294)(cid:296)(cid:258)(cid:213)(cid:261)(cid:254)(cid:235)(cid:175)(cid:284)(cid:267)(cid:242)(cid:262)(cid:258)
+(cid:293)(cid:213)(cid:293)(cid:277)(cid:181)(cid:213)(cid:229)(cid:213)(cid:277)(cid:245)(cid:261)(cid:197)(cid:197)(cid:181)(cid:197)(cid:245)(cid:293)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000006 *
+6
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:7)(cid:44)
+2 (a) State what is meant by an ideal gas.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Ideal gases may be used to measure the temperature of the environment in a laboratory
+experiment. In some situations, however, it is preferable to use a thermocouple thermometer.
+(i) Explain how a thermometer that uses an ideal gas can be advantageous compared with
+a thermometer that uses a liquid in glass.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) Describe a laboratory situation in which a thermocouple thermometer is preferable to a
+thermometer that uses an ideal gas.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(c) A very small sample of an ideal gas consists of five molecules, each of mass 3.34 × 10–27 kg.
+At a particular instant, the speeds of the molecules are as shown in Figure 2.1.
+357 m s–1 424 m s–1 509 m s–1 286 m s–1 435 m s–1
+Figure 2.1
+Determine, to three significant figures, the root-mean-square (r.m.s.) speed c of
+0
+the molecules.
+c = ................................................ m s–1 [2]
+0
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:250)(cid:181)(cid:254)(cid:215)
+(cid:300)(cid:295)(cid:237)(cid:243)(cid:210)(cid:288)(cid:256)(cid:268)(cid:205)(cid:258)(cid:239)(cid:210)(cid:207)(cid:292)(cid:298)(cid:218)(cid:246)(cid:258)
+(cid:293)(cid:261)(cid:197)(cid:277)(cid:181)(cid:245)(cid:229)(cid:245)(cid:213)(cid:277)(cid:229)(cid:197)(cid:261)(cid:181)(cid:293)(cid:181)(cid:181)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000007 *
+7
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:8)(cid:44)
+(d) A larger sample of the gas in 2(c) consists of 5.0 × 1023 molecules. These molecules have
+the same r.m.s. speed as the molecules of the gas in 2(c).
+(i) Calculate the amount of gas.
+amount of gas = .................................................. mol [2]
+(ii) Determine the thermodynamic temperature T of the gas.
+0
+T = ...................................................... K [2]
+0
+(iii) The temperature of the gas is now gradually increased.
+On Figure 2.2, sketch the variation of the r.m.s. speed of the molecules of the gas with
+thermodynamic temperature.
+r.m.s. speed
+c
+0
+0
+0 T
+0
+thermodynamic temperature
+Figure 2.2
+[3]
+[Total: 13]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26 [Turn over
+(cid:300)(cid:211)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:252)(cid:181)(cid:254)(cid:215)
+(cid:300)(cid:295)(cid:238)(cid:244)(cid:218)(cid:298)(cid:260)(cid:252)(cid:236)(cid:248)(cid:258)(cid:279)(cid:267)(cid:284)(cid:174)(cid:218)(cid:262)(cid:258)
+(cid:293)(cid:261)(cid:181)(cid:213)(cid:245)(cid:277)(cid:197)(cid:277)(cid:197)(cid:293)(cid:245)(cid:197)(cid:261)(cid:213)(cid:261)(cid:245)(cid:229)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000008 *
+8
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:44)
+3 (a) State what is meant by the internal energy of a system.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) An ideal gas containing 8.7 × 1023 molecules is at a temperature of 300 K and a pressure
+of 2.0 × 105 Pa.
+(i) Show that the volume of the gas is 0.018 m3.
+[2]
+(ii) Determine the internal energy of the gas. Explain your reasoning.
+internal energy = ...................................................... J [3]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:250)(cid:181)(cid:256)(cid:215)
+(cid:300)(cid:295)(cid:238)(cid:241)(cid:218)(cid:292)(cid:242)(cid:237)(cid:207)(cid:250)(cid:265)(cid:272)(cid:233)(cid:184)(cid:272)(cid:202)(cid:238)(cid:258)
+(cid:293)(cid:181)(cid:293)(cid:213)(cid:181)(cid:277)(cid:197)(cid:181)(cid:229)(cid:197)(cid:261)(cid:197)(cid:197)(cid:213)(cid:229)(cid:245)(cid:181)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000009 *
+9
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:10)(cid:44)
+(c) The gas in 3(b) undergoes a sequence of changes AB, BC and CA in its pressure p and
+volume V, as shown in Figure 3.1.
+6
+B
+4
+p / 105 Pa
+2
+C A
+0
+0 0.005 0.010 0.015 0.020
+V / m3
+Figure 3.1
+Determine three conclusions that can be drawn from Figure 3.1 about the individual
+and overall effects of these changes on the energy of the gas. The conclusions may be
+qualitative or quantitative, and may refer to any of work done, transfer of thermal energy and
+change in internal energy. Use the space for any working.
+1 ................................................................................................................................................
+...................................................................................................................................................
+2 ................................................................................................................................................
+...................................................................................................................................................
+3 ................................................................................................................................................
+...................................................................................................................................................
+[3]
+[Total: 10]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26 [Turn over
+(cid:300)(cid:211)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:252)(cid:181)(cid:256)(cid:215)
+(cid:300)(cid:295)(cid:237)(cid:242)(cid:210)(cid:294)(cid:238)(cid:253)(cid:234)(cid:256)(cid:248)(cid:217)(cid:237)(cid:192)(cid:204)(cid:202)(cid:254)(cid:258)
+(cid:293)(cid:181)(cid:277)(cid:277)(cid:245)(cid:245)(cid:229)(cid:213)(cid:181)(cid:181)(cid:213)(cid:197)(cid:197)(cid:181)(cid:197)(cid:181)(cid:229)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000010 *
+10
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:1)(cid:44)
+4 A hydrogen atom consists of a proton and an electron separated by distance 2x, as shown
+in Figure 4.1.
+proton
+electron
+P
+not to scale
+2x
+Figure 4.1
+Point P is at the midpoint of the line joining the centres of the proton and the electron.
+(a) (i) For point P, compare the electric field due to the proton with the electric field due to
+the electron.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(ii) For point P, compare the electric potential due to the proton with the electric potential
+due to the electron.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(b) (i) The elementary charge is e and the permittivity of free space is ε.
+0
+State an expression, in terms of x, e and ε, for the magnitude of the electric force F
+0
+between the proton and the electron.
+F = ......................................................... [2]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:250)(cid:183)(cid:254)(cid:215)
+(cid:300)(cid:295)(cid:239)(cid:241)(cid:211)(cid:290)(cid:250)(cid:299)(cid:209)(cid:241)(cid:258)(cid:182)(cid:197)(cid:182)(cid:252)(cid:242)(cid:262)(cid:258)
+(cid:293)(cid:293)(cid:261)(cid:277)(cid:181)(cid:277)(cid:293)(cid:181)(cid:261)(cid:245)(cid:261)(cid:261)(cid:197)(cid:245)(cid:229)(cid:245)(cid:261)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000011 *
+11
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:2)(cid:44)
+(ii) Determine an expression, in terms of F and x, for the electric potential energy E of the
+P
+proton and the electron.
+E = ......................................................... [1]
+P
+[Total: 9]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26 [Turn over
+(cid:300)(cid:211)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:252)(cid:183)(cid:254)(cid:215)
+(cid:300)(cid:295)(cid:240)(cid:242)(cid:219)(cid:296)(cid:246)(cid:283)(cid:232)(cid:263)(cid:239)(cid:243)(cid:273)(cid:190)(cid:224)(cid:242)(cid:246)(cid:258)
+(cid:293)(cid:293)(cid:245)(cid:213)(cid:245)(cid:245)(cid:261)(cid:213)(cid:277)(cid:261)(cid:213)(cid:261)(cid:197)(cid:277)(cid:197)(cid:181)(cid:277)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000012 *
+12
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:3)(cid:44)
+5 (a) Define the capacitance of a parallel plate capacitor.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Two capacitors X and Y have capacitances C and C respectively. The capacitors
+X Y
+are connected in parallel to a supply that has electromotive force (e.m.f.) E, as shown
+in Figure 5.1.
+E
+C
+X
+C
+Y
+Figure 5.1
+Derive the expression for the relationship between C , C and the combined capacitance C
+X Y T
+of the circuit.
+[3]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:250)(cid:183)(cid:256)(cid:215)
+(cid:300)(cid:295)(cid:240)(cid:243)(cid:219)(cid:286)(cid:264)(cid:270)(cid:211)(cid:265)(cid:248)(cid:252)(cid:179)(cid:290)(cid:254)(cid:290)(cid:254)(cid:258)
+(cid:293)(cid:213)(cid:229)(cid:213)(cid:181)(cid:245)(cid:261)(cid:245)(cid:245)(cid:229)(cid:229)(cid:261)(cid:261)(cid:277)(cid:293)(cid:181)(cid:261)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000013 *
+13
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:4)(cid:44)
+(c) Two capacitors are connected in series to a supply that has e.m.f. 6.00 V.
+One of the capacitors has capacitance C and the other has capacitance 2C.
+The total energy stored by the two capacitors is 1.30 mJ.
+Calculate C in μF.
+C = .................................................... μF [3]
+[Total: 8]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26 [Turn over
+(cid:300)(cid:211)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:252)(cid:183)(cid:256)(cid:215)
+(cid:300)(cid:295)(cid:239)(cid:244)(cid:211)(cid:300)(cid:268)(cid:286)(cid:230)(cid:239)(cid:265)(cid:173)(cid:295)(cid:282)(cid:218)(cid:290)(cid:238)(cid:258)
+(cid:293)(cid:213)(cid:213)(cid:277)(cid:245)(cid:277)(cid:293)(cid:277)(cid:293)(cid:213)(cid:245)(cid:261)(cid:261)(cid:245)(cid:261)(cid:245)(cid:277)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000014 *
+14
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:5)(cid:44)
+6 (a) Define magnetic flux density.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Figure 6.1 shows a beam of charged particles in a device known as a mass spectrometer.
+beam of particles
+8.2 cm
+Y X
+magnetic field
+out of plane of page
+Figure 6.1
+The shaded region contains a uniform magnetic field that is out of the plane of the page.
+The particles enter the region of the magnetic field at point X and strike a detector at point Y.
+(i) Explain whether the sign of the charge on the particles is positive or negative.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:251)(cid:182)(cid:258)(cid:215)
+(cid:300)(cid:295)(cid:240)(cid:242)(cid:210)(cid:294)(cid:247)(cid:278)(cid:216)(cid:249)(cid:254)(cid:274)(cid:203)(cid:195)(cid:206)(cid:210)(cid:246)(cid:258)
+(cid:293)(cid:245)(cid:213)(cid:213)(cid:181)(cid:245)(cid:229)(cid:181)(cid:261)(cid:197)(cid:245)(cid:197)(cid:197)(cid:181)(cid:229)(cid:181)(cid:197)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000015 *
+15
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:6)(cid:44)
+(ii) Explain why the path followed by the beam of particles inside the magnetic field
+is circular.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(c) Each of the particles in 6(b) has a mass of 2.0 × 10–26 kg and a charge of magnitude
+3.2 × 10–19 C. All of the particles have a speed of 7.3 × 104 m s–1.
+The distance XY is 8.2 cm.
+(i) Show that the centripetal acceleration of one of the particles is 1.3 × 1011 m s–2.
+[2]
+(ii) Use the information in 6(c)(i) to determine the flux density B of the uniform magnetic
+field. Give a unit with your answer.
+B = .................................. unit ............... [2]
+(d) The particles in 6(b) are replaced with particles that have half of the charge and a quarter of
+the mass of the particles in 6(b). The sign of the charge and the speed of the particles are
+both unchanged.
+On Figure 6.1, draw the path of this beam of particles. [2]
+[Total: 12]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26 [Turn over
+(cid:300)(cid:207)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:249)(cid:182)(cid:258)(cid:215)
+(cid:300)(cid:295)(cid:239)(cid:241)(cid:218)(cid:292)(cid:251)(cid:294)(cid:225)(cid:255)(cid:243)(cid:215)(cid:271)(cid:187)(cid:266)(cid:210)(cid:262)(cid:258)
+(cid:293)(cid:245)(cid:229)(cid:277)(cid:245)(cid:277)(cid:197)(cid:213)(cid:277)(cid:181)(cid:229)(cid:197)(cid:197)(cid:213)(cid:197)(cid:245)(cid:213)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000016 *
+16
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:7)(cid:44)
+7 (a) (i) State what is meant by half-wave rectification of an alternating current.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) Figure 7.1 shows an incomplete diagram of the circuit used to achieve half-wave
+rectification of an alternating input voltage V to produce output voltage V .
+IN OUT
+V V
+IN OUT
+Figure 7.1
+Complete the circuit diagram in Figure 7.1. [2]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:251)(cid:182)(cid:260)(cid:215)
+(cid:300)(cid:295)(cid:239)(cid:244)(cid:218)(cid:298)(cid:265)(cid:291)(cid:214)(cid:257)(cid:252)(cid:208)(cid:173)(cid:279)(cid:236)(cid:194)(cid:238)(cid:258)
+(cid:293)(cid:197)(cid:245)(cid:277)(cid:181)(cid:277)(cid:197)(cid:245)(cid:245)(cid:277)(cid:213)(cid:197)(cid:261)(cid:213)(cid:293)(cid:245)(cid:197)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000017 *
+17
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:8)(cid:44)
+(b) Two alternating voltages V and V have the same peak voltage V and the same period T.
+1 2 0
+One is sinusoidal and the other is a square wave, as shown by the variations with time t in
+Figure 7.2 and Figure 7.3.
+V
+0
+V
+1
+0
+0 T
+t
+–V
+0
+Figure 7.2
+V
+0
+V
+2
+0
+0 T
+t
+–V
+0
+Figure 7.3
+The alternating voltages are applied in turn to the input terminals in the completed circuit
+of Figure 7.1.
+Complete Table 7.1 to show, in terms of V , expressions for the root-mean-square (r.m.s.)
+0
+values of the two unrectified and the two half-wave rectified voltages.
+Table 7.1
+r.m.s. value
+V V
+1 2
+unrectified
+half-wave rectified
+[4]
+[Total: 8]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26 [Turn over
+(cid:300)(cid:207)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:249)(cid:182)(cid:260)(cid:215)
+(cid:300)(cid:295)(cid:240)(cid:243)(cid:210)(cid:288)(cid:261)(cid:275)(cid:227)(cid:247)(cid:261)(cid:281)(cid:297)(cid:287)(cid:240)(cid:194)(cid:254)(cid:258)
+(cid:293)(cid:197)(cid:261)(cid:213)(cid:245)(cid:245)(cid:229)(cid:277)(cid:293)(cid:293)(cid:261)(cid:197)(cid:261)(cid:181)(cid:261)(cid:181)(cid:213)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000018 *
+18
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:9)(cid:44)
+8 (a) State what is meant by a photon.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) X-rays for use in medical diagnosis are produced by accelerating charged particles towards
+a metal target.
+(i) State the name of the charged particles.
+..................................................................................................................................... [1]
+(ii) Describe how X-rays are formed at the target.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(iii) For any given accelerating voltage, there is a range of wavelengths of X-rays produced
+that has a minimum value.
+Explain, with reference to photons, why there is a range of wavelengths and why this
+range has a minimum value.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(iv) Calculate the minimum wavelength of X-rays produced when the accelerating voltage
+is 52.0 kV.
+minimum wavelength = ..................................................... m [3]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:251)(cid:184)(cid:258)(cid:215)
+(cid:300)(cid:295)(cid:238)(cid:244)(cid:211)(cid:300)(cid:257)(cid:245)(cid:220)(cid:266)(cid:243)(cid:246)(cid:209)(cid:277)(cid:192)(cid:250)(cid:262)(cid:258)
+(cid:293)(cid:277)(cid:277)(cid:213)(cid:181)(cid:277)(cid:293)(cid:245)(cid:213)(cid:229)(cid:213)(cid:261)(cid:261)(cid:245)(cid:293)(cid:245)(cid:245)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000019 *
+19
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:10)(cid:44)
+(c) X-rays are used to create an image of the internal structure of an object that is made from
+two types of material of similar thickness.
+Describe and explain how a property of the materials determines whether or not the image
+produced has good contrast.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 13]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26 [Turn over
+(cid:300)(cid:207)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:249)(cid:184)(cid:258)(cid:215)
+(cid:300)(cid:295)(cid:237)(cid:243)(cid:219)(cid:286)(cid:253)(cid:261)(cid:221)(cid:240)(cid:254)(cid:179)(cid:261)(cid:285)(cid:284)(cid:250)(cid:246)(cid:258)
+(cid:293)(cid:277)(cid:293)(cid:277)(cid:245)(cid:245)(cid:261)(cid:277)(cid:197)(cid:213)(cid:261)(cid:261)(cid:261)(cid:277)(cid:261)(cid:181)(cid:293)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000020 *
+20
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:1)(cid:44)
+9 (a) Define the mass defect of a nucleus.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Thorium-228 ( 228Th) is radioactive.
+90
+Table 9.1 shows the mass defects of thorium-228 and some other nuclides.
+Table 9.1
+nuclide mass defect / u
+4He 0.030 377
+2
+224Ra 1.846 840
+88
+228Ac 1.869 820
+89
+228Th 1.871 290
+90
+228Pa 1.866 129
+91
+(i) Use the data in Table 9.1 to explain why thorium-228 is an α-emitter and not a
+β– emitter or a β+ emitter.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [4]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:251)(cid:184)(cid:260)(cid:215)
+(cid:300)(cid:295)(cid:237)(cid:242)(cid:219)(cid:296)(cid:239)(cid:260)(cid:218)(cid:242)(cid:261)(cid:188)(cid:231)(cid:193)(cid:186)(cid:298)(cid:254)(cid:258)
+(cid:293)(cid:229)(cid:181)(cid:277)(cid:181)(cid:245)(cid:261)(cid:181)(cid:229)(cid:245)(cid:245)(cid:261)(cid:197)(cid:277)(cid:229)(cid:181)(cid:245)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000021 *
+21
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:2)(cid:44)
+(ii) Calculate the energy, in MeV, released by the α-decay of one thorium-228 nucleus.
+Give your answer to three significant figures.
+energy = ................................................. MeV [3]
+[Total: 9]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26 [Turn over
+(cid:300)(cid:207)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:249)(cid:184)(cid:260)(cid:215)
+(cid:300)(cid:295)(cid:238)(cid:241)(cid:211)(cid:290)(cid:243)(cid:244)(cid:223)(cid:264)(cid:252)(cid:237)(cid:243)(cid:185)(cid:286)(cid:298)(cid:238)(cid:258)
+(cid:293)(cid:229)(cid:197)(cid:213)(cid:245)(cid:277)(cid:293)(cid:213)(cid:181)(cid:261)(cid:229)(cid:261)(cid:197)(cid:245)(cid:197)(cid:245)(cid:293)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000022 *
+22
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:3)(cid:44)
+10 (a) State Wien’s displacement law.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The Sun has a radius of 6.96 × 108 m and a surface temperature of 5770 K.
+The Earth is at a distance of 1.52 × 1011 m from the Sun.
+(i) Calculate the luminosity of the Sun.
+luminosity = ..................................................... W [2]
+(ii) Determine the radiant flux intensity at the Earth of radiation emitted by the Sun. Give a
+unit with your answer.
+radiant flux intensity = ................................... unit .............. [3]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:249)(cid:181)(cid:258)(cid:215)
+(cid:300)(cid:295)(cid:237)(cid:241)(cid:208)(cid:300)(cid:283)(cid:250)(cid:231)(cid:259)(cid:265)(cid:264)(cid:275)(cid:193)(cid:255)(cid:194)(cid:254)(cid:258)
+(cid:293)(cid:245)(cid:293)(cid:213)(cid:245)(cid:181)(cid:293)(cid:245)(cid:245)(cid:293)(cid:261)(cid:261)(cid:261)(cid:245)(cid:293)(cid:181)(cid:181)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000023 *
+23
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:4)(cid:44)
+(iii) Star X has a wavelength of maximum emission of 0.581λ, where λ is the wavelength
+s s
+of maximum emission from the Sun.
+Calculate the surface temperature of star X.
+surface temperature = ...................................................... K [1]
+[Total: 8]
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26
+(cid:300)(cid:211)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:251)(cid:181)(cid:258)(cid:215)
+(cid:300)(cid:295)(cid:238)(cid:242)(cid:216)(cid:286)(cid:279)(cid:266)(cid:210)(cid:245)(cid:248)(cid:193)(cid:199)(cid:185)(cid:219)(cid:194)(cid:238)(cid:258)
+(cid:293)(cid:245)(cid:277)(cid:277)(cid:181)(cid:213)(cid:261)(cid:277)(cid:293)(cid:277)(cid:213)(cid:261)(cid:261)(cid:277)(cid:261)(cid:245)(cid:229)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000024 *
+24
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:5)(cid:44)
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (Cambridge University Press & Assessment) to trace copyright holders, but if any items requiring clearance
+have unwittingly been included, the publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in our Copyright
+Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download at www.cambridgeinternational.org after the live
+examination series.
+Cambridge International Education is the name of our awarding body and a part of Cambridge University Press & Assessment, which is a department of the
+University of Cambridge.
+© Cambridge University Press & Assessment 2026 9702/41/M/J/26
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:249)(cid:181)(cid:260)(cid:215)
+(cid:300)(cid:295)(cid:238)(cid:243)(cid:216)(cid:296)(cid:293)(cid:255)(cid:229)(cid:251)(cid:239)(cid:202)(cid:293)(cid:277)(cid:249)(cid:210)(cid:262)(cid:258)
+(cid:293)(cid:197)(cid:197)(cid:277)(cid:245)(cid:213)(cid:261)(cid:181)(cid:261)(cid:181)(cid:229)(cid:261)(cid:197)(cid:277)(cid:229)(cid:245)(cid:181)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-EB3990A8B1
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CQuaemstiobn rPiadpegr eJune· 2 0p2a6 p| Saocuracem: pbapraidcagmebr.idcgoe.mcom 9702/41 Question Paper June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/

@@ -1,0 +1,521 @@
+Cambridge International AS & A Level
+MATHEMATICS 9709/42
+Paper 4 Mechanics October/November 2022
+MARK SCHEME
+Maximum Mark: 50
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the October/November 2022 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 22 printed pages.
+© UCLES 2022 [Turn over
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the specific content of the
+mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the scope of the
+syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the question as
+indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently, e.g. in situations where candidates have not followed instructions or in the application of generic level descriptors.
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may be limited
+according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or grade descriptors in
+mind.
+© UCLES 2022 Page 2 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Mathematics Specific Marking Principles
+1 Unless a particular method has been specified in the question, full marks may be awarded for any correct method. However, if a calculation is required
+then no marks will be awarded for a scale drawing.
+2 Unless specified in the question, answers may be given as fractions, decimals or in standard form. Ignore superfluous zeros, provided that the degree of
+accuracy is not affected.
+3 Allow alternative conventions for notation if used consistently throughout the paper, e.g. commas being used as decimal points.
+4 Unless otherwise indicated, marks once gained cannot subsequently be lost, e.g. wrong working following a correct form of answer is ignored (isw).
+5 Where a candidate has misread a number in the question and used that value consistently throughout, provided that number does not alter the difficulty or
+the method required, award all marks earned and deduct just 1 mark for the misread.
+6 Recovery within working is allowed, e.g. a notation error in the working where the following line of working makes the candidate’s intent clear.
+© UCLES 2022 Page 3 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Mark Scheme Notes
+The following notes are intended to aid interpretation of mark schemes in general, but individual mark schemes may include marks awarded for specific reasons
+outside the scope of these notes.
+Types of mark
+M Method mark, awarded for a valid method applied to the problem. Method marks are not lost for numerical errors, algebraic slips or errors in units.
+However, it is not usually sufficient for a candidate just to indicate an intention of using some method or just to quote a formula; the formula or idea
+must be applied to the specific problem in hand, e.g. by substituting the relevant quantities into the formula. Correct application of a formula
+without the formula being quoted obviously earns the M mark and in some cases an M mark can be implied from a correct answer.
+A Accuracy mark, awarded for a correct answer or intermediate step correctly obtained. Accuracy marks cannot be given unless the associated method
+mark is earned (or implied).
+B Mark for a correct result or statement independent of method marks.
+DM or DB When a part of a question has two or more ‘method’ steps, the M marks are generally independent unless the scheme specifically says otherwise;
+and similarly, when there are several B marks allocated. The notation DM or DB is used to indicate that a particular M or B mark is dependent on
+an earlier M or B (asterisked) mark in the scheme. When two or more steps are run together by the candidate, the earlier marks are implied and full
+credit is given.
+FT Implies that the A or B mark indicated is allowed for work correctly following on from previously incorrect results. Otherwise, A or B marks are
+given for correct work only.
+• A or B marks are given for correct work only (not for results obtained from incorrect working) unless follow through is allowed (see abbreviation FT above).
+• For a numerical answer, allow the A or B mark if the answer is correct to 3 significant figures or would be correct to 3 significant figures if rounded (1
+decimal place for angles in degrees).
+• The total number of marks available for each question is shown at the bottom of the Marks column.
+• Wrong or missing units in an answer should not result in loss of marks unless the guidance indicates otherwise.
+• Square brackets [ ] around text or numbers show extra information not needed for the mark to be awarded.
+© UCLES 2022 Page 4 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Abbreviations
+AEF/OE Any Equivalent Form (of answer is equally acceptable) / Or Equivalent
+AG Answer Given on the question paper (so extra checking is needed to ensure that the detailed working leading to the result is valid)
+CAO Correct Answer Only (emphasising that no ‘follow through’ from a previous error is allowed)
+CWO Correct Working Only
+ISW Ignore Subsequent Working
+SOI Seen Or Implied
+SC Special Case (detailing the mark to be given for a specific wrong solution, or a case where some standard marking practice is to be varied in the
+light of a particular circumstance)
+WWW Without Wrong Working
+AWRT Answer Which Rounds To
+© UCLES 2022 Page 5 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+1 Work done by cyclist = 50 × 100 (= 5000 J) B1
+1 M1 Work energy equation. Three terms. Allow sign errors.
+Their 5000 – 3560 = m62
+Dimensionally correct.
+2
+mass = 80 kg A1
+3
+SC: Acceleration considered as a constant
+62 =0+2a50 [⇒a=0.36] M1 From use of v=6, u=0, s=50. Must be using
+correct suvat formulae.
+3560
+100− =mtheir 0.36 For equation involving mass using N2L with three
+50
+terms.
+Allow sign errors in N2L.
+mass = 80 kg A1
+© UCLES 2022 Page 6 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+2(a) R = 0.4g cos 30 =2 3 or F or R=0.4gsin30 =2 B1 Use of m instead of 0.4 condoned.
+ 
+0.4g sin 30 – µ 0.4g cos 30 = 0 M1 For using F = µR. Allow sin/cos mix.
+Both must be different components of their weight
+only, not a 2 term R. Allow sign errors. Allow g
+omitted.
+ 4sin30 1 3 A1 AG (exact answer only)
+ = = 3 or .
+  If zero scored then SC B1 for [Angle of friction = 30°
+ 4cos30 3 3
+1
+so] µ = tan 30 = 3.
+3
+Allow full marks if using m in place of 0.4 or W in
+place of mg or 0.4g
+1
+A0 for =0.577= 3, but A1(ISW) for
+3
+1
+= 3=0.577
+3
+3
+© UCLES 2022 Page 7 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+2(b) 7.2 – 0.4g sin 30 –F = 0.4a M1 Newton’s second law. Four terms. Second term must
+be a component of their weight. F ≠ 0 and F .
+Allow sin/cos mix. Allow sign errors.
+F must be a numerical expression
+May use their F from part (a).
+a = 8 A1
+1 M1 For use of constant acceleration formula(e) and solving
+1=0+ (their positive 8)t2
+for t. a10,ag.
+2
+Allow if a is negative in part (a) and use |a| here.
+Time = 0.5 s A1
+4
+© UCLES 2022 Page 8 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+3 Attempt to resolve either direction M1 Correct number of terms. Allow sin/cos mix. Allow
+sign errors. Allow g missing.
+0.3g + T cos  – 4 sin 60 = 0 (T cos α° = 0.464…) A1 OE
+T sin  – 4 cos 60 = 0 (T sin α° = 2) A1 OE If the two Ts are different, award maximum
+A1A0 unless subsequently stated that the two Ts are
+the same.
+ 4 cos 60   2  M1 Attempt to solve for α. No missing/extra terms. Allow
+=tan−1
+
+=tan−1
+  g missing. Must get to ‘α =’.
+4 sin 60−0.3g 0.464
+4cos60 M1 OE Attempt to solve for T. No missing/extra terms.
+T = = (4 cos 60 )2 +(4 sin 60−0.3g)2 = 22 +(0.464)2
+sin(their) Allow g missing. Must get to ‘T =’.
+Tension = 2.05 N α = 76.9 A1 For both AWRT 2.05, 76.9
+(Tension = 2.05314… N α = 76.9356…)
+Alternative method for Q3 using triangle of forces
+Attempt at cosine rule from triangle of forces M1 Must use lengths 4 and 0.3g with a suitable angle.
+Allow g missing.
+T2 =42 +(0.3g)2 −24(0.3g)cos30 A1
+Tension = 2.05 A1 Tension = 2.05314… AWRT 2.05
+Attempt at sin rule M1 Must have angle 30° and another angle in terms of α
+with correct numerators, but allow g missing.
+Their T 4 Their T 0.3g A1 Correct. Allow sin instead of sin(180−).
+= or =
+sin30 sin(180−) sin30 sin(−30)
+α = 76.9 A1 α = 76.9356… AWRT 76.9
+© UCLES 2022 Page 9 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+3 Alternative method for Q3 using Lami’s theorem
+Attempt at Lami’s theorem M1 Must have numerators correct and at least one angle
+correct. Allow g missing.
+4 0.3g T A1 A1 A1 for two parts second A1 for all three.
+= =
+sin sin(210−) sin(150)
+ 4sin210  M1 For solving for α using compound angle formula. Must
+=tan−1
+  be correct for their angles. Allow g missing.
+0.3g+4cos210
+4sin(150) 0.3gsin(150) M1 For solving for T using their α. Allow g missing.
+T = or T =
+sin sin(210−)
+Tension = 2.05 N α = 76.9 A1 For both AWRT 2.05, 76.9
+6
+SC: Tension and the 4 N force considered in the wrong directions
+Attempt to resolve either direction M1 Correct number of terms. Allow sin/cos mix. Allow
+sign errors. Allow g missing.
+T cos 60 – 4 sin  = 0 A1 For both
+And: T sin 60 – 4 cos −0.3g= 0 OE If the two Ts are different, they get SC A0 unless
+they subsequently state that the two Ts are the same.
+2 2 M1 OE Attempt to solve for T or α. No missing/extra
+T cos 60 T sin 60 −0.3g 1 3
+  +   =1 T2 + T2 −33T +9=16 terms. Allow g missing. Must get to ‘T =’ or ‘α=’.
+ 4   4  4 4
+T2−33T−7=0T =6.31 (or−1.11)
+3
+OR: 4 3sin−4cos=3 ⇒ 8sin(−30)=3 ⇒ =sin−1 +30
+8
+© UCLES 2022 Page 10 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+3 T =6.31 N  =52.0 A1 (T = 6.30617…, α=52.0243…)
+6
+© UCLES 2022 Page 11 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+4(a) P = D × 15 B1 P
+For any D. OE including .
+15
+D – 500 = 1200 × 0.8 (⇒ D = 1460) M1 Attempt at Newton’s second law with three terms.
+Allow sign errors.
+Power = 21900 W A1 Allow 21900 without units or 21.9 kW, but not simply
+21.9 without units or with wrong units.
+3
+4(b) 1 1 B1 Sight of both KEs.
+[Change in KE =] 1200322 − 1200152
+2 2
+=614400−135000= 479400
+Work done by engine = 21900 × 53 ( = 1160700) B1ft WD
+OE e.g. 21900=
+53
+FT their 21900.
+Distance AB = 1362.6 m B1 AG Must come from 1160700 – 500d = 479400 OE
+e.g. 500d=681300.
+3
+© UCLES 2022 Page 12 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+5(a) T – 40g sin20 – 50 = 40a T −136.8−50=40a M1 Attempt at Newton’s second law for at least one case.
+Allow sign errors. Do not allow g missing. Correct
+500 cos15 – 80g sin20 – T = 80a 482.96−273.61−T =80a
+number of terms. Allow sin/cos mix.
+500 cos15 – 80g sin20 – 40g sin20−50 = (80+40)a
+A1 Any 2 equations.
+482.96−273.61−136.8−50=120a
+For attempt to solve for T or a M1 From equation(s) with no missing/extra terms. Allow g
+missing. Must get to ‘T =’ or ‘α =’.
+Acceleration = 0.188 ms−2 A1 Allow AWRT 0.19.
+Tension = 194 N A1
+5
+5(b) [1.2 = 0 + 0.188t] M1 For use of constant acceleration formula(e) and solving
+for t with their positive a, leading to a positive value of
+t
+a10,ag
+Allow if a is negative in part (a) and use |a| here.
+Time = 6.39 s A1 Allow 6.38
+Allow 6.32 from a = 0.19
+2
+© UCLES 2022 Page 13 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+6(a) 0.32+0=0.30.6+0.4v M1 For use of conservation of momentum. Must be 3
+terms. Allow sign errors.
+Speed of B = 1.05 ms−1 A1 AG Allow M1 A0 if g included with the masses.
+2
+6(b) 0.41.05+0=(0.4+m)0.5 M1 For use of conservation of momentum. Must be 3
+terms. Allow sign errors.
+11 A1 Allow M1 A0 if g included with the masses.
+m = 0.44 or
+25
+2
+© UCLES 2022 Page 14 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+6(c) 1.2 [m] or 0.9 [m] B1 Must be a distance as some candidates get 1.2 from
+0.6
+.
+0.5
+0.5t B1 1
+Seen but not + at2 unless later state that a=0.
+2
+B0 if only 0.5t=2.1 (may see solving to find t =3.5).
+0.6t B1 1
+Seen but not + at2 unless later state that a=0.
+2
+Allow B2 in place of second and third B1 marks for
+‘difference in speeds is 0.1 [ ms−1]’.
+Distances equal so 0.6t−0.9=0.5t and solve for t M1 OE Must get to ‘t=’. Allow ± their 0.9 but not ±1.2
+0.9 or ± 2.1 or 1.5. Do not allow 0.6t+0.5t=0.9 .
+Or t =
+Do not allow M1 if either or both terms include
+0.6−0.5
+1
++ at2 unless they state a = 0.
+2
+Time = 9 s A1 CWO
+© UCLES 2022 Page 15 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+6(c) Alternative method for question 6(c) using time from start of motion
+1 [m] or 1.1[m] B1
+0.6T B1 1
+Seen but not + aT2 unless later state that a=0.
+2
+0.5T B1 1
+Seen but not + aT2 unless later state that a=0.
+2
+Allow B2 in place of second and third B1 marks for
+‘difference in speeds is 0.1 [ ms−1]’.
+Distances equal so 0.6T−1.1=0.5T and solve for T M1 OE Must get to ‘T=’. Allow ± their 1.1 but not ±1.0
+1.1 or ± 2.1. Do not allow 0.6T+0.5T =1.1 .
+Or T =
+Do not allow M1 if either or both terms include
+0.6−0.5
+1
++ aT2 unless they state a = 0
+2
+⇒ Time from BC collision = 11−2=9 s A1 CWO
+© UCLES 2022 Page 16 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+6(c) Alternative method for question 6(c) using distance travelled from time when B and C collide
+1.2 [m] or 0.9 [m] B1
+d +0.9 B1 FT Allow ± their 0.9 but not ±1.2 or ± 2.1 or 1.5.
+Time taken for A is
+0.6
+Or d+0.9=0.6t
+d B1
+Time taken for BC is
+0.5
+Or d =0.5t
+d+0.9 d 4.5 M1 Must get to ‘t=’.
+= d =4.5Time=
+Allow ± their 0.9 but not ±1.2 or ± 2.1.
+0.6 0.5 0.5
+Time = 9 s A1 CWO
+5
+© UCLES 2022 Page 17 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+7(a) 0.3 3  3  M1 For integration (do not penalise missing c)
+v= t2(+c) =0.2t2(+c)  The power of t must increase by 1 with a change of
+1.5   coefficient. Use of v=at scores M0.
+ 8 A1 ISW any extra work using the second equation for a.
+Velocity = 1.6 = ms−1
+ 
+ 5
+2
+© UCLES 2022 Page 18 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+7(b) −k − 1  − 1  *M1 For integration. No need for constant. Allow use of
+v= t 2+d =2kt 2+d  given value of k=2.6.
+−0.5  
+The power of t must increase by 1 with a change of
+coefficient. Use of v=at scores M0.
+−k − 1  − 1  A1 FT For both equations in k and d (Allow unsimplified).
+Their1 .6= 4 2 +d =2k4 2 +d Their1 .6=k+d
+−0.5  
+−k − 1  − 1   k 
+0.3= 16 2 +d=2k16 2 +d
+
+0.3= +d
+
+−0.5    2 
+Attempt to solve for k or d DM1 Or substitute k = 2.6 into both equations and solve both
+for d (with d 0).
+Must get to ‘k=’ or ‘d=’.
+− 1 −2.6 − 1 A1 AG (AG for k, not for the expression).
+k = 2.6v=5.2t 2 −1 or v= t 2 −1 Allow unsimplified expression for v and/or in terms of
+−0.5
+k.
+If k is substituted then both equations must be shown
+1
+−
+to give a value of d =−1 and getting v=5.2t 2 −1
+SC B1 for solving the correct equations simultaneously
+with no working seen and getting correct expression
+for v.
+SC A1 for correct expression for v if only the first M1
+is scored.
+© UCLES 2022 Page 19 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+7(b) Alternative method for question 7(b) from using limits
+−k − 1  − 1  *M1 For integration No need for constant. Allow use of
+v= t 2+d =2kt 2+d  given value of k=2.6.
+−0.5  
+The power of t must increase by 1 with a change of
+coefficient. Use of v=at scores M0.
+−k − 1 −k − 1 − 1 − 1 A1 FT OE For correct unsimplified equation in k from using
+4 2 − 16 2 =1.6−0.3 or 2k4 2 −2k16 2 =1.6−0.3
+limits for v as their 1.6 and 0.3 and limits for t as 4 and
+−0.5 −0.5
+16.
+Attempt to solve for k DM1 Must be an equation using 0.3 and their k, and 16 and
+4, Must be subtracting the limits to form the equation
+in k, but may have sign errors in their 1.6−0.3.
+− 1 −2.6 − 1 A1 AG (AG for k, not for the expression).
+k = 2.6, v=5.2t 2 −1 or v= t 2 −1 Allow unsimplified expression for v and/or in terms of
+−0.5
+k.
+4
+7(c) 1 M1 For solving for T. Must get to ‘T=’. Must come from
+−
+5.2T 2 −their1 =0 integration, with their 1 from part (b) or found here not
+equal to zero. Do not allow made up value of d.
+676 A1 OE Must be exact. Allow both marks as long as
+T = or 27.04
+expression for v is correct, however obtained in
+25
+Q7(b).
+2
+© UCLES 2022 Page 20 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+7(d) 4 3 0.2 5 27.04 − 1  5.2 1 M1 3 − 1
+0.2t2dt = t2 or  5.2t 2 −their1 dt = t2 −their1 t For integration of 0.2t2 oe or 5.2t 2 −their 1 . May
+2.5   0.5
+  be in terms of k. Not from any other expression. Their
+0 4
+1 may be zero (or replaced by zero).
+Their 1 may came from either part (b) or part (c)
+The power of t must increase by 1 with a change of
+coefficient in at least one term.
+0.2 5
+4
+5.2 1 
+27.04
+ 5
+4
+ 1 
+27.04 A1ft For both integrals (unsimplified) No need for limits
+= t2 + t2 −t =0.08t2 +10.4t2 −t  FT non-zero value of d. May be in terms of k.
+ 2.5   0.5        Their 1 may came from either part (b) or part (c).
+0 4  0 4 
+=0.0832+(10.45.2−27.04)−(10.42−4) =2.56+10.24 M1 For correct use of limits (0 and 4 then 4 and their
+27.04) in both of their integrals, which have come from
+3 1
+−
+integration of 0.2t2 and 5.2t 2 −their1 . Not from any
+other expression. Their 1 may be zero (or replaced by
+zero).
+Their 1 may came from either part (b) or part (c).
+Allow M1 for d = 0 (the final answer is 35.8).
+64 A1 oe Awrt 12.8 Allow if using 27(.0) rather than 27.04
+= or 12.8
+Allow all 4 marks as long as expression for v is
+5
+correct, however obtained in Q7(b).
+© UCLES 2022 Page 21 of 22
+
+9709/42 Cambridge International AS & A Level – Mark Scheme October/November 2022
+PUBLISHED
+Question Answer Marks Guidance
+7(d) SC for using a calculator to integrate.
+4 3 B1 AWRT 2.56
+Either 0.2t2dt=2.56 Allow 10.2
+0 Must use 27.04 or 27(.0) if latter integral.
+27.04 1 
+−
+Or  5.2t 2 −1dt =10.24
+ 
+ 
+4
+Total distance = 12.8 m B1 AWRT 12.8. Allow if using 27(.0) rather than 27.04
+Allow both B marks as long as expression for v is
+correct, however obtained in Q7(b).
+4
+© UCLES 2022 Page 22 of 22

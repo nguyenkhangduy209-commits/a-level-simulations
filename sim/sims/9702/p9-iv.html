@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>I–V characteristics</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-circuits.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, CI = SIM.circuits, IV = CI.IV, DEF = CI.IV_DEFAULTS;
+  var pg = ui.page({ title: 'I–V characteristics, resistance, thermistor and LDR', g: 9.81,
+    tags: ['9702 9.3.1–5 resistance, Ohm’s law, I–V', '9702 9.3.7–8 LDR and NTC thermistor'] });
+  (function hideG() { try { var t = document.querySelector('header').children[2], l = t.children[t.children.length - 1]; if (l && /g =/.test(l.innerHTML)) l.style.display = 'none'; } catch (e) { /* header layout changed */ } })();
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 12 });
+  ui.legend(sceneCard, [{ color: 'var(--c-s1)', label: 'I–V characteristic' }, { color: 'var(--c-s3)', label: 'line from the origin: gradient = 1/R = I/V' },
+    { color: 'var(--c-s2)', label: 'tangent: gradient dI/dV (NOT 1/R)' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pIV = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'I / A', xLabel: 'V / V' });
+  var pR = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'R / Ω', xLabel: 'V / V' });
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var comp = ui.select(paramCard, { label: 'Component', value: 'metal', options: [
+    { value: 'metal', label: 'Metallic conductor (resistor) at constant temperature' }, { value: 'lamp', label: 'Filament lamp' },
+    { value: 'diode', label: 'Semiconductor diode' }, { value: 'thermistor', label: 'NTC thermistor' }, { value: 'ldr', label: 'Light-dependent resistor (LDR)' }] }, function () { setRange(); update(); });
+  var prm = ui.params(paramCard, [
+    { key: 'V', label: 'p.d. across the component', sym: 'V', unit: 'V', min: -12, max: 12, step: 0.01, value: 6 },
+    { key: 'R', label: 'Resistance of the resistor', sym: 'R', unit: 'Ω', min: 1, max: 100, step: 0.1, value: 6 },
+    { key: 'T', label: 'Temperature of the thermistor', sym: 'T', unit: '°C', min: -10, max: 100, step: 0.5, value: 25 },
+    { key: 'Lx', label: 'Light intensity on the LDR (arbitrary units)', sym: '', unit: 'a.u.', min: 0, max: 100, step: 0.5, value: 20 }
+  ], update);
+  var tangent = ui.toggle(paramCard, { label: 'Show the tangent at the point (to compare with V/I)', value: true }, update);
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var RANGE = { metal: 12, lamp: 12, diode: 1, thermistor: 6, ldr: 6 };
+  function setRange() { var m = RANGE[comp.get()]; prm.range('V', -m, m, m <= 1 ? 0.001 : 0.01); }
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Metallic conductor at constant temperature (6.0 Ω): Ohm’s law', comp: 'metal', values: { V: 6, R: 6 }, note: 'Straight line through the origin: I ∝ V, R constant.' },
+    { name: 'Filament lamp: resistance at 6.0 V is V/I, not 1/gradient', comp: 'lamp', values: { V: 6 }, note: 'R = V/I = 6.0 ÷ 1.6 = 3.75 Ω. The tangent gives 9.4 Ω — wrong quantity.' },
+    { name: 'Filament lamp at its working p.d. (12 V)', comp: 'lamp', values: { V: 12 }, note: 'Hot filament: R = 12 ÷ 2.0 = 6.0 Ω, four times the cold resistance on this curve.' },
+    { name: 'Semiconductor diode, forward bias 0.70 V', comp: 'diode', values: { V: 0.7 }, note: 'Above about 0.6 V the current rises steeply; R = V/I is now small.' },
+    { name: 'Semiconductor diode, reverse bias', comp: 'diode', values: { V: -0.8 }, note: 'Almost no current: very high resistance in the reverse direction.' },
+    { name: 'NTC thermistor, cold (0 °C)', comp: 'thermistor', values: { V: 3, T: 0 }, note: 'Low temperature ⇒ high resistance ⇒ shallow I–V line.' },
+    { name: 'NTC thermistor, hot (80 °C)', comp: 'thermistor', values: { V: 3, T: 80 }, note: 'Higher temperature ⇒ lower resistance ⇒ steeper I–V line.' },
+    { name: 'LDR in dim light', comp: 'ldr', values: { V: 3, Lx: 2 }, note: 'Low light intensity ⇒ high resistance.' },
+    { name: 'LDR in bright light', comp: 'ldr', values: { V: 3, Lx: 90 }, note: 'Greater light intensity ⇒ lower resistance.' }
+  ], function (p) { comp.set(p.comp, true); setRange(); prm.set(p.values); });
+
+  ui.notes(noteCard, [
+    'Resistance is defined as <b>R = V/I</b> at a point: divide the coordinates. It is <b>not</b> the gradient of the I–V graph (or its reciprocal), unless the graph is a straight line through the origin.',
+    'Ohm’s law: the current in a metallic conductor is proportional to the p.d. <b>provided the temperature is constant</b>.',
+    'Filament lamp: as I increases the filament gets hotter, so R increases — the I–V curve bends towards the V axis. It is symmetrical for reversed p.d.',
+    'Diode: almost no current in reverse bias; in forward bias, very little until about 0.6 V, then a steep rise.',
+    'NTC thermistor: R <b>decreases</b> as temperature increases. LDR: R <b>decreases</b> as light intensity increases.',
+    'These curves are <b>illustrative models</b>: the shapes are what you must sketch and explain; exam numbers come from the graph you are given.'
+  ]);
+
+  /* ---------- model ---------- */
+  function Ifn() {
+    var c = comp.get(), v = prm.values;
+    if (c === 'metal') return function (V) { return IV.metal(V, { R: v.R }); };
+    if (c === 'lamp') return function (V) { return IV.lamp(V, DEF.lamp); };
+    if (c === 'diode') return function (V) { return IV.diode(V, DEF.diode); };
+    if (c === 'thermistor') { var Rt = IV.thermistorR(v.T, DEF.thermistor); return function (V) { return V / Rt; }; }
+    var Rl = IV.ldrR(v.Lx, DEF.ldr); return function (V) { return V / Rl; };
+  }
+  var M = null;
+  function update() {
+    var c = comp.get(), v = prm.values;
+    prm.show('R', c === 'metal'); prm.show('T', c === 'thermistor'); prm.show('Lx', c === 'ldr');
+    var f = Ifn(), V = v.V, I = f(V), h = Math.max(1e-6, RANGE[c] * 1e-4), grad = (f(V + h) - f(V - h)) / (2 * h);
+    M = { f: f, V: V, I: I, grad: grad, kI: c === 'diode' ? 1e3 : (c === 'thermistor' || c === 'ldr' ? 1e3 : 1), uI: c === 'metal' || c === 'lamp' ? 'A' : 'mA' };
+    drawScene(); drawPlots(); readout();
+  }
+
+  /* ---------- scene: measuring circuit ---------- */
+  function drawScene() {
+    if (!M) return;
+    var col = ui.colors(), c, cn = comp.get();
+    vp.fit(0, 16, 0, 9);
+    c = vp.begin();
+    var L = col['object-line'];
+    function wire(pts) { D.line(c, pts.map(function (p) { return vp.P(p[0], p[1]); }), L, { width: 2 }); }
+    // loop: supply at bottom, ammeter left, component top, voltmeter across component
+    wire([[3, 1.5], [7, 1.5]]); wire([[9, 1.5], [13, 1.5], [13, 6.5], [10.6, 6.5]]); wire([[5.4, 6.5], [3, 6.5], [3, 4.6]]); wire([[3, 3.4], [3, 1.5]]);
+    // variable supply (cell + arrow)
+    c.strokeStyle = L; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(vp.X(7), vp.Y(1.5)); c.lineTo(vp.X(7.7), vp.Y(1.5)); c.moveTo(vp.X(7.7), vp.Y(2.2)); c.lineTo(vp.X(7.7), vp.Y(0.8));
+    c.moveTo(vp.X(8.3), vp.Y(1.85)); c.lineTo(vp.X(8.3), vp.Y(1.15)); c.moveTo(vp.X(8.3), vp.Y(1.5)); c.lineTo(vp.X(9), vp.Y(1.5)); c.stroke();
+    D.arrow(c, vp.X(6.9), vp.Y(0.6), vp.X(9.1), vp.Y(2.4), L, { head: 7, width: 1.4 });
+    D.label(c, 'variable d.c. supply', vp.X(8), vp.Y(0.25), col.muted, { size: 11 });
+    // ammeter
+    c.beginPath(); c.arc(vp.X(3), vp.Y(4), vp.scale * 0.6, 0, 7); c.fillStyle = col.panel; c.fill(); c.stroke(); D.label(c, 'A', vp.X(3), vp.Y(4), col.ink, { bold: true });
+    D.label(c, (M.I * M.kI).toFixed(M.kI === 1 ? 3 : 2).replace('-', '−') + ' ' + M.uI, vp.X(1.4), vp.Y(4), col.applied, { size: 12, bg: true });
+    // component between x = 5.4 and 10.6 at y = 6.5
+    var cx = 8, cy = vp.Y(6.5), w = vp.scale * 2.2, h = vp.scale * 0.8, x0 = vp.X(cx) - w / 2;
+    wire([[5.4, 6.5], [cx - 1.1, 6.5]]); wire([[cx + 1.1, 6.5], [10.6, 6.5]]);
+    c.strokeStyle = L; c.lineWidth = 2; c.fillStyle = col.panel;
+    if (cn === 'metal' || cn === 'thermistor' || cn === 'ldr') {
+      c.fillRect(x0, cy - h / 2, w, h); c.strokeRect(x0, cy - h / 2, w, h);
+      if (cn === 'thermistor') { c.beginPath(); c.moveTo(x0 - 6, cy + h); c.lineTo(x0 + w * 0.15, cy + h); c.lineTo(x0 + w + 6, cy - h); c.stroke(); }
+      if (cn === 'ldr') {
+        c.beginPath(); c.arc(vp.X(cx), cy, w * 0.65, 0, 7); c.stroke();
+        D.arrow(c, vp.X(cx) - w * 0.7, cy - h * 2.6, vp.X(cx) - w * 0.25, cy - h * 0.9, L, { head: 6, width: 1.3 });
+        D.arrow(c, vp.X(cx) - w * 0.35, cy - h * 2.9, vp.X(cx) + w * 0.05, cy - h * 1.0, L, { head: 6, width: 1.3 });
+      }
+    } else if (cn === 'lamp') {
+      var r = h * 0.95, P = Math.abs(M.V * M.I), glow = U.clamp(P / 24, 0, 1);
+      c.save(); c.globalAlpha = 0.15 + 0.6 * glow; c.fillStyle = col.s4; c.beginPath(); c.arc(vp.X(cx), cy, r * (1 + glow), 0, 7); c.fill(); c.restore();
+      wire([[cx - 1.1, 6.5], [cx - r / vp.scale, 6.5]]); wire([[cx + r / vp.scale, 6.5], [cx + 1.1, 6.5]]);
+      c.strokeStyle = L; c.beginPath(); c.arc(vp.X(cx), cy, r, 0, 7); c.stroke();
+      var q = r * 0.7; c.beginPath(); c.moveTo(vp.X(cx) - q, cy - q); c.lineTo(vp.X(cx) + q, cy + q); c.moveTo(vp.X(cx) - q, cy + q); c.lineTo(vp.X(cx) + q, cy - q); c.stroke();
+    } else {
+      var s = h * 0.9; wire([[cx - 1.1, 6.5], [cx + 1.1, 6.5]]);
+      c.fillStyle = L; c.beginPath(); c.moveTo(vp.X(cx) - s, cy - s); c.lineTo(vp.X(cx) - s, cy + s); c.lineTo(vp.X(cx) + s * 0.8, cy); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(vp.X(cx) + s * 0.8, cy - s); c.lineTo(vp.X(cx) + s * 0.8, cy + s); c.stroke();
+      D.label(c, M.V >= 0 ? 'forward bias' : 'reverse bias', vp.X(cx), cy + s + 14, col.muted, { size: 11 });
+    }
+    // voltmeter across the component
+    wire([[5.4, 6.5], [5.4, 8.3], [7.4, 8.3]]); wire([[8.6, 8.3], [10.6, 8.3], [10.6, 6.5]]);
+    c.beginPath(); c.arc(vp.X(8), vp.Y(8.3), vp.scale * 0.6, 0, 7); c.fillStyle = col.panel; c.fill(); c.strokeStyle = L; c.stroke(); D.label(c, 'V', vp.X(8), vp.Y(8.3), col.ink, { bold: true });
+    D.label(c, M.V.toFixed(M.V !== 0 && Math.abs(M.V) < 1.2 ? 3 : 2).replace('-', '−') + ' V', vp.X(10.2), vp.Y(8.8), col.applied, { size: 12, bg: true, align: 'left' });
+    [5.4, 10.6].forEach(function (x) { c.fillStyle = L; c.beginPath(); c.arc(vp.X(x), vp.Y(6.5), 3.5, 0, 7); c.fill(); });
+    D.label(c, 'illustrative model curve — shapes are the syllabus content', vp.X(13.6), vp.Y(4.2), col.muted, { size: 11, align: 'center' });
+  }
+
+  /* ---------- plots ---------- */
+  function drawPlots() {
+    if (!M) return;
+    var col = ui.colors(), cn = comp.get(), m = RANGE[cn], k = M.kI, f = M.f, V = M.V, I = M.I;
+    var yr = null;
+    if (cn === 'diode') yr = [-5, 60];
+    var series = [{ fn: function (x) { return f(x) * k; }, color: col.s1, steps: 600 }];
+    if (Math.abs(V) > 1e-9) series.push({ fn: function (x) { return I / V * x * k; }, color: col.s3, width: 1.5 });
+    if (tangent.get()) series.push({ fn: function (x) { return (I + M.grad * (x - V)) * k; }, color: col.s2, dash: [5, 4], width: 1.5 });
+    pIV.draw({ x: [-m, m], y: yr, yLabel: 'I / ' + M.uI, series: series, markers: [{ x: V, y: I * k, label: '(' + U.sf(V) + ', ' + U.sf(I * k) + ')', color: col.accent }], title: cn === 'diode' ? 'current axis clipped at 60 mA' : '' });
+    if (cn === 'thermistor') {
+      pR.draw({ x: [-10, 100], xLabel: 'temperature / °C', yLabel: 'R / kΩ', series: [{ fn: function (T) { return IV.thermistorR(T, DEF.thermistor) / 1e3; }, color: col.s4 }], cursor: prm.values.T, title: 'NTC: R falls as T rises' });
+    } else if (cn === 'ldr') {
+      pR.draw({ x: [0, 100], xLabel: 'light intensity / a.u.', yLabel: 'R / kΩ', y: [0, 200], series: [{ fn: function (L) { return IV.ldrR(L, DEF.ldr) / 1e3; }, color: col.s4 }], cursor: prm.values.Lx, title: 'R falls as light intensity rises' });
+    } else {
+      var Rf = function (x) { var i = f(x); return Math.abs(i) > 1e-6 ? x / i : NaN; };
+      pR.draw({ x: cn === 'diode' ? [0.3, m] : [-m, m], xLabel: 'V / V', yLabel: 'R = V/I / Ω', y: cn === 'diode' ? [0, 300] : undefined, series: [{ fn: Rf, color: col.s4 }], cursor: V,
+        title: cn === 'lamp' ? 'R rises with |V| (hotter filament)' : cn === 'diode' ? 'forward bias only (axis clipped)' : 'constant R' });
+    }
+  }
+
+  /* ---------- live working ---------- */
+  function readout() {
+    if (!M) return;
+    var s3 = U.sf, cn = comp.get(), V = M.V, I = M.I, v = prm.values;
+    R.clear();
+    if (cn !== 'metal') R.badge('Illustrative model: read values as you would from a given exam graph', 'info');
+    R.head('Reading the point on the I–V graph');
+    R.eq('V', 'p.d. across the component', V, 'V');
+    R.eq('I', 'current through it (from the curve)', I * M.kI, M.uI);
+    R.head('Resistance at this point: R = V/I');
+    if (Math.abs(V) < 1e-12) R.eq('R', 'V = 0 and I = 0: V/I cannot be evaluated here', '—');
+    else if (Math.abs(I) < 1e-6) R.eq('R', s3(V) + ' V ÷ ' + s3(I) + ' A', 'very large (almost no current)');
+    else R.eq('R', s3(V) + ' ÷ ' + s3(I), V / I, 'Ω');
+    if (Math.abs(M.grad) > 1e-12 && Math.abs(V) > 1e-12 && Math.abs(I) > 1e-6) {
+      R.eq('1 ÷ gradient', 'dV/dI of the tangent = 1 ÷ ' + s3(M.grad) + (Math.abs(V / I - 1 / M.grad) / Math.abs(V / I) > 0.01 ? ' — NOT the resistance' : ' — equal to R only because the graph is a straight line through the origin'), 1 / M.grad, 'Ω');
+    }
+    if (cn === 'thermistor') R.eq('R(T)', 'model value at ' + U.num(v.T, 3) + ' °C', IV.thermistorR(v.T, DEF.thermistor), 'Ω');
+    if (cn === 'ldr') R.eq('R(light)', 'model value at ' + U.num(v.Lx, 3) + ' a.u.', IV.ldrR(v.Lx, DEF.ldr), 'Ω');
+    R.eq('P', 'VI = ' + s3(V) + ' × ' + s3(I), V * I, 'W');
+    R.head('Why this shape?');
+    var why = {
+      metal: 'Ohmic conductor at constant temperature: I ∝ V, so R is constant (Ohm’s law).',
+      lamp: 'More current ⇒ filament hotter ⇒ greater resistance ⇒ the graph curves towards the V axis (symmetrical for reversed p.d.).',
+      diode: V >= 0 ? (V < 0.55 ? 'Forward bias but below about 0.6 V: very little current.' : 'Forward bias above about 0.6 V: the diode conducts and the current rises steeply.') : 'Reverse bias: almost no current — very high resistance.',
+      thermistor: 'At a fixed temperature the I–V graph is a straight line; raising the temperature lowers R, making the line steeper.',
+      ldr: 'At a fixed light intensity the I–V graph is a straight line; more light lowers R, making the line steeper.'
+    };
+    R.html('<div class="eq">' + why[cn] + '</div>');
+    R.render();
+  }
+
+  ui.onTheme(function () { drawScene(); drawPlots(); });
+  vp.onResize = drawScene;
+  setRange();
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

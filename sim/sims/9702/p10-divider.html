@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Potential divider and potentiometer</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-circuits.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, CI = SIM.circuits, IV = CI.IV, DEF = CI.IV_DEFAULTS;
+  var pg = ui.page({ title: 'Potential divider, sensors and the potentiometer', g: 9.81,
+    tags: ['9702 10.3 Potential dividers', '9702 10.3.2–3 potentiometer, null method', '9702 10.3.4 thermistor / LDR'] });
+  (function hideG() { try { var t = document.querySelector('header').children[2], l = t.children[t.children.length - 1]; if (l && /g =/.test(l.innerHTML)) l.style.display = 'none'; } catch (e) { /* header layout changed */ } })();
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 10 });
+  ui.legend(sceneCard, [{ color: 'var(--c-applied)', label: 'current' }, { color: 'var(--c-s1)', label: 'output p.d. / balance length' }, { color: 'var(--c-s2)', label: 'galvanometer current' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pA = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'V / V' });
+  var pB = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: '' });
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var mode = ui.select(paramCard, { label: 'Circuit', value: 'div', options: [{ value: 'div', label: 'Potential divider' }, { value: 'pot', label: 'Potentiometer (null method)' }] }, update);
+  var sensor = ui.select(paramCard, { label: 'Sensor', value: 'none', options: [{ value: 'none', label: 'none (two fixed resistors)' }, { value: 'th', label: 'NTC thermistor' }, { value: 'ldr', label: 'LDR' }] }, update);
+  var spos = ui.select(paramCard, { label: 'Sensor position', value: 'bottom', options: [{ value: 'top', label: 'top (replaces R₁)' }, { value: 'bottom', label: 'bottom, across the output (replaces R₂)' }] }, update);
+  var prm = ui.params(paramCard, [
+    { key: 'Vin', label: 'Supply e.m.f. (negligible internal resistance)', sym: 'V<sub>in</sub>', unit: 'V', min: 0, max: 24, step: 0.01, value: 9 },
+    { key: 'R1', label: 'Top resistor', sym: 'R₁', unit: 'kΩ', min: 0, max: 100, step: 0.01, value: 1 },
+    { key: 'R2', label: 'Bottom resistor', sym: 'R₂', unit: 'kΩ', min: 0, max: 100, step: 0.01, value: 2 },
+    { key: 'T', label: 'Thermistor temperature', sym: 'T', unit: '°C', min: -10, max: 100, step: 0.5, value: 25 },
+    { key: 'Lx', label: 'Light intensity on the LDR (arbitrary units)', sym: '', unit: 'a.u.', min: 0, max: 100, step: 0.5, value: 20 },
+    { key: 'RL', label: 'Load resistance across the output', sym: 'R<sub>L</sub>', unit: 'kΩ', min: 0.1, max: 1000, step: 0.1, value: 2 },
+    { key: 'E0', label: 'Driver cell e.m.f.', sym: 'E₀', unit: 'V', min: 0, max: 12, step: 0.01, value: 2.5 },
+    { key: 'r0', label: 'Driver cell internal resistance', sym: 'r₀', unit: 'Ω', min: 0, max: 10, step: 0.01, value: 0 },
+    { key: 'Rs', label: 'Series resistor in the driver circuit', sym: 'R<sub>s</sub>', unit: 'Ω', min: 0, max: 100, step: 0.1, value: 0 },
+    { key: 'Rw', label: 'Resistance of the whole wire', sym: 'R<sub>w</sub>', unit: 'Ω', min: 0.5, max: 50, step: 0.01, value: 10 },
+    { key: 'Lc', label: 'Length of the wire', sym: 'L', unit: 'cm', min: 50, max: 200, step: 0.5, value: 100 },
+    { key: 'Ex', label: 'Test cell e.m.f.', sym: 'E<sub>x</sub>', unit: 'V', min: 0, max: 5, step: 0.001, value: 1.2 },
+    { key: 'rx', label: 'Test cell internal resistance', sym: 'r<sub>x</sub>', unit: 'Ω', min: 0, max: 10, step: 0.01, value: 0.5 },
+    { key: 'Rg', label: 'Galvanometer resistance', sym: 'R<sub>G</sub>', unit: 'Ω', min: 1, max: 1000, step: 1, value: 50 },
+    { key: 'xc', label: 'Jockey position from A', sym: 'l', unit: 'cm', min: 0, max: 100, step: 0.1, value: 40 },
+    { key: 'Es', label: 'Standard cell e.m.f. (for comparison)', sym: 'E<sub>s</sub>', unit: 'V', min: 0.1, max: 5, step: 0.001, value: 1.5 }
+  ], update);
+  var load = ui.toggle(paramCard, { label: 'Connect a load R<sub>L</sub> across the output' }, update);
+  var balBtn = ui.h('button', { class: 'btn', text: 'Move jockey to the balance point', onclick: function () { if (M && M.pot && M.pot.hasBalance) prm.set({ xc: M.pot.balance * 100 }); } });
+  var btnRow = ui.h('div', { class: 'row' }, [balBtn]); paramCard.appendChild(btnRow);
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Divider: 9.0 V across 1.0 kΩ and 2.0 kΩ', mode: 'div', sensor: 'none', values: { Vin: 9, R1: 1, R2: 2 }, note: 'V_out = 9.0 × 2.0/(1.0 + 2.0) = 6.0 V across the 2.0 kΩ resistor.' },
+    { name: 'Loading: a 2.0 kΩ load across the 2.0 kΩ resistor', mode: 'div', sensor: 'none', load: true, values: { Vin: 9, R1: 1, R2: 2, RL: 2 }, note: '2.0 kΩ ∥ 2.0 kΩ = 1.0 kΩ ⇒ V_out = 9.0 × 1.0/2.0 = 4.5 V. A load lowers V_out.' },
+    { name: 'Thermistor at the bottom: V_out falls as temperature rises', mode: 'div', sensor: 'th', spos: 'bottom', values: { Vin: 6, R1: 10, T: 25 }, note: 'Warmer ⇒ R_th smaller ⇒ smaller share of the supply p.d. across it.' },
+    { name: 'Thermistor at the top: V_out rises as temperature rises (fire alarm)', mode: 'div', sensor: 'th', spos: 'top', values: { Vin: 6, R2: 10, T: 25 }, note: 'Now the fixed resistor is across the output: as R_th falls, the fixed resistor gets a larger share.' },
+    { name: 'LDR at the bottom: V_out rises as it gets dark (night light)', mode: 'div', sensor: 'ldr', spos: 'bottom', values: { Vin: 6, R1: 10, Lx: 20 }, note: 'Dark ⇒ R_LDR large ⇒ most of the supply p.d. is across the LDR.' },
+    { name: 'Potentiometer: 1.50 V standard cell balances at 60.0 cm; unknown at 48.0 cm', mode: 'pot', values: { E0: 2.5, r0: 0, Rs: 0, Rw: 10, Lc: 100, Es: 1.5, Ex: 1.2, rx: 0.5, Rg: 50, xc: 48 }, note: 'E_x/E_s = l_x/l_s ⇒ E_x = 1.50 × 48.0/60.0 = 1.20 V.' },
+    { name: '9702/23 M/J 25 Q7: 1.2 V driver across 150 cm nichrome (6.86 Ω), null at 64 cm', mode: 'pot', values: { E0: 1.2, r0: 0, Rs: 0, Rw: 6.86, Lc: 150, Ex: 0.512, rx: 0.5, Rg: 50, xc: 64, Es: 1.2 }, note: 'E_x/1.2 = 64/150 ⇒ E_x = 0.51 V.' },
+    { name: '…same, but the driver cell now has internal resistance', mode: 'pot', values: { E0: 1.2, r0: 1, Rs: 0, Rw: 6.86, Lc: 150, Ex: 0.512, rx: 0.5, Rg: 50, xc: 64, Es: 1.2 }, note: 'Lost volts in the driver ⇒ smaller p.d. across the wire ⇒ the balance point moves further along (to the right).' },
+    { name: 'No balance point: test e.m.f. larger than the p.d. across the wire', mode: 'pot', values: { E0: 2, r0: 0, Rs: 10, Rw: 10, Lc: 100, Ex: 1.5, rx: 0.5, Rg: 50, xc: 90, Es: 1.0 }, note: 'Only 1.0 V across the wire: a 1.5 V cell cannot be balanced. Reduce R_s or use a larger driver e.m.f.' }
+  ], function (p) { mode.set(p.mode, true); if (p.sensor) sensor.set(p.sensor, true); if (p.spos) spos.set(p.spos, true); load.set(!!p.load, true); prm.set(p.values); });
+
+  ui.notes(noteCard, [
+    'V<sub>out</sub> = V<sub>in</sub> × R₂/(R₁ + R₂) where R₂ is the resistor the output is taken <b>across</b>. The larger resistor gets the larger share of the p.d.',
+    'A load in parallel with R₂ lowers the effective R₂, so V<sub>out</sub> <b>falls</b>. Combine R₂ ∥ R<sub>L</sub> first.',
+    'Thermistor (NTC) and LDR: resistance falls as temperature / light intensity rises. Decide which resistor the output is across before saying whether V<sub>out</sub> rises or falls.',
+    'Potentiometer (a nu&#8203;ll method): at balance the galvanometer reads <b>zero</b>, so <b>no current</b> is drawn from the test cell — no lost volts, the balance gives its <b>e.m.f.</b>',
+    'E₁/E₂ = l₁/l₂ for the same driver circuit (same potential gradient along the wire).',
+    'Both positive terminals must connect to the same end of the wire, and the test e.m.f. must be less than the p.d. across the whole wire.',
+    'Internal resistance of the <b>driver</b> cell lowers the potential gradient; the balance length gets longer. The test cell’s own internal resistance does not change the balance length.'
+  ]);
+
+  /* ---------- model ---------- */
+  var M = null;
+  function sensorR() { return sensor.get() === 'th' ? IV.thermistorR(prm.values.T, DEF.thermistor) : IV.ldrR(prm.values.Lx, DEF.ldr); }
+  function dividerAt(sR) {
+    var v = prm.values, s = sensor.get(), top = v.R1 * 1e3, bot = v.R2 * 1e3;
+    if (s !== 'none') { if (spos.get() === 'top') top = sR; else bot = sR; }
+    return { top: top, bot: bot, d: CI.divider(v.Vin, top, bot, load.get() ? v.RL * 1e3 : null) };
+  }
+  function update() {
+    var v = prm.values, pot = mode.get() === 'pot', s = sensor.get();
+    sensor.row.style.display = pot ? 'none' : ''; spos.row.style.display = !pot && s !== 'none' ? '' : 'none'; load.el.style.display = pot ? 'none' : '';
+    btnRow.style.display = pot ? '' : 'none';
+    var top = spos.get() === 'top';
+    prm.show('Vin', !pot); prm.show('R1', !pot && !(s !== 'none' && top)); prm.show('R2', !pot && !(s !== 'none' && !top));
+    prm.show('T', !pot && s === 'th'); prm.show('Lx', !pot && s === 'ldr'); prm.show('RL', !pot && load.get());
+    ['E0', 'r0', 'Rs', 'Rw', 'Lc', 'Ex', 'rx', 'Rg', 'xc', 'Es'].forEach(function (k) { prm.show(k, pot); });
+    if (pot && Math.abs(prm.rows.xc.spec.max - v.Lc) > 1e-9) prm.range('xc', 0, v.Lc, 0.1);
+    M = { pot: null, div: null };
+    if (pot) {
+      var base = { E0: v.E0, r0: v.r0, Rs: v.Rs, Rw: v.Rw, L: v.Lc / 100, rx: v.rx, Rg: v.Rg };
+      M.pot = CI.potentiometer(Object.assign({ Ex: v.Ex, x: prm.values.xc / 100 }, base));
+      M.std = CI.potentiometer(Object.assign({ Ex: v.Es }, base));
+    } else M.div = dividerAt(s !== 'none' ? sensorR() : null);
+    drawScene(); drawPlots(); readout();
+  }
+
+  /* ---------- drawing helpers ---------- */
+  function resistor(c, x, y, w, h, vertical, label, col, kind) {
+    var L = col['object-line'];
+    c.save(); c.strokeStyle = L; c.lineWidth = 2; c.fillStyle = col.panel;
+    var rw = vertical ? h : w, rh = vertical ? w : h;
+    c.fillRect(x - rw / 2, y - rh / 2, rw, rh); c.strokeRect(x - rw / 2, y - rh / 2, rw, rh);
+    if (kind === 'th') { c.beginPath(); c.moveTo(x - rw / 2 - 8, y + rh / 2 + 8); c.lineTo(x - rw / 2, y + rh / 2 + 8); c.lineTo(x + rw / 2 + 8, y - rh / 2 - 8); c.stroke(); }
+    if (kind === 'ldr') {
+      var rr = Math.max(rw, rh) * 0.7; c.beginPath(); c.arc(x, y, rr, 0, 7); c.stroke();
+      D.arrow(c, x - rr * 1.9, y - rr * 1.5, x - rr * 0.95, y - rr * 0.55, L, { head: 6, width: 1.3 });
+      D.arrow(c, x - rr * 1.9, y - rr * 0.8, x - rr * 1.05, y + rr * 0.05, L, { head: 6, width: 1.3 });
+    }
+    c.restore();
+    if (label) D.label(c, label, x + (vertical ? Math.max(rw, rh) * 0.7 + 10 : 0), y + (vertical ? 0 : -rh / 2 - 12), col.ink, { size: 11, bg: true, align: vertical ? 'left' : 'center' });
+  }
+  function cellSym(c, x, y, vertical, col, label) {
+    var L = col['object-line'], s = vp.scale;
+    c.save(); c.strokeStyle = L; c.lineWidth = 2;
+    if (vertical) { c.beginPath(); c.moveTo(x - 0.55 * s, y - 0.12 * s); c.lineTo(x + 0.55 * s, y - 0.12 * s); c.stroke(); c.lineWidth = 3.5; c.beginPath(); c.moveTo(x - 0.28 * s, y + 0.12 * s); c.lineTo(x + 0.28 * s, y + 0.12 * s); c.stroke(); }
+    else { c.beginPath(); c.moveTo(x - 0.12 * s, y - 0.55 * s); c.lineTo(x - 0.12 * s, y + 0.55 * s); c.stroke(); c.lineWidth = 3.5; c.beginPath(); c.moveTo(x + 0.12 * s, y - 0.28 * s); c.lineTo(x + 0.12 * s, y + 0.28 * s); c.stroke(); }
+    c.restore();
+    if (label) D.label(c, label, x + (vertical ? -0.8 * s : 0), y + (vertical ? 0 : -0.9 * s), col.ink, { size: 11, bg: true, align: vertical ? 'right' : 'center' });
+  }
+
+  /* ---------- scene ---------- */
+  function drawScene() {
+    if (!M) return;
+    var col = ui.colors(), c, L = col['object-line'], s, v = prm.values;
+    vp.fit(0, 16, 0, 9); c = vp.begin(); s = vp.scale;
+    function wire(pts) { D.line(c, pts.map(function (p) { return vp.P(p[0], p[1]); }), L, { width: 2 }); }
+    function dot(x, y) { c.fillStyle = L; c.beginPath(); c.arc(vp.X(x), vp.Y(y), 3.5, 0, 7); c.fill(); }
+    if (M.div) {
+      var dv = M.div, d = dv.d, sn = sensor.get(), top = spos.get() === 'top';
+      wire([[3, 4.0], [3, 8], [7, 8], [7, 7.0]]); wire([[7, 5.0], [7, 3.0]]); wire([[7, 1], [3, 1], [3, 3.6]]);
+      cellSym(c, vp.X(3), vp.Y(3.8), true, col, 'V<sub>in</sub>'.replace(/<[^>]+>/g, '') + ' = ' + U.sf(v.Vin) + ' V');
+      var lab = function (R) { return R >= 1e3 ? U.sf(R / 1e3) + ' kΩ' : U.sf(R) + ' Ω'; };
+      resistor(c, vp.X(7), vp.Y(6), 0.7 * s, 2 * s, true, (sn !== 'none' && top ? (sn === 'th' ? 'thermistor ' : 'LDR ') : 'R₁ = ') + lab(dv.top), col, sn !== 'none' && top ? sn : null);
+      resistor(c, vp.X(7), vp.Y(2), 0.7 * s, 2 * s, true, (sn !== 'none' && !top ? (sn === 'th' ? 'thermistor ' : 'LDR ') : 'R₂ = ') + lab(dv.bot), col, sn !== 'none' && !top ? sn : null);
+      wire([[7, 4], [11, 4]]); wire([[7, 1], [11, 1]]); dot(7, 4); dot(7, 1);
+      c.strokeStyle = L; c.fillStyle = col.panel; [4, 1].forEach(function (y) { c.beginPath(); c.arc(vp.X(11), vp.Y(y), 4.5, 0, 7); c.fill(); c.stroke(); });
+      D.label(c, 'V_out', vp.X(11.6), vp.Y(2.5), col.s1, { size: 12, bold: true, align: 'left' });
+      if (load.get()) { wire([[9.5, 4], [9.5, 3.2]]); wire([[9.5, 1.8], [9.5, 1]]); resistor(c, vp.X(9.5), vp.Y(2.5), 0.6 * s, 1.4 * s, true, 'R_L = ' + U.sf(v.RL) + ' kΩ', col); dot(9.5, 4); dot(9.5, 1); }
+      if (d.invalid) { D.label(c, d.invalid, vp.w / 2, 14, col.warn, { bold: true, bg: true }); return; }
+      D.label(c, U.sf(d.Vout) + ' V', vp.X(12.6), vp.Y(2.5), col.s1, { size: 16, bold: true, align: 'left', bg: true });
+      if (d.I > 0) D.arrow(c, vp.X(5), vp.Y(8.5), vp.X(6.4), vp.Y(8.5), col.applied, { head: 7, label: 'I = ' + (d.I >= 1e-2 ? U.sf(d.I) + ' A' : U.sf(d.I * 1e3) + ' mA') });
+      // share bar
+      var bx = vp.X(14.6), bw = vp.X(15.4) - bx, ty = vp.Y(8), by = vp.Y(1), fr = v.Vin > 0 ? d.Vout / v.Vin : 0;
+      c.fillStyle = col.s1; c.fillRect(bx, by - (by - ty) * fr, bw, (by - ty) * fr); c.strokeStyle = L; c.lineWidth = 1; c.strokeRect(bx, ty, bw, by - ty);
+      D.label(c, 'share across output', vp.X(15), vp.Y(8.5), col.muted, { size: 10 });
+    } else {
+      var p = M.pot, Lc = v.Lc, xA = 2.5, xB = 13.5, yW = 5, X = function (cm) { return xA + (xB - xA) * cm / Lc; };
+      // driver loop above the wire
+      wire([[xA, yW], [xA, 8], [7.4, 8]]); wire([[8.6, 8], [10, 8]]); wire([[11.6, 8], [xB, 8], [xB, yW]]);
+      cellSym(c, vp.X(8), vp.Y(8), false, col, 'E₀ = ' + U.sf(v.E0) + ' V' + (v.r0 > 0 ? ', r₀ = ' + U.sf(v.r0) + ' Ω' : ''));
+      if (v.Rs > 0) resistor(c, vp.X(10.8), vp.Y(8), 0.6 * s, 1.6 * s, false, 'R_s = ' + U.sf(v.Rs) + ' Ω', col); else wire([[10, 8], [11.6, 8]]);
+      // the wire with a scale
+      c.strokeStyle = col.s4; c.lineWidth = 4; c.beginPath(); c.moveTo(vp.X(xA), vp.Y(yW)); c.lineTo(vp.X(xB), vp.Y(yW)); c.stroke();
+      c.lineWidth = 1; c.strokeStyle = col.muted;
+      for (var cm = 0; cm <= Lc + 1e-9; cm += 10) { c.beginPath(); c.moveTo(vp.X(X(cm)), vp.Y(yW) + 5); c.lineTo(vp.X(X(cm)), vp.Y(yW) + (cm % 50 === 0 ? 13 : 9)); c.stroke(); if (cm % 50 === 0) D.label(c, cm + ' cm', vp.X(X(cm)), vp.Y(yW) + 22, col.muted, { size: 10 }); }
+      D.label(c, 'A', vp.X(xA) - 12, vp.Y(yW), col.ink, { bold: true }); D.label(c, 'B', vp.X(xB) + 12, vp.Y(yW), col.ink, { bold: true });
+      // test circuit below: A → test cell → galvanometer → jockey
+      var xj = X(U.clamp(v.xc, 0, Lc));
+      wire([[xA, yW], [xA, 1.5], [4.6, 1.5]]); wire([[5.4, 1.5], [7.4, 1.5]]); wire([[8.6, 1.5], [xj, 1.5], [xj, yW - 0.6]]);
+      cellSym(c, vp.X(5), vp.Y(1.5), false, col, 'E_x = ' + U.sf(v.Ex) + ' V');
+      c.strokeStyle = L; c.lineWidth = 2; c.fillStyle = col.panel; c.beginPath(); c.arc(vp.X(8), vp.Y(1.5), 0.6 * s, 0, 7); c.fill(); c.stroke();
+      D.label(c, 'G', vp.X(8), vp.Y(1.5) + 0.32 * s, col.ink, { size: 11, bold: true });
+      var ig = p.Ig || 0, needle = U.clamp(ig / 0.005, -1, 1) * 1.1;
+      c.strokeStyle = col.s2; c.lineWidth = 2; c.beginPath(); c.moveTo(vp.X(8), vp.Y(1.5) + 0.2 * s); c.lineTo(vp.X(8) + Math.sin(needle) * 0.5 * s, vp.Y(1.5) + 0.2 * s - Math.cos(needle) * 0.5 * s); c.stroke();
+      D.arrow(c, vp.X(xj), vp.Y(yW - 0.6), vp.X(xj), vp.Y(yW) + 3, L, { head: 8, width: 2 });
+      D.label(c, 'jockey  l = ' + U.sf(v.xc) + ' cm', vp.X(xj), vp.Y(yW - 1.0), col.ink, { size: 11, bg: true });
+      if (p.invalid) { D.label(c, p.invalid, vp.w / 2, 14, col.warn, { bold: true, bg: true }); return; }
+      if (p.hasBalance) { var xb = vp.X(X(p.balance * 100)); c.save(); c.setLineDash([4, 3]); c.strokeStyle = col.s1; c.beginPath(); c.moveTo(xb, vp.Y(yW + 0.9)); c.lineTo(xb, vp.Y(yW - 0.2)); c.stroke(); c.restore(); D.label(c, 'balance ' + U.sf(p.balance * 100) + ' cm', xb, vp.Y(yW + 1.2), col.s1, { size: 11, bg: true }); }
+      D.label(c, p.galvError ? '' : 'I_G = ' + (Math.abs(ig) < 1e-9 ? '0' : U.sf(ig * 1e3) + ' mA'), vp.X(8), vp.Y(0.45), col.s2, { size: 12, bold: true, bg: true });
+    }
+  }
+
+  /* ---------- plots ---------- */
+  function drawPlots() {
+    if (!M) return;
+    var col = ui.colors(), v = prm.values;
+    if (M.div) {
+      var sn = sensor.get();
+      if (sn === 'th') pA.draw({ x: [-10, 100], xLabel: 'temperature / °C', yLabel: 'V_out / V', series: [{ fn: function (T) { var d = dividerAt(IV.thermistorR(T, DEF.thermistor)).d; return d.invalid ? NaN : d.Vout; }, color: col.s1 }], cursor: v.T, title: 'illustrative thermistor model' });
+      else if (sn === 'ldr') pA.draw({ x: [0, 100], xLabel: 'light intensity / a.u.', yLabel: 'V_out / V', series: [{ fn: function (Lx) { var d = dividerAt(IV.ldrR(Lx, DEF.ldr)).d; return d.invalid ? NaN : d.Vout; }, color: col.s1 }], cursor: v.Lx, title: 'illustrative LDR model' });
+      else pA.draw({ x: [0, 100], xLabel: 'R₂ / kΩ', yLabel: 'V_out / V', series: [{ fn: function (r2) { var d = CI.divider(v.Vin, v.R1 * 1e3, r2 * 1e3, load.get() ? v.RL * 1e3 : null); return d.invalid ? NaN : d.Vout; }, color: col.s1 }], cursor: v.R2, title: load.get() ? 'with load' : 'no load' });
+      pB.draw({ x: [0.1, 100], xLabel: 'R_L / kΩ', yLabel: 'V_out / V', series: [{ fn: function (rl) { var d = dividerAt(sn !== 'none' ? sensorR() : null), dd = CI.divider(v.Vin, d.top, d.bot, rl * 1e3); return dd.invalid ? NaN : dd.Vout; }, color: col.s3 }],
+        hlines: [{ y: CI.divider(v.Vin, dividerAt(sensor.get() !== 'none' ? sensorR() : null).top, dividerAt(sensor.get() !== 'none' ? sensorR() : null).bot).Vout || 0, label: 'no load' }], cursor: load.get() ? v.RL : undefined, title: 'loading lowers V_out' });
+    } else {
+      var p = M.pot;
+      if (p.invalid) return;
+      var base = { E0: v.E0, r0: v.r0, Rs: v.Rs, Rw: v.Rw, L: v.Lc / 100, Ex: v.Ex, rx: v.rx, Rg: v.Rg };
+      pA.draw({ x: [0, v.Lc], xLabel: 'l / cm', yLabel: 'V across AJ / V', series: [{ fn: function (cm) { return p.k * cm / 100; }, color: col.s4 }], hlines: [{ y: v.Ex, label: 'E_x' }], cursor: v.xc, title: 'gradient = potential gradient' });
+      pB.draw({ x: [0, v.Lc], xLabel: 'l / cm', yLabel: 'I_G / mA', series: [{ fn: function (cm) { var q = CI.potentiometer(Object.assign({ x: cm / 100 }, base)); return q.galvError ? NaN : q.Ig * 1e3; }, color: col.s2, steps: 200 }], cursor: v.xc, title: 'zero at balance' });
+    }
+  }
+
+  /* ---------- live working ---------- */
+  function readout() {
+    if (!M) return;
+    var s3 = U.sf, v = prm.values;
+    R.clear();
+    if (M.div) {
+      var dv = M.div, d = dv.d, sn = sensor.get(), top = spos.get() === 'top';
+      if (d.invalid) { R.badge(d.invalid, 'warn').render(); return; }
+      if (sn !== 'none') {
+        R.badge('Sensor resistance from an illustrative model curve', 'info');
+        R.eq(sn === 'th' ? 'R<sub>thermistor</sub>' : 'R<sub>LDR</sub>', 'at ' + (sn === 'th' ? U.num(v.T, 3) + ' °C' : U.num(v.Lx, 3) + ' a.u.'), sn === 'th' ? IV.thermistorR(v.T, DEF.thermistor) : IV.ldrR(v.Lx, DEF.ldr), 'Ω');
+      }
+      R.head('Potential divider (output across the bottom resistor)');
+      if (load.get()) R.eq('R<sub>bottom</sub> ∥ R<sub>L</sub>', '(1/' + s3(dv.bot) + ' + 1/' + s3(v.RL * 1e3) + ')<sup>−1</sup>', d.R2eff, 'Ω');
+      R.eq('I', 'V<sub>in</sub> ÷ (R<sub>top</sub> + R<sub>bottom</sub>) = ' + s3(v.Vin) + ' ÷ (' + s3(dv.top) + ' + ' + s3(d.R2eff) + ')', d.I, 'A');
+      R.eq('V<sub>out</sub>', 'V<sub>in</sub> × R<sub>bottom</sub> ÷ (R<sub>top</sub> + R<sub>bottom</sub>) = ' + s3(v.Vin) + ' × ' + s3(d.R2eff) + ' ÷ ' + s3(dv.top + d.R2eff), d.Vout, 'V');
+      R.eq('p.d. across top', 'V<sub>in</sub> − V<sub>out</sub>', d.V1, 'V');
+      if (load.get()) { var nl = CI.divider(v.Vin, dv.top, dv.bot); R.eq('without load', 'V<sub>in</sub> R<sub>bottom</sub>/(R<sub>top</sub> + R<sub>bottom</sub>)', nl.Vout, 'V'); }
+      if (sn !== 'none') {
+        R.head('As the ' + (sn === 'th' ? 'temperature' : 'light intensity') + ' increases');
+        R.html('<div class="eq">R<sub>' + (sn === 'th' ? 'thermistor' : 'LDR') + '</sub> decreases, so the p.d. across it decreases. The output is across the ' + (top ? 'fixed resistor' : (sn === 'th' ? 'thermistor' : 'LDR')) + ', so V<sub>out</sub> <b>' + (top ? 'increases' : 'decreases') + '</b>.</div>');
+      }
+      R.render(); return;
+    }
+    var p = M.pot, st = M.std;
+    if (p.invalid) { R.badge(p.invalid, 'warn').render(); return; }
+    R.head('Driver circuit: potential gradient along AB');
+    R.eq('I<sub>wire</sub>', 'E₀ ÷ (r₀ + R<sub>s</sub> + R<sub>w</sub>) = ' + s3(v.E0) + ' ÷ (' + s3(v.r0) + ' + ' + s3(v.Rs) + ' + ' + s3(v.Rw) + ')', p.Iwire, 'A');
+    R.eq('V<sub>AB</sub>', 'I<sub>wire</sub> R<sub>w</sub>', p.Vwire, 'V');
+    R.eq('potential gradient', 'V<sub>AB</sub> ÷ L = ' + s3(p.Vwire) + ' ÷ ' + U.num(v.Lc, 4) + ' cm', p.k / 100, 'V cm<sup>−1</sup>');
+    R.head('Balance point for the test cell (nu&#8203;ll method: galvanometer reads zero)');
+    if (p.hasBalance) R.eq('l<sub>x</sub>', 'E<sub>x</sub> ÷ gradient = ' + s3(v.Ex) + ' ÷ ' + s3(p.k / 100), p.balance * 100, 'cm');
+    else R.badge('No balance point: E_x is more than the p.d. across the whole wire (' + s3(p.Vwire) + ' V)', 'warn');
+    if (p.galvError) R.badge(p.galvError, 'warn');
+    else {
+      var bal = p.hasBalance && Math.abs(v.xc / 100 - p.balance) < 1e-6;
+      R.eq('I<sub>G</sub> at l = ' + s3(v.xc) + ' cm', bal ? 'balanced: no current in the test cell' : 'p.d. across AJ = ' + s3(p.VAJ) + ' V ≠ E<sub>x</sub>', Math.abs(p.Ig) < 1e-12 ? 0 : p.Ig * 1e3, 'mA');
+      if (!bal && Math.abs(p.Ig) > 1e-12) R.eq('terminal p.d. of test cell', 'E<sub>x</sub> − I r<sub>x</sub> = ' + s3(v.Ex) + ' − ' + s3(p.Itest) + ' × ' + s3(v.rx) + ' (not the e.m.f. while current flows)', v.Ex - p.Itest * v.rx, 'V');
+    }
+    R.head('Comparing e.m.f.s: E<sub>x</sub>/E<sub>s</sub> = l<sub>x</sub>/l<sub>s</sub>');
+    if (st.hasBalance && p.hasBalance) {
+      R.eq('l<sub>s</sub>', 'standard cell balance = ' + s3(v.Es) + ' ÷ ' + s3(p.k / 100), st.balance * 100, 'cm');
+      R.eq('E<sub>x</sub>', 'E<sub>s</sub> × l<sub>x</sub> ÷ l<sub>s</sub> = ' + s3(v.Es) + ' × ' + s3(p.balance * 100) + ' ÷ ' + s3(st.balance * 100), CI.compareEmf(v.Es, st.balance, p.balance), 'V');
+    } else R.html('<div class="eq">Both cells need a balance point on the wire to compare them.</div>');
+    R.render();
+  }
+
+  ui.onTheme(function () { drawScene(); drawPlots(); });
+  vp.onResize = drawScene;
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

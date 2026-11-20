@@ -1,0 +1,299 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions October/November 2018
+MARK SCHEME
+Maximum Mark: 100
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the October/November 2018 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 14 printed pages.
+© UCLES 2018 [Turn over
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the
+specific content of the mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these
+marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the
+scope of the syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the
+question as indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently e.g. in situations where candidates have not followed instructions or in the application of generic level
+descriptors.
+© UCLES 2018 Page 2 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may
+be limited according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or
+grade descriptors in mind.
+© UCLES 2018 Page 3 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+1(a)(i) force per unit mass B1
+1(a)(ii) acceleration = F/m, field strength = F/m, so equal B1
+1(b) smooth curve between R and 4R with negative gradient of decreasing magnitude B1
+line passing through (R, 1.00g) and (2R, 0.25g) B1
+line ending at (4R, 0.0625g) B1
+1(c) M = (4/3 × πR3)ρ C1
+g = GM/(2R)2 C1
+g = ⅓ × 6.67 × 10–11 × π × 3.4 × 106 × 4.0 × 103 A1
+= 0.95ms–2
+© UCLES 2018 Page 4 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+2(a) gas that obeys equation pV = constant × T M1
+symbols p,V and T explained A1
+2(b)(i) pV = ⅓ Nm<c2> and M = Nm C1
+(and so) p = ⅓ρ<c2>
+2.12 × 107 = ⅓ × [3.20/(1.84 × 10–2)]×<c2> C1
+c = 605ms–1 A1
+r.m.s.
+2(b)(ii) 1. pV = nRT and T = (22 + 273)K C1
+n = (2.12 × 107 × 1.84 × 10–2)/(8.31 × 295) A1
+= 159 mol
+2. mass = 3.20/(159 × 6.02 × 1023) C1
+or
+mass = [2 × (3/2) × 1.38 × 10–23 × 295]/6052
+mass = 3.34 × 10–26kg A1
+2(c) A = (3.34 × 10–26)/(1.66 × 10–27) A1
+= 20
+© UCLES 2018 Page 5 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+3(a) (thermal) energy per unit mass (to cause change of state) B1
+(energy transfer during) change of state between solid and liquid at constant temperature B1
+3(b)(i) Any one from: B1
+• rate of increase in mass (of beaker and water) is constant
+• level of water rises at a constant rate
+• volume of water (in beaker) increases at a constant rate
+• constant time between drops
+• constant rate of dripping
+3(b)(ii) (electrical power supplied =) 12.8 × 4.60 C1
+(= 58.9W)
+(rate of transfer to ice =) [(185.0 – 121.5) × 332]/[5.00 × 60] C1
+(= 70.3W)
+1. rate = 70.3W A1
+2. rate = 70.3 – 58.9 A1
+= 11.4W
+© UCLES 2018 Page 6 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+4(a) (defining equation of s.h.m. is) a = –kx where k is a constant or a ∝ –x B1
+g and L are constant (so a ∝ –x and hence s.h.m.) B1
+4(b) T = 0.50s and T = 2π/ω C1
+ω2 = 2g/L C1
+L = (2 × 9.81 × 0.502)/4π2 A1
+= 0.12m
+4(c)(i) Any one from: B1
+• viscosity of liquid
+• friction within the liquid
+• viscous drag
+• friction/resistance between walls of tube and liquid
+4(c)(ii) (maximum) KE = ½mv 2 and v = ωx C1
+0 0 0
+or
+energy = ½mω2x 2
+0
+ratio = (1.3/2.0)2 A1
+= 0.42
+© UCLES 2018 Page 7 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+5(a) amplitude of carrier (wave) varies B1
+variation in synchrony with displacement of information signal B1
+5(b)(i) wavelength = (3.0 × 108)/(900 × 103) A1
+= 3.3 × 102m
+5(b)(ii) amplitude varies (continuously) between a maximum and a minimum B1
+variations repeat 5000 times each second B1
+or
+variations repeat every 0.2ms
+or
+variations above and below 4.0V
+5(b)(iii) 10000Hz A1
+5(c)(i) Any two from: B2
+• (orbit is) above the Equator
+• (orbit is) from west to east/same direction as Earth’s rotation
+• orbit is circular/orbit has a particular radius
+5(c)(ii) 1. minimal reflection/absorption/attenuation by atmosphere B1
+or
+maximum penetration of/transmission through atmosphere
+2. uplink signal is greatly attenuated/must be greatly amplified B1
+prevents downlink signal swamping the uplink signal B1
+© UCLES 2018 Page 8 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+6(a)(i) work done per unit charge B1
+work done moving positive charge from infinity (to the point) B1
+6(a)(ii) field strength = potential gradient M1
+negative sign included or directions discussed A1
+6(b) horizontal straight lines, at non-zero potential, within the spheres B1
+magnitude of potential greater at surface of sphere A than at surface of sphere B B1
+concave curve between A and B, with a minimum nearer to B B1
+lines show V positive all the way from 0 to D B1
+Question Answer Marks
+7(a) R/R = 2.4/1.8 C1
+T
+or
+at 4.0°C, R = 3.2kΩ
+T
+hence R/3.2 = 2.4/1.8 A1
+R = 4.3kΩ
+7(b) R = 3.37kΩ B1
+T
+or
+R is greater (than 3.2kΩ)
+T
+V+ > V– M1
+hence output is +5.0V A1
+© UCLES 2018 Page 9 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+7(c) correct LED symbol B1
+two diodes shown connected, in parallel and with opposite polarities, between V and earth M1
+OUT
+diodes labelled to show correct polarities consistent with (b) A1
+(G pointing from V to earth and B pointing from earth to V if (b) correct)
+OUT OUT
+Question Answer Marks
+8(a) force per unit current B1
+force per unit length (of wire) B1
+current normal to (magnetic) field B1
+8(b)(i) forces (on PQ and RS) are horizontal B1
+(hence they create) no moment about the pivot B1
+or
+forces (on PQ and RS) are equal and opposite (B1)
+(hence there is) no net force (on the two sections) (B1)
+8(b)(ii) realisation of the need to apply moments C1
+BILx = mgy C1
+B × 2.7 × 1.2 × 10–2 × 7.5 = 45 × 10–6 × 9.81 × 8.8
+B = 1.6 × 10–2T A1
+© UCLES 2018 Page 10 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+9(a) 0 → t horizontal straight line at non-zero value of V B1
+1 H
+and
+t → t horizontal straight line at different non-zero V
+3 4 H
+t → t straight diagonal line with negative gradient B1
+1 3
+and
+graph line starts at (0, V ) and ends at (t , –2V )
+0 4 0
+9(b) E = 0 for 0 → t and t → t B1
+1 3 4
+E is non-zero at all points between t → t M1
+1 3
+E has constant magnitude between t → t A1
+1 3
+© UCLES 2018 Page 11 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+10(a) V = √2 × V = √2 × 9.9 (= 14V) C1
+0 r.m.s.
+and
+ω = 2πf = 2π × 50 (= 314rads–1)
+V = 14 sin 314t A1
+10(b) enables (resonating) nuclei to be located B1
+resonant frequency depends on magnetic field strength B1
+Any one from: B1
+• non-uniform field is (accurately) calibrated
+• (non-uniform) field may be varied to enable detection in different positions
+• unique (magnetic) field strength/frequency at each point
+10(c) I = I exp(–µx) C1
+0
+I = I [exp(–µx) × exp(–µx) ] C1
+0 bone soft tissue
+I = I [exp(–2.9 × 0.40) × exp(–0.92 × 1.4)]
+0
+I/I = 0.0865 C1
+0
+ratio/dB = 10 lg 0.0865 A1
+= –11dB
+© UCLES 2018 Page 12 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+11(a) discrete amount/quantum/packet of energy M1
+of electromagnetic radiation A1
+11(b) mostly dark/dark background B1
+coloured lines B1
+11(c)(i) 6 A1
+11(c)(ii) 1. maximum photon energy = 13.6 – 0.85 C1
+(= 12.75eV)
+maximum kinetic energy = (13.6 – 0.85) – 5.6 A1
+= 7.2eV
+2. energy = hc/λ C1
+λ = (6.63 × 10–34 × 3.00 × 108) / [(13.6 – 0.85) × 1.60 × 10–19] C1
+= 9.8 × 10–8m A1
+© UCLES 2018 Page 13 of 14
+
+9702/42 Cambridge International AS/A Level – Mark Scheme October/November 2018
+PUBLISHED
+Question Answer Marks
+12(a) fusion: two nuclei combine to form a (single) nucleus B1
+fission: a (single) large nucleus divides to form (smaller) nuclei B1
+Any one from: B1
+• fusion is initiated by (very) high temperatures
+• fission is initiated by neutron bombardment
+• resulting nuclei in fission are of similar size
+• (both processes) release energy
+• binding energy per nucleon increases
+• total binding energy increases
+• fission involves release of neutrons
+12(b)(i) neutron B1
+12(b)(ii) 1. zero A1
+2. (4 × 11.3290 × 10–13) – (2 × 1.7813 × 10–13) – (3 × 4.5285 × 10–13) C1
+energy change = 45.316 × 10–13 – 17.148 × 10–13 A1
+= 2.82 × 10–12J
+12(b)(iii) 1.0mol or N nuclei of each A1
+A
+energy = 2.817 × 10–12 × 6.02 × 1023
+= 1.7 × 1012J
+© UCLES 2018 Page 14 of 14

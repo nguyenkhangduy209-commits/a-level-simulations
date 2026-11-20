@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Density, pressure and upthrust</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-statics.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  // Cambridge rounding: exact halves round away from zero (49.05 → 49.1); toPrecision alone can round 49.05 down (binary floating point)
+  (function (sf, dp) { SIM.util.sf = function (x, n) { return typeof x === 'number' && isFinite(x) ? sf(x * (1 + 1e-12), n) : sf(x, n); };
+    SIM.util.dp = function (x, d) { return typeof x === 'number' && isFinite(x) ? dp(x * (1 + 1e-12), d) : dp(x, d); }; })(SIM.util.sf, SIM.util.dp);
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, ST = SIM.statics;
+  var course = ui.course('9702'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Density, hydrostatic pressure and upthrust', g: g, tags: ['9702 4.3 Density and pressure'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 22 });
+  ui.legend(sceneCard, [
+    { color: 'var(--c-weight)', label: 'weight W' }, { color: 'var(--c-normal)', label: 'upthrust U' },
+    { color: 'var(--c-component)', label: 'pressure forces on faces' }, { color: 'var(--c-tension)', label: 'support force (balance / string / floor)' },
+    { color: 'var(--accent)', label: 'pressure probe' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pP = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'p / kPa', xLabel: 'depth h / m' });
+  var derivCard = ui.h('div', { class: 'readout' }); plotWrap.appendChild(derivCard);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var mode = ui.select(paramCard, { label: 'Object', value: 'held', options: [
+    { value: 'held', label: 'Held at a depth (spring balance / string)' },
+    { value: 'released', label: 'Just released from rest at that depth' },
+    { value: 'free', label: 'Left to float or sink' }] }, function () { update('*'); });
+  var fluid = ui.select(paramCard, { label: 'Fluid', value: 'custom', options: [
+    { value: 'custom', label: 'custom (use slider)' }, { value: '1000', label: 'water 1000 kg m⁻³' }, { value: '1030', label: 'sea water 1030 kg m⁻³' },
+    { value: '800', label: 'oil 800 kg m⁻³' }, { value: '13600', label: 'mercury 13 600 kg m⁻³' }] }, function (v) { if (v !== 'custom') prm.set({ rhoF: Number(v) }); });
+  var prm = ui.params(paramCard, [
+    { key: 'rhoF', label: 'Density of fluid', sym: 'ρ<sub>f</sub>', unit: 'kg m<sup>−3</sup>', min: 500, max: 13600, step: 1, value: 1000 },
+    { key: 'rhoO', label: 'Density of object', sym: 'ρ<sub>o</sub>', unit: 'kg m<sup>−3</sup>', min: 50, max: 20000, step: 1, value: 2700 },
+    { key: 'V', label: 'Volume of object', sym: 'V', unit: 'm<sup>3</sup>', min: 0.00001, max: 0.5, step: 0.00001, value: 0.001 },
+    { key: 'H', label: 'Height of object (vertical sides)', sym: 'H', unit: 'm', min: 0.01, max: 2, step: 0.01, value: 0.1 },
+    { key: 'd', label: 'Depth of top face below surface (negative = above)', sym: 'd', unit: 'm', min: -2, max: 20, step: 0.01, value: 0.3 },
+    { key: 'Dl', label: 'Depth of liquid in the tank', sym: 'D', unit: 'm', min: 0.01, max: 20, step: 0.01, value: 1 },
+    { key: 'h', label: 'Pressure probe depth', sym: 'h', unit: 'm', min: 0, max: 20, step: 0.01, value: 0.5 },
+    { key: 'p0', label: 'Atmospheric pressure', sym: 'p<sub>0</sub>', unit: 'kPa', min: 0, max: 200, step: 0.1, value: 101 }
+  ], update);
+  var useP0 = ui.toggle(paramCard, { label: 'Include atmospheric pressure (absolute pressure)', value: false }, function () { update('*'); });
+  var sideArrows = ui.toggle(paramCard, { label: 'Show pressure forces on the faces', value: true }, function () { draw(); });
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: '1.0×10⁻³ m³ aluminium block on a spring balance, fully in water', mode: 'held', values: { rhoF: 1000, rhoO: 2700, V: 0.001, H: 0.1, d: 0.3, h: 0.3 }, p0: false,
+      note: 'Upthrust = ρ_f g V = 1000 × 9.81 × 1.0×10⁻³ = 9.81 N. Balance reading = W − U = 26.5 − 9.81 = 16.7 N.' },
+    { name: 'Pressure difference 2.0 m below the surface of water', mode: 'held', values: { rhoF: 1000, rhoO: 2700, V: 0.001, H: 0.1, d: 1.9, h: 2 }, p0: false,
+      note: 'Δp = ρgΔh = 1000 × 9.81 × 2.0 = 19 600 Pa (1.96×10⁴ Pa). This is the pressure ABOVE atmospheric.' },
+    { name: 'Upthrust = difference in pressure × area (atmospheric pressure cancels)', mode: 'held', values: { rhoF: 1000, rhoO: 8000, V: 0.002, H: 0.2, d: 1.5, h: 1.5, p0: 101 }, p0: true,
+      note: 'p_bottom − p_top = ρg(0.2 m) whatever the depth and whether or not p₀ is included. U = Δp × A = ρgHA = ρgV.' },
+    { name: 'Wooden block floating in water: fraction submerged', mode: 'free', values: { rhoF: 1000, rhoO: 600, V: 0.002, H: 0.2, Dl: 0.5, h: 0.12 }, p0: false,
+      note: 'Floating ⇒ upthrust = weight ⇒ ρ_f g V_sub = ρ_o g V ⇒ V_sub/V = ρ_o/ρ_f = 0.60.' },
+    { name: 'Iceberg (917 kg m⁻³) in sea water', mode: 'free', values: { rhoF: 1030, rhoO: 917, V: 0.5, H: 2, Dl: 5, h: 1 }, p0: false,
+      note: 'Fraction below the surface = 917/1030 = 0.890: about 89% is hidden.' },
+    { name: '9702/22 F/M 24 Q2(c): diver (7.5×10⁻² m³, 78 kg) fully under water', mode: 'released', values: { rhoF: 1000, rhoO: 1040, V: 0.075, H: 0.5, d: 1, h: 1 }, p0: false,
+      note: 'Show that U ≈ 740 N: 1000 × 9.81 × 7.5×10⁻² = 736 N. (Here at the instant of release, with no drag yet.)' },
+    { name: 'Mercury column: pressure 0.760 m down', mode: 'held', values: { rhoF: 13600, rhoO: 20000, V: 0.0001, H: 0.05, d: 0.2, h: 0.76 }, p0: false,
+      note: 'Δp = 13 600 × 9.81 × 0.760 = 1.01×10⁵ Pa — about one atmosphere.' },
+    { name: 'Steel block resting on the floor of a tank', mode: 'free', values: { rhoF: 1000, rhoO: 7800, V: 0.0001, H: 0.05, Dl: 0.4, h: 0.4 }, p0: false,
+      note: 'ρ_o > ρ_f, so it sinks. The floor supports the rest of the weight: reaction = W − U (exam convention: the water still acts on the underside).' },
+    { name: 'Light ball held under water by a string tied to the bottom', mode: 'held', values: { rhoF: 1000, rhoO: 200, V: 0.004, H: 0.16, d: 0.4, h: 0.4 }, p0: false,
+      note: 'U > W, so the support must pull DOWN: tension = U − W.' }
+  ], function (p) { mode.set(p.mode, true); useP0.set(!!p.p0, true); fluid.set('custom', true); prm.set(p.values); });
+
+  ui.notes(noteCard, [
+    'Upthrust uses the density of the <b>fluid</b> and the volume of fluid <b>displaced</b> (submerged volume), not the density of the object.',
+    'Δp = ρgΔh gives the pressure <b>difference</b> due to the fluid. The total (absolute) pressure adds atmospheric pressure p₀ on top.',
+    'Upthrust is caused by the bottom face being deeper than the top face: F = (p<sub>bottom</sub> − p<sub>top</sub>)A = ρgHA = ρgV. Atmospheric pressure cancels.',
+    'Once fully submerged, upthrust does not increase with depth (for an incompressible fluid).',
+    'Floating: upthrust = weight. Spring-balance (apparent) weight = W − U.',
+    'Density is mass ÷ volume (kg m<sup>−3</sup>); pressure is force ÷ area, normal to the surface (Pa = N m<sup>−2</sup>). Convert cm³ → m³ (× 10<sup>−6</sup>).'
+  ]);
+
+  /* ---------- model ---------- */
+  var o = null, floor = 1;
+  function params() {
+    var v = prm.values;
+    return { rhoF: v.rhoF, rhoO: v.rhoO, V: v.V, H: v.H, d: v.d, D: v.Dl, g: g, p0: useP0.get() ? v.p0 * 1000 : 0, mode: mode.get() === 'free' ? 'free' : 'held' };
+  }
+  function update(key) {
+    var md = mode.get(), v = prm.values;
+    prm.show('d', md !== 'free'); prm.show('Dl', md === 'free'); prm.show('p0', useP0.get());
+    if (key === 'rhoF') fluid.set('custom', true);
+    prm.range('d', -v.H, 20, 0.01);
+    o = ST.submerged(params());
+    if (md === 'free') { prm.range('h', 0, v.Dl, 0.01); floor = Math.max(v.Dl, o.state === 'floats' ? 1.4 * o.sub : 0); }
+    else { prm.range('h', 0, 20, 0.01); floor = Math.max(o.depthBottom * 1.15, o.depthBottom + 0.3 * v.H, v.h * 1.05, 0.05); }
+    draw(); readout();
+  }
+
+  /* ---------- drawing ---------- */
+  function draw() {
+    if (!o) return;
+    var col = ui.colors(), v = prm.values, md = mode.get();
+    var wTrue = Math.sqrt(o.A), w = U.clamp(wTrue, 0.4 * v.H, 3 * v.H);
+    var depthMax = Math.max(floor, 1e-3), halfW = Math.max(2.2 * w, 0.9 * depthMax);
+    var top = Math.max(0.35 * depthMax, -o.d + 0.6 * v.H, 0.3 * w);
+    vp.fit(-halfW, halfW, -depthMax * 1.04, top);
+    var c = vp.begin();
+    // tank
+    c.save(); c.fillStyle = col.s1; c.globalAlpha = 0.16; c.fillRect(vp.X(-halfW), vp.Y(0), vp.X(halfW) - vp.X(-halfW), vp.Y(-depthMax) - vp.Y(0)); c.restore();
+    D.line(c, [vp.P(-halfW, 0), vp.P(halfW, 0)], col.s1, { width: 2 });
+    D.ground(c, vp.X(-halfW), vp.Y(-depthMax), vp.X(halfW), vp.Y(-depthMax));
+    D.label(c, 'surface (p = ' + (useP0.get() ? 'p₀' : '0 gauge') + ')', vp.X(-halfW) + 6, vp.Y(0) - 10, col.s1, { align: 'left', size: 11 });
+    // object
+    var x0 = -w / 2, yTop = -o.d, yBot = -o.d - v.H;
+    c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
+    c.beginPath(); c.rect(vp.X(x0), vp.Y(yTop), vp.X(w / 2) - vp.X(x0), vp.Y(yBot) - vp.Y(yTop)); c.fill(); c.stroke(); c.restore();
+    if (w !== wTrue) D.label(c, 'width not to scale', vp.X(w / 2) + 6, vp.Y(yTop) + 8, col.muted, { align: 'left', size: 10 });
+    // string / balance for held
+    if (md === 'held' && Math.abs(o.apparent) > 1e-9) {
+      if (o.apparent > 0) { D.line(c, [vp.P(0, yTop), [vp.X(0), 4]], col['object-line'], { width: 1.5 }); }
+      else { D.line(c, [vp.P(0, yBot), vp.P(0, -depthMax)], col['object-line'], { width: 1.5 }); }
+    }
+    var cx = vp.X(0), cy = vp.Y((yTop + yBot) / 2);
+    var k = SIM.view.forceScale([o.W, o.U, Math.abs(o.apparent)], Math.min(110, vp.h * 0.28));
+    D.arrow(c, cx - 12, cy, cx - 12, cy + o.W * k, col.weight, { label: 'W = ' + U.sf(o.W) + ' N' });
+    if (o.U > 1e-12) D.arrow(c, cx + 12, cy, cx + 12, cy - o.U * k, col.normal, { label: 'U = ' + U.sf(o.U) + ' N' });
+    var sup = md === 'released' ? 0 : (md === 'free' ? (o.state === 'sinks' ? o.apparent : 0) : o.apparent);
+    if (Math.abs(sup) > 1e-9) {
+      var sx = vp.X(w / 2) + 22;
+      D.arrow(c, sx, cy, sx, cy - sup * k, col.tension, { label: (md === 'free' ? 'floor ' : sup > 0 ? 'balance ' : 'string ') + U.sf(Math.abs(sup)) + ' N' });
+    }
+    if (sideArrows.get() && o.sub > 0) {
+      var kp = 46 / Math.max(o.FBottom, 1e-12);
+      if (o.FTop > 1e-12 && o.d > 0) D.arrow(c, vp.X(-w / 4), vp.Y(yTop) - o.FTop * kp - 2, vp.X(-w / 4), vp.Y(yTop) - 2, col.component, { width: 1.6, label: 'p_top A' });
+      D.arrow(c, vp.X(-w / 4), vp.Y(yBot) + o.FBottom * kp + 2, vp.X(-w / 4), vp.Y(yBot) + 2, col.component, { width: 1.6, label: 'p_bottom A' });
+      // side forces (cancel)
+      [0.25, 0.75].forEach(function (fr) {
+        var yy = yTop - fr * v.H; if (yy > 0) return;
+        var len = 10 + 18 * (-yy) / depthMax;
+        D.arrow(c, vp.X(-w / 2) - len - 2, vp.Y(yy), vp.X(-w / 2) - 2, vp.Y(yy), col.component, { width: 1.2, head: 6 });
+        D.arrow(c, vp.X(w / 2) + len + 2, vp.Y(yy), vp.X(w / 2) + 2, vp.Y(yy), col.component, { width: 1.2, head: 6 });
+      });
+    }
+    // probe
+    var py = vp.Y(-v.h), px = vp.X(halfW) - 26;
+    c.save(); c.fillStyle = col.accent; c.beginPath(); c.arc(px, py, 5, 0, 2 * Math.PI); c.fill(); c.restore();
+    D.line(c, [[px, vp.Y(0)], [px, py]], col.accent, { dash: [3, 3], width: 1 });
+    D.label(c, 'h = ' + U.sf(v.h) + ' m', px - 8, py, col.accent, { align: 'right', size: 11, bg: true });
+    // state banner
+    var msg = '';
+    if (md === 'free') msg = o.state === 'floats' ? 'floats: ' + U.sf(100 * o.fraction) + '% submerged' : o.state === 'sinks' ? 'sinks and rests on the floor' : 'neutrally buoyant: stays at any depth';
+    else if (md === 'released') msg = Math.abs(o.U - o.W) < 1e-9 * o.W ? 'no resultant force: stays put' : (o.U > o.W ? 'U > W: rises' : 'W > U: sinks');
+    else if (o.state === 'out') msg = 'object is out of the fluid: no upthrust';
+    if (msg) D.label(c, msg, vp.w / 2, 14, col.ink, { bold: true, size: 12 });
+    drawPlot();
+  }
+  function drawPlot() {
+    var col = ui.colors(), v = prm.values, p0 = useP0.get() ? v.p0 * 1000 : 0;
+    var mk = [];
+    if (o.sub > 0 && o.d > 0) mk.push({ x: o.d, y: o.pTop / 1000, label: 'top', color: col.component });
+    if (o.sub > 0) mk.push({ x: Math.max(0, o.depthBottom), y: o.pBottom / 1000, label: 'bottom', color: col.component });
+    mk.push({ x: v.h, y: (p0 + ST.hydro(v.rhoF, g, v.h)) / 1000, label: 'probe', color: col.accent });
+    pP.draw({ x: [0, Math.max(floor, 0.01)], series: [{ fn: function (h) { return (p0 + ST.hydro(v.rhoF, g, h)) / 1000; }, color: col.s1 }], markers: mk,
+      title: 'gradient = ρg = ' + U.sf(v.rhoF * g / 1000) + ' kPa m⁻¹' });
+  }
+
+  /* ---------- working ---------- */
+  function readout() {
+    var v = prm.values, md = mode.get(), s3 = U.sf, abs = useP0.get(), p0 = abs ? v.p0 * 1000 : 0;
+    R.clear();
+    R.head('Object');
+    R.eq('A', 'V ÷ H = ' + s3(v.V) + ' ÷ ' + s3(v.H), o.A, 'm<sup>2</sup>');
+    R.eq('m', 'ρ<sub>o</sub>V = ' + s3(v.rhoO) + ' × ' + s3(v.V), o.mass, 'kg');
+    R.eq('W', 'mg = ' + s3(o.mass) + ' × ' + g, o.W, 'N');
+    R.head('Pressure on the faces' + (abs ? ' (absolute, p₀ = ' + s3(p0) + ' Pa)' : ' (due to the fluid only)'));
+    if (o.sub <= 0) R.badge('The object is above the surface: no upthrust', 'warn');
+    else {
+      R.eq('p<sub>top</sub>', o.d > 0 ? (abs ? 'p₀ + ' : '') + 'ρ<sub>f</sub>gd = ' + (abs ? s3(p0) + ' + ' : '') + s3(v.rhoF) + ' × ' + g + ' × ' + s3(o.d) : (abs ? 'p₀ (top face in air)' : '0 (top face in air)'), o.pTop, 'Pa');
+      R.eq('p<sub>bottom</sub>', (abs ? 'p₀ + ' : '') + 'ρ<sub>f</sub>g(d + H) = ' + (abs ? s3(p0) + ' + ' : '') + s3(v.rhoF) + ' × ' + g + ' × ' + s3(o.depthBottom), o.pBottom, 'Pa');
+      R.eq('Δp', 'p<sub>bottom</sub> − p<sub>top</sub> = ρ<sub>f</sub>g × ' + s3(o.sub), o.pBottom - o.pTop, 'Pa');
+      R.eq('U', 'Δp × A = ' + s3(o.pBottom - o.pTop) + ' × ' + s3(o.A), o.U, 'N');
+      R.eq('check: ρ<sub>f</sub>gV<sub>sub</sub>', s3(v.rhoF) + ' × ' + g + ' × ' + s3(o.Vsub), o.Uarch, 'N');
+    }
+    R.head(md === 'free' ? 'Released: float or sink?' : md === 'released' ? 'At the instant of release' : 'Support needed to hold it');
+    if (md === 'free') {
+      if (o.state === 'floats') {
+        R.badge('ρ<sub>o</sub> &lt; ρ<sub>f</sub> ⇒ floats: U = W', 'ok');
+        R.eq('V<sub>sub</sub> ÷ V', 'ρ<sub>o</sub> ÷ ρ<sub>f</sub> = ' + s3(v.rhoO) + ' ÷ ' + s3(v.rhoF), o.fraction);
+        R.eq('depth submerged', 'H × ρ<sub>o</sub>/ρ<sub>f</sub>', o.sub, 'm');
+      } else if (o.state === 'sinks') {
+        R.badge('ρ<sub>o</sub> > ρ<sub>f</sub> ⇒ sinks' + (v.Dl < v.H ? ' (liquid shallower than the object: only partly covered)' : ''), 'warn');
+        R.eq('floor reaction', 'W − U = ' + s3(o.W) + ' − ' + s3(o.U), o.apparent, 'N');
+      } else R.badge('ρ<sub>o</sub> = ρ<sub>f</sub> ⇒ U = W at any depth', 'info');
+    } else if (md === 'released') {
+      var Fr = o.U - o.W;
+      R.eq('resultant force', 'U − W = ' + s3(o.U) + ' − ' + s3(o.W), Math.abs(Fr) < 1e-12 ? 0 : s3(Math.abs(Fr)) + (Fr > 0 ? ' upwards' : ' downwards'), 'N');
+      R.eq('initial acceleration', '|U − W| ÷ m = ' + s3(Math.abs(Fr)) + ' ÷ ' + s3(o.mass), Math.abs(Fr) / o.mass, 'm s<sup>−2</sup>');
+      R.html('<div class="head">Once it moves, drag also acts (topic 3) — not modelled here.</div>');
+    } else {
+      if (o.apparent >= 0) R.eq('balance reading', 'W − U = ' + s3(o.W) + ' − ' + s3(o.U), o.apparent, 'N');
+      else { R.eq('downward pull needed', 'U − W = ' + s3(o.U) + ' − ' + s3(o.W), -o.apparent, 'N'); R.badge('U > W: a spring balance would go slack; a string from below must pull down', 'warn'); }
+    }
+    R.head('Pressure probe at depth h');
+    R.eq('Δp', 'ρ<sub>f</sub>gh = ' + s3(v.rhoF) + ' × ' + g + ' × ' + s3(v.h), ST.hydro(v.rhoF, g, v.h), 'Pa');
+    if (abs) R.eq('p', 'p₀ + ρ<sub>f</sub>gh = ' + s3(p0) + ' + ' + s3(ST.hydro(v.rhoF, g, v.h)), p0 + ST.hydro(v.rhoF, g, v.h), 'Pa');
+    R.render();
+    // derivation panel
+    var A = o.A, dh = v.H;
+    derivCard.innerHTML = '<div class="head">Derivation of Δp = ρgΔh (column of fluid of area A = ' + s3(A) + ' m² and height Δh = ' + s3(dh) + ' m)</div>' +
+      '<div class="eq"><span class="lhs">mass of column</span><span class="rhs">ρAΔh = ' + s3(v.rhoF) + ' × ' + s3(A) + ' × ' + s3(dh) + ' = ' + s3(v.rhoF * A * dh) + ' kg</span></div>' +
+      '<div class="eq"><span class="lhs">weight of column</span><span class="rhs">ρAΔh g = ' + s3(v.rhoF * A * dh * g) + ' N</span></div>' +
+      '<div class="eq"><span class="lhs">Δp = weight ÷ A</span><span class="rhs">ρAΔhg ÷ A = ρgΔh = ' + s3(v.rhoF * g * dh) + ' Pa</span></div>';
+  }
+
+  ui.onTheme(draw);
+  vp.onResize = draw;
+  update('*');
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

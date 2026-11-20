@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moments, beams and couples</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-statics.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  // Cambridge rounding: exact halves round away from zero (49.05 → 49.1); toPrecision alone can round 49.05 down (binary floating point)
+  (function (sf, dp) { SIM.util.sf = function (x, n) { return typeof x === 'number' && isFinite(x) ? sf(x * (1 + 1e-12), n) : sf(x, n); };
+    SIM.util.dp = function (x, d) { return typeof x === 'number' && isFinite(x) ? dp(x * (1 + 1e-12), d) : dp(x, d); }; })(SIM.util.sf, SIM.util.dp);
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, ST = SIM.statics;
+  var course = ui.course('9702'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Moments, beams, centre of gravity and couples', g: g,
+    tags: ['9702 4.1 Turning effects of forces', '9702 4.2 Equilibrium of forces'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 26 });
+  ui.legend(sceneCard, [
+    { color: 'var(--c-weight)', label: 'weight W (at centre of gravity)' }, { color: 'var(--c-applied)', label: 'applied forces' },
+    { color: 'var(--c-normal)', label: 'support / pivot reactions' }, { color: 'var(--c-component)', label: 'line of action and perpendicular distance' },
+    { color: 'var(--accent)', label: 'O: point moments are taken about' }]);
+  var momWrap = ui.h('div', { class: 'readout' }); sceneCard.appendChild(momWrap);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var mode = ui.select(paramCard, { label: 'Situation', value: 'pin', options: [
+    { value: 'pin', label: 'Beam on one pivot or hinge (any forces)' },
+    { value: 'supports', label: 'Beam on two supports (vertical loads)' },
+    { value: 'couple', label: 'Couple: two equal, opposite, parallel forces' }] }, function () { refreshSolveOptions(); update('*'); });
+  var solve = ui.select(paramCard, { label: 'Solve for (principle of moments)', value: 'none', options: [{ value: 'none', label: '—' }] }, function () { update('*'); });
+  var prm = ui.params(paramCard, [
+    { key: 'L', label: 'Beam length', sym: 'L', unit: 'm', min: 0.2, max: 10, step: 0.01, value: 4 },
+    { key: 'W', label: 'Weight of beam (0 = light beam)', sym: 'W', unit: 'N', min: 0, max: 2000, step: 0.01, value: 0 },
+    { key: 'xG', label: 'Centre of gravity from left end', sym: 'x<sub>G</sub>', unit: 'm', min: 0, max: 4, step: 0.001, value: 2 },
+    { key: 'xP', label: 'Pivot / hinge position', sym: 'x<sub>P</sub>', unit: 'm', min: 0, max: 4, step: 0.001, value: 2 },
+    { key: 'xA', label: 'Support A position', sym: 'x<sub>A</sub>', unit: 'm', min: 0, max: 4, step: 0.001, value: 0 },
+    { key: 'xB', label: 'Support B position', sym: 'x<sub>B</sub>', unit: 'm', min: 0, max: 4, step: 0.001, value: 4 },
+    { key: 'F1', label: 'Force F<sub>1</sub> magnitude', sym: 'F<sub>1</sub>', unit: 'N', min: 0, max: 2000, step: 0.01, value: 200 },
+    { key: 'x1', label: 'F<sub>1</sub> position from left end', sym: 'x<sub>1</sub>', unit: 'm', min: 0, max: 4, step: 0.001, value: 3 },
+    { key: 'a1', label: 'F<sub>1</sub> direction (anticlockwise from →; −90° = down)', sym: 'θ<sub>1</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: -90 },
+    { key: 'F2', label: 'Force F<sub>2</sub> magnitude (0 = absent)', sym: 'F<sub>2</sub>', unit: 'N', min: 0, max: 2000, step: 0.01, value: 300 },
+    { key: 'x2', label: 'F<sub>2</sub> position from left end', sym: 'x<sub>2</sub>', unit: 'm', min: 0, max: 4, step: 0.001, value: 0.5 },
+    { key: 'a2', label: 'F<sub>2</sub> direction (anticlockwise from →)', sym: 'θ<sub>2</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: -90 },
+    { key: 'F3', label: 'Force F<sub>3</sub> magnitude (0 = absent)', sym: 'F<sub>3</sub>', unit: 'N', min: 0, max: 2000, step: 0.01, value: 0 },
+    { key: 'x3', label: 'F<sub>3</sub> position from left end', sym: 'x<sub>3</sub>', unit: 'm', min: 0, max: 4, step: 0.001, value: 4 },
+    { key: 'a3', label: 'F<sub>3</sub> direction (anticlockwise from →)', sym: 'θ<sub>3</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: -90 },
+    { key: 'Fc', label: 'Each force of the couple', sym: 'F', unit: 'N', min: 0, max: 500, step: 0.01, value: 15 },
+    { key: 'dc', label: 'Distance between the points of application', sym: 'd', unit: 'm', min: 0.01, max: 5, step: 0.01, value: 0.4 },
+    { key: 'thc', label: 'Angle between each force and the bar', sym: 'θ', unit: '°', min: 0, max: 180, step: 0.5, value: 90 },
+    { key: 'xO', label: 'Take moments about O at (from left end)', sym: 'x<sub>O</sub>', unit: 'm', min: 0, max: 4, step: 0.001, value: 0 }
+  ], update);
+  var uniform = ui.toggle(paramCard, { label: 'Uniform beam (centre of gravity at the midpoint)', value: true }, function () { update('*'); });
+  var showPerp = ui.toggle(paramCard, { label: 'Show lines of action and perpendicular distances from O', value: true }, function () { draw(); });
+  var showPoly = ui.toggle(paramCard, { label: 'Show force polygon (vector triangle for 3 forces)', value: true }, function () { draw(); });
+  var btnRow = ui.h('div', { class: 'row' }); paramCard.appendChild(btnRow);
+  btnRow.appendChild(ui.h('button', { class: 'btn', text: 'Move O to pivot / support A', onclick: function () {
+    prm.set({ xO: mode.get() === 'supports' ? prm.values.xA : prm.values.xP }); } }));
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var SOLVE = {
+    pin: [{ value: 'none', label: '— (just analyse)' }, { value: 'F1', label: 'F₁ magnitude for balance' }, { value: 'F2', label: 'F₂ magnitude for balance' },
+      { value: 'F3', label: 'F₃ magnitude for balance' }, { value: 'x1', label: 'position x₁ of F₁ for balance' },
+      { value: 'W', label: 'weight W of the beam' }, { value: 'xG', label: 'centre of gravity x_G of the beam' }],
+    supports: [{ value: 'none', label: '— (just analyse)' }, { value: 'x1:RA', label: 'x₁ when on the point of tipping about B (R_A = 0)' },
+      { value: 'x1:RB', label: 'x₁ when on the point of tipping about A (R_B = 0)' }, { value: 'F1:RA', label: 'F₁ when R_A = 0' }, { value: 'F1:RB', label: 'F₁ when R_B = 0' }],
+    couple: [{ value: 'none', label: '—' }]
+  };
+  function refreshSolveOptions() {
+    var sel = solve.el, list = SOLVE[mode.get()], cur = solve.get();
+    while (sel.children && sel.children.length) sel.removeChild(sel.children[0]);
+    if (sel.options) sel.options.length = 0;
+    list.forEach(function (o) { sel.appendChild(ui.h('option', { value: o.value, text: o.label })); });
+    solve.set(list.some(function (o) { return o.value === cur; }) ? cur : 'none', true);
+  }
+  refreshSolveOptions();
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Light beam on two end supports: 200 N at 2 m, 300 N at 1 m', mode: 'supports', solve: 'none', uniform: true,
+      values: { L: 4, W: 0, xA: 0, xB: 4, F1: 200, x1: 2, F2: 300, x2: 1, F3: 0, xO: 0 }, note: 'Take moments about A to remove R_A: R_B × 4 = 200 × 2 + 300 × 1 ⇒ R_B = 175 N, R_A = 325 N.' },
+    { name: 'Uniform plank on two supports: how far can a 600 N person walk?', mode: 'supports', solve: 'x1:RA', uniform: true,
+      values: { L: 6, W: 200, xA: 1, xB: 4, F1: 600, x1: 5, F2: 0, F3: 0, xO: 4 }, note: 'On the point of tipping about B, R_A = 0. Take moments about B.' },
+    { name: 'See-saw: find the unknown force (principle of moments)', mode: 'pin', solve: 'F1', uniform: true,
+      values: { L: 4, W: 0, xP: 2, F1: 100, x1: 3.2, a1: -90, F2: 300, x2: 0.4, a2: -90, F3: 0, xO: 2 }, note: 'Sum of clockwise moments = sum of anticlockwise moments about the pivot: F₁ × 1.2 = 300 × 1.6.' },
+    { name: '9702/22 O/N 24 Q3(c): hinged shelf held by a wire at 50°', mode: 'pin', solve: 'F2', uniform: true,
+      values: { L: 0.65, W: 33, xP: 0, F1: 1.5, x1: 0.53, a1: -90, F2: 40, x2: 0.325, a2: 130, F3: 0, xO: 0 }, note: 'Moments about the hinge A: 33 × 0.325 + 1.5 × 0.53 = T sin 50° × 0.325 ⇒ T = 46 N (mark scheme).' },
+    { name: '9702/21 M/J 23 Q2(a): hinged beam with spring, block and string at 30°', mode: 'pin', solve: 'W', uniform: true,
+      values: { L: 1.2, W: 1, xP: 0, F1: 8.2, x1: 0.5, a1: 90, F2: 0.3, x2: 0.8, a2: -90, F3: 4.8, x3: 1.2, a3: -30, xO: 0 }, note: '8.2 × 0.50 = W × 0.60 + 0.30 × 0.80 + 2.4 × 1.2 ⇒ W = 1.6 N. Hinge horizontal force = 4.8 cos 30° = 4.2 N. (String drawn to the right; only the size of the horizontal component is asked.)' },
+    { name: 'Non-uniform rod balanced on a pivot: find the centre of gravity', mode: 'pin', solve: 'xG', uniform: false,
+      values: { L: 2, W: 12, xG: 1, xP: 0.8, F1: 5, x1: 0, a1: -90, F2: 0, F3: 0, xO: 0.8 }, note: 'The weight acts at the centre of gravity: 5 × 0.80 = 12 × (x_G − 0.80) ⇒ x_G = 1.13 m.' },
+    { name: 'Force at an angle on a hinged rod: perpendicular distance', mode: 'pin', solve: 'F1', uniform: true,
+      values: { L: 2, W: 40, xP: 0, F1: 20, x1: 2, a1: 120, F2: 0, F3: 0, xO: 0 }, note: 'Moment of F₁ = F₁ × (2.0 sin 60°), not F₁ × 2.0. F₁ × 1.732 = 40 × 1.0 ⇒ F₁ = 23.1 N.' },
+    { name: 'Couple on a steering wheel: 15 N each side, 0.40 m apart', mode: 'couple', solve: 'none', uniform: true,
+      values: { Fc: 15, dc: 0.4, thc: 90, xO: 0.2 }, note: 'Torque of a couple = one force × perpendicular distance between the forces = 15 × 0.40 = 6.0 N m. Move O: the total moment does not change.' },
+    { name: 'Couple with forces at 30° to the bar', mode: 'couple', solve: 'none', uniform: true,
+      values: { Fc: 20, dc: 0.5, thc: 30, xO: -0.3 }, note: 'Perpendicular separation = 0.50 sin 30° = 0.25 m ⇒ torque = 20 × 0.25 = 5.0 N m.' }
+  ], function (p) {
+    mode.set(p.mode, true); refreshSolveOptions(); solve.set(p.solve, true); uniform.set(p.uniform, true);
+    if (p.values.L !== undefined) setRanges(p.values.L);
+    prm.set(p.values);
+  });
+
+  ui.notes(noteCard, [
+    'Moment = force × <b>perpendicular</b> distance from the point to the <b>line of action</b> of the force. For a force at angle θ to the beam, d⊥ = d sin θ.',
+    'A force whose line of action passes through the point has <b>zero</b> moment about it — take moments about an unknown force (hinge, pivot, support) to remove it.',
+    'The weight of the beam acts at its <b>centre of gravity</b> (the midpoint only if the beam is uniform). Don’t forget it.',
+    'Equilibrium needs <b>both</b> no resultant force <b>and</b> no resultant moment (about every point).',
+    'A support can only push. If a calculation gives a negative reaction, the beam has already tipped about the other support.',
+    'Couple: a pair of equal, opposite, parallel forces (not in line). Resultant force zero, so it produces rotation only. Torque = one force × perpendicular distance between the lines of action — the same about any point.',
+    'Units: N m for moments and torques (not J).'
+  ]);
+
+  /* ---------- model ---------- */
+  var KEYS = ['xG', 'xP', 'xA', 'xB', 'x1', 'x2', 'x3'];
+  function setRanges(L) {
+    KEYS.forEach(function (k) { prm.range(k, 0, L, 0.001); });
+    if (mode.get() !== 'couple') prm.range('xO', 0, L, 0.001);
+  }
+  function baseModel() {
+    var v = prm.values;
+    return { L: v.L, W: v.W, xG: v.xG, mode: mode.get(), xP: v.xP, xA: v.xA, xB: v.xB,
+      loads: [{ x: v.x1, F: v.F1, ang: v.a1, name: 'F₁' }, { x: v.x2, F: v.F2, ang: v.a2, name: 'F₂' }, { x: v.x3, F: v.F3, ang: v.a3, name: 'F₃' }] };
+  }
+  var res = null, solved = null, lastLocked = null;
+  function update(key) {
+    var v = prm.values, md = mode.get();
+    if (key === 'L' || key === '*') setRanges(v.L);
+    if (md === 'couple') prm.range('xO', -v.dc, 2 * v.dc, 0.001);
+    var sol = solve.get();
+    if (sol === 'xG' && uniform.get()) uniform.set(false, true);
+    if (uniform.get()) prm.set({ xG: v.L / 2 }, true);
+    // visibility
+    var beamKeys = ['L', 'W', 'xG', 'F1', 'x1', 'F2', 'x2', 'F3', 'x3'];
+    beamKeys.forEach(function (k) { prm.show(k, md !== 'couple'); });
+    ['a1', 'a2', 'a3'].forEach(function (k) { prm.show(k, md === 'pin'); });
+    prm.show('xP', md === 'pin'); prm.show('xA', md === 'supports'); prm.show('xB', md === 'supports');
+    ['Fc', 'dc', 'thc'].forEach(function (k) { prm.show(k, md === 'couple'); });
+    prm.show('xG', md !== 'couple'); prm.lock('xG', uniform.get() && md !== 'couple', v.L / 2);
+    uniform.el.style.display = md === 'couple' ? 'none' : '';
+    solve.row.style.display = md === 'couple' ? 'none' : '';
+    // solve
+    if (lastLocked) { prm.lock(lastLocked, lastLocked === 'xG' && uniform.get()); lastLocked = null; }
+    solved = null;
+    if (md !== 'couple' && sol !== 'none') {
+      var parts = sol.split(':'), k = parts[0], target = parts[1] || 'M';
+      var r = ST.solveUnknown(baseModel(), k, target);
+      var lim = { F1: [0, 2000], F2: [0, 2000], F3: [0, 2000], x1: [0, v.L], W: [0, 2000], xG: [0, v.L] }[k];
+      solved = { key: k, target: target, value: r.value, why: r.why };
+      if (isFinite(r.value) && r.value >= lim[0] - 1e-9 && r.value <= lim[1] + 1e-9) {
+        var o = {}; o[k] = U.clamp(r.value, lim[0], lim[1]); prm.set(o, true); prm.lock(k, true, o[k]); lastLocked = k; solved.ok = true;
+      } else {
+        solved.ok = false;
+        if (isFinite(r.value)) solved.why = (r.value < lim[0] ? 'the required value (' + U.sf(r.value) + ') is negative' : 'the required value (' + U.sf(r.value) + ') is beyond ' + (k.charAt(0) === 'x' ? 'the end of the beam' : 'the slider range')) + ', so no equilibrium is possible this way';
+      }
+    }
+    res = md === 'couple' ? null : ST.solveBeam(baseModel());
+    draw(); readout();
+  }
+
+  /* ---------- drawing ---------- */
+  function angTxt(a) { return U.num(a, 1) + '°'; }
+  function draw() {
+    var col = ui.colors(), v = prm.values, md = mode.get();
+    var c;
+    if (md === 'couple') { drawCouple(); return; }
+    var L = v.L;
+    vp.fit(-0.14 * L, 1.14 * L, -0.42 * L, 0.42 * L);
+    c = vp.begin();
+    var by = vp.Y(0), th = Math.max(8, Math.min(16, vp.scale * L * 0.03));
+    // wall for a hinge at an end
+    if (md === 'pin' && (v.xP < 1e-9 || v.xP > L - 1e-9)) {
+      var wx = vp.X(v.xP), dir = v.xP < 1e-9 ? -1 : 1;
+      c.save(); c.fillStyle = col.surface; c.fillRect(Math.min(wx, wx + dir * 14), by - 90, 14, 180); c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(wx, by - 90); c.lineTo(wx, by + 90); c.stroke(); c.restore();
+    }
+    // beam
+    c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
+    c.beginPath(); c.rect(vp.X(0), by - th / 2, vp.X(L) - vp.X(0), th); c.fill(); c.stroke(); c.restore();
+    // scale ticks
+    var tk = U.niceTicks(0, L, 6);
+    tk.ticks.forEach(function (t) { if (t < -1e-9 || t > L + 1e-9) return; D.line(c, [[vp.X(t), by + th / 2], [vp.X(t), by + th / 2 + 5]], col.muted, { width: 1 }); D.label(c, U.num(t, 3), vp.X(t), by + th / 2 + 13, col.muted, { size: 10 }); });
+    // supports / pivot
+    function tri(x) { var px = vp.X(x); c.save(); c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.4; c.beginPath(); c.moveTo(px, by + th / 2); c.lineTo(px - 11, by + th / 2 + 20); c.lineTo(px + 11, by + th / 2 + 20); c.closePath(); c.fill(); c.stroke(); c.restore(); }
+    if (md === 'supports') { tri(v.xA); tri(v.xB); D.label(c, 'A', vp.X(v.xA), by + th / 2 + 30, col.ink, { bold: true }); D.label(c, 'B', vp.X(v.xB), by + th / 2 + 30, col.ink, { bold: true }); }
+    else { c.save(); c.fillStyle = col['object-line']; c.beginPath(); c.arc(vp.X(v.xP), by, 4, 0, 2 * Math.PI); c.fill(); c.restore(); if (v.xP > 1e-9 && v.xP < L - 1e-9) tri(v.xP); D.label(c, 'pivot', vp.X(v.xP), by + th / 2 + 30, col.muted, { size: 11 }); }
+    if (!res) return;
+    if (res.invalid) { D.label(c, res.invalid, vp.w / 2, 18, col.warn, { bold: true, size: 12 }); }
+    var all = res.all || res.forces;
+    var mags = all.map(function (f) { return f.F; });
+    var k = SIM.view.forceScale(mags, Math.min(120, vp.h * 0.3));
+    // O marker
+    var ox = vp.X(v.xO);
+    c.save(); c.strokeStyle = col.accent; c.lineWidth = 2; c.beginPath(); c.arc(ox, by, 7, 0, 2 * Math.PI); c.stroke(); c.restore();
+    D.label(c, 'O', ox, by - 16, col.accent, { bold: true });
+    all.forEach(function (f) {
+      if (!(f.F > 1e-12)) return;
+      var color = f.kind === 'weight' ? col.weight : f.kind === 'reaction' ? col.normal : col.applied;
+      var a = U.rad(f.ang), px = vp.X(f.x), len = Math.max(14, f.F * k);
+      var lab = (f.kind === 'weight' ? 'W' : f.name.replace('_', '')) + ' = ' + U.sf(f.F) + ' N';
+      // draw so that the arrow tail is at the beam for pushes away, head at the beam for pushes towards
+      var sx = px, sy = by, ex = px + Math.cos(a) * len, ey = by - Math.sin(a) * len;
+      if (f.kind === 'reaction' && Math.sin(a) > 0.5) { sx = px - Math.cos(a) * len; sy = by + Math.sin(a) * len + th / 2 + 22; ex = px; ey = by + th / 2 + 22; }
+      D.arrow(c, sx, sy, ex, ey, color, { label: lab });
+      if (showPerp.get() && f.kind !== 'reaction' && Math.abs(Math.cos(a)) > 1e-6 && Math.abs(Math.sin(a)) > 1e-6 && Math.abs(f.x - v.xO) > 1e-9) {
+        // line of action through (x,0) along (cos a, sin a); foot of perpendicular from O
+        var t = (v.xO - f.x) * Math.cos(a), fx = f.x + t * Math.cos(a), fy = t * Math.sin(a);
+        var ext = 2 * L;
+        D.line(c, [vp.P(f.x - ext * Math.cos(a), -ext * Math.sin(a)), vp.P(f.x + ext * Math.cos(a), ext * Math.sin(a))], col.component, { dash: [4, 5], width: 1.1 });
+        D.line(c, [[ox, by], vp.P(fx, fy)], col.component, { width: 1.8 });
+        D.rightAngle(c, vp.X(fx), vp.Y(fy), Math.atan2(-(fy - 0), -(fx - v.xO)) , 7, col.component);
+        D.label(c, 'd⊥ = ' + U.sf(ST.perpDist(f, v.xO)) + ' m', (ox + vp.X(fx)) / 2, (by + vp.Y(fy)) / 2, col.component, { size: 11, bg: true });
+      }
+    });
+    if (md === 'pin' && res && !res.balanced) {
+      var cw = res.Mnet < 0;
+      c.save(); c.strokeStyle = col.warn; c.lineWidth = 2; c.beginPath(); c.arc(vp.X(v.xP), by, 30, cw ? -2.4 : -0.7, cw ? -0.7 : -2.4, !cw); c.stroke(); c.restore();
+      D.label(c, 'resultant moment ⇒ rotates ' + (cw ? 'clockwise' : 'anticlockwise'), vp.w / 2, 16, col.warn, { bold: true, size: 12 });
+    }
+    if (md === 'supports' && res && res.tips) D.label(c, 'Not possible: R_' + (res.tips === 'B' ? 'A' : 'B') + ' would be negative ⇒ beam tips about ' + res.tips, vp.w / 2, 16, col.warn, { bold: true, size: 12 });
+    if (showPoly.get()) drawPolygon(c, all, col);
+  }
+  function drawPolygon(c, list, col) {
+    var fs = list.filter(function (f) { return f.F > 1e-12; });
+    if (fs.length < 2) return;
+    var pts = [[0, 0]];
+    fs.forEach(function (f) { var q = ST.comps(f.F, f.ang), p = pts[pts.length - 1]; pts.push([p[0] + q.x, p[1] + q.y]); });
+    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
+    var w = Math.max.apply(null, xs) - Math.min.apply(null, xs), h = Math.max.apply(null, ys) - Math.min.apply(null, ys);
+    var box = Math.min(110, vp.w * 0.22), s = box / Math.max(w, h, 1e-9);
+    var X0 = vp.w - 14 - box - (Math.min.apply(null, xs)) * s - (box - w * s) / 2, Y0 = 34 + Math.max.apply(null, ys) * s + (box - h * s) / 2;
+    D.label(c, 'force polygon', vp.w - 14 - box / 2, 22, col.muted, { size: 11 });
+    fs.forEach(function (f, i) {
+      var color = f.kind === 'weight' ? col.weight : f.kind === 'reaction' ? col.normal : col.applied;
+      D.arrow(c, X0 + pts[i][0] * s, Y0 - pts[i][1] * s, X0 + pts[i + 1][0] * s, Y0 - pts[i + 1][1] * s, color, { width: 1.8, head: 7 });
+    });
+    var end = pts[pts.length - 1], gap = Math.hypot(end[0], end[1]);
+    var scale = 1; fs.forEach(function (f) { scale = Math.max(scale, f.F); });
+    D.label(c, gap < 1e-9 * scale ? 'closed ⇒ ΣF = 0' : 'not closed', vp.w - 14 - box / 2, 34 + box + 12, gap < 1e-9 * scale ? col.ok : col.warn, { size: 11 });
+  }
+  function drawCouple() {
+    var col = ui.colors(), v = prm.values, d = v.dc, cp = ST.couple(v.Fc, d, v.thc);
+    vp.fit(-1.1 * d, 2.1 * d, -0.75 * d, 0.75 * d);
+    var c = vp.begin(), by = vp.Y(0);
+    c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
+    c.beginPath(); c.rect(vp.X(0), by - 6, vp.X(d) - vp.X(0), 12); c.fill(); c.stroke(); c.restore();
+    c.save(); c.fillStyle = col['object-line']; c.beginPath(); c.arc(vp.X(d / 2), by, 3, 0, 2 * Math.PI); c.fill(); c.restore();
+    var len = Math.min(110, vp.h * 0.3);
+    cp.forces.forEach(function (f, i) {
+      if (!(f.F > 0)) return;
+      var a = U.rad(f.ang), px = vp.X(f.x);
+      D.arrow(c, px, by, px + Math.cos(a) * len, by - Math.sin(a) * len, col.applied, { label: 'F = ' + U.sf(f.F) + ' N' });
+      if (showPerp.get()) D.line(c, [[px - Math.cos(a) * 3 * len, by + Math.sin(a) * 3 * len], [px + Math.cos(a) * 3 * len, by - Math.sin(a) * 3 * len]], col.component, { dash: [4, 5], width: 1.1 });
+    });
+    // perpendicular separation between the two lines of action, drawn from the left point
+    var a2 = U.rad(v.thc);
+    if (showPerp.get() && cp.dPerp > 1e-9) {
+      // foot on line 2 of the perpendicular from (0,0): line 2 through (d,0) direction (cos a2, sin a2)
+      var t = (0 - d) * Math.cos(a2), fx = d + t * Math.cos(a2), fy = t * Math.sin(a2);
+      D.line(c, [vp.P(0, 0), vp.P(fx, fy)], col.component, { width: 1.8 });
+      D.label(c, 'd⊥ = d sin θ = ' + U.sf(cp.dPerp) + ' m', (vp.X(0) + vp.X(fx)) / 2, (by + vp.Y(fy)) / 2 - 12, col.component, { size: 11, bg: true });
+    }
+    var ox = vp.X(v.xO);
+    c.save(); c.strokeStyle = col.accent; c.lineWidth = 2; c.beginPath(); c.arc(ox, by, 7, 0, 2 * Math.PI); c.stroke(); c.restore();
+    D.label(c, 'O', ox, by + 18, col.accent, { bold: true });
+    if (cp.torque > 1e-12) {
+      var acw = cp.signedTorque > 0;
+      c.save(); c.strokeStyle = col.resultant; c.lineWidth = 2; c.beginPath(); c.arc(vp.X(d / 2), by, 26, acw ? -0.3 : -2.8, acw ? -2.8 : -0.3, acw); c.stroke(); c.restore();
+      D.label(c, (acw ? 'anticlockwise' : 'clockwise') + ' torque ' + U.sf(cp.torque) + ' N m', vp.w / 2, 16, col.resultant, { bold: true, size: 12 });
+    } else D.label(c, 'forces in line: no turning effect (not a couple)', vp.w / 2, 16, col.warn, { bold: true, size: 12 });
+  }
+
+  /* ---------- working ---------- */
+  function sense(M) { return Math.abs(M) < 1e-12 ? '' : M > 0 ? 'anticlockwise' : 'clockwise'; }
+  function momentWork(f, xO) {
+    var d = Math.abs(f.x - xO), s = Math.abs(Math.sin(U.rad(f.ang)));
+    var acute = U.deg(Math.asin(Math.min(1, s)));
+    var nm = f.kind === 'weight' ? 'W' : f.name.replace('R_', 'R<sub>').replace(/R<sub>(\w)/, 'R<sub>$1</sub>');
+    if (d < 1e-12) return 'acts through O';
+    if (s < 1e-12) return 'line of action passes through O';
+    if (s > 1 - 1e-12) return nm + ' × d = ' + U.sf(f.F) + ' × ' + U.sf(d);
+    return nm + ' × d⊥ = ' + U.sf(f.F) + ' × (' + U.sf(d) + ' × sin ' + U.dp(acute, 1) + '°)';
+  }
+  function readout() {
+    var v = prm.values, md = mode.get(), s3 = U.sf;
+    R.clear(); momWrap.innerHTML = '';
+    if (md === 'couple') { coupleReadout(); return; }
+    if (res.invalid) { R.badge(res.invalid, 'warn').render(); return; }
+    R.html('<div class="head">Sign convention: anticlockwise moments positive. Distances from the left end of the beam.</div>');
+    if (solved) {
+      if (solved.ok) R.badge('Solved: ' + solveLabel(solved.key) + ' = ' + s3(solved.value) + ' ' + (solved.key.charAt(0) === 'x' ? 'm' : 'N'), 'ok');
+      else R.badge('Cannot solve for ' + solveLabel(solved.key) + ': ' + (solved.why || 'no solution'), 'warn');
+    }
+    // moments about O
+    var all = res.all, sumCW = 0, sumACW = 0;
+    R.head('Moments about O (x<sub>O</sub> = ' + U.num(v.xO, 4).replace('-', '−') + ' m)');
+    all.forEach(function (f) {
+      if (!(f.F > 1e-12)) return;
+      var M = ST.momentAbout(f, v.xO);
+      if (M > 0) sumACW += M; else sumCW -= M;
+      var nm = f.kind === 'weight' ? 'W' : f.name.replace(/_(\w)/, '<sub>$1</sub>');
+      R.eq('moment of ' + nm, momentWork(f, v.xO), Math.abs(M) < 1e-12 ? '0' : s3(Math.abs(M)) + ' ' + sense(M), 'N m');
+    });
+    R.eq('Σ clockwise', '', sumCW, 'N m');
+    R.eq('Σ anticlockwise', '', sumACW, 'N m');
+    var bal = res.balanced;
+    if (md === 'pin') {
+      R.head('Principle of moments about the pivot (x<sub>P</sub> = ' + U.num(v.xP, 4) + ' m)');
+      var cw = 0, acw = 0, cwT = [], acwT = [];
+      res.forces.forEach(function (f) {
+        var M = ST.momentAbout(f, v.xP); if (Math.abs(M) < 1e-12) return;
+        var nm = f.kind === 'weight' ? 'W' : f.name;
+        var t = s3(f.F) + '×' + s3(ST.perpDist(f, v.xP));
+        if (M < 0) { cw -= M; cwT.push(t); } else { acw += M; acwT.push(t); }
+      });
+      R.eq('Σ clockwise', cwT.join(' + ') || '0', cw, 'N m');
+      R.eq('Σ anticlockwise', acwT.join(' + ') || '0', acw, 'N m');
+      if (bal) R.badge('Equilibrium: no resultant moment about the pivot', 'ok');
+      else R.badge('Not in equilibrium: resultant moment ' + s3(Math.abs(res.Mnet)) + ' N m ' + sense(res.Mnet), 'warn');
+      R.head('Force from the pivot / hinge on the beam' + (bal ? '' : ' (needed for zero resultant force)'));
+      R.eq('ΣF<sub>x</sub> applied', 'sum of F cos θ', res.sumApplied.x, 'N');
+      R.eq('ΣF<sub>y</sub> applied', 'sum of F sin θ (up +)', res.sumApplied.y, 'N');
+      R.eq('R<sub>x</sub>', '−ΣF<sub>x</sub>', res.R.x, 'N');
+      R.eq('R<sub>y</sub>', '−ΣF<sub>y</sub>', res.R.y, 'N');
+      R.eq('|R|', '√(R<sub>x</sub>² + R<sub>y</sub>²) = √(' + sq(res.R.x) + '² + ' + sq(res.R.y) + '²)', res.Rmag, 'N');
+      if (res.Rmag > 1e-9) R.eq('direction of R', 'tan⁻¹(R<sub>y</sub> ÷ R<sub>x</sub>), anticlockwise from →', U.dp(res.Rang, 1) + '°');
+    } else {
+      R.head('Take moments about support A (removes R<sub>A</sub>)');
+      var terms = [], tot = 0, span = v.xB - v.xA;
+      res.forces.forEach(function (f) { if (!(f.F > 1e-12)) return; var M = -ST.momentAbout(f, v.xA); tot += M; terms.push(s3(f.F) + ' × ' + (f.x - v.xA < 0 ? '(' + s3(f.x - v.xA) + ')' : s3(f.x - v.xA))); });
+      R.eq('R<sub>B</sub> × (x<sub>B</sub> − x<sub>A</sub>)', 'Σ load × (x − x<sub>A</sub>) = ' + (terms.join(' + ') || '0'), tot, 'N m');
+      R.eq('R<sub>B</sub>', s3(tot) + ' ÷ ' + s3(span), res.RB, 'N');
+      R.head('Resolve vertically');
+      R.eq('R<sub>A</sub>', 'total load − R<sub>B</sub> = ' + s3(-res.sumApplied.y) + ' − ' + s3(res.RB), res.RA, 'N');
+      if (res.tips) R.badge('A support cannot pull: R<sub>' + (res.tips === 'B' ? 'A' : 'B') + '</sub> &lt; 0 ⇒ the beam tips about ' + res.tips, 'warn');
+      else if (res.limiting) R.badge('On the point of tipping (one reaction is zero)', 'warn');
+      else R.badge('Equilibrium: both reactions push up', 'ok');
+    }
+    R.head('Check');
+    var chk = ST.sumM(res.all, v.xO);
+    R.eq('Σ moments about O', 'all forces including reactions (zero about every point in equilibrium)', Math.abs(chk) < 1e-9 * res.scale ? 0 : chk, 'N m');
+    R.render();
+    // moment balance meter under the scene
+    var tot2 = sumCW + sumACW;
+    momWrap.innerHTML = '<div class="head">About O: Σ clockwise ' + s3(sumCW) + ' N m vs Σ anticlockwise ' + s3(sumACW) + ' N m</div>' +
+      '<div class="meter"><div style="width:' + (tot2 > 0 ? (100 * sumCW / tot2).toFixed(1) : 50) + '%;background:var(--c-applied)"></div></div>';
+  }
+  function sq(x) { return x < 0 ? '(' + U.sf(x) + ')' : U.sf(x); }
+  function solveLabel(k) { return { F1: 'F₁', F2: 'F₂', F3: 'F₃', x1: 'x₁', W: 'W', xG: 'x_G' }[k] || k; }
+  function coupleReadout() {
+    var v = prm.values, cp = ST.couple(v.Fc, v.dc, v.thc), s3 = U.sf;
+    R.html('<div class="head">Two equal and opposite forces F at the ends of a bar of length d, each at θ to the bar.</div>');
+    R.eq('perpendicular distance', 'd sin θ = ' + s3(v.dc) + ' × sin ' + U.dp(v.thc, 1) + '°', cp.dPerp, 'm');
+    R.eq('torque of couple', 'F × d sin θ = ' + s3(v.Fc) + ' × ' + s3(cp.dPerp), cp.torque, 'N m');
+    R.eq('resultant force', 'F + (−F)', 0, 'N');
+    R.head('Moments about O (x<sub>O</sub> = ' + U.num(v.xO, 4).replace('-', '−') + ' m from the left force)');
+    cp.forces.forEach(function (f, i) {
+      var M = ST.momentAbout(f, v.xO);
+      R.eq('force ' + (i + 1), Math.abs(f.x - v.xO) < 1e-12 ? 'acts through O' : 'F × ' + s3(Math.abs(f.x - v.xO)) + ' × sin ' + U.dp(v.thc, 1) + '°', Math.abs(M) < 1e-12 ? '0' : s3(Math.abs(M)) + ' ' + sense(M), 'N m');
+    });
+    R.eq('total', 'sum (independent of O)', Math.abs(cp.momentAbout(v.xO)) < 1e-12 ? '0' : s3(Math.abs(cp.momentAbout(v.xO))) + ' ' + sense(cp.momentAbout(v.xO)), 'N m');
+    if (cp.torque > 1e-12) R.badge('Rotation only: zero resultant force, non-zero torque', 'info');
+    else R.badge('θ = 0° or 180°: the forces act along the same line, so there is no couple', 'warn');
+    R.render();
+  }
+
+  ui.onTheme(draw);
+  vp.onResize = draw;
+  update('*');
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

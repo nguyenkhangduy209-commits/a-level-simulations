@@ -1,0 +1,244 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions March 2019
+MARK SCHEME
+Maximum Mark: 100
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the March 2019 series for most Cambridge
+IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level components.
+This document consists of 12 printed pages.
+© UCLES 2019 [Turn over
+
+9702/42 Cambridge International AS/A Level – Mark Scheme March 2019
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the
+specific content of the mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these
+marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the
+scope of the syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the
+question as indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently e.g. in situations where candidates have not followed instructions or in the application of generic level
+descriptors.
+© UCLES 2019 Page 2 of 12
+
+9702/42 Cambridge International AS/A Level – Mark Scheme March 2019
+PUBLISHED
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may
+be limited according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or
+grade descriptors in mind.
+© UCLES 2019 Page 3 of 12
+
+9702/42 Cambridge International AS/A Level – Mark Scheme March 2019
+PUBLISHED
+Question Answer Marks
+1(a)(i) work done per unit mass B1
+idea of work done moving mass from infinity (to the point) B1
+1(a)(ii) (gravitational) force is attractive B1
+(gravitational) potential at infinity is zero B1
+decrease in potential energy as masses approach B1
+or displacement and force in opposite directions
+1(b)(i) Either mv2 / R = GMm / R2 C1
+Or v = √( GM / R)
+v2 = (6.67 × 10–11 × 6.00 × 1024) / (7.30 × 106)
+giving v = 7.4 × 103 m s–1 A1
+1(b)(ii) V = – GMm / R C1
+P
+= – (6.67 × 10–11 × 6.00 × 1024 × 340) / (7.30 × 106) C1
+V = – 1.9 × 1010 J A1
+P
+1(c) v2 ∝ 1 / r, (r smaller) so v greater M1
+and E greater A1
+K
+© UCLES 2019 Page 4 of 12
+
+9702/42 Cambridge International AS/A Level – Mark Scheme March 2019
+PUBLISHED
+Question Answer Marks
+2(a)(i) gas obeys formula pV / T = constant M1
+symbols V and T explained A1
+2(a)(ii) mean-square-speed (of atoms / molecules) B1
+2(b)(i) use of T = 393 C1
+pV = nRT C1
+2.4 × 105 × 6.8 × 10–3 = n × 8.31 × 393 A1
+and N = n × 6.02 × 1023 = 3.0 × 1023
+or (C1)
+pV = NkT
+2.4 × 105 × 6.8 × 10–3 = N × 1.38 x 10–23 × 393 (A1)
+hence N = 3.0 × 1023
+2(b)(ii) volume of one atom = 4 / 3πr3 C1
+volume occupied = 3.0 × 1023 × 4 / 3 × π × (3.2 × 10–11 )3 A1
+= 4 × 10–8 m3
+2(b)(iii) assumption: volume of atoms negligible compared to volume of container / cylinder B1
+4 × 10–8 (m3) << 6.8 × 10–3 (m3) so yes B1
+© UCLES 2019 Page 5 of 12
+
+9702/42 Cambridge International AS/A Level – Mark Scheme March 2019
+PUBLISHED
+Question Answer Marks
+3(a)(i) mention of upthrust and weight B1
+3(a)(ii) upthrust is greater than the weight B1
+(resultant force is) upwards B1
+3(b) A, ρ, g and M are constant B1
+either acceleration ∝ – displacement B1
+or acceleration ∝ displacement and (– sign indicates) a and x in opposite directions
+3(c)(i) either ω = 2π / T or ω = 2πf and f = 1 / T C1
+ω = 2π / 1.3 A1
+= 4.8 rad s–1
+3(c)(ii) ω2 = Aρg / m C1
+4.832 = (4.5 × 10–4 × ρ × 9.81) / 0.17 C1
+ρ = 900 kg m–3 A1
+© UCLES 2019 Page 6 of 12
+
+9702/42 Cambridge International AS/A Level – Mark Scheme March 2019
+PUBLISHED
+Question Answer Marks
+4(a) Any three from: B3
+above the Equator
+period 24 hours
+orbits west to east
+one particular orbital radius
+4(b) attenuation = 10 lg(P / P ) C1
+1 2
+194 = 10 lg (3.2 × 103 / P )
+2
+P = 1.3 × 10–16 W A1
+2
+4(c) advantage: e.g. no tracking required B1
+disadvantage: e.g. longer time delay B1
+Question Answer Marks
+5(a) region where charge experiences an (electric) force B1
+5(b) graph: field strength zero from x = 0 to x = R B1
+curve with negative gradient, decreasing from x = R to x = 3R B1
+line passes through field strength E at x = R, B1
+line passes through field strength 0.25E at x = 2R and field strength 0.11E at x = 3R B1
+© UCLES 2019 Page 7 of 12
+
+9702/42 Cambridge International AS/A Level – Mark Scheme March 2019
+PUBLISHED
+Question Answer Marks
+5(c) field strength = q / 4πϵ x2 C1
+0
+2.0 × 106 = q / (4 × π × 8.85 × 10–12 × 0.262) C1
+q = 1.5 × 10–5 C A1
+Question Answer Marks
+6(a) charge / potential (difference) M1
+charge on one plate, p.d. between the plates A1
+6(b)(i) all three capacitors connected in series B1
+6(b)(ii) 8 ( µF) in parallel with the two 4 (µF) capacitors connected in series B1
+6(c) discharge from 7.0 V to 4.0 V C1
+Either energy = ½CV2 or energy = ½ QV and C = Q / V C1
+energy = ½ × 47 × 10–6 × (72 – 42) A1
+= 7.8 × 10–4 J
+Question Answer Marks
+7(a)(i) output voltage / input voltage B1
+7(a)(ii) no time delay between input and output B1
+clear reference to change(s) in input and / or output B1
+7(b)(i) V only connected to non-inverting input B1
+IN
+midpoint between R and R only connected to inverting input B1
+1 2
+© UCLES 2019 Page 8 of 12
+
+9702/42 Cambridge International AS/A Level – Mark Scheme March 2019
+PUBLISHED
+Question Answer Marks
+7(b)(ii) gain = 1 + (R / R ) C1
+1 2
+25 = 1 + (12 × 103) / R
+2
+R = 500 Ω A1
+2
+7(b)(iii) V = 9/25 C1
+MAX
+= 0.36 V
+range is –0.36 V to + 0.36 V A1
+Question Answer Marks
+8(a)(i) Either Newton’s third law or equal and opposite forces B1
+force on magnet is upwards B1
+so force on wire downwards B1
+8(a)(ii) using (Fleming’s) left-hand rule M1
+current from B to A A1
+8(b) sinusoidal wave with at least 1 cycle B1
+peaks at +6.4 mN and –6.4 mN B1
+time period 25 ms B1
+© UCLES 2019 Page 9 of 12
+
+9702/42 Cambridge International AS/A Level – Mark Scheme March 2019
+PUBLISHED
+Question Answer Marks
+9 X-rays (are used) B1
+(object is) scanned in sections / slices B1
+either: scans taken at many angles / directions B1
+or images of each section / slice are 2-dimensional
+scans of many sections / slices are combined B1
+(to give) 3-dimensional image (of whole structure) B1
+Question Answer Marks
+10(a) single straight line along full length of solenoid B1
+at least two more parallel lines along full length of solenoid B1
+correct direction – right to left B1
+10(b) (induced) e.m.f. proportional / equal to rate M1
+of change of (magnetic) flux (linkage) A1
+10(c) increasing current causes increasing flux B1
+increasing flux induces e.m.f. in coil B1
+(induced) e.m.f. opposes growth of current B1
+© UCLES 2019 Page 10 of 12
+
+9702/42 Cambridge International AS/A Level – Mark Scheme March 2019
+PUBLISHED
+Question Answer Marks
+11(a) quantum / packet / discrete amount of energy M1
+of electromagnetic radiation A1
+11(b) E = hc / λ C1
+= (6.63 × 10–34 × 3.0 × 108) / (540 × 10–9) C1
+= (3.68 × 10–19) / (1.6 × 10–19) A1
+= 2.3 eV
+11(c) Any 4 from: B4
+photon absorbed by electron in valence band (1)
+photon energy > energy of forbidden band (1)
+electron promoted to conduction band (1)
+hole left in valence band (1)
+more charge carriers so lower resistance (1)
+Question Answer Marks
+12(a)(i) fission B1
+12(a)(ii) either 0 e or 0 β M1
+–1 –1
+7 A1
+12(b)(i) energy = c2 ∆m C1
+= 0.223 × 1.66 × 10–27 × (3.00 × 108)2
+= 3.33 × 10–11 J A1
+© UCLES 2019 Page 11 of 12
+
+9702/42 Cambridge International AS/A Level – Mark Scheme March 2019
+PUBLISHED
+Question Answer Marks
+12(b)(ii) Any 2 from: B2
+kinetic energy of products
+gamma photons
+neutrinos
+© UCLES 2019 Page 12 of 12

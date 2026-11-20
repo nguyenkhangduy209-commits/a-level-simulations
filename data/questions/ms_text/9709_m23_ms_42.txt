@@ -1,0 +1,483 @@
+Cambridge International AS & A Level
+MATHEMATICS 9709/42
+Paper 4 Mechanics February/March 2023
+MARK SCHEME
+Maximum Mark: 50
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the February/March 2023 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 19 printed pages.
+[Turn over
+© UCLES 2023
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the specific content of the
+mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the scope of the
+syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the question as
+indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently, e.g. in situations where candidates have not followed instructions or in the application of generic level descriptors.
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may be limited
+according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or grade descriptors in
+mind.
+© UCLES 2023 Page 2 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Mathematics Specific Marking Principles
+1 Unless a particular method has been specified in the question, full marks may be awarded for any correct method. However, if a calculation is required
+then no marks will be awarded for a scale drawing.
+2 Unless specified in the question, answers may be given as fractions, decimals or in standard form. Ignore superfluous zeros, provided that the degree of
+accuracy is not affected.
+3 Allow alternative conventions for notation if used consistently throughout the paper, e.g. commas being used as decimal points.
+4 Unless otherwise indicated, marks once gained cannot subsequently be lost, e.g. wrong working following a correct form of answer is ignored (isw).
+5 Where a candidate has misread a number in the question and used that value consistently throughout, provided that number does not alter the difficulty or
+the method required, award all marks earned and deduct just 1 mark for the misread.
+6 Recovery within working is allowed, e.g. a notation error in the working where the following line of working makes the candidate’s intent clear.
+© UCLES 2023 Page 3 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Mark Scheme Notes
+The following notes are intended to aid interpretation of mark schemes in general, but individual mark schemes may include marks awarded for specific reasons
+outside the scope of these notes.
+Types of mark
+M Method mark, awarded for a valid method applied to the problem. Method marks are not lost for numerical errors, algebraic slips or errors in units.
+However, it is not usually sufficient for a candidate just to indicate an intention of using some method or just to quote a formula; the formula or idea
+must be applied to the specific problem in hand, e.g. by substituting the relevant quantities into the formula. Correct application of a formula
+without the formula being quoted obviously earns the M mark and in some cases an M mark can be implied from a correct answer.
+A Accuracy mark, awarded for a correct answer or intermediate step correctly obtained. Accuracy marks cannot be given unless the associated method
+mark is earned (or implied).
+B Mark for a correct result or statement independent of method marks.
+DM or DB When a part of a question has two or more ‘method’ steps, the M marks are generally independent unless the scheme specifically says otherwise;
+and similarly, when there are several B marks allocated. The notation DM or DB is used to indicate that a particular M or B mark is dependent on
+an earlier M or B (asterisked) mark in the scheme. When two or more steps are run together by the candidate, the earlier marks are implied and full
+credit is given.
+FT Implies that the A or B mark indicated is allowed for work correctly following on from previously incorrect results. Otherwise, A or B marks are
+given for correct work only.
+• A or B marks are given for correct work only (not for results obtained from incorrect working) unless follow through is allowed (see abbreviation FT above).
+• For a numerical answer, allow the A or B mark if the answer is correct to 3 significant figures or would be correct to 3 significant figures if rounded (1
+decimal place for angles in degrees).
+• The total number of marks available for each question is shown at the bottom of the Marks column.
+• Wrong or missing units in an answer should not result in loss of marks unless the guidance indicates otherwise.
+• Square brackets [ ] around text or numbers show extra information not needed for the mark to be awarded.
+© UCLES 2023 Page 4 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Abbreviations
+AEF/OE Any Equivalent Form (of answer is equally acceptable) / Or Equivalent
+AG Answer Given on the question paper (so extra checking is needed to ensure that the detailed working leading to the result is valid)
+CAO Correct Answer Only (emphasising that no ‘follow through’ from a previous error is allowed)
+CWO Correct Working Only
+ISW Ignore Subsequent Working
+SOI Seen Or Implied
+SC Special Case (detailing the mark to be given for a specific wrong solution, or a case where some standard marking practice is to be varied in the
+light of a particular circumstance)
+WWW Without Wrong Working
+AWRT Answer Which Rounds To
+© UCLES 2023 Page 5 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+1(a) 60015 M1 Use of power = ∆W / ∆t to get an equation in t.
+4500=
+May see 600v=4500 v=7.5 followed by 7.5t=15.
+t
+t=2s A1
+2
+1(b) 600=200a a=3 *M1 Use of Newton’s second law; 2 terms only.
+15 DM1 Use of constant acceleration to set up an equation that would
+0= +(their−3)t
+lead to a positive t, e.g. v=u+at with their t=2 and their
+their 2
+negative a (and possibly their 7.5 from (a)).
+t=2.5s A1
+3
+Question Answer Marks Guidance
+2(a) Use constant acceleration in an attempt to find v or v2 M1 e.g. v2 = u2 + 2as with a=g.
+[v2 = 152 – 2g × 10]
+Speed = 5 m s-1 A1
+2
+© UCLES 2023 Page 6 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+2(b) (s =)   15t− 1 gt2  , ( s = )  1 gt2 *B1 Use of s=ut+ 1 at2 for either.
+P  2  Q 2 2
+Allow if a not substituted, need both expressions with opposite
+sign of t2 term and the same a.
+Use s +s =18 and solve for t DM1 Allow s +s =18.
+P Q P Q
+Must have s and s of the correct form.
+P Q
+So height = 10.8 m A1
+Alternative method for Question 2(b): Using relative velocity
+15t *B1 Use of relative velocity (no acceleration).
+Use 15t=18 and solve for t DM1 Allow 15t=18.
+So height = 10.8 m A1 Not from t=−1.2 made positive without justification.
+3
+Question Answer Marks Guidance
+3(a) Attempt to integrate M1 Increasing power by 1 and a change in coefficient in at least one
+ 4 3 8 3  term; may be unsimplified.
+ (v=) t2 = t2 (+c)  v=at M0.
+ 1.5 3 
+Substitute t=9 to get speed = 72 m s–1 A1 Or use limits t=0 and t=9.
+2
+© UCLES 2023 Page 7 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+3(b) Attempt at integration of their v *M1 Increasing power by 1 and a change in coefficient in at least one
+ (s=)= 8 3 t2 = 16 t 5 2 (+c')   t s er = m v ; t m M ay 0 be unsimplified.
+ 2.5 15  Their v, which has come from integration in part (a).
+ 
+Equate their v and their s and attempt to solve for t DM1 Their v must have come from integration.
+16 5 8 3 16 8  Allow if their c from (a) is not 0.
+ t2 = t2  t− =0
+ 15 3 15 3 
+5 A1 5
+time= s Must discard t=0 and t=− .
+2 2
+3
+Question Answer Marks Guidance
+4(a) Tension = 0 N B1 May be implied.
+1
+4(b) Power = 0.22=0.4W B1 Use of power = Fv.
+Allow without units.
+1
+© UCLES 2023 Page 8 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+4(c) Driving force = 1.2/2 [= 0.6 N] B1
+Use of Newton’s second law for locomotive or truck or system M1 Correct number of relevant terms.
+For locomotive: DF – 0.2 – T = 0.8a A1 For any two correct.
+For truck: T = 0.4a
+For system: DF – 0.2 =1 .2a
+For attempt to solve for T M1 From equations with correct number of relevant terms.
+Using their dimensionally correct DF.
+1
+May see a= .
+3
+2 A1 Allow awrt 0.133 .
+T = N
+15
+5
+© UCLES 2023 Page 9 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+5(a) Attempt to resolve vertically M1 4 terms; allow with T and T ; allow sign errors; allow g
+A B
+missing.
+500+Tcos45+Tcos45−100g=0 A1 Must have T =T =T .
+A B
+Allow if 500−2Tcos45−100g=0.
+OR 500+T cos45+T cos45−100g=0 AND
+A B Allow 500−T cos45−T cos45−100g=0 AND
+A B
+T A (sin45)=T B (sin45) T (sin45)=T (sin45).
+A B
+T = 354 N A1 500
+Allow 250 2, .
+2
+Allow if 500−2Tcos45−100g=0 to obtain
+T = −354 and then state magnitude is 354.
+If T and T are different values then A0.
+A B
+Alternative Method 1 for Question 5(a): Resolving perpendicular to a strut
+Resolve perpendicular to T or T M1 3 terms; allow sign errors; allow g missing.
+A B
+T (or T )+500cos45=100gcos45 A1 Allow T (or T )+100gcos45=500cos45.
+A B A B
+T =T =354 A1 500
+A B Allow 250 2, .
+2
+© UCLES 2023 Page 10 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+5(a) Alternative Method 2 for Question 5(a): Using triangle of forces
+Attempt Pythagoras on a right-angled triangle of forces or use of M1 4 terms; allow with T and T ; allow sign errors; allow g
+A B
+trigonometry
+missing.
+ T 2 +T 2 =(100g−500)2 
+ A B 
+ 100g−500 100g−500
+OR sin45orcos45= or
+ 
+ T T 
+A B
+T2 +T2 =(100g−500)2 A1
+OR T A 2 +T B 2 =(100g−500)2 AND T A (sin45)=T B (sin45) Allow sin45= T A (or T B ) OR cos45= T A (or T B ) .
+T (or T ) T (or T ) 500−100g 500−100g
+OR sin45= A B OR cos45= A B
+100g−500 100g−500
+T =T =354 A1 500
+A B Allow 250 2, .
+2
+Alternative Method 3 for Question 5(a): Using Lami’s Theorem
+Attempt at Lami M1 Allow with T and T ; allow sign errors; allow g missing.
+A B
+100g−500 T (or T ) A1 500−100g T (or T )
+= A B Allow = A B .
+sin90 sin135 sin90 sin135
+100g−500 T (or T )
+Allow = A B .
+sin270 sin45
+T =T =354 A1 500
+A B Allow 250 2, .
+2
+3
+© UCLES 2023 Page 11 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+5(b) Attempt to resolve vertically and horizontally M1 3 terms vertically and 2 terms horizontally; allow sign errors;
+allow g missing.
+Must have T =0.
+A
+T cos45+500−100g =0 and A1 Allow −T cos45+500−100g=0 and
+B B
+F−T sin45=0 F+T sin45=0
+B B
+OR T cos45+500−100g =0 and
+B
+F+T sin45=0
+B
+OR −T cos45+500−100g=0 and
+B
+F−T sin45=0.
+B
+For both equations correct.
+F=500 A1 awrt 500 to 3sf.
+Alternative Method 1 for Question 5(b): Resolving perpendicular to T
+B
+Attempt to resolve perpendicular to T M1 3 terms; allow sign errors; allow g missing.
+B
+Must have T =0.
+A
+Fcos45+500cos45=100gcos45 A1 Allow −Fcos45+500cos45=100gcos45.
+F=500 A1 awrt 500 to 3sf.
+© UCLES 2023 Page 12 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+5(b) Alternative Method 2 for Question 5(b): Using Lami’s Theorem
+Attempt at Lami M1 Allow sign errors.
+100g−500 F  T  A1 500−100g F 100g−500 F
+=
+
+= B
+
+Allow = or = or
+sin135 sin135 sin90 sin135 sin135 sin45 sin45
+100g−500 F 100g−500 F
+= or = .
+sin45 sin225 sin225 sin45
+F=500 A1 awrt 500 to 3sf.
+Alternative Method 3 for Question 5(b): Using triangle of forces
+Attempt use of trigonometry on right angled triangle M1 Allow sign errors; allow g missing.
+F A1 F
+tan45= Allow tan45=
+100g−500 500−100g
+F=500 A1 awrt 500 to 3sf.
+3
+Question Answer Marks Guidance
+6(a)(i) Attempt to resolve parallel to the plane M1 4 terms; allow sin/cos mix; allow sign errors; allow g missing.
+Tcos20−5−2gsin30=21.2 A1 Correct equation.
+T =18.5 A1 awrt 18.5 .
+3
+© UCLES 2023 Page 13 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+6(a)(ii) Attempt resolve perpendicular to the plane M1 3 terms; allow sin/cos mix: allow sign errors; allow with T or
+R=2g cos30−Tsin20 their T ; allow g missing.
+Use of 5 =R to get an equation in  only M1 Where R is a two term expression with a component of 2g and
+5=(2g cos30−Tsin20) a component of their T ; allow g missing.
+ 
+=0.455 A1 5
+awrt 0.455; allow 0.46 or 0.45; do not allow .
+11
+3
+6(b) Max F =0.8(2g cos30−15sin20) *B1
+=0.812.1902=9.7521
+Net force up the plane =15cos20−2gsin30=4.0953 *B1 15cos20−2gsin30−0.8(2g cos30−15sin20)
+OR
+=2a  −5.6567=2a a=−2.8283..
+If max F incorrect and use F = ma then allow B1 for
+15cos20−2gsin30−theirmaxF.
+[State 4.09539.7521 ,] hence the block does not move DB1 Must have correct values (to at least 1 sf) to compare for this
+[up the plane] mark. No incorrect statement seen.
+Alternative Method 1 for Question 6(b)
+Max force down plane=0.8(2g cos30−15sin20)+2gsin30 *B1
+=0.812.1902+10=19.7521
+Force up plane=15cos20=14.0953 *B1 i.e. using it to compare with their max force down the plane.
+[State 14.095319.7521 ,] hence the block does not move DB1 Must have correct values (to at least 1 sf) to compare for this
+[up the plane] mark. No incorrect statement seen.
+© UCLES 2023 Page 14 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+6(b) Alternative Method 2 for Question 6(b)
+F =15cos20−2gsin30=4.9053 *B1
+Or R=2g cos30−15sin20=12.1902
+15cos20−2gsin30 *B1
+Get = =0.3359
+2g cos30−15sin20
+[State 0.33590.8,] hence the block does not move [up the DB1 Must have correct value of  (to at least 1 sf) to compare for
+plane] this mark. No incorrect statement seen.
+3
+© UCLES 2023 Page 15 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+7(a) Attempt to use conservation of energy M1 2 terms, dimensionally correct.
+1  1  Do not allow from use of constant acceleration.
+0.5v2 =0.5g1.8 or mv2 =mg1.8
+   
+2  2 
+v=6 A1 Do not allow from use of constant acceleration.
+Attempt at conservation of momentum M1 3 terms; allow sign errors; allow their v=6 or just v; allow if
+0.56(+0)=0.54+0.1w using mgv (consistently in all terms).
+ 
+Speed of Q (= w) =1 0m s-1 A1 AG
+Do not allow from use of constant acceleration.
+Do not allow if using mgv.
+Use of constant acceleration gets M0 A0 M1 A0 maximum.
+4 SC Assuming elastic collision
+1 1
+M1A1 0.5g1.8= 0.1w2 + 0.542
+2 2
+M1 For attempt at conservation of energy, 3 terms; allow sign
+errors.
+B1 Speed of Q (= w) =1 0m s-1
+© UCLES 2023 Page 16 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+7(b) Attempt at conservation of momentum *M1 3 terms, allow sign errors, allow if using mgv.
+0.110=(0.1+0.4)z (z=2)
+ 
+Attempt to use conservation of energy *DM1 Dependent on previous M mark.
+1 (0.1+0.4)(their 2)2 =(0.1+0.4)gh (h=0.2)  4 terms, dimensionally correct.
+  Do not allow from use of constant acceleration.
+2 
+their 210.
+Use trigonometry to get an equation in  and solve for  DM1 Dependent on previous 2 M marks.
+Using their h and 0.4 .
+ their 0.2
+ = sin−1   Allow sin/cos mix.
+  0.4 
+θ = 30 A1 Do not allow if using mgv.
+Alternative method for Question 7(b): Using constant acceleration
+Attempt at conservation of momentum *M1 2 terms, allow sign errors, allow if using mgv.
+0.110=0.5z (z=2)
+ 
+Attempt at use of constant acceleration *DM1 Dependent on previous M mark.
+02 =(their 2)2 2a0.4 (a= 5) Uses constant acceleration with u=their 2 and s=0.4 to get an
+  equation in a; their 210.
+Use N2L to get an equation in  leading to a positive value of  DM1 Dependent on previous 2 M marks.
+and solve for  Using their a; May have m for 0.5 .
+(0.5)their a =(0.5)gsin Allow sin/cos mix.
+ 
+θ = 30 A1 Do not allow if using mgv.
+4
+© UCLES 2023 Page 17 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+7(c) Q takes 0.7 s to travel from B to C B1
+(their 2)+0 B1FT SOI
+0.4= t t=0.4
+0.8
+2 FT their 2 from (b), t= .
+their 2
+u+v
+For use of s=   t to get a time up the slope.
+ 2 
+Allow for total time on slope from
+1
+0=(their 2)t− (their a)t2 t=0.8 .
+2
+Distance between P moved is (0.7+0.8)4(=6) B1 Allow 1 m from point C.
+Set up equation in t using 4t, (their 2)t and their 6 and solve for M1 Must have considered all parts of motion to find times from
+relevant equations.
+t
+4t+(their 2)t=(their1 ) OR (their 6)+4t+(their 2)t=7
+ 
+2 A1
+Distance from B = 6 m
+3
+© UCLES 2023 Page 18 of 19
+
+9709/42 Cambridge International AS & A Level – Mark Scheme February/March 2023
+PUBLISHED
+Question Answer Marks Guidance
+7(c) Alternative method for last 3 marks of Question 7(c)
+b 7−b B1 Where b is distance from B
+[Time for P =] and [Time for QR =]
+4 2
+OR Where c is distance from C.
+7−c c
+OR [Time for P =] and [Time for QR =]
+4 2
+Attempt to form an equation from use of total time and solve for b M1 Where b is distance from B
+(or c) OR Where c is distance from C.
+Must have considered all parts of motion to find times from
+ 7−b b  2  relevant equations.
++0.7+0.4+0.4= b=6
+   
+2 4  3
+ 
+ c 7−c  1
+ OR +0.7+0.4+0.4=  c= 
+ 2 4  3
+2 A1
+Distance from B = 6 m
+3
+5
+© UCLES 2023 Page 19 of 19

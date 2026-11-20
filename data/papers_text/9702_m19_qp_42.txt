@@ -1,0 +1,506 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+*4651206235*
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions February/March 2019
+2 hours
+Candidates answer on the Question Paper.
+No Additional Materials are required.
+READ THESE INSTRUCTIONS FIRST
+Write your centre number, candidate number and name on all the work you hand in.
+Write in dark blue or black pen.
+You may use an HB pencil for any diagrams or graphs.
+Do not use staples, paper clips, glue or correction fluid.
+DO NOT WRITE IN ANY BARCODES.
+Answer all questions.
+Electronic calculators may be used.
+You may lose marks if you do not show your working or if you do not use appropriate units.
+At the end of the examination, fasten all your work securely together.
+The number of marks is given in brackets [ ] at the end of each question or part question.
+This document consists of 22 printed pages and 2 blank pages.
+DC (NF/SW) 162370/4
+© UCLES 2019 [Turn over
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2019 9702/42/F/M/19
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1
+2
+at2
+v2 = u2 + 2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω (x 2-x2)
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2019 9702/42/F/M/19 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 (a) (i) Define gravitational potential at a point.
+...........................................................................................................................................
+...........................................................................................................................................
+...................................................................................................................................... [2]
+(ii) Use your answer in (i) to explain why the gravitational potential near an isolated mass is
+always negative.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...................................................................................................................................... [3]
+(b) A spherical planet has mass 6.00 × 1024 kg and radius 6.40 × 106 m.
+The planet may be assumed to be isolated in space with its mass concentrated at its centre.
+A satellite of mass 340 kg is in a circular orbit about the planet at a height 9.00 × 105 m above
+its surface.
+For the satellite:
+(i) show that its orbital speed is 7.4 × 103 m s–1
+[2]
+© UCLES 2019 9702/42/F/M/19
+
+5
+(ii) calculate its gravitational potential energy.
+energy = ........................................................ J [3]
+(c) Rockets on the satellite are fired for a short time. The satellite’s orbit is now closer to the
+surface of the planet.
+State and explain the change, if any, in the kinetic energy of the satellite.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+.............................................................................................................................................. [2]
+[Total: 12]
+© UCLES 2019 9702/42/F/M/19 [Turn over
+
+6
+2 The pressure p of an ideal gas having density ρ is given by the expression
+p = 1 ρ〈c2〉.
+3
+(a) State what is meant by:
+(i) an ideal gas
+...........................................................................................................................................
+...........................................................................................................................................
+...................................................................................................................................... [2]
+(ii) the symbol 〈c2〉.
+...........................................................................................................................................
+...................................................................................................................................... [1]
+(b) A cylinder contains a fixed mass of a gas at a temperature of 120 °C. The gas has a volume of
+6.8 × 10–3 m3 at a pressure 2.4 × 105 Pa.
+(i) Assuming the gas acts like an ideal gas, show that the number of atoms of gas in the
+cylinder is 3.0 × 1023.
+[3]
+(ii) Each atom of the gas, assumed to be a sphere, has a radius of 3.2 × 10–11 m.
+Use the answer in (i) to estimate the actual volume occupied by the gas atoms.
+volume = ...................................................... m3 [2]
+© UCLES 2019 9702/42/F/M/19
+
+7
+(iii) One of the assumptions of the kinetic theory of gases is related to the volume of the
+atoms.
+State this assumption. Explain whether your answer in (ii) is consistent with this
+assumption.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...................................................................................................................................... [2]
+[Total: 10]
+© UCLES 2019 9702/42/F/M/19 [Turn over
+
+8
+3 A cylindrical tube, sealed at one end, has cross-sectional area A and contains some sand.
+The total mass of the tube and the sand is M.
+The tube floats upright in a liquid of density ρ, as illustrated in Fig. 3.1.
+tube
+cross-sectional
+area A
+sand
+liquid
+densityρ
+x
+equilibrium position
+of base of tube
+Fig. 3.1
+The tube is pushed a short distance into the liquid and then released.
+(a) (i) State the two forces that act on the tube immediately after its release.
+...........................................................................................................................................
+...................................................................................................................................... [1]
+(ii) State and explain the direction of the resultant force acting on the tube immediately after
+its release.
+...........................................................................................................................................
+...........................................................................................................................................
+...................................................................................................................................... [2]
+(b) The acceleration a of the tube is given by the expression
+Aρg
+a = – x
+M
+where x is the vertical displacement of the tube from its equilibrium position.
+Use the expression to explain why the tube undergoes simple harmonic oscillations in the
+liquid.
+...................................................................................................................................................
+...................................................................................................................................................
+.............................................................................................................................................. [2]
+© UCLES 2019 9702/42/F/M/19
+
+9
+(c) For a tube having cross-sectional area A of 4.5 cm2 and a total mass M of 0.17 kg, the period
+of oscillation of the tube is 1.3 s.
+(i) Determine the angular frequency ω of the oscillations.
+ω = ................................................ rad s–1 [2]
+(ii) Use your answer in (i) and the expression in (b) to determine the density ρ of the liquid in
+which the tube is floating.
+ρ = ................................................ kg m–3 [3]
+[Total: 10]
+© UCLES 2019 9702/42/F/M/19 [Turn over
+
+10
+4 (a) State three features of the orbit of a geostationary satellite.
+1. ...............................................................................................................................................
+...................................................................................................................................................
+2. ...............................................................................................................................................
+...................................................................................................................................................
+3. ...............................................................................................................................................
+.............................................................................................................................................. [3]
+(b) A signal is transmitted from Earth to a geostationary satellite. Initially, the signal has power
+3.2 kW. The signal is attenuated by 194 dB.
+Calculate the signal power received by the satellite.
+power = ....................................................... W [2]
+(c) Suggest one advantage and one disadvantage of the use of geostationary satellites compared
+with polar-orbiting satellites for communication between points on the Earth’s surface.
+advantage: ................................................................................................................................
+...................................................................................................................................................
+disadvantage: ...........................................................................................................................
+.............................................................................................................................................. [2]
+[Total: 7]
+© UCLES 2019 9702/42/F/M/19
+
+11
+5 (a) State what is meant by an electric field.
+...................................................................................................................................................
+.............................................................................................................................................. [1]
+(b) An isolated solid metal sphere has radius R. The charge on the sphere is +Q and the electric
+field strength at its surface is E.
+On Fig. 5.1, draw a line to show the variation of the electric field strength with distance x from
+the centre of the solid sphere for values of x from x = 0 to x = 3R.
+1.00E
+0.75E
+electric
+field
+strength
+0.50E
+0.25E
+0
+0 R 2R 3R
+distance x
+Fig. 5.1
+[4]
+(c) The sphere in (b) has radius R = 0.26 m.
+Electrical breakdown (a spark) occurs when the electric field strength at the surface of the
+sphere exceeds 2.0 × 106 V m–1.
+Determine the maximum charge that can be stored on the sphere before electrical breakdown
+occurs.
+charge = ........................................................ C [3]
+[Total: 8]
+© UCLES 2019 9702/42/F/M/19 [Turn over
+
+12
+6 (a) Define the capacitance of a parallel-plate capacitor.
+...................................................................................................................................................
+...................................................................................................................................................
+.............................................................................................................................................. [2]
+(b) A student has three capacitors. Two of the capacitors have a capacitance of 4.0 μF and one
+has a capacitance of 8.0 μF.
+Draw labelled circuit diagrams, one in each case, to show how the three capacitors may be
+connected to give a total capacitance of:
+(i) 1.6 μF
+[1]
+(ii) 10 μF.
+[1]
+© UCLES 2019 9702/42/F/M/19
+
+13
+(c) A capacitor C of capacitance 47 μF is connected across the output terminals of a bridge
+rectifier, as shown in Fig. 6.1.
+C
+bridge
+R
+rectifier 47 μF
+Fig. 6.1
+The variation with time t of the potential difference V across the resistor R is shown in Fig. 6.2.
+10
+8
+V / V
+6
+4
+2
+0
+0 t t time t
+1 2
+Fig. 6.2
+Use data from Fig. 6.2 to determine the energy transfer from the capacitor C to the resistor R
+between time t and time t .
+1 2
+energy = ......................................................... J [3]
+[Total: 7]
+© UCLES 2019 9702/42/F/M/19 [Turn over
+
+14
+7 (a) Two properties that an ideal operational amplifier (op-amp) would have are constant voltage
+gain and infinite slew rate.
+State what is meant by:
+(i) gain of an amplifier
+...........................................................................................................................................
+...................................................................................................................................... [1]
+(ii) infinite slew rate.
+...........................................................................................................................................
+...........................................................................................................................................
+...................................................................................................................................... [2]
+(b) The partially completed circuit of a non-inverting amplifier, incorporating an ideal op-amp, is
+shown in Fig. 7.1.
+R
+1
++9 V
++
+–
+V –9 V V
+IN R OUT
+2
+Fig. 7.1
+(i) On Fig. 7.1, complete the circuit for the non-inverting amplifier. [2]
+(ii) For the completed circuit of Fig. 7.1, the gain of the amplifier is 25. The resistance of
+resistor R is 12 kΩ.
+1
+Calculate the resistance of resistor R .
+2
+resistance = ....................................................... Ω [2]
+© UCLES 2019 9702/42/F/M/19
+
+15
+(iii) Calculate, for the amplifier gain of 25, the range of values of V for which the amplifier
+IN
+does not saturate.
+range from ....................... V to ........................ V [2]
+[Total: 9]
+© UCLES 2019 9702/42/F/M/19 [Turn over
+
+16
+8 A horseshoe magnet is placed on a top pan balance. A rigid copper wire is fixed between the
+poles of the magnet, as illustrated in Fig. 8.1.
+A
+rigid copper
+wire
+balance
+pan
+horseshoe
+magnet
+B
+Fig. 8.1
+The wire is clamped at ends A and B.
+(a) When a direct current is switched on in the wire, the reading on the balance is seen to
+decrease.
+State and explain the direction of:
+(i) the force acting on the wire
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...................................................................................................................................... [3]
+(ii) the current in the wire.
+...........................................................................................................................................
+...........................................................................................................................................
+...................................................................................................................................... [2]
+© UCLES 2019 9702/42/F/M/19
+
+17
+(b) A direct current of 4.6 A in the wire causes the reading on the balance to change by
+4.5 × 10–3 N.
+The direct current is now replaced by an alternating current of frequency 40 Hz and
+root-mean-square (r.m.s.) value 4.6 A.
+On the axes of Fig. 8.2, sketch a graph to show the change in balance reading over a time of
+50 ms.
+8
+6
+4
+change in
+2
+balance
+reading
+0
+/ 10–3 N
+0 10 20 30 40 50
+time / ms
+–2
+–4
+–6
+–8
+Fig. 8.2
+[3]
+[Total: 8]
+© UCLES 2019 9702/42/F/M/19 [Turn over
+
+18
+BLANK PAGE
+© UCLES 2019 9702/42/F/M/19
+
+19
+9 Outline the principles of computed tomography (CT) scanning.
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..................................................................................................................................................... [5]
+[Total: 5]
+© UCLES 2019 9702/42/F/M/19 [Turn over
+
+20
+10 (a) A cross-section through a current-carrying solenoid is shown in Fig. 10.1.
+current
+into page
+current out
+of page
+Fig. 10.1
+On Fig. 10.1, draw field lines to represent the magnetic field inside the solenoid. [3]
+(b) State Faraday’s law of electromagnetic induction.
+...................................................................................................................................................
+...................................................................................................................................................
+.............................................................................................................................................. [2]
+(c) A coil of insulated wire is wound on to a soft-iron core.
+The coil is connected in series with a battery, a switch and an ammeter, as shown in Fig. 10.2.
+coil of soft-iron
+wire core
+A
+Fig. 10.2
+© UCLES 2019 9702/42/F/M/19
+
+21
+Use laws of electromagnetic induction to explain why, when the switch is closed, the current
+increases gradually to its maximum value.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+.............................................................................................................................................. [3]
+[Total: 8]
+© UCLES 2019 9702/42/F/M/19 [Turn over
+
+22
+11 (a) State what is meant by a photon.
+...................................................................................................................................................
+...................................................................................................................................................
+.............................................................................................................................................. [2]
+(b) Calculate the energy, in eV, of a photon of light of wavelength 540 nm.
+energy = ...................................................... eV [3]
+(c) The outermost electron energy bands of a semiconductor material are illustrated in Fig. 11.1.
+conduction band
+forbidden band
+valence band
+Fig. 11.1
+The width of the forbidden band is 1.1 eV.
+Explain why, when photons of light, each of energy 2.1 eV, are incident on the semiconductor
+material, its resistance decreases.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+.............................................................................................................................................. [4]
+[Total: 9]
+© UCLES 2019 9702/42/F/M/19
+
+23
+12 The incomplete nuclear equation for one possible reaction that takes place in the core of a nuclear
+reactor is
+235U + 1n 139La + 95Mo + 21n + ..................
+92 0 57 42 0
+(a) (i) State the name given to this type of nuclear reaction.
+...................................................................................................................................... [1]
+(ii) Complete the nuclear equation. [2]
+(b) The mass defect for the reaction is 0.223 u.
+(i) Calculate the energy, in J, equivalent to 0.223 u.
+energy = ........................................................ J [2]
+(ii) Suggest two forms of the energy released in this reaction.
+1. .......................................................................................................................................
+...........................................................................................................................................
+2. .......................................................................................................................................
+...................................................................................................................................... [2]
+[Total: 7]
+© UCLES 2019 9702/42/F/M/19
+
+24
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of the University of
+Cambridge Local Examinations Syndicate (UCLES), which itself is a department of the University of Cambridge.
+© UCLES 2019 9702/42/F/M/19

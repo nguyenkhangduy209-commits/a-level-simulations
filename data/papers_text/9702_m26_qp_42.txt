@@ -1,0 +1,1470 @@
+Cambridge International AS & A Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions February/March 2026
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen. Do not use correction fluid or tape.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+This document has 24 pages. Any blank pages are indicated.
+[Turn over
+*7027190526*
+* 0000800000001 * DFD
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:44)
+(cid:172)(cid:79)(cid:138)(cid:62)(cid:160)(cid:52)(cid:109)(cid:72)(cid:117)(cid:79)(cid:170)(cid:69)(cid:138)(cid:96)(cid:122)(cid:53)(cid:128)(cid:87)
+(cid:172)(cid:168)(cid:111)(cid:115)(cid:79)(cid:170)(cid:135)(cid:129)(cid:86)(cid:125)(cid:114)(cid:157)(cid:79)(cid:117)(cid:163)(cid:108)(cid:118)(cid:130)
+(cid:165)(cid:85)(cid:69)(cid:85)(cid:117)(cid:117)(cid:133)(cid:85)(cid:69)(cid:69)(cid:53)(cid:69)(cid:133)(cid:117)(cid:165)(cid:117)(cid:53)(cid:85)
+DC (SL/TC) 356453/3
+© Cambridge University Press & Assessment 2026
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000002 *
+2
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:44)
+Data
+acceleration of free fall g = 9.81 m s–2
+speed of light in free space c = 3.00 × 108 m s–1
+elementary charge e = 1.60 × 10–19 C
+unified atomic mass unit 1 u = 1.66 × 10–27 kg
+rest mass of proton m = 1.67 × 10–27 kg
+p
+rest mass of electron m = 9.11 × 10–31 kg
+e
+Avogadro constant N = 6.02 × 1023 mol–1
+A
+molar gas constant R = 8.31 J K–1 mol–1
+Boltzmann constant k = 1.38 × 10–23 J K–1
+gravitational constant G = 6.67 × 10–11 N m2 kg–2
+permittivity of free space ε = 8.85 × 10–12 F m–1
+0
+1
+( = 8.99 × 109 m F–1)
+4rf
+0
+Planck constant h = 6.63 × 10–34 J s
+Stefan–Boltzmann constant σ = 5.67 × 10–8 W m–2 K–4
+Formulae
+uniformly accelerated motion s = ut + 1at 2
+2
+v 2 = u 2 + 2as
+hydrostatic pressure ∆p = ρg∆h
+upthrust F = ρgV
+f v
+Doppler effect for sound waves f = s
+o v!v
+s
+electric current I = Anvq
+resistors in series R = R + R + ...
+1 2
+1 1 1
+resistors in parallel = + + ...
+R R R
+1 2
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:252)(cid:183)(cid:254)(cid:215)
+(cid:300)(cid:296)(cid:237)(cid:244)(cid:206)(cid:286)(cid:259)(cid:295)(cid:221)(cid:244)(cid:264)(cid:258)(cid:295)(cid:255)(cid:211)(cid:276)(cid:238)(cid:258)
+(cid:293)(cid:261)(cid:213)(cid:213)(cid:181)(cid:277)(cid:197)(cid:181)(cid:245)(cid:261)(cid:293)(cid:261)(cid:261)(cid:181)(cid:261)(cid:181)(cid:277)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000003 *
+32
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:4)(cid:44)
+GM
+gravitational potential ϕ = –
+r
+GMm
+gravitational potential energy E = –
+P r
+Nm
+pressure of an ideal gas p = 1 〈c2〉
+3 V
+simple harmonic motion a = – ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ! ω (x 2-x2)
+0
+Q
+electric potential V =
+4rf r
+0
+Qq
+electrical potential energy E =
+P 4rf r
+0
+1 1 1
+capacitors in series = + + ...
+C C C
+1 2
+capacitors in parallel C = C + C + ...
+1 2
+t
+discharge of a capacitor x = x e- RC
+0
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ωt
+0
+radioactive decay x = x e– λt
+0
+0.693
+decay constant λ =
+t
+1
+2
+I (Z -Z )2
+intensity reflection coefficient R = 1 2
+I (Z +Z )2 0 1 2
+Stefan–Boltzmann law L = 4πσr 2T 4
+∆λ Df v
+Doppler redshift á á
+λ f c
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26 [Turn over
+(cid:300)(cid:207)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:250)(cid:183)(cid:254)(cid:215)
+(cid:300)(cid:296)(cid:238)(cid:243)(cid:214)(cid:300)(cid:255)(cid:279)(cid:220)(cid:262)(cid:249)(cid:199)(cid:179)(cid:247)(cid:263)(cid:276)(cid:254)(cid:258)
+(cid:293)(cid:261)(cid:229)(cid:277)(cid:245)(cid:245)(cid:229)(cid:213)(cid:293)(cid:245)(cid:181)(cid:261)(cid:261)(cid:213)(cid:293)(cid:245)(cid:261)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000004 *
+4
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:5)(cid:44)
+1 (a) Define the radian.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) Three children are playing on a roundabout (rotatable horizontal platform) at a playground.
+Child X is standing on the edge of the roundabout. This child is pushing so that the edge of
+the roundabout moves in a circle at a constant speed of 2.4 m s–1, as shown in the view from
+above in Figure 1.1.
+rotation
+2R
+Y
+Z
+R
+2.4 m s–1
+3R
+X
+Figure 1.1
+The radius of the roundabout is 3R.
+Child Y is sitting on the roundabout at a distance 2R from the centre.
+Child Z is sitting at a distance R from the centre.
+Child Y is moving in a circle with an angular speed of 0.75 rad s–1.
+Calculate:
+(i) the radius of the roundabout
+radius = ..................................................... m [2]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:252)(cid:183)(cid:256)(cid:215)
+(cid:300)(cid:296)(cid:238)(cid:242)(cid:214)(cid:290)(cid:237)(cid:274)(cid:223)(cid:268)(cid:242)(cid:192)(cid:273)(cid:219)(cid:229)(cid:260)(cid:246)(cid:258)
+(cid:293)(cid:181)(cid:245)(cid:277)(cid:181)(cid:245)(cid:229)(cid:245)(cid:261)(cid:213)(cid:197)(cid:261)(cid:197)(cid:213)(cid:197)(cid:245)(cid:277)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000005 *
+5
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:6)(cid:44)
+(ii) the frequency of rotation of the roundabout
+frequency = .................................................... Hz [2]
+(iii) the centripetal acceleration of child Y.
+acceleration = ................................................ m s–2 [2]
+(c) For the roundabout in 1(b), complete Table 1.1 to compare the linear and angular velocities
+for child X and child Z at any instant in time. Indicate your response by placing one tick (✓)
+in the appropriate box for each of magnitude and direction for the two quantities.
+Table 1.1
+magnitude direction
+X less than Z equal X greater than Z same opposite
+linear velocity
+angular velocity
+[3]
+[Total: 10]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26 [Turn over
+(cid:300)(cid:207)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:250)(cid:183)(cid:256)(cid:215)
+(cid:300)(cid:296)(cid:237)(cid:241)(cid:206)(cid:296)(cid:241)(cid:290)(cid:218)(cid:238)(cid:255)(cid:265)(cid:197)(cid:227)(cid:241)(cid:260)(cid:262)(cid:258)
+(cid:293)(cid:181)(cid:261)(cid:213)(cid:245)(cid:277)(cid:197)(cid:277)(cid:277)(cid:229)(cid:277)(cid:261)(cid:197)(cid:181)(cid:229)(cid:181)(cid:261)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000006 *
+6
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:7)(cid:44)
+2 (a) Define electric field at a point.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) An oil droplet has charge of magnitude Q. The droplet is held in equilibrium by the electric
+field between two horizontal parallel plates, as shown in Figure 2.1.
+–
+oil droplet
+x
++
+Figure 2.1
+The electric field is created by a potential difference (p.d.) V between the plates, with the
+lower plate at the higher electric potential. The separation of the plates is x.
+(i) On Figure 2.1, draw four field lines to represent the electric field between the plates. [3]
+(ii) Explain, with reference to forces, whether the sign of Q is positive or negative.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:250)(cid:182)(cid:254)(cid:215)
+(cid:300)(cid:296)(cid:238)(cid:241)(cid:209)(cid:286)(cid:281)(cid:300)(cid:210)(cid:249)(cid:238)(cid:244)(cid:229)(cid:219)(cid:276)(cid:236)(cid:246)(cid:258)
+(cid:293)(cid:293)(cid:229)(cid:213)(cid:245)(cid:181)(cid:197)(cid:181)(cid:213)(cid:197)(cid:181)(cid:261)(cid:261)(cid:181)(cid:261)(cid:245)(cid:213)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000007 *
+7
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:8)(cid:44)
+(c) For the oil droplet in 2(b), state expressions, in terms of some or all of Q, V and x, for:
+(i) the electric field strength E
+E = ......................................................... [1]
+(ii) the weight W of the droplet.
+W = ......................................................... [1]
+(d) The plates in 2(b) have a p.d. across them of 4800 V and a separation of 0.024 m. The
+magnitude of the charge on the oil droplet is 3e, where e is the elementary charge.
+Calculate the mass of the oil droplet.
+mass = .................................................... kg [2]
+(e) The polarity of the p.d. across the plates in 2(b) is reversed.
+Describe and explain the subsequent motion of the oil droplet.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 12]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26 [Turn over
+(cid:300)(cid:211)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:252)(cid:182)(cid:254)(cid:215)
+(cid:300)(cid:296)(cid:237)(cid:242)(cid:217)(cid:300)(cid:277)(cid:284)(cid:231)(cid:255)(cid:259)(cid:181)(cid:241)(cid:227)(cid:200)(cid:236)(cid:262)(cid:258)
+(cid:293)(cid:293)(cid:213)(cid:277)(cid:181)(cid:213)(cid:229)(cid:213)(cid:197)(cid:181)(cid:293)(cid:261)(cid:261)(cid:213)(cid:293)(cid:181)(cid:197)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000008 *
+8
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:44)
+3 (a) Define specific latent heat of fusion.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Explain why substances usually have a higher specific latent heat for vaporisation than
+for fusion.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(c) An ice cube of mass 15.6 g at a temperature of –18 °C is removed from a freezer.
+The ice cube is immediately placed in an insulated beaker that contains a mass of 132.4 g of
+water at a temperature of 34 °C.
+The specific heat capacity of water is 4.19 kJ kg–1 °C –1.
+The specific heat capacity of ice is 2.11 kJ kg–1 °C –1.
+The specific latent heat of fusion of water is 336 kJ kg–1.
+The beaker has negligible specific heat capacity.
+The contents of the beaker are left to reach thermal equilibrium.
+Calculate the temperature, in °C, of the water in the beaker when thermal equilibrium
+is reached.
+temperature = .................................................... °C [4]
+[Total: 8]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:250)(cid:182)(cid:256)(cid:215)
+(cid:300)(cid:296)(cid:237)(cid:243)(cid:217)(cid:290)(cid:295)(cid:269)(cid:212)(cid:257)(cid:268)(cid:174)(cid:211)(cid:255)(cid:294)(cid:188)(cid:238)(cid:258)
+(cid:293)(cid:213)(cid:261)(cid:277)(cid:245)(cid:213)(cid:229)(cid:245)(cid:229)(cid:277)(cid:277)(cid:261)(cid:197)(cid:213)(cid:197)(cid:181)(cid:213)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000009 *
+9
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:10)(cid:44)
+4 The first law of thermodynamics may be written as
+ΔU = Q + W
+where W is the work done on a system.
+(a) State the meaning, in this equation, of the symbols ΔU and Q.
+ΔU .............................................................................................................................................
+Q ...............................................................................................................................................
+[2]
+(b) An ideal gas at a pressure of 2.0 × 105 Pa has an initial volume of 0.048 m3, an initial
+thermodynamic temperature of 560 K, and an initial internal energy of 14.4 kJ.
+The volume of the gas is reduced at constant pressure to a final volume of 0.012 m3.
+(i) Show that the magnitude of the work done on the gas is 7200 J.
+[2]
+(ii) Explain whether the work done on the gas is positive or negative.
+..................................................................................................................................... [1]
+(iii) Explain why the final internal energy of the gas is 3.6 kJ.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(c) For the reduction of the volume of the gas in 4(b), calculate Q. Give a unit with your answer.
+Q = .................................... unit ............ [2]
+[Total: 9]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26 [Turn over
+(cid:300)(cid:211)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:252)(cid:182)(cid:256)(cid:215)
+(cid:300)(cid:296)(cid:238)(cid:244)(cid:209)(cid:296)(cid:299)(cid:285)(cid:229)(cid:247)(cid:245)(cid:251)(cid:263)(cid:247)(cid:178)(cid:188)(cid:254)(cid:258)
+(cid:293)(cid:213)(cid:245)(cid:213)(cid:181)(cid:181)(cid:197)(cid:277)(cid:181)(cid:293)(cid:197)(cid:261)(cid:197)(cid:181)(cid:229)(cid:245)(cid:197)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000010 *
+10
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:1)(cid:44)
+5 (a) State what is represented by the Avogadro constant.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) A gas is in a sealed container that has a fixed volume. The thermodynamic temperature T of
+the gas is varied.
+Figure 5.1 shows how the pressure p of the gas varies with NT, where N is the number of
+molecules of the gas.
+Figure 5.2 shows how the mean-square speed 〈c 2〉 of the molecules of the gas varies with T.
+Figure 5.3 shows how the total kinetic energy E of all the molecules of the gas varies
+K
+with T.
+4 2.50
+〈c2〉 / 106 m2 s–2
+p / 104 Pa 2 1.25
+0 0
+0 4 8 0 200 400
+NT / 1026 K T / K
+Figure 5.1 Figure 5.2
+2
+E / 104 J 1
+K
+0
+0 200 400
+T / K
+Figure 5.3
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:250)(cid:184)(cid:254)(cid:215)
+(cid:300)(cid:296)(cid:240)(cid:243)(cid:212)(cid:292)(cid:287)(cid:267)(cid:206)(cid:266)(cid:259)(cid:280)(cid:175)(cid:253)(cid:258)(cid:260)(cid:262)(cid:258)
+(cid:293)(cid:261)(cid:293)(cid:213)(cid:245)(cid:213)(cid:261)(cid:245)(cid:261)(cid:229)(cid:277)(cid:197)(cid:197)(cid:245)(cid:197)(cid:181)(cid:293)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000011 *
+11
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:2)(cid:44)
+Determine three conclusions about the gas that can be drawn from Figure 5.1, Figure 5.2
+and Figure 5.3. The conclusions may be qualitative or quantitative. Use the space below for
+any working.
+1 ................................................................................................................................................
+...................................................................................................................................................
+2 ................................................................................................................................................
+...................................................................................................................................................
+3 ................................................................................................................................................
+...................................................................................................................................................
+[3]
+(c) One assumption of the kinetic theory of gases is that the volume of the molecules is
+negligible compared with the volume of the gas.
+(i) State, with a reason, whether this assumption applies to the gas in 5(b).
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) State two other assumptions of the kinetic theory of gases.
+1 ........................................................................................................................................
+...........................................................................................................................................
+2 ........................................................................................................................................
+...........................................................................................................................................
+[2]
+[Total: 7]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26 [Turn over
+(cid:300)(cid:211)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:252)(cid:184)(cid:254)(cid:215)
+(cid:300)(cid:296)(cid:239)(cid:244)(cid:220)(cid:294)(cid:291)(cid:251)(cid:235)(cid:240)(cid:238)(cid:209)(cid:299)(cid:245)(cid:214)(cid:260)(cid:246)(cid:258)
+(cid:293)(cid:261)(cid:277)(cid:277)(cid:181)(cid:181)(cid:293)(cid:277)(cid:277)(cid:213)(cid:197)(cid:197)(cid:197)(cid:277)(cid:229)(cid:245)(cid:245)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000012 *
+12
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:3)(cid:44)
+6 (a) State what is meant by simple harmonic motion.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A length of thick copper wire is formed into a rectangular frame, as shown in Figure 6.1.
+thin cotton thread
+X Y
+wire frame
+6.0 cm
+vertical axis
+4.0 cm
+Figure 6.1
+The frame has side lengths of 6.0 cm and 4.0 cm.
+There is a small gap XY at the ends of the wire at the top of the frame.
+The frame is suspended so that it hangs vertically using thin cotton thread attached to the
+two ends of the wire. The frame oscillates about its vertical axis, as shown in the view from
+above in Figure 6.2.
+s
+equilibrium position
+Figure 6.2
+The oscillations are simple harmonic. The displacement s of the edge of the frame from its
+equilibrium position varies with time t according to
+s = 3.2 sin 6.9t
+where s is in mm and t is in s.
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:250)(cid:184)(cid:256)(cid:215)
+(cid:300)(cid:296)(cid:239)(cid:241)(cid:220)(cid:288)(cid:273)(cid:238)(cid:208)(cid:242)(cid:245)(cid:218)(cid:201)(cid:217)(cid:248)(cid:276)(cid:254)(cid:258)
+(cid:293)(cid:181)(cid:197)(cid:277)(cid:245)(cid:181)(cid:293)(cid:181)(cid:245)(cid:245)(cid:181)(cid:197)(cid:261)(cid:277)(cid:261)(cid:245)(cid:293)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000013 *
+13
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:4)(cid:44)
+(i) Calculate the period T of the oscillations.
+T = ...................................................... s [2]
+(ii) Show that the maximum speed of the edges of the frame is 22 mm s–1.
+[2]
+(c) The frame in 6(b) is in a uniform horizontal magnetic field that is parallel to the equilibrium
+position of the frame.
+The flux density of the magnetic field is 0.047 T.
+(i) Calculate the electromotive force (e.m.f.) E induced across XY when the frame is
+0
+moving at its maximum speed.
+E = ...................................................... V [3]
+0
+(ii) On Figure 6.3, sketch the variation of the induced e.m.f. E across XY with t between
+t = 0 and t = 2T.
+E
+0
+E
+0
+0 T 2T
+t
+–E
+0
+Figure 6.3
+[2]
+[Total: 11]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26 [Turn over
+(cid:300)(cid:211)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:252)(cid:184)(cid:256)(cid:215)
+(cid:300)(cid:296)(cid:240)(cid:242)(cid:212)(cid:298)(cid:269)(cid:254)(cid:233)(cid:264)(cid:268)(cid:271)(cid:269)(cid:225)(cid:228)(cid:276)(cid:238)(cid:258)
+(cid:293)(cid:181)(cid:181)(cid:213)(cid:181)(cid:213)(cid:261)(cid:213)(cid:293)(cid:261)(cid:293)(cid:197)(cid:261)(cid:245)(cid:293)(cid:181)(cid:245)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000014 *
+14
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:5)(cid:44)
+7 (a) State what is meant by the root-mean-square (r.m.s.) value of an alternating current.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) There is a sinusoidal alternating current in a resistor of resistance 26 Ω. The power P
+dissipated in the resistor varies with time t as shown in Figure 7.1.
+8
+P / W 4
+0
+0 0.01 0.02 0.03 0.04 0.05
+t / s
+Figure 7.1
+(i) Determine the mean power dissipated in the resistor.
+mean power = ..................................................... W [1]
+(ii) Calculate the r.m.s. current in the resistor.
+r.m.s. current = ...................................................... A [2]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:251)(cid:181)(cid:258)(cid:215)
+(cid:300)(cid:296)(cid:239)(cid:244)(cid:209)(cid:296)(cid:290)(cid:246)(cid:219)(cid:258)(cid:255)(cid:180)(cid:177)(cid:252)(cid:232)(cid:228)(cid:246)(cid:258)
+(cid:293)(cid:277)(cid:181)(cid:277)(cid:245)(cid:181)(cid:197)(cid:245)(cid:261)(cid:277)(cid:293)(cid:261)(cid:197)(cid:181)(cid:197)(cid:245)(cid:229)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000015 *
+15
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:6)(cid:44)
+(c) The current in the resistor in 7(b) is now half-wave rectified.
+(i) State the name of the electric circuit component that is used to achieve this rectification.
+..................................................................................................................................... [1]
+(ii) On Figure 7.2, sketch the variation of the power P dissipated in the resistor between
+t = 0 and t = 0.050 s.
+8
+P / W 4
+0
+0 0.01 0.02 0.03 0.04 0.05
+t / s
+Figure 7.2
+[2]
+(iii) Determine the r.m.s. current in the resistor. Explain your reasoning.
+r.m.s. current = ...................................................... A [2]
+[Total: 10]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26 [Turn over
+(cid:300)(cid:207)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:249)(cid:181)(cid:258)(cid:215)
+(cid:300)(cid:296)(cid:240)(cid:243)(cid:217)(cid:290)(cid:286)(cid:262)(cid:222)(cid:248)(cid:242)(cid:245)(cid:293)(cid:260)(cid:244)(cid:228)(cid:262)(cid:258)
+(cid:293)(cid:277)(cid:197)(cid:213)(cid:181)(cid:213)(cid:229)(cid:277)(cid:277)(cid:293)(cid:181)(cid:261)(cid:197)(cid:213)(cid:229)(cid:181)(cid:181)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000016 *
+16
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:7)(cid:44)
+8 A star in a distant galaxy consists mostly of hydrogen. Visible light emitted by the star consists of
+discrete spectral absorption lines, as represented in Figure 8.1.
+410 434 486 656
+Figure 8.1
+The numbers represent the wavelengths, in nm, of the spectral lines.
+(a) Explain, with reference to photons, how the existence of these spectral lines provides
+evidence for discrete electron energy levels in the hydrogen atom.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+(b) The galaxy is at a distance of 6.7 × 1024 m from the Earth.
+(i) Explain why the spectral lines observed on the Earth are at different wavelengths from
+those shown in Figure 8.1.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) On Figure 8.1, draw possible positions for the four spectral lines observed on
+the Earth. [2]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:251)(cid:181)(cid:260)(cid:215)
+(cid:300)(cid:296)(cid:240)(cid:242)(cid:217)(cid:300)(cid:272)(cid:259)(cid:217)(cid:250)(cid:249)(cid:238)(cid:199)(cid:224)(cid:210)(cid:180)(cid:238)(cid:258)
+(cid:293)(cid:229)(cid:277)(cid:213)(cid:245)(cid:213)(cid:229)(cid:181)(cid:245)(cid:197)(cid:197)(cid:261)(cid:261)(cid:213)(cid:261)(cid:181)(cid:229)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000017 *
+17
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:8)(cid:44)
+(iii) The Hubble constant may be taken as 2.1 × 10–18 s–1.
+Determine the observed wavelength, in nm, of the lowest frequency spectral line of
+visible light from the star.
+wavelength = ................................................... nm [3]
+[Total: 10]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26 [Turn over
+(cid:300)(cid:207)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:249)(cid:181)(cid:260)(cid:215)
+(cid:300)(cid:296)(cid:239)(cid:241)(cid:209)(cid:286)(cid:276)(cid:243)(cid:224)(cid:256)(cid:264)(cid:187)(cid:275)(cid:216)(cid:262)(cid:180)(cid:254)(cid:258)
+(cid:293)(cid:229)(cid:293)(cid:277)(cid:181)(cid:181)(cid:197)(cid:213)(cid:293)(cid:181)(cid:277)(cid:261)(cid:261)(cid:181)(cid:293)(cid:245)(cid:181)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000018 *
+18
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:9)(cid:44)
+9 (a) State what is meant by radioactive decay.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) An isotope X is radioactive and decays to a stable product with a half-life of 12.0 minutes.
+A sample of X has an activity of 5.80 × 1014 Bq at time t = 0.
+(i) Calculate the decay constant of X. Give a unit with your answer.
+decay constant = .................................... unit ............ [2]
+(ii) Calculate the activity of the sample at t = 20.0 minutes.
+activity = .................................................... Bq [2]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:251)(cid:183)(cid:258)(cid:215)
+(cid:300)(cid:296)(cid:237)(cid:242)(cid:212)(cid:298)(cid:280)(cid:277)(cid:215)(cid:241)(cid:242)(cid:216)(cid:235)(cid:222)(cid:182)(cid:268)(cid:262)(cid:258)
+(cid:293)(cid:245)(cid:245)(cid:277)(cid:245)(cid:213)(cid:261)(cid:181)(cid:213)(cid:245)(cid:197)(cid:197)(cid:261)(cid:245)(cid:261)(cid:181)(cid:277)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000019 *
+19
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:2)(cid:10)(cid:44)
+(iii) On Figure 9.1, sketch the variation of the activity A of the sample with t between t = 0
+and t = 20.0 minutes.
+6
+4
+A / 1014 Bq
+2
+0
+0 5 10 15 20
+t / min
+Figure 9.1
+[3]
+(c) A scientist uses a radiation detector to determine the measured count rate of radiation
+emitted by the sample in 9(b).
+Explain why the measured count rate at any given time is less than the activity of
+the sample.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+[Total: 12]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26 [Turn over
+(cid:300)(cid:207)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:223)(cid:249)(cid:183)(cid:258)(cid:215)
+(cid:300)(cid:296)(cid:238)(cid:241)(cid:220)(cid:288)(cid:284)(cid:293)(cid:226)(cid:263)(cid:255)(cid:273)(cid:239)(cid:214)(cid:290)(cid:268)(cid:246)(cid:258)
+(cid:293)(cid:245)(cid:261)(cid:213)(cid:181)(cid:181)(cid:293)(cid:213)(cid:197)(cid:261)(cid:277)(cid:197)(cid:261)(cid:277)(cid:293)(cid:245)(cid:261)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000020 *
+20
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:1)(cid:44)
+10 (a) (i) Explain how ultrasound waves are detected by a piezoelectric transducer.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) Define the specific acoustic impedance of a medium.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(b) Table 10.1 lists the specific acoustic impedances Z of air, water and glass.
+Table 10.1
+medium Z / kg m–2 s–1
+air 4.39 × 102
+water 1.49 × 106
+glass 9.98 × 106
+(i) The density of water is 998 kg m–3.
+Determine the speed of sound in water.
+speed = ................................................ m s–1 [2]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:251)(cid:183)(cid:260)(cid:215)
+(cid:300)(cid:296)(cid:238)(cid:244)(cid:220)(cid:294)(cid:298)(cid:292)(cid:213)(cid:265)(cid:264)(cid:282)(cid:205)(cid:250)(cid:196)(cid:284)(cid:254)(cid:258)
+(cid:293)(cid:197)(cid:213)(cid:213)(cid:245)(cid:181)(cid:293)(cid:245)(cid:229)(cid:229)(cid:293)(cid:197)(cid:197)(cid:277)(cid:197)(cid:245)(cid:277)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000021 *
+21
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:2)(cid:44)
+(ii) Calculate, to three significant figures, the intensity reflection coefficient for sound
+incident on a water-glass boundary.
+intensity reflection coefficient = ......................................................... [2]
+(iii) Explain, without calculation, what happens when sound is incident on an
+air-glass boundary.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+[Total: 11]
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:207)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:221)(cid:249)(cid:183)(cid:260)(cid:215)
+(cid:300)(cid:296)(cid:237)(cid:243)(cid:212)(cid:292)(cid:294)(cid:276)(cid:228)(cid:239)(cid:249)(cid:207)(cid:265)(cid:258)(cid:280)(cid:284)(cid:238)(cid:258)
+(cid:293)(cid:197)(cid:229)(cid:277)(cid:181)(cid:213)(cid:261)(cid:277)(cid:181)(cid:213)(cid:181)(cid:197)(cid:197)(cid:245)(cid:229)(cid:181)(cid:261)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000022 *
+22
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:3)(cid:44)
+BLANK PAGE
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:249)(cid:182)(cid:258)(cid:215)
+(cid:300)(cid:296)(cid:238)(cid:243)(cid:207)(cid:298)(cid:254)(cid:282)(cid:236)(cid:252)(cid:268)(cid:230)(cid:297)(cid:250)(cid:245)(cid:180)(cid:254)(cid:258)
+(cid:293)(cid:277)(cid:261)(cid:277)(cid:181)(cid:245)(cid:261)(cid:181)(cid:245)(cid:181)(cid:277)(cid:197)(cid:261)(cid:245)(cid:261)(cid:245)(cid:213)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000023 *
+23
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:4)(cid:44)
+BLANK PAGE
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:211)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:224)(cid:251)(cid:182)(cid:258)(cid:215)
+(cid:300)(cid:296)(cid:237)(cid:244)(cid:215)(cid:288)(cid:258)(cid:298)(cid:205)(cid:254)(cid:245)(cid:291)(cid:173)(cid:258)(cid:225)(cid:180)(cid:238)(cid:258)
+(cid:293)(cid:277)(cid:245)(cid:213)(cid:245)(cid:277)(cid:293)(cid:213)(cid:293)(cid:197)(cid:197)(cid:197)(cid:261)(cid:277)(cid:293)(cid:181)(cid:197)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+* 0000800000024 *
+24
+(cid:44)(cid:1)(cid:1)(cid:1)(cid:1)(cid:9)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:1)(cid:3)(cid:5)(cid:44)
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (Cambridge University Press & Assessment) to trace copyright holders, but if any items requiring clearance
+have unwittingly been included, the publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in our Copyright
+Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download at www.cambridgeinternational.org after the live
+examination series.
+Cambridge International Education is the name of our awarding body and a part of Cambridge University Press & Assessment, which is a department of the
+University of Cambridge.
+© Cambridge University Press & Assessment 2026 9702/42/F/M/26
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:180)(cid:237)(cid:200)(cid:245)(cid:207)(cid:298)(cid:197)(cid:266)(cid:222)(cid:249)(cid:182)(cid:260)(cid:215)
+(cid:300)(cid:296)(cid:237)(cid:241)(cid:215)(cid:294)(cid:244)(cid:287)(cid:234)(cid:260)(cid:238)(cid:300)(cid:271)(cid:222)(cid:259)(cid:228)(cid:262)(cid:258)
+(cid:293)(cid:229)(cid:229)(cid:213)(cid:181)(cid:277)(cid:293)(cid:245)(cid:261)(cid:293)(cid:181)(cid:197)(cid:197)(cid:277)(cid:197)(cid:181)(cid:213)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+DFD
+Trace ID: PC-9D2323C856
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a2 CQuaemstiobn rPiadpegr eMarc·h 2p0a26p |a Scouarcme: bparpidacgameb.cridogme.com 9702/42 Question Paper March 2026
+Downloaded from PapaCambridge - https://papacambridge.com/

@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coplanar forces at a point</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/mech-forces.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, FO = SIM.forces;
+  var g = 10, NMAX = 5, SUB = ['₁', '₂', '₃', '₄', '₅'], HSUB = function (i) { return '<sub>' + (i + 1) + '</sub>'; };
+  var pg = ui.page({ title: 'Coplanar forces at a point: resultant and equilibrium', g: g, tags: ['9709 4.1 Forces & equilibrium'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 18 });
+  ui.legend(sceneCard, [
+    { color: 'var(--c-s1)', label: 'F₁' }, { color: 'var(--c-s2)', label: 'F₂' }, { color: 'var(--c-s3)', label: 'F₃' },
+    { color: 'var(--c-s4)', label: 'F₄' }, { color: 'var(--c-tension)', label: 'F₅' },
+    { color: 'var(--c-resultant)', label: 'resultant R' }, { color: 'var(--c-component)', label: 'components (dashed)' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var polyCv = ui.canvas(plotWrap);
+  var vp2 = new SIM.view.Viewport(polyCv, { pad: 26 });
+  var tableBox = ui.h('div', { style: 'overflow-x:auto' }); plotWrap.appendChild(tableBox);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  /* ---------- controls ---------- */
+  var modeSel = ui.select(paramCard, { label: 'Mode', value: 'resultant', options: [
+    { value: 'resultant', label: 'Resultant of the forces' },
+    { value: 'solve', label: 'Equilibrium: solve for 2 unknowns' },
+    { value: 'constraint', label: 'Resultant has no x- or y-component (1 unknown)' }] }, update);
+  var unkOpts = [], i;
+  for (i = 0; i < NMAX; i++) unkOpts.push({ value: 'F' + i, label: 'magnitude F' + SUB[i] });
+  for (i = 0; i < NMAX; i++) unkOpts.push({ value: 'th' + i, label: 'direction θ' + SUB[i] });
+  unkOpts.push({ value: 'k', label: 'F (the common force in c × F)' });
+  var u1Sel = ui.select(paramCard, { label: 'Unknown 1', value: 'F2', options: unkOpts }, update);
+  var u2Sel = ui.select(paramCard, { label: 'Unknown 2', value: 'th2', options: unkOpts }, update);
+  var axisSel = ui.select(paramCard, { label: 'Condition', value: 'y', options: [
+    { value: 'y', label: 'resultant has no y-component (Y = 0)' }, { value: 'x', label: 'resultant has no x-component (X = 0)' }] }, update);
+  var ucOpts = []; for (i = 0; i < NMAX; i++) ucOpts.push({ value: 'F' + i, label: 'magnitude F' + SUB[i] }); ucOpts.push({ value: 'k', label: 'F (the common force in c × F)' });
+  var ucSel = ui.select(paramCard, { label: 'Unknown', value: 'F1', options: ucOpts }, update);
+  var solSel = ui.select(paramCard, { label: 'Show solution', value: '0', options: [{ value: '0', label: 'solution 1' }, { value: '1', label: 'solution 2' }] }, update);
+  var compsAll = ui.toggle(paramCard, { label: 'Dashed components of every force (resultant always shown)' }, update);
+  var angleMode = ui.select(paramCard, { label: 'Angle arcs', value: 'exam', options: [
+    { value: 'exam', label: 'from the nearest x-direction (exam style)' }, { value: 'std', label: 'anticlockwise from +x (0–360°)' }] }, update);
+
+  var top = ui.params(paramCard, [{ key: 'n', label: 'Number of forces', sym: 'n', unit: '', min: 2, max: NMAX, step: 1, value: 3 }], update);
+  var defaults = [[10, 0], [20, 90], [15, 210], [12, 300], [8, 135]];
+  var blocks = [];
+  for (i = 0; i < NMAX; i++) {
+    var box = ui.h('div', { style: 'border-top:1px solid var(--line);margin-top:8px;padding-top:4px' });
+    paramCard.appendChild(box);
+    box.appendChild(ui.h('div', { html: '<b>Force ' + (i + 1) + '</b>', style: 'font-size:13.5px;margin-top:4px' }));
+    var type = ui.select(box, { label: 'F' + SUB[i] + ' is given as', value: 'N', options: [{ value: 'N', label: 'a number of newtons' }, { value: 'mult', label: 'a multiple of F (c × F)' }] }, update);
+    var p = ui.params(box, [
+      { key: 'F', label: 'Magnitude', sym: 'F' + HSUB(i), unit: 'N', min: 0, max: 200, step: 0.1, value: defaults[i][0] },
+      { key: 'th', label: 'Direction (anticlockwise from +x)', sym: 'θ' + HSUB(i), unit: '°', min: 0, max: 360, step: 0.5, value: defaults[i][1] },
+      { key: 'c', label: 'Multiple of F', sym: 'c' + HSUB(i), unit: '', min: 0, max: 10, step: 0.5, value: 1 }
+    ], update);
+    blocks.push({ box: box, type: type, p: p, locked: {} });
+  }
+  var kp = ui.params(paramCard, [{ key: 'k', label: 'Common force F (used by every c × F force)', sym: 'F', unit: 'N', min: 0, max: 200, step: 0.01, value: 10 }], update);
+  var kLocked = false;
+
+  var exam = ui.examToggle(outCard, outCard);
+  exam.el.querySelector('input').addEventListener('change', function () { update(); });
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Resultant of three forces: 10 N, 20 N, 15 N', mode: 'resultant',
+      forces: [[10, 0], [20, 90], [15, 210]], note: 'X = 10 − 15 cos 30°, Y = 20 − 15 sin 30°. R = 12.9 N at 76.5° above the −x direction (103.5° from +x).' },
+    { name: '9709/41 M/J 24 Q2(b): 20 N at 60° and F = 10 N downwards', mode: 'resultant',
+      forces: [[20, 60], [10, 270]], note: 'MS: X = 20 cos 60° = 10, Y = 20 sin 60° − 10 = 7.32 ⇒ R = 12.4 N at 36.2° above the x-direction.' },
+    { name: '9709/41 M/J 24 Q2(a): resultant has no y-component, find F', mode: 'constraint', axis: 'y', uc: 'F1',
+      forces: [[20, 60], [10, 270]], note: 'Y = 20 sin 60° − F = 0 ⇒ F = 17.3 (MS: 17.3 or 10√3).' },
+    { name: '9709/41 O/N 24 Q3: 52 N, 39 N and P N in equilibrium, find P and θ', mode: 'solve', u1: 'F2', u2: 'th2',
+      forces: [[39, 0], [52, 90], [65, 233]], note: 'In the paper θ is measured below the −x direction: θ = 233.1° − 180° = 53.1°. MS: P cos θ = 39, P sin θ = 52 ⇒ P = 65, θ = 53.1.' },
+    { name: '9709/42 F/M 26 Q3: F N, 2F N and 20 N in equilibrium, find F and θ', mode: 'solve', u1: 'k', u2: 'th0',
+      forces: [[20, 50], [0, 270, 1], [0, 210, 2]], k: 7.5, note: '20 sin θ = F + 2F sin 30°, 20 cos θ = 2F cos 30° ⇒ tan θ = 2/√3. MS: θ = 49.1, F = 7.56.' },
+    { name: '9709/41 M/J 26 Q1: four forces 55 N, 23 N, 20 N, 16 N, find the resultant', mode: 'resultant',
+      forces: [[55, 30], [16, 180], [23, 345], [20, 220]], note: '55 N is 60° from the upward vertical (30° above +x); 20 N is 40° below the −x direction. MS: 39.5 N at 12.7° above the horizontal (to the right).' },
+    { name: 'Two unknown magnitudes with known directions (Cramer’s rule)', mode: 'solve', u1: 'F1', u2: 'F2',
+      forces: [[30, 270], [20, 30], [20, 135]], note: 'det = sin(θ₃ − θ₂) = sin 105°. P = 22.0 N, Q = 26.9 N.' },
+    { name: 'Unknown forces along the same line: no unique solution', mode: 'solve', u1: 'F1', u2: 'F2',
+      forces: [[10, 90], [5, 0], [5, 180]], note: 'Both unknowns are horizontal, so nothing can balance the vertical 10 N: det = sin 180° = 0.' },
+    { name: 'A solved magnitude comes out negative', mode: 'solve', u1: 'F1', u2: 'F2',
+      forces: [[20, 45], [5, 0], [5, 90]], note: 'P and Q would both have to be −14.1 N: the forces must act in the opposite directions to those drawn.' },
+    { name: 'Two unknown directions, both 10 N: two mirror-image solutions', mode: 'solve', u1: 'th1', u2: 'th2',
+      forces: [[10, 270], [10, 0], [10, 90]], note: 'The forces at 30° and 150° (or 150° and 30°) both close the triangle. Switch “Show solution”.' },
+    { name: 'Five forces: the polygon closes only in equilibrium', mode: 'resultant',
+      forces: [[40, 0], [30, 72], [50, 150], [20, 230], [35, 300]], note: 'The force polygon does not close, so the dashed side from start to finish is the resultant.' }
+  ], function (pr) {
+    modeSel.set(pr.mode, true);
+    if (pr.u1) u1Sel.set(pr.u1, true); if (pr.u2) u2Sel.set(pr.u2, true);
+    if (pr.axis) axisSel.set(pr.axis, true); if (pr.uc) ucSel.set(pr.uc, true);
+    solSel.set('0', true); angleMode.set('exam', true);
+    top.set({ n: pr.forces.length }, true);
+    pr.forces.forEach(function (fv, j) {
+      var b = blocks[j]; b.type.set(fv.length > 2 ? 'mult' : 'N', true);
+      unlockAll();
+      b.p.set(fv.length > 2 ? { F: b.p.values.F, th: fv[1], c: fv[2] } : { F: fv[0], th: fv[1] }, true);
+    });
+    if (pr.k !== undefined) kp.set({ k: pr.k }, true);
+    update();
+  });
+
+  ui.notes(noteCard, [
+    'Check which line each angle is measured from. “60° from the vertical” is 30° from the horizontal: then the <b>horizontal</b> component uses <b>sin 60°</b>.',
+    'sin/cos swap: the component <b>next to</b> the angle uses cos, the one <b>opposite</b> it uses sin.',
+    'Signs: give every component a sign from the diagram (right and up positive) before adding. A force pointing left has a negative x-component even if its angle is acute.',
+    'Direction of the resultant: tan⁻¹(|Y| ÷ |X|) only gives the acute angle. Say which way it points, e.g. “76.5° above the −x direction”, and mark it on a diagram.',
+    'Equilibrium ⇔ X = 0 and Y = 0 ⇔ the force polygon (tip to tail) closes.',
+    'A negative magnitude from simultaneous equations means the force acts the other way; it is not a valid answer for a magnitude.',
+    'Lami’s theorem / the triangle of forces are allowed alternatives but not required for 9709: resolving always works.',
+    'Take g = 10 m s<sup>−2</sup> (9709 papers say “use 10”).'
+  ]);
+
+  /* ---------- model ---------- */
+  function parseU(v) { if (v === 'k') return { kind: 'k' }; var mm = /^(F|th)(\d)$/.exec(v); return { kind: mm[1], i: Number(mm[2]) }; }
+  function unlockAll() {
+    blocks.forEach(function (b) { ['F', 'th'].forEach(function (key) { if (b.locked[key]) { b.p.lock(key, false); b.p.set(obj(key, b.p.values[key]), true); b.locked[key] = false; } }); });
+    if (kLocked) { kp.lock('k', false); kp.set({ k: kp.values.k }, true); kLocked = false; }
+  }
+  function obj(k, v) { var o = {}; o[k] = v; return o; }
+  function isUnknown(M, j, kind) {
+    return (M.unk || []).some(function (u) { return u.kind === kind && u.i === j; });
+  }
+  var M = null;
+  function compute() {
+    var n = Math.round(top.values.n), list = [], k = kp.values.k;
+    for (var j = 0; j < n; j++) {
+      var b = blocks[j]; list.push({ F: b.p.values.F, th: b.p.values.th, c: b.type.get() === 'mult' ? b.p.values.c : null });
+    }
+    var out = { n: n, list: list, k: k, mode: modeSel.get(), unk: [], eff: null, sol: null, con: null };
+    if (out.mode === 'solve') {
+      out.unk = [parseU(u1Sel.get()), parseU(u2Sel.get())];
+      out.sol = FO.solveEquilibrium(list, k, out.unk);
+      if (out.sol.solutions.length) {
+        out.solIdx = Math.min(Number(solSel.get()), out.sol.solutions.length - 1);
+        var so = out.sol.solutions[out.solIdx]; out.eff = { list: so.list, k: so.k };
+      }
+    } else if (out.mode === 'constraint') {
+      out.unk = [parseU(ucSel.get())];
+      out.con = FO.solveConstraint(list, k, out.unk[0], axisSel.get());
+      if (out.con.list) out.eff = { list: out.con.list, k: out.con.k };
+    } else out.eff = { list: list, k: k };
+    out.res = out.eff ? FO.resultant(out.eff.list, out.eff.k) : null;
+    return out;
+  }
+  function update() {
+    unlockAll();
+    var n = Math.round(top.values.n), anyMult = false;
+    blocks.forEach(function (b, j) {
+      b.box.style.display = j < n ? '' : 'none';
+      var mult = b.type.get() === 'mult'; if (j < n && mult) anyMult = true;
+      b.p.show('F', !mult); b.p.show('c', mult);
+    });
+    var mode = modeSel.get();
+    u1Sel.row.style.display = u2Sel.row.style.display = mode === 'solve' ? '' : 'none';
+    axisSel.row.style.display = ucSel.row.style.display = mode === 'constraint' ? '' : 'none';
+    M = compute();
+    kp.show('k', anyMult);
+    solSel.row.style.display = M.sol && M.sol.solutions.length > 1 ? '' : 'none';
+    // lock the unknown sliders and show solved values in them
+    M.unk.forEach(function (u, j) {
+      var val = null;
+      if (M.sol && M.sol.solutions.length) val = M.sol.solutions[M.solIdx].vals[j];
+      else if (M.con && M.con.value !== undefined) val = M.con.value;
+      if (u.kind === 'k') { kp.lock('k', true, val === null ? undefined : val); kLocked = true; }
+      else if (u.i < n) {
+        var key = u.kind === 'F' ? 'F' : 'th', b = blocks[u.i];
+        b.p.lock(key, true, val === null ? undefined : val); b.locked[key] = true;
+      }
+    });
+    tableBox.classList.toggle('exam-hidden', exam.get());
+    var hv = {}; hv.n = n; hv.mode = mode;
+    blocks.forEach(function (b, j) { if (j < n) { hv['F' + j] = b.p.values.F; hv['th' + j] = b.p.values.th; hv['c' + j] = b.p.values.c; hv['t' + j] = b.type.get(); } });
+    ui.writeHash(hv);
+    drawScene(); drawPolygon(); drawTable(); readout();
+  }
+
+  /* ---------- drawing helpers ---------- */
+  function forceColor(col, j) { return [col.s1, col.s2, col.s3, col.s4, col.tension][j % 5]; }
+  function fname(j) { return 'F' + SUB[j]; }
+  /** list of drawable forces: {j, mag, th, unknown} — unknown forces without a solution are left out */
+  function drawList() {
+    var out = [];
+    var src = M.eff ? M.eff : { list: M.list, k: M.k };
+    src.list.forEach(function (f, j) {
+      var unknownForce = M.unk.some(function (u) { return (u.kind !== 'k' && u.i === j) || (u.kind === 'k' && FO.isMult(f)); });
+      if (!M.eff && unknownForce) return;
+      var mag = FO.magOf(f, src.k);
+      if (!isFinite(mag)) return;
+      out.push({ j: j, mag: mag, th: f.th, unknown: unknownForce, mult: FO.isMult(f), c: f.c });
+    });
+    return out;
+  }
+  function valueLabel(fd) {
+    var hide = exam.get() && fd.unknown;
+    var base = fname(fd.j) + (fd.mult ? ' = ' + (fd.c === 1 ? '' : U.num(fd.c, 3)) + 'F' : '');
+    return hide ? base : base + ' = ' + U.num(fd.mag, 3) + ' N';
+  }
+  function arcFor(c, x, y, r, th, color, label) {
+    var a = FO.norm360(th), d = FO.dirInfo(a);
+    if (angleMode.get() === 'std') { if (a > 1e-9) D.arc(c, x, y, r, 0, U.rad(a), color, label || (U.dp(a, 1) + '°')); return; }
+    if (d.ref === 'up' || d.ref === 'down' || d.beta < 1e-9) return;
+    var a0 = d.ref === '+x' ? 0 : Math.PI, s = (d.ref === '+x') === (d.side === 'above') ? 1 : -1;
+    D.arc(c, x, y, r, a0, a0 + s * U.rad(d.beta), color, label || (U.dp(d.beta, 1) + '°'));
+  }
+
+  /* ---------- scene: forces from O ---------- */
+  function drawScene() {
+    if (!M) return;
+    var col = ui.colors(), c;
+    vp.fit(-1.25, 1.25, -1.25, 1.25); c = vp.begin();
+    var ox = vp.X(0), oy = vp.Y(0), L = Math.min(vp.w, vp.h) * 0.4;
+    D.line(c, [[vp.X(-1.25) - 200, oy], [vp.X(1.25) + 200, oy]], col.grid, { dash: [4, 4] });
+    D.line(c, [[ox, vp.Y(1.25) - 50], [ox, vp.Y(-1.25) + 50]], col.grid, { dash: [4, 4] });
+    D.label(c, '+x', Math.min(vp.w - 14, ox + L + 30), oy - 10, col.muted, { size: 11 });
+    D.label(c, '+y', ox + 14, Math.max(10, oy - L - 22), col.muted, { size: 11 });
+    var fl = drawList(), mags = fl.map(function (x) { return x.mag; });
+    if (M.res && M.res.R > 0) mags.push(M.res.R);
+    var k = SIM.view.forceScale(mags, L);
+    fl.forEach(function (fd, idx) {
+      var color = forceColor(col, fd.j), ang = U.rad(fd.th);
+      if (compsAll.get() && Math.abs(fd.mag) > 1e-9) {
+        var ux = Math.cos(ang) * fd.mag, uy = Math.sin(ang) * fd.mag;
+        if (Math.abs(ux) > 1e-9) D.arrow(c, ox, oy, ox + ux * k, oy, color, { dash: [4, 4], width: 1.2, head: 7 });
+        if (Math.abs(uy) > 1e-9) D.arrow(c, ox, oy, ox, oy - uy * k, color, { dash: [4, 4], width: 1.2, head: 7 });
+        D.line(c, [[ox + ux * k, oy], [ox + ux * k, oy - uy * k], [ox, oy - uy * k]], color, { dash: [2, 4], width: 1 });
+      }
+      if (Math.abs(fd.mag) > 1e-9) {
+        D.arrowPolar(c, ox, oy, ang, fd.mag * k, color, { label: valueLabel(fd), dash: fd.mag < 0 ? [6, 4] : null });
+        var lab = exam.get() && M.unk.some(function (u) { return u.kind === 'th' && u.i === fd.j; }) ? 'θ' + SUB[fd.j] : null;
+        arcFor(c, ox, oy, 22 + 9 * idx, fd.th, color, lab);
+      }
+    });
+    if (M.res && M.res.R > 0) {
+      var rx = M.res.X * k, ry = M.res.Y * k;
+      if (Math.abs(rx) > 0.5) D.arrow(c, ox, oy, ox + rx, oy, col.component, { dash: [5, 4], width: 1.6, label: exam.get() ? 'X' : 'X = ' + U.num(M.res.X, 3) });
+      if (Math.abs(ry) > 0.5) D.arrow(c, ox, oy, ox, oy - ry, col.component, { dash: [5, 4], width: 1.6, label: exam.get() ? 'Y' : 'Y = ' + U.num(M.res.Y, 3) });
+      D.line(c, [[ox + rx, oy], [ox + rx, oy - ry], [ox, oy - ry]], col.component, { dash: [2, 4], width: 1 });
+      D.arrowPolar(c, ox, oy, U.rad(M.res.dir), M.res.R * k, col.resultant, { width: 3.4, label: exam.get() ? 'R' : 'R = ' + U.num(M.res.R, 3) + ' N' });
+      arcFor(c, ox, oy, 16 + 9 * fl.length + 10, M.res.dir, col.resultant, exam.get() ? 'β' : null);
+    }
+    D.particle(c, ox, oy, 4, {});
+    var msg = null;
+    if (M.res && M.res.equilibrium) msg = { t: 'R = 0: in equilibrium', col: col.ok };
+    else if (!M.eff) msg = { t: 'No valid solution: unknown force not drawn', col: col.warn };
+    else if (M.res && M.res.nearEquilibrium) msg = { t: 'R is under 0.5% of ΣF: approximately in equilibrium', col: col.ok };
+    if (msg) D.label(c, msg.t, vp.w / 2, 14, msg.col, { bold: true, bg: true });
+    D.label(c, 'angles anticlockwise from +x', 8, vp.h - 10, col.muted, { align: 'left', size: 11 });
+  }
+
+  /* ---------- force polygon (tip to tail) ---------- */
+  function drawPolygon() {
+    if (!M) return;
+    var col = ui.colors(), fl = drawList(), pts = [[0, 0]], p0 = [0, 0];
+    fl.forEach(function (fd) { var a = U.rad(fd.th); p0 = [p0[0] + fd.mag * Math.cos(a), p0[1] + fd.mag * Math.sin(a)]; pts.push(p0); });
+    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+    var span = Math.max(x1 - x0, y1 - y0, 1e-9), m = span * 0.18;
+    vp2.fit(x0 - m, x1 + m, y0 - m - span * 0.08, y1 + m);
+    var c = vp2.begin();
+    D.label(c, 'Force polygon (tip to tail)', 8, 12, col.muted, { align: 'left', size: 12, bold: true });
+    fl.forEach(function (fd, idx) {
+      if (Math.abs(fd.mag) < 1e-9) return;
+      var a = pts[idx], b = pts[idx + 1];
+      D.arrow(c, vp2.X(a[0]), vp2.Y(a[1]), vp2.X(b[0]), vp2.Y(b[1]), forceColor(col, fd.j), { label: fname(fd.j), dash: fd.mag < 0 ? [6, 4] : null });
+    });
+    D.particle(c, vp2.X(0), vp2.Y(0), 3.5, {});
+    var end = pts[pts.length - 1], closed = M.res ? M.res.equilibrium : Math.hypot(end[0], end[1]) <= 1e-9 * Math.max(1, span);
+    if (!closed && Math.hypot(end[0], end[1]) > 0) {
+      D.arrow(c, vp2.X(0), vp2.Y(0), vp2.X(end[0]), vp2.Y(end[1]), col.resultant, { dash: [6, 4], width: 2.4, label: 'R' });
+      D.label(c, 'gap = resultant R (start → finish)', vp2.w / 2, vp2.h - 12, col.muted, { size: 12 });
+    } else D.label(c, 'polygon closes ⇒ equilibrium', vp2.w / 2, vp2.h - 12, col.ok, { size: 12, bold: true });
+  }
+
+  /* ---------- component table ---------- */
+  function drawTable() {
+    var fl = drawList(), rows = '';
+    fl.forEach(function (fd) {
+      var a = U.rad(fd.th), d = FO.dirInfo(fd.th), x = fd.mag * Math.cos(a), y = fd.mag * Math.sin(a);
+      if (Math.abs(x) < 1e-12 * Math.max(1, Math.abs(fd.mag))) x = 0; if (Math.abs(y) < 1e-12 * Math.max(1, Math.abs(fd.mag))) y = 0;
+      var cls = fd.unknown ? ' class="res"' : '';
+      rows += '<tr><td>' + fname(fd.j) + '</td><td' + cls + '>' + U.sf(fd.mag) + '</td><td' + cls + '>' + U.dp(FO.norm360(fd.th), 1) + '°</td><td' + cls + '>' + d.text + '</td><td' + cls + '>' + U.sf(x) + '</td><td' + cls + '>' + U.sf(y) + '</td></tr>';
+    });
+    if (M.res) rows += '<tr><th>Σ</th><th></th><th></th><th></th><th class="res">X = ' + U.sf(M.res.X) + '</th><th class="res">Y = ' + U.sf(M.res.Y) + '</th></tr>';
+    tableBox.innerHTML = '<table class="tbl"><tr><th>force</th><th>F / N</th><th>θ</th><th>direction</th><th>F cos θ</th><th>F sin θ</th></tr>' + rows + '</table>' +
+      '<p style="font-size:12.5px;color:var(--muted)">x to the right, y up; θ anticlockwise from +x.</p>';
+  }
+
+  /* ---------- live working ---------- */
+  function sq(v) { return (v < 0 ? '(' + U.sf(v) + ')' : U.sf(v)) + '²'; }
+  function cstr(cv) { return cv === 1 ? '' : U.num(cv, 3); }
+  /** exam-style term for one force on one axis. f: force, j: index, opts {magSym, thSym} */
+  function term(f, j, axis, kUnknown) {
+    var unkMag = isUnknown(M, j, 'F'), unkTh = isUnknown(M, j, 'th');
+    var symbolic = unkMag || (FO.isMult(f) && kUnknown), mv = FO.isMult(f) ? f.c * M.k : f.F, fl = !symbolic && mv < 0 ? -1 : 1;
+    var mag = FO.isMult(f) ? (kUnknown ? cstr(f.c) + 'F' : U.num(Math.abs(mv), 4)) : (unkMag ? 'F' + HSUB(j) : U.num(Math.abs(mv), 4));
+    if (unkTh) return { s: mag + (axis === 'x' ? ' cos θ' : ' sin θ') + HSUB(j), sign: fl };
+    var d = FO.dirInfo(f.th);
+    if (d.ref === 'up' || d.ref === 'down') return axis === 'x' ? null : { s: mag, sign: fl * (d.ref === 'up' ? 1 : -1) };
+    if (axis === 'x') return { s: d.beta < 1e-9 ? mag : mag + ' cos ' + U.num(d.beta, 2) + '°', sign: fl * (d.ref === '+x' ? 1 : -1) };
+    if (d.beta < 1e-9) return null;
+    return { s: mag + ' sin ' + U.num(d.beta, 2) + '°', sign: fl * (d.side === 'above' ? 1 : -1) };
+  }
+  function joinTerms(ts) {
+    var s = ''; ts.forEach(function (t, q) { if (!t) return; s += (s === '' ? (t.sign < 0 ? '−' : '') : (t.sign < 0 ? ' − ' : ' + ')) + t.s; });
+    return s === '' ? '0' : s;
+  }
+  function joinNums(vals) {
+    var s = ''; vals.forEach(function (v) { if (Math.abs(v) < 1e-12) return; s += (s === '' ? (v < 0 ? '−' : '') : (v < 0 ? ' − ' : ' + ')) + U.sf(Math.abs(v)); });
+    return s === '' ? '0' : s;
+  }
+  function axisLine(list, axis, kUnknown) { return joinTerms(list.map(function (f, j) { return term(f, j, axis, kUnknown); })); }
+  function unkLabel(u) { return u.kind === 'k' ? 'F' : (u.kind === 'F' ? 'F' : 'θ') + HSUB(u.i); }
+  function angleText(v) { return U.dp(v, 1) + '° (' + FO.dirInfo(v).text + ')'; }
+
+  function resultantBlock(res, title) {
+    R.head(title);
+    var nx = res.comps.map(function (q) { return q.x; }), ny = res.comps.map(function (q) { return q.y; });
+    var effList = M.eff.list;
+    var saveUnk = M.unk; M.unk = [];               // show substituted numbers for solved unknowns
+    var saveK = M.k; M.k = M.eff.k;
+    R.eq('X', 'ΣF cos θ = ' + axisLine(effList, 'x', false) + ' = ' + joinNums(nx), res.X, 'N');
+    R.eq('Y', 'ΣF sin θ = ' + axisLine(effList, 'y', false) + ' = ' + joinNums(ny), res.Y, 'N');
+    M.unk = saveUnk; M.k = saveK;
+    R.eq('R', '√(X² + Y²) = √(' + sq(res.X) + ' + ' + sq(res.Y) + ')', res.R, 'N');
+    if (res.R > 0) {
+      var d = FO.dirInfo(res.dir);
+      if (d.ref === 'up' || d.ref === 'down') R.eq('direction', 'X = 0', d.text);
+      else if (Math.abs(res.Y) === 0) R.eq('direction', 'Y = 0', d.text);
+      else R.eq('β', 'tan⁻¹(|Y| ÷ |X|) = tan⁻¹(' + U.sf(Math.abs(res.Y)) + ' ÷ ' + U.sf(Math.abs(res.X)) + ')', U.dp(d.beta, 1) + '°', d.side + ' the ' + d.ref + ' direction');
+      R.eq('θ<sub>R</sub>', 'anticlockwise from +x', U.dp(res.dir, 1) + '°');
+    }
+  }
+
+  function readout() {
+    if (!M) return;
+    R.clear();
+    var res = M.res, kUnk = M.unk.some(function (u) { return u.kind === 'k'; });
+    R.html('<div style="font-size:12.5px;color:var(--muted)">Sign convention: x to the right, y up (positive). θ is measured anticlockwise from +x.</div>');
+    if (M.mode === 'resultant') {
+      if (res.equilibrium) R.badge('Resultant is zero: the forces are in equilibrium', 'ok');
+      else if (res.nearEquilibrium) R.badge('R is less than 0.5% of ΣF: approximately in equilibrium (check rounding)', 'info');
+      else R.badge('Not in equilibrium: resultant ' + U.sf(res.R) + ' N', 'info');
+      resultantBlock(res, 'Resolve in two perpendicular directions');
+    } else if (M.mode === 'solve') {
+      var sol = M.sol;
+      R.head('Equilibrium: each component sum is zero');
+      if (sol.status === 'invalid') { R.badge(sol.message, 'warn').render(); return; }
+      R.eq('→', axisLine(M.list, 'x', kUnk) + ' = 0', '');
+      R.eq('↑', axisLine(M.list, 'y', kUnk) + ' = 0', '');
+      var u = M.unk;
+      if (sol.method === 'magdir') {
+        var j = u[0].kind === 'F' ? u[0].i : u[1].i;
+        R.head('The unknown force must cancel the resultant of the others');
+        R.eq('F' + HSUB(j) + ' cos θ' + HSUB(j), '−(x-components of the known forces)', sol.Xp, 'N');
+        R.eq('F' + HSUB(j) + ' sin θ' + HSUB(j), '−(y-components of the known forces)', sol.Yp, 'N');
+        if (sol.status === 'zero') { R.badge(sol.message, 'warn'); }
+        else {
+          var vs = sol.solutions[0].vals, P = u[0].kind === 'F' ? vs[0] : vs[1], th = u[0].kind === 'F' ? vs[1] : vs[0];
+          R.eq('F' + HSUB(j), 'square and add: √(' + sq(sol.Xp) + ' + ' + sq(sol.Yp) + ')', P, 'N');
+          var di = FO.dirInfo(th);
+          R.eq('θ' + HSUB(j), (di.ref === 'up' || di.ref === 'down' || Math.abs(sol.Yp) === 0 ? 'one component is zero' : 'divide: tan⁻¹(' + U.sf(Math.abs(sol.Yp)) + ' ÷ ' + U.sf(Math.abs(sol.Xp)) + ') = ' + U.dp(di.beta, 1) + '°, then use the signs'), angleText(th));
+          R.badge('Solved: the force polygon closes', 'ok');
+        }
+      } else if (sol.method === 'cramer') {
+        var twoMags = u[0].kind === 'F' && u[1].kind === 'F';
+        if (twoMags) R.eq('det', 'sin(θ' + HSUB(u[1].i) + ' − θ' + HSUB(u[0].i) + ') = sin(' + U.num(M.list[u[1].i].th, 2) + '° − ' + U.num(M.list[u[0].i].th, 2) + '°)', sol.det);
+        else R.eq('det', 'a₁b₂ − a₂b₁ of the coefficients of the unknowns = ' + U.sf(sol.c1[0]) + ' × ' + U.sf(sol.c2[1]) + ' − ' + U.sf(sol.c2[0]) + ' × ' + U.sf(sol.c1[1]), sol.det);
+        if (/parallel/.test(sol.status)) R.badge(sol.message, 'warn');
+        else {
+          var s0 = sol.solutions[0];
+          R.eq(unkLabel(u[0]), 'solve simultaneously (Cramer’s rule)', s0.vals[0], 'N');
+          R.eq(unkLabel(u[1]), 'solve simultaneously (Cramer’s rule)', s0.vals[1], 'N');
+          if (sol.status === 'negative') R.badge('A magnitude came out negative: that force would have to act in the opposite direction. No equilibrium with the directions as given.', 'warn');
+          else R.badge('Solved: the force polygon closes', 'ok');
+        }
+      } else {
+        R.html('<div style="font-size:12.5px;color:var(--muted)">Solved numerically (Newton–Raphson from 12 starting angles). By hand: make one equation give sin θ and the other cos θ, then divide (tan θ) or square and add.</div>');
+        if (sol.status === 'none' || sol.status === 'many') R.badge(sol.message, 'warn');
+        sol.solutions.forEach(function (s, q) {
+          if (sol.solutions.length > 1) R.head('Solution ' + (q + 1) + (q === M.solIdx ? ' (drawn)' : ''));
+          s.vals.forEach(function (v, qq) { R.eq(unkLabel(u[qq]), u[qq].kind === 'th' ? 'direction' : 'magnitude', u[qq].kind === 'th' ? angleText(v) : v, u[qq].kind === 'th' ? '' : 'N'); });
+        });
+        if (sol.status === 'ok') R.badge(sol.solutions.length > 1 ? 'Two solutions: both close the polygon (use “Show solution”)' : 'Solved: the force polygon closes', 'ok');
+      }
+      if (M.eff) resultantBlock(res, 'Check with the solved values');
+    } else {
+      var con = M.con, ax = axisSel.get(), uu = M.unk[0];
+      R.head('Condition: ' + (ax === 'y' ? 'Y' : 'X') + ' = 0');
+      if (con.status === 'invalid') { R.badge(con.message, 'warn').render(); return; }
+      R.eq(ax === 'y' ? 'Y' : 'X', axisLine(M.list, ax, kUnk) + ' = 0', '');
+      if (con.status === 'impossible' || con.status === 'any') { R.badge(con.message, 'warn').render(); return; }
+      R.eq(unkLabel(uu), '−(' + (ax === 'y' ? 'y' : 'x') + '-components of the others) ÷ ' + (ax === 'y' ? 'sin' : 'cos') + ' θ = −(' + U.sf(con.known) + ') ÷ ' + U.sf(con.col), con.value, 'N');
+      if (con.status === 'negative') R.badge('Negative: the force would have to act in the opposite direction', 'warn');
+      if (M.eff) resultantBlock(res, 'Resultant with this value');
+    }
+    R.render();
+  }
+
+  ui.onTheme(function () { drawScene(); drawPolygon(); });
+  vp.onResize = drawScene; vp2.onResize = drawPolygon;
+  // restore a shared set-up from the URL hash
+  var hsh = ui.readHash();
+  if (typeof hsh.n === 'number') {
+    top.set({ n: U.clamp(Math.round(hsh.n), 2, NMAX) }, true);
+    if (hsh.mode === 'resultant' || hsh.mode === 'solve' || hsh.mode === 'constraint') modeSel.set(hsh.mode, true);
+    blocks.forEach(function (b, j) {
+      if (hsh['t' + j] === 'mult' || hsh['t' + j] === 'N') b.type.set(hsh['t' + j], true);
+      var o = {}; ['F', 'th', 'c'].forEach(function (key) { if (typeof hsh[key + j] === 'number') o[key] = hsh[key + j]; });
+      b.p.set(o, true);
+    });
+  }
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

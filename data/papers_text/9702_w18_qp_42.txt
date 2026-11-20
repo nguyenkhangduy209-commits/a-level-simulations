@@ -1,0 +1,609 @@
+*9693379253*
+Cambridge International Examinations
+Cambridge International Advanced Subsidiary and Advanced Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions October/November 2018
+2 hours
+Candidates answer on the Question Paper.
+No Additional Materials are required.
+READ THESE INSTRUCTIONS FIRST
+Write your Centre number, candidate number and name on all the work you hand in.
+Write in dark blue or black pen.
+You may use an HB pencil for any diagrams or graphs.
+Do not use staples, paper clips, glue or correction fluid.
+DO NOT WRITE IN ANY BARCODES.
+Answer all questions.
+Electronic calculators may be used.
+You may lose marks if you do not show your working or if you do not use appropriate units.
+At the end of the examination, fasten all your work securely together.
+The number of marks is given in brackets [ ] at the end of each question or part question.
+This document consists of 27 printed pages and 1 blank page.
+DC (ST/FC) 146701/4
+© UCLES 2018 [Turn over
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2018 9702/42/O/N/18
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1
+2
+at2
+v2 = u2 + 2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω √  ( x  2  –   x 2 )
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2018 9702/42/O/N/18 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 (a) (i) State what is meant by gravitational field strength.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[1]
+(ii) Explain why, at the surface of a planet, gravitational field strength is numerically equal to
+the acceleration of free fall.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[1]
+(b) An isolated uniform spherical planet has radius R.
+The acceleration of free fall at the surface of the planet is g.
+On Fig. 1.1, sketch a graph to show the variation of the acceleration of free fall with distance
+x from the centre of the planet for values of x in the range x = R to x = 4R.
+1.00 g
+acceleration
+of free fall 0.75 g
+0.50 g
+0.25 g
+0
+0 R 2R 3R 4R
+x
+Fig. 1.1
+[3]
+© UCLES 2018 9702/42/O/N/18
+
+5
+(c) The planet in (b) has radius R equal to 3.4 × 103 km and mean density 4.0 × 103 kg m–3.
+Calculate the acceleration of free fall at a height R above its surface.
+acceleration of free fall = ................................................. m s–2 [3]
+[Total: 8]
+© UCLES 2018 9702/42/O/N/18 [Turn over
+
+6
+2 (a) State what is meant by an ideal gas.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) An ideal gas comprised of single atoms is contained in a cylinder and has a volume of
+1.84 × 10–2 m3 at a pressure of 2.12 × 107 Pa.
+The mass of gas in the cylinder is 3.20 kg.
+(i) Determine, to three significant figures, the root-mean-square (r.m.s.) speed of the atoms
+of the gas.
+r.m.s. speed = ..................................................m s–1 [3]
+© UCLES 2018 9702/42/O/N/18
+
+7
+(ii) The temperature of the gas in the cylinder is 22 °C.
+Determine, to three significant figures,
+1. the amount, in mol, of the gas,
+amount = ................................................... mol [2]
+2. the mass of one atom of the gas.
+mass = ..................................................... kg [2]
+(c) Use your answer in (b)(ii) part 2 to determine the nucleon number A of an atom of the gas.
+A = .......................................................... [1]
+[Total: 10]
+© UCLES 2018 9702/42/O/N/18 [Turn over
+
+8
+3 (a) Define specific latent heat of fusion.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) A student sets up the apparatus shown in Fig. 3.1 in order to investigate the melting of ice.
+A
++
+V
+–
+pure melting
+ice
+heater
+beaker
+water
+Fig. 3.1
+The heater is switched on.
+When the pure ice is melting at a constant rate, the data shown in Fig. 3.2 are collected.
+initial mass of final mass of
+voltmeter reading ammeter reading time of collection
+beaker beaker
+/ V / A / minutes
+plus water / g plus water / g
+12.8 4.60 121.5 185.0 5.00
+Fig. 3.2
+The specific latent heat of fusion of ice is 332 J g–1.
+(i) State what is observed by the student that shows that the ice is melting at a constant
+rate.
+...........................................................................................................................................
+.......................................................................................................................................[1]
+© UCLES 2018 9702/42/O/N/18
+
+9
+(ii) Use the data in Fig. 3.2 to determine the rate at which
+1. thermal energy is transferred to the melting ice,
+rate = .......................................................... W
+2. thermal energy is gained from the surroundings.
+rate = .......................................................... W
+[4]
+[Total: 7]
+© UCLES 2018 9702/42/O/N/18 [Turn over
+
+10
+4 A U-tube contains liquid, as shown in Fig. 4.1.
+x
+x
+liquid
+L
+Fig. 4.1 Fig. 4.2
+The total length of the liquid column is L.
+The column of liquid is displaced so that the change in height of the liquid level from the equilibrium
+position in each arm of the U-tube is x, as shown in Fig. 4.2.
+The liquid in the U-tube then oscillates such that its acceleration a is given by the expression
+2g
+a =- x
+d L n
+where g is the acceleration of free fall.
+(a) Show that the liquid column undergoes simple harmonic motion.
+[2]
+© UCLES 2018 9702/42/O/N/18
+
+11
+(b) The variation with time t of the displacement x is shown in Fig. 4.3.
++2.0
+x / cm
++1.0
+0
+0 0.25 0.50 0.75 1.00 1.25 1.50
+t / s
+–1.0
+–2.0
+Fig. 4.3
+Use data from Fig. 4.3 to determine the length L of the liquid column.
+L = ...................................................... m [3]
+© UCLES 2018 9702/42/O/N/18 [Turn over
+
+12
+(c) The oscillations shown in Fig. 4.3 are damped.
+(i) Suggest one cause of this damping.
+...........................................................................................................................................
+.......................................................................................................................................[1]
+(ii) Calculate the ratio
+total energy of oscillations after 1.5 complete oscillations
+total initial energy of oscillations
+ratio = .......................................................... [2]
+[Total: 8]
+© UCLES 2018 9702/42/O/N/18
+
+13
+BLANK PAGE
+© UCLES 2018 9702/42/O/N/18 [Turn over
+
+14
+5 (a) In radio communication, the radio wave is usually modulated.
+State what is meant by amplitude modulation (AM ).
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) A sinusoidal radio carrier wave has a frequency of 900 kHz and an unmodulated amplitude
+measured to be 4.0 V.
+The carrier wave is amplitude modulated by a signal of frequency 5.0 kHz.
+For the amplitude modulated wave,
+(i) determine the wavelength,
+wavelength = ...................................................... m [1]
+(ii) describe the amplitude variation,
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(iii) state the bandwidth.
+bandwidth = .................................................... Hz [1]
+(c) Communication is sometimes made using satellites in geostationary orbits that have a period
+of rotation about the Earth of 24 hours.
+(i) State two other features, apart from the period, of a geostationary orbit.
+1. .......................................................................................................................................
+...........................................................................................................................................
+2. .......................................................................................................................................
+...........................................................................................................................................
+[2]
+© UCLES 2018 9702/42/O/N/18
+
+15
+(ii) Suggest why
+1. frequencies of the order of gigahertz are used for satellite communication,
+...........................................................................................................................................
+.......................................................................................................................................[1]
+2. the uplink frequency to the satellite is different from the downlink frequency.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+[Total: 11]
+© UCLES 2018 9702/42/O/N/18 [Turn over
+
+16
+6 (a) State
+(i) what is meant by the electric potential at a point,
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) the relationship between electric potential at a point and electric field strength at the
+point.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(b) Two similar solid metal spheres A and B, each of radius R, are situated in a vacuum such that
+the separation of their centres is D, as shown in Fig. 6.1.
+D
+x
+P
+sphere A sphere B
+R R
+charge +Q charge +q
+Fig. 6.1
+The charge +Q on sphere A is larger than the charge +q on sphere B.
+A movable point P is located on the line joining the centres of the two spheres.
+The point P is a distance x from the centre of sphere A.
+© UCLES 2018 9702/42/O/N/18
+
+17
+On Fig. 6.2, sketch a graph to show the variation with x of the electric potential V between the
+centres of the two spheres.
+V
+0
+0 D x
+surface of surface of
+sphere A sphere B
+Fig. 6.2
+[4]
+[Total: 8]
+© UCLES 2018 9702/42/O/N/18 [Turn over
+
+18
+7 A circuit incorporating an ideal operational amplifier (op-amp) is shown in Fig. 7.1.
++5.0 V
++5.0 V
+R 1.8 kΩ
+T –
++
+–5.0 V
+V
+OUT
+R 2.4 kΩ
+Fig. 7.1
+The variation with temperature θ of the resistance R of the thermistor is shown in Fig. 7.2.
+T
+3.4
+3.3
+R / kΩ
+T
+3.2
+3.1
+3.0
+2 3 4 5 6 7
+θ / °C
+Fig. 7.2
+© UCLES 2018 9702/42/O/N/18
+
+19
+(a) The output potential V of the op-amp circuit changes sign when the temperature of the
+OUT
+thermistor is 4.0 °C.
+Calculate the resistance R.
+R = .................................................... kΩ [2]
+(b) State and explain whether the output potential V is +5.0 V or −5.0 V for a thermistor
+OUT
+temperature of 2.5 °C.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[3]
+(c) The output of the op-amp is to be displayed using two light-emitting diodes (LEDs) labelled G
+and B.
+When the temperature of the thermistor is below 4.0 °C, only the LED labelled G emits light.
+The LED labelled B emits light only when the temperature of the thermistor is above 4.0 °C.
+On Fig. 7.1, draw and label the symbols for the two LEDs. [3]
+[Total: 8]
+© UCLES 2018 9702/42/O/N/18 [Turn over
+
+20
+8 (a) Define magnetic flux density.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[3]
+(b) A stiff copper wire is balanced horizontally on a pivot, as shown in Fig. 8.1.
+7.5 cm
+P pivot stiff wire
+S
+Q
+R
+Fig. 8.1
+Sections PQ, QR and RS of the wire are situated in a uniform magnetic field of flux density B
+produced between the poles of a permanent magnet.
+The perpendicular distance of PQRS from the pivot is 7.5 cm.
+When a current of 2.7 A is passed through the wire, a small mass of 45 mg is placed a distance
+8.8 cm from the pivot in order to restore the balance of the wire, as shown in Fig. 8.2.
+small mass
+7.5 cm 8.8 cm
+2.7 A
+2.7 A
+P pivot stiff wire
+S
+Q
+R
+pole pieces
+of magnet
+Fig. 8.2
+© UCLES 2018 9702/42/O/N/18
+
+21
+(i) Explain why, when the current is switched on, the current in the sections PQ and RS of
+the wire does not affect the balance of the wire.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) The length of section QR of the wire is 1.2 cm.
+Calculate the magnetic flux density B.
+B = ....................................................... T [3]
+[Total: 8]
+© UCLES 2018 9702/42/O/N/18 [Turn over
+
+22
+9 (a) A Hall probe is placed near one end of a solenoid that has been wound on a soft-iron core, as
+shown in Fig. 9.1.
+soft-iron
++ –
+core
+solenoid Hall probe
+V
+Fig. 9.1
+The current in the solenoid is switched on.
+The Hall probe is rotated until the reading V on the voltmeter is maximum.
+H
+The current in the solenoid is then varied, causing the magnetic flux density to change.
+The variation with time t of the magnetic flux density B at the Hall probe is shown in Fig. 9.2.
+2
+B / mT
+1
+0
+0 t t t t t
+1 2 3 4
+–1
+–2
+Fig. 9.2
+At time t = 0, the Hall voltage is V .
+0
+On Fig. 9.3, draw a line to show the variation with time t of the Hall voltage V for time t = 0 to
+H
+time t = t .
+4
+V
+H
+V
+0
+0
+0 t t t t t
+1 2 3 4
+Fig. 9.3
+[2]
+© UCLES 2018 9702/42/O/N/18
+
+23
+(b) The Hall probe in (a) is now replaced by a small coil of wire connected to a sensitive voltmeter,
+as shown in Fig. 9.4.
+soft-iron
++ –
+core
+solenoid small coil
+of wire
+V
+Fig. 9.4
+The magnetic flux density, normal to the plane of the small coil, is again varied as shown in
+Fig. 9.2.
+On Fig. 9.5, draw a line to show the variation with time t of the e.m.f. E induced in the small
+coil for time t = 0 to time t = t .
+4
+E
+0
+0 t t t t t
+1 2 3 4
+Fig. 9.5
+[3]
+[Total: 5]
+© UCLES 2018 9702/42/O/N/18 [Turn over
+
+24
+10 (a) The root-mean-square (r.m.s.) value of the voltage of a sinusoidal alternating supply is 9.9 V.
+The frequency of the supply is 50 Hz.
+Derive an expression for the variation with time t (in second) of the potential difference V
+(in volt) of the supply.
+V = .......................................................... [2]
+(b) Explain the function of the non-uniform magnetic field superposed on the large constant
+magnetic field in diagnosis using magnetic resonance imaging (NMRI).
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[3]
+© UCLES 2018 9702/42/O/N/18
+
+25
+(c) A parallel beam of X-rays of intensity I is incident normally on some soft tissue and bone, as
+0
+illustrated in Fig. 10.1.
+0.40 cm
+incident
+transmitted
+intensity I 0 bone intensity I
+soft tissue
+1.8 cm
+Fig. 10.1
+The bone is 0.40 cm thick and the total thickness of the bone and the soft tissue is 1.8 cm.
+The intensity of the transmitted beam is I.
+Data for the linear attenuation (absorption) coefficient μ of bone and of soft tissue are given in
+Fig. 10.2.
+μ / cm–1
+bone 2.9
+soft tissue 0.92
+Fig. 10.2
+Calculate, in dB, the ratio
+transmitted intensity I
+.
+incident intensity I
+0
+ratio = .................................................... dB [4]
+[Total: 9]
+© UCLES 2018 9702/42/O/N/18 [Turn over
+
+26
+11 (a) State what is meant by a photon.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) Describe the appearance of a visible line emission spectrum, as seen using a diffraction
+grating.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(c) The lowest electron energy levels in an isolated hydrogen atom are shown in Fig. 11.1.
+– 0.54 – 0.38
+– 0.85
+–1.50
+– 3.40
+energy / eV
+–13.6
+Fig. 11.1 (not to scale)
+(i) An electron is initially at the energy level –0.85 eV. State the total number of different
+wavelengths that may be emitted as the electron de-excites (loses energy).
+number = .......................................................... [1]
+© UCLES 2018 9702/42/O/N/18
+
+27
+(ii) Photons resulting from electron de-excitation from the –0.85 eV energy level are incident
+on the surface of a sample of platinum.
+Platinum has a work function energy of 5.6 eV.
+Determine
+1. the maximum kinetic energy, in eV, of a photoelectron emitted from the surface of
+the platinum,
+maximum energy = .................................................... eV [2]
+2. the wavelength of the photon producing the photoelectron in (ii) part 1.
+wavelength = ...................................................... m [3]
+[Total: 10]
+12 (a) State what is meant by nuclear fusion and nuclear fission.
+nuclear fusion: ..........................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+nuclear fission: ..........................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+[3]
+© UCLES 2018 9702/42/O/N/18 [Turn over
+
+28
+(b) A nuclear reaction which may, in the future, be used for the generation of electrical energy is
+2H+3H 4He+x.
+1 1 2
+(i) Name the particle x.
+.......................................................................................................................................[1]
+(ii) Data for the binding energy per nucleon E of some nuclei are given in Fig. 12.1.
+B
+binding energy per nucleon
+E / 10–13 J
+B
+deuterium 2H 1.7813
+1
+tritium 3H 4.5285
+1
+helium 4He 11.3290
+2
+Fig. 12.1
+1. State the binding energy per nucleon of x.
+binding energy per nucleon = ............................................................ J
+2. Calculate the energy change that takes place in this reaction.
+energy change = ............................................................ J
+[3]
+(iii) Use your answer in (ii) part 2 to determine the energy release when 2.0 g of deuterium (
+2H)
+1
+reacts with 3.0 g of tritium (
+3H).
+1
+energy = ....................................................... J [1]
+[Total: 8]
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge International
+Examinations Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download at www.cie.org.uk after
+the live examination series.
+© UCLES 2018 9702/42/O/N/18

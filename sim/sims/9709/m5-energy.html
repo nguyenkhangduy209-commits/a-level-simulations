@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Work and energy</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/mech-energy.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, EN = SIM.energy;
+  var course = ui.course('9709'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Work–energy along a slope or path', g: g,
+    tags: course === '9702' ? ['9702 5 Work, energy and power'] : ['9709 4.5 Energy, work and power', '9709 4.1 Friction'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 18 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 4, onFrame: function () { drawScene(); drawBars(); drawPlots(); readout(); } });
+  ui.legend(sceneCard, [{ color: 'var(--c-s1)', label: 'kinetic energy' }, { color: 'var(--c-s2)', label: 'gravitational PE (relative to start)' },
+    { color: 'var(--c-friction)', label: 'work against resistance' }, { color: 'var(--c-applied)', label: 'work done by P and the engine' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var barCv = ui.canvas(plotWrap); var bvp = new SIM.view.Viewport(barCv, { pad: 8 });
+  var pE = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'energy / J', xLabel: 'distance travelled / m' });
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var pathSel = ui.select(paramCard, { label: 'Path', value: 'slope', options: [{ value: 'slope', label: 'straight slope (θ, length L)' },
+    { value: 'drop', label: 'plane: vertical drop h over length L' }, { value: 'curve', label: 'smooth curved path: drop h (only Δh matters)' }] }, update);
+  var dirSel = ui.select(paramCard, { label: 'Direction', value: 'up', options: [{ value: 'up', label: 'projected / moving UP the slope' }, { value: 'down', label: 'moving DOWN the slope' }] }, update);
+  var prm = ui.params(paramCard, [
+    { key: 'm', label: 'Mass', sym: 'm', unit: 'kg', min: 0.1, max: 200000, step: 0.1, value: 3 },
+    { key: 'u', label: 'Initial speed', sym: 'u', unit: 'm s<sup>−1</sup>', min: 0, max: 60, step: 0.01, value: 8 },
+    { key: 'theta', label: 'Slope angle', sym: 'θ', unit: '°', min: 0, max: 80, step: 0.01, value: 30 },
+    { key: 'L', label: 'Path length', sym: 'L', unit: 'm', min: 0.1, max: 5000, step: 0.01, value: 20 },
+    { key: 'h', label: 'Vertical drop along the path (negative = rise)', sym: 'h', unit: 'm', min: -500, max: 500, step: 0.01, value: 5, hidden: true },
+    { key: 'F', label: 'Constant resistance force', sym: 'F', unit: 'N', min: 0, max: 60000, step: 0.01, value: 0, hidden: true },
+    { key: 'mu', label: 'Coefficient of friction', sym: 'μ', unit: '', min: 0, max: 1.5, step: 0.0001, value: 0.1443 },
+    { key: 'P', label: 'Applied force P', sym: 'P', unit: 'N', min: 0, max: 100000, step: 0.1, value: 0 },
+    { key: 'phi', label: 'Angle of P to the direction of motion (+ away from the surface)', sym: 'φ', unit: '°', min: -89, max: 89, step: 0.5, value: 0 },
+    { key: 'Wx', label: 'Extra work against resistance (given as a total)', sym: 'W<sub>x</sub>', unit: 'J', min: 0, max: 50000000, step: 1, value: 0 },
+    { key: 'We', label: 'Work done by the engine / person', sym: 'W<sub>eng</sub>', unit: 'J', min: 0, max: 200000000, step: 1, value: 0 },
+    { key: 'vT', label: 'Known final speed (for “solve for”)', sym: 'v', unit: 'm s<sup>−1</sup>', min: 0, max: 60, step: 0.01, value: 4, hidden: true },
+    { key: 'tA', label: 'Time taken (for average power, 0 = not given)', sym: 't', unit: 's', min: 0, max: 600, step: 0.01, value: 0 }
+  ], update);
+  var resSel = ui.select(paramCard, { label: 'Resistance', value: 'mu', options: [{ value: 'none', label: 'none (smooth) — or only W_x' }, { value: 'force', label: 'constant force F' }, { value: 'mu', label: 'friction μR (straight slope only)' }] }, update);
+  var solveSel = ui.select(paramCard, { label: 'Solve for', value: 'v', options: [{ value: 'v', label: 'final speed v' }, { value: 'F', label: 'resistance force F (given v)' },
+    { value: 'mu', label: 'coefficient of friction μ (given v)' }, { value: 'd', label: 'distance d to reach v (straight slope)' },
+    { value: 'Wx', label: 'work against resistance W_x (given v)' }, { value: 'Weng', label: 'work done by the engine (given v)' }] }, update);
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+  function fmtX(x) {
+    if (typeof x !== 'number' || !isFinite(x)) return U.sf(x);
+    for (var d = 0; d <= 4; d++) {
+      var y = x * Math.pow(10, d);
+      if (Math.abs(y - Math.round(y)) < 1e-9 * Math.max(1, Math.abs(y))) {
+        var str = x.toFixed(d), dig = str.replace(/[-.]/g, '').replace(/^0+/, '').length;
+        return dig <= 6 && Math.abs(x) < 1e6 && (Math.abs(x) >= 1e-3 || x === 0) ? str.replace('-', '−') : U.sf(x);
+      }
+    }
+    return U.sf(x);
+  }
+  function plain(x) { return Math.abs(x) >= 1e6 ? x.toExponential(3).replace('e+', ' × 10^') : String(Number(x.toPrecision(4))); }
+  var eq0 = R.eq; R.eq = function (l, w, v, u) { return eq0(l, w, typeof v === 'number' ? fmtX(v) : v, u); };
+
+  var base = { m: 1, u: 0, theta: 0, L: 10, h: 0, F: 0, mu: 0, P: 0, phi: 0, Wx: 0, We: 0, vT: 0, tA: 0 };
+  function pre(name, path, vals, o, note) { return Object.assign({ name: name, path: path, values: Object.assign({}, base, vals), note: note }, o); }
+  var presetList = [
+    pre('9709/42 O/N 23 Q1: 15 kg block slides down, drop 1.6 m, 2 → 4 m s⁻¹: work against resistance', 'drop', { m: 15, u: 2, h: 1.6, L: 4, vT: 4 }, { res: 'none', solve: 'Wx' },
+      'Loss of PE 15 × 10 × 1.6 = 240 J; gain in KE ½ × 15 × (4² − 2²) = 90 J ⇒ work against resistance = 150 J. (The plane length does not matter.)'),
+    pre('9709/42 O/N 23 Q3: 10 kg up a 30° plane, 120 N at 20° to the slope, 200 J against resistance over 5 m', 'slope', { m: 10, u: 0, theta: 30, L: 5, P: 120, phi: 20, Wx: 200 }, { res: 'none', dir: 'up', solve: 'v' },
+      'W_P = 120 × 5 cos 20° = 563.8 J; PE gain = 10 × 10 × 5 sin 30° = 250 J ⇒ ½ × 10 v² = 563.8 − 250 − 200 ⇒ v = 4.77 m s⁻¹.'),
+    pre('9709/41 M/J 24 Q3: train 180 000 kg up 1.5 km at 1.5°, 45 → 40 m s⁻¹, 12 000 kJ against resistance', 'slope', { m: 180000, u: 45, theta: 1.5, L: 1500, Wx: 12000000, vT: 40, tA: 0 }, { res: 'none', dir: 'up', solve: 'Weng' },
+      'W_engine = ΔKE + ΔPE + W_res = −38 250 000 + 70 677 765 + 12 000 000 = 44 427 765 J = 44 400 kJ.'),
+    pre('9709/41 O/N 24 Q2(a): 7.5 kg from rest, B is 12.5 m below A, smooth', 'drop', { m: 7.5, u: 0, h: 12.5, L: 25 }, { res: 'none', solve: 'v' },
+      '½v² = 10 × 12.5 ⇒ v = 15.8 m s⁻¹ (independent of the mass and of the path).'),
+    pre('9709/41 O/N 24 Q2(b): rough 25 m plane, reaches B at 8 m s⁻¹: find the friction F', 'drop', { m: 7.5, u: 0, h: 12.5, L: 25, vT: 8 }, { res: 'force', solve: 'F' },
+      '937.5 − 25F = ½ × 7.5 × 64 = 240 ⇒ F = 27.9 N.'),
+    pre('9709/43 M/J 22 Q5(c): cyclist 70 kg freewheels down 5°, 6 → 12 m s⁻¹, 30 N resistance: find d', 'slope', { m: 70, u: 6, theta: 5, L: 150, F: 30, vT: 12 }, { res: 'force', dir: 'down', solve: 'd' },
+      'ΔKE = ½ × 70 × (144 − 36) = 3780 J = 70g d sin 5° − 30d ⇒ d = 122 m.'),
+    pre('9709/42 F/M 26 Q4: car 1600 kg, 10 → 12 m s⁻¹, 50 m lower after 2 km, 150 N + brakes, engine off', 'drop', { m: 1600, u: 10, h: 50, L: 2000, F: 150, vT: 12 }, { res: 'force', solve: 'Wx' },
+      'Braking work = PE loss − KE gain − 150 × 2000 = 800 000 − 35 200 − 300 000 = 464 800 J.'),
+    pre('9709/42 M/J 25 Q1: crate pushed 12 m in 8 s at constant speed by 25 N at 20° to the horizontal', 'slope', { m: 20, u: 1.5, theta: 0, L: 12, P: 25, phi: 20, vT: 1.5, tA: 8 }, { res: 'force', dir: 'up', solve: 'F' },
+      'Speed 12 ÷ 8 = 1.5 m s⁻¹. Work by the 25 N force = 25 × 12 cos 20° = 282 J; power = 282 ÷ 8 = 35.2 W. (The crate’s mass is not needed: here it is a placeholder.)'),
+    pre('9709/42 M/J 25 Q7: 3 kg projected up a 30° plane at 8 m s⁻¹, μ = √3/12: energy method up and back', 'slope', { m: 3, u: 8, theta: 30, L: 20, mu: Math.sqrt(3) / 12 }, { res: 'mu', dir: 'up', solve: 'v' },
+      'Up: 96 = 15d + 3.75d ⇒ d = 5.12 m. tan 30° > μ so it slides back. Down: ½ × 3v² = 15 × 5.12 − 3.75 × 5.12 ⇒ v = 6.20 m s⁻¹ (friction work counted on BOTH legs).'),
+    pre('9709/43 M/J 23 Q7(a): child 25 kg down a curved slide, drop 1.8 m, 50 J against resistance', 'curve', { m: 25, u: 0, h: 1.8, L: 3, Wx: 50 }, { res: 'none', solve: 'v' },
+      '½ × 25 v² = 25 × 10 × 1.8 − 50 = 400 ⇒ v = √32 = 5.66 m s⁻¹. On a curve only the vertical drop matters for PE.'),
+    pre('Projected up a rough slope: stays at the top (tan θ ≤ μ)', 'slope', { m: 2, u: 4, theta: 20, L: 10, mu: 0.5 }, { res: 'mu', dir: 'up', solve: 'v' },
+      'It stops after u² ÷ (2g(sin θ + μ cos θ)) and then mg sin θ ≤ μR, so friction holds it.')
+  ];
+  var presetCtl = ui.presets(presetCard, presetList, function (p) {
+    clock.pause(); pathSel.set(p.path, true); resSel.set(p.res || 'none', true); dirSel.set(p.dir || 'up', true); solveSel.set(p.solve || 'v', true);
+    prm.set(p.values); clock.seek(0);
+  });
+
+  ui.notes(noteCard, [
+    'Energy equation: <b>KE<sub>start</sub> + work done by driving forces = KE<sub>end</sub> + PE gained + work against resistance</b>. Every term in joules.',
+    'Work by a force: W = F d cos θ, with θ the angle between the force and the motion. A force perpendicular to the motion does no work.',
+    'PE change uses the <b>vertical</b> height: mg d sin θ on a slope, not mg d.',
+    'Friction work on a slope uses R = mg cos θ (minus any perpendicular component of P), and it acts on the way up AND on the way down.',
+    'At the top of a “projected up” motion, re-test: it only slides back if mg sin θ > μR.',
+    'Average power = work done ÷ time taken. Convert kJ / kW carefully.'
+  ]);
+
+  /* ---------- model ---------- */
+  var r = null, tl = null;
+  function params() {
+    var v = prm.values, path = pathSel.get();
+    return { m: v.m, g: g, u: v.u, path: path, theta: v.theta, dir: dirSel.get(), L: v.L, h: v.h, resist: resSel.get(), F: v.F, mu: v.mu,
+      P: v.P, phi: v.phi, Wx: v.Wx, Weng: v.We, tAvg: v.tA, solve: solveSel.get(), vTarget: v.vT };
+  }
+  /** illustrative timeline: each leg at constant acceleration (exact on a straight slope with constant forces) */
+  function timeline() {
+    var legs = r.journey.legs, segs = [], t = 0, s = 0, m = prm.values.m;
+    legs.forEach(function (lg) {
+      var v0 = Math.sqrt(2 * lg.KE0 / m), v1 = Math.sqrt(2 * Math.max(0, lg.KE1) / m), a = (v1 * v1 - v0 * v0) / (2 * lg.d), dur;
+      if (Math.abs(a) > 1e-12) dur = (v1 - v0) / a; else dur = v0 > 0 ? lg.d / v0 : 0;
+      segs.push({ t0: t, t1: t + dur, s0: s, v0: v0, a: a, dir: lg.dir, d: lg.d }); t += dur; s += lg.d;
+    });
+    return { segs: segs, T: t, at: function (T) {
+      if (!segs.length) return { sig: 0, v: 0 };
+      for (var i = 0; i < segs.length; i++) {
+        var sg = segs[i];
+        if (T <= sg.t1 || i === segs.length - 1) { var d = U.clamp(T - sg.t0, 0, sg.t1 - sg.t0); return { sig: Math.min(sg.s0 + sg.v0 * d + 0.5 * sg.a * d * d, sg.s0 + sg.d), v: (sg.v0 + sg.a * d) * sg.dir }; }
+      }
+      return { sig: 0, v: 0 };
+    } };
+  }
+  function update() {
+    var path = pathSel.get(), sv = solveSel.get(), rs = resSel.get();
+    prm.show('theta', path === 'slope'); dirSel.row.style.display = path === 'slope' ? '' : 'none';
+    prm.show('h', path !== 'slope'); prm.show('F', rs === 'force' && sv !== 'F' && sv !== 'mu'); prm.show('mu', rs === 'mu' && sv !== 'mu');
+    prm.show('phi', prm.values.P > 0); prm.show('vT', sv !== 'v');
+    ['F', 'mu', 'L', 'Wx', 'We'].forEach(function (k) { prm.lock(k, false); });
+    var p = params();
+    if (sv === 'mu' && (path !== 'slope')) { solveSel.set('F', true); p.solve = 'F'; }
+    if (sv === 'mu') { resSel.set('mu', true); p.resist = 'mu'; }
+    if (sv === 'F' && p.resist === 'mu') { resSel.set('force', true); p.resist = 'force'; }
+    r = EN.leg(p);
+    if (!r.invalid) {
+      if (sv === 'F' && isFinite(r.Fsolved)) prm.lock('F', true, Math.max(0, r.Fsolved));
+      if (sv === 'mu' && isFinite(r.muSolved)) prm.lock('mu', true, Math.max(0, r.muSolved));
+      if (sv === 'd' && r.dSolved > 0) prm.lock('L', true, r.dSolved);
+      if (sv === 'Wx') prm.lock('Wx', true, r.WxSolved);
+      if (sv === 'Weng') prm.lock('We', true, r.WengSolved);
+      tl = timeline();
+      clock.setDuration(Math.max(0.5, tl.T));
+    } else tl = null;
+    ui.writeHash(Object.assign({}, prm.values, { path: path, res: resSel.get(), dir: dirSel.get(), solve: solveSel.get() }));
+    drawScene(); drawBars(); drawPlots(); readout();
+  }
+
+  /* ---------- scene ---------- */
+  function drawScene() {
+    if (!r) return;
+    var col = ui.colors(), c, path = pathSel.get(), v = prm.values;
+    if (r.invalid) { vp.fit(0, 1, 0, 1); c = vp.begin(); D.label(c, r.invalid, vp.w / 2, vp.h / 2, col.warn, { bold: true }); return; }
+    var Lp = r.L, rise = r.rise, W = 10, k = W / Math.max(Lp * Math.sqrt(Math.max(0, 1 - rise * rise)), 1e-9);
+    var Hh = Lp * rise; // total rise in the forward direction
+    var ky = k; if (Math.abs(Hh) * ky > 6) ky = 6 / Math.abs(Hh);
+    var X = function (s) { return (s / Lp) * W; };
+    var Yf = function (s) {
+      var f = s / Lp;
+      if (path === 'curve') return Hh * ky * (0.5 - 0.5 * Math.cos(Math.PI * f));
+      return Hh * ky * f;
+    };
+    var ymin = Math.min(0, Hh * ky), ymax = Math.max(0, Hh * ky);
+    vp.fit(-1, W + 1, ymin - 1.5, ymax + 2.5);
+    c = vp.begin();
+    var pts = []; for (var i = 0; i <= 80; i++) pts.push(vp.P(X(Lp * i / 80), Yf(Lp * i / 80)));
+    c.save(); c.fillStyle = col.surface; c.beginPath(); c.moveTo(pts[0][0], vp.Y(ymin - 0.8)); pts.forEach(function (p) { c.lineTo(p[0], p[1]); }); c.lineTo(pts[pts.length - 1][0], vp.Y(ymin - 0.8)); c.closePath(); c.fill(); c.restore();
+    D.line(c, pts, col['object-line'], { width: 2 });
+    D.label(c, 'start', pts[0][0], pts[0][1] + 14, col.muted, { size: 11 });
+    D.label(c, 'end of path (' + U.sf(Lp) + ' m)', pts[pts.length - 1][0], pts[pts.length - 1][1] + 14, col.muted, { size: 11 });
+    if (path === 'slope' && v.theta > 0) D.label(c, 'θ = ' + U.num(v.theta, 2) + '°, moving ' + dirSel.get(), 10, 14, col.muted, { align: 'left', size: 11 });
+    if (path === 'curve') D.label(c, 'curved path: only the vertical drop matters for PE', 10, 14, col.muted, { align: 'left', size: 11 });
+    if (path === 'drop') D.label(c, 'vertical drop ' + U.sf(v.h) + ' m over ' + U.sf(Lp) + ' m of path', 10, 14, col.muted, { align: 'left', size: 11 });
+    if (!tl) return;
+    var st = tl.at(clock.t), acc = r.at(st.sig), pos = acc.pos;
+    var bx = vp.X(X(pos)), by = vp.Y(Yf(pos));
+    D.particle(c, bx, by - 10, 10, { fill: col.s1 });
+    if (r.sStop !== undefined && r.sStop < Lp) {
+      var ps = [vp.X(X(r.sStop)), vp.Y(Yf(r.sStop))];
+      c.save(); c.strokeStyle = col.warn; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(ps[0], ps[1] - 26); c.lineTo(ps[0], ps[1] + 4); c.stroke(); c.restore();
+      D.label(c, 'stops: ' + U.sf(r.sStop) + ' m', ps[0], ps[1] - 34, col.warn, { size: 11 });
+    }
+    if (Math.abs(st.v) > 1e-6) {
+      var dx = X(Math.min(Lp, pos + Lp * 0.01)) - X(pos), dy = Yf(Math.min(Lp, pos + Lp * 0.01)) - Yf(pos), an = Math.atan2(dy, dx) + (st.v < 0 ? Math.PI : 0);
+      D.arrowPolar(c, bx, by - 24, an, 20 + Math.min(50, Math.abs(st.v) * 4), col.velocity, { width: 2, label: U.sf(Math.abs(st.v)) + ' m/s' });
+    }
+    D.label(c, 'distance travelled ' + U.sf(st.sig) + ' m', vp.w - 10, 14, col.muted, { align: 'right', size: 11 });
+  }
+
+  /* ---------- energy account bars ---------- */
+  function drawBars() {
+    if (!r || r.invalid || !tl) return;
+    var col = ui.colors(), st = tl.at(clock.t), a = r.at(st.sig);
+    var KE0 = r.KE0, ins = [], outs = [];
+    ins.push({ v: KE0, c: col.s1, l: 'KE at start' });
+    if (a.GPE < 0) ins.push({ v: -a.GPE, c: col.s2, l: 'PE lost' });
+    if (a.WP > 0) ins.push({ v: a.WP, c: col.applied, l: 'work by P' });
+    if (a.Weng > 0) ins.push({ v: a.Weng, c: col.applied, l: 'engine work' });
+    outs.push({ v: a.KE, c: col.s1, l: 'KE now' });
+    if (a.GPE > 0) outs.push({ v: a.GPE, c: col.s2, l: 'PE gained' });
+    if (a.Wres > 0) outs.push({ v: a.Wres, c: col.friction, l: 'work against resistance' });
+    if (a.WP < 0) outs.push({ v: -a.WP, c: col.applied, l: 'work against P' });
+    if (a.Weng < 0) outs.push({ v: -a.Weng, c: col.applied, l: 'negative engine work' });
+    var sumIn = ins.reduce(function (s, x) { return s + x.v; }, 0), sumOut = outs.reduce(function (s, x) { return s + x.v; }, 0);
+    var top = Math.max(sumIn, sumOut, 1e-9);
+    bvp.fit(0, 10, -1.4, 11);
+    var c = bvp.begin();
+    function stack(list, x0, title) {
+      var y = 0;
+      list.forEach(function (it) {
+        var h = it.v / top * 9.5; if (h <= 0) return;
+        c.save(); c.fillStyle = it.c; c.globalAlpha = 0.85; c.fillRect(bvp.X(x0), bvp.Y(y + h), bvp.X(x0 + 3) - bvp.X(x0), bvp.Y(y) - bvp.Y(y + h)); c.restore();
+        if (h > 0.6) D.label(c, it.l + ': ' + plain(it.v) + ' J', bvp.X(x0 + 3) + 4, bvp.Y(y + h / 2), col.ink, { align: 'left', size: 10.5 });
+        y += h;
+      });
+      D.label(c, title, bvp.X(x0 + 1.5), bvp.Y(-0.7), col.ink, { size: 12, bold: true });
+    }
+    stack(ins, 0.2, 'energy in'); stack(outs, 5.2, 'energy now / out');
+    var ok = Math.abs(sumIn - sumOut) <= 1e-6 * Math.max(1, top);
+    D.label(c, ok ? 'balances ✓' : 'does not balance!', bvp.w / 2, 10, ok ? col.ok : col.warn, { size: 12, bold: true });
+  }
+
+  /* ---------- plots ---------- */
+  function drawPlots() {
+    if (!r || r.invalid || !tl) return;
+    var col = ui.colors(), S = Math.max(r.totalDist, 1e-6), st = tl.at(clock.t);
+    var brk = r.journey.legs.length > 1 ? [r.journey.legs[0].d] : [];
+    pE.draw({ x: [0, S], series: [
+      { fn: function (s) { return r.at(s).KE; }, color: col.s1, breaks: brk },
+      { fn: function (s) { return r.at(s).GPE; }, color: col.s2, breaks: brk },
+      { fn: function (s) { return r.at(s).Wres; }, color: col.friction, breaks: brk },
+      { fn: function (s) { var a = r.at(s); return a.WP + a.Weng; }, color: col.applied, dash: [6, 4], breaks: brk },
+      { fn: function (s) { var a = r.at(s); return a.KE + a.GPE + a.Wres - a.WP - a.Weng; }, color: col.ink, dash: [2, 3], breaks: brk }],
+      cursor: st.sig, vlines: brk.map(function (b) { return { x: b, label: 'turns back' }; }), title: 'dotted: KE + PE + W_res − W_in = KE₀ (flat)' });
+  }
+
+  /* ---------- live working ---------- */
+  function readout() {
+    R.clear(); if (!r) return;
+    var s3 = fmtX, v = prm.values, path = pathSel.get(), sv = solveSel.get();
+    if (r.invalid) { R.badge(r.invalid, 'warn').render(); return; }
+    R.html('<div style="font-size:12.5px;color:var(--muted)">Energy method along the path (forward = initial direction of motion). g = ' + g + ' m s⁻².</div>');
+    r.warn.forEach(function (w) { R.badge(w, 'warn'); });
+    R.head((r.reachesEnd ? 'Work and energy terms over ' : 'Terms over the whole path of ') + s3(r.L) + ' m' + (sv === 'd' ? ' (the distance found)' : '') + (r.reachesEnd ? '' : ' — it does NOT get that far, see below'));
+    R.eq('KE at start', '½mu² = ½ × ' + s3(v.m) + ' × ' + s3(v.u) + '²', r.KE0, 'J');
+    var hTxt = path === 'slope' ? (dirSel.get() === 'up' ? '' : '−') + s3(r.L) + ' sin ' + U.num(v.theta, 2) + '°' : (v.h >= 0 ? '−' : '') + s3(Math.abs(v.h));
+    R.eq('PE gained', 'mgΔh = ' + s3(v.m) + ' × ' + g + ' × (' + hTxt + ')', r.dGPE, 'J');
+    if (v.P > 0) R.eq('work by P', 'P d cos φ = ' + s3(v.P) + ' × ' + s3(r.L) + ' × cos ' + U.num(v.phi, 2) + '°', r.WP, 'J');
+    if (path === 'slope' && resSel.get() === 'mu') {
+      R.eq('R', 'mg cos θ' + (v.P > 0 && v.phi ? ' − P sin φ' : '') , r.R, 'N');
+      R.eq('friction', 'μR = ' + s3(sv === 'mu' && isFinite(r.muSolved) ? r.muSolved : v.mu) + ' × ' + s3(r.R), r.Fr, 'N');
+    }
+    if (r.Fr > 0 || sv === 'F') R.eq('work against F', 'F × d = ' + s3(r.Fr) + ' × ' + s3(r.L), r.Fr * r.L, 'J');
+    if (r.Wx) R.eq('extra work against resistance', sv === 'Wx' ? 'unknown' : 'given', r.Wx, 'J');
+    if (r.Weng) R.eq('engine work', sv === 'Weng' ? 'unknown' : 'given', r.Weng, 'J');
+    R.head('Energy equation');
+    R.html('<div class="eq">½mu² + W<sub>P</sub> + W<sub>eng</sub> = ½mv² + mgΔh + W<sub>res</sub></div>');
+    if (sv === 'v') {
+      if (r.reachesEnd) {
+        var pq = function (x) { return x < 0 ? '(' + s3(x) + ')' : s3(x); };
+        R.eq('½mv²', s3(r.KE0) + ' + ' + pq(r.WP) + ' + ' + pq(r.Weng) + ' − ' + pq(r.dGPE) + ' − ' + pq(r.Wres), r.KE1, 'J');
+        R.eq('v', '√(2 × KE ÷ m)', r.v, 'm s<sup>−1</sup>');
+      }
+    } else {
+      var lbl = { F: 'F', mu: 'μ', d: 'd', Wx: 'W<sub>x</sub>', Weng: 'W<sub>eng</sub>' }[sv];
+      var val = { F: r.Fsolved, mu: r.muSolved, d: r.dSolved, Wx: r.WxSolved, Weng: r.WengSolved }[sv];
+      var how = { F: '(½mu² − ½mv² + W<sub>P</sub> + W<sub>eng</sub> − mgΔh − W<sub>x</sub>) ÷ d', mu: 'F ÷ R', d: '(½mv² − ½mu²) ÷ (net constant force along the path)',
+        Wx: '½mu² − ½mv² + W<sub>P</sub> + W<sub>eng</sub> − mgΔh − F d', Weng: '½mv² − ½mu² + mgΔh + W<sub>res</sub> − W<sub>P</sub>' }[sv];
+      R.eq(lbl, how + ' with v = ' + s3(v.vT), isFinite(val) ? val : '—', { F: 'N', mu: '', d: 'm', Wx: 'J', Weng: 'J' }[sv]);
+      if (sv === 'Weng' && isFinite(val) && Math.abs(val) >= 1000) R.eq('', 'in kJ', val / 1000, 'kJ');
+      if (sv === 'F' && r.Fsolved < 0) R.badge('Negative F: the stated speed needs extra driving work, not resistance.', 'warn');
+    }
+    if (!r.reachesEnd) {
+      R.head('It stops before the end');
+      R.eq('d<sub>stop</sub>', '½mu² ÷ (resisting force along the path) = ' + s3(r.KE0) + ' ÷ ' + s3(-r.net - (r.Weng - r.Wx) / r.L), r.sStop, 'm');
+      if (r.staysAtRest === true) R.badge('At rest: the driving force along the slope (' + s3(Math.abs(r.stopDrive || 0)) + ' N) ≤ friction available (' + s3(r.stopCap || 0) + ' N) ⇒ it stays there.', 'ok');
+      else if (r.staysAtRest === false) {
+        R.badge('At rest: ' + s3(Math.abs(r.stopDrive)) + ' N down the slope > friction available ' + s3(r.stopCap) + ' N ⇒ it slides back.', 'info');
+        var lb = r.journey.legs[1];
+        R.eq('½mv² back at the start', '(weight component − friction) × d = ' + s3(lb.net) + ' × ' + s3(r.sStop), lb.KE1, 'J');
+        R.eq('v<sub>return</sub>', 'resistance work counted on both legs', r.vReturn, 'm s<sup>−1</sup>');
+        R.eq('total work against friction', 'F × 2d', r.Fr * 2 * r.sStop, 'J');
+      }
+    }
+    if (v.tA > 0) {
+      R.head('Average power');
+      if (v.P > 0) R.eq('power of P', 'W<sub>P</sub> ÷ t = ' + s3(r.WP) + ' ÷ ' + s3(v.tA), r.powerP, 'W');
+      if (r.Weng) R.eq('engine power', 'W<sub>eng</sub> ÷ t', r.powerEng, 'W');
+      if (!v.P && !r.Weng) R.badge('No driving force: average power is zero.', 'info');
+    }
+    if (tl) {
+      var st = tl.at(clock.t), a = r.at(st.sig);
+      R.head('At distance ' + U.sf(st.sig) + ' m (animation; time scale assumes constant forces)');
+      R.eq('KE', 'now', a.KE, 'J'); R.eq('PE', 'relative to start', a.GPE, 'J'); R.eq('W<sub>res</sub>', 'so far', a.Wres, 'J');
+      R.eq('balance', 'KE + PE + W<sub>res</sub> − W<sub>in</sub> − KE₀', Math.abs(a.balance) < 1e-6 * (1 + Math.abs(a.KE) + Math.abs(a.GPE)) ? 0 : a.balance, 'J ✓');
+    }
+    R.render();
+  }
+
+  ui.onTheme(function () { drawScene(); drawBars(); drawPlots(); });
+  vp.onResize = drawScene; bvp.onResize = drawBars;
+  var hsh = ui.readHash();
+  ['path', 'res', 'dir', 'solve'].forEach(function (k) { if (typeof hsh[k] === 'string') ({ path: pathSel, res: resSel, dir: dirSel, solve: solveSel })[k].set(hsh[k], true); });
+  var init = {}; Object.keys(prm.values).forEach(function (k) { if (typeof hsh[k] === 'number') init[k] = hsh[k]; });
+  prm.set(init, true);
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

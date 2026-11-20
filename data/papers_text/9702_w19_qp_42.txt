@@ -1,0 +1,609 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+This document consists of 27 printed pages and 1 blank page.
+DC (LK/CB) 163541/3
+© UCLES 2019 [Turn over
+*7084266478*
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions October/November 2019
+2 hours
+Candidates answer on the Question Paper.
+No Additional Materials are required.
+READ THESE INSTRUCTIONS FIRST
+Write your centre number, candidate number and name on all the work you hand in.
+Write in dark blue or black pen.
+You may use an HB pencil for any diagrams or graphs.
+Do not use staples, paper clips, glue or correction fluid.
+DO NOT WRITE IN ANY BARCODES.
+Answer all questions.
+Electronic calculators may be used.
+You may lose marks if you do not show your working or if you do not use appropriate units.
+At the end of the examination, fasten all your work securely together.
+The number of marks is given in brackets [ ] at the end of each question or part question.
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2019 9702/42/O/N/19
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1
+2
+at2
+v2 = u2 + 2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p =
+1Nm
+〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω √  ( x  2  –   x 2 )
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2019 9702/42/O/N/19 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 (a) State Newton’s law of gravitation.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The astronomer Johannes Kepler showed that the period T of rotation of a planet about the
+Sun is related to its mean distance R from the centre of the Sun by the expression
+R 3
+= k
+T 2
+where k is a constant.
+Use Newton’s law to show that, for planets in circular orbits about the Sun of mass M, the
+constant k is given by
+GM
+k =
+4π 2
+where G is the gravitational constant. Explain your working.
+[4]
+(c) A satellite is in a circular orbit about Mars.
+The radius of the orbit of the satellite is 4.38 × 106 m. The orbital period is 2.44 hours.
+Use the expressions in (b) to calculate a value for the mass of Mars.
+mass = .................................................... kg [2]
+[Total: 8]
+© UCLES 2019 9702/42/O/N/19
+
+5
+2 (a) Smoke particles are suspended in still air. Brownian motion of the smoke particles is seen
+through a microscope.
+Describe:
+(i) what is seen through the microscope
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) how Brownian motion provides evidence for the nature of the movement of gas
+molecules.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(b) A fixed mass of an ideal gas has volume 2.40 × 103 cm3 at pressure 3.51 × 105 Pa and
+temperature 290 K. The gas is heated at constant volume until the temperature is 310 K at
+pressure 3.75 × 105 Pa, as illustrated in Fig. 2.1.
+2.40 × 103 cm3 2.40 × 103 cm3
+3.51 × 105 Pa 3.75 × 105 Pa
+290 K 310 K
+Fig. 2.1
+The quantity of thermal energy required to raise the temperature of 1.00 mol of the gas by
+1.00 K at constant volume is 12.5 J.
+Calculate, to three significant figures:
+(i) the amount, in mol, of the gas
+amount = .................................................. mol [3]
+© UCLES 2019 9702/42/O/N/19 [Turn over
+
+6
+(ii) the thermal energy transfer during the change.
+energy transfer = ...................................................... J [2]
+(c) For the change in the gas in (b), state:
+(i) the quantity of external work done on the gas
+work done = ...................................................... J [1]
+(ii) the change in internal energy, with the direction of this change.
+change = ........................................................... J
+direction ...............................................................
+[2]
+[Total: 11]
+© UCLES 2019 9702/42/O/N/19
+
+7
+3 (a) State what is meant by specific latent heat.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A student uses the apparatus illustrated in Fig. 3.1 to determine a value for the specific latent
+heat of fusion of ice.
+A
+V
+ice
+heater
+beaker
+melted ice
+pan of
+balance
+Fig. 3.1
+The balance reading measures the mass of the beaker and the melted ice (water) in the
+beaker.
+The heater is switched on and pieces of ice at 0 °C are added continuously to the funnel so
+that the heater is always surrounded by ice.
+When water drips out of the funnel at a constant rate, the balance reading is noted at
+2.0 minute intervals. After 10 minutes, the current in the heater is increased and the balance
+readings are taken for a further 12 minutes.
+© UCLES 2019 9702/42/O/N/19 [Turn over
+
+8
+The variation with time of the balance reading is shown in Fig. 3.2.
+300
+250
+mass / g
+200
+150
+100
+50
+0
+0 4 8 12 16 20 24
+time / minutes
+Fig. 3.2
+The readings of the ammeter and of the voltmeter are shown in Fig. 3.3.
+ammeter reading voltmeter reading
+/ A / V
+from time 0 to time 10 minutes 1.8 7.3
+after time 10 minutes 3.6 15.1
+Fig. 3.3
+© UCLES 2019 9702/42/O/N/19
+
+9
+(i) From time 0 to time 10.0 minutes, 65 g of ice is melted.
+Use Fig. 3.2 to determine the mass of ice melted from time 12.0 minutes to time
+22.0 minutes.
+mass = ...................................................... g [1]
+(ii) Explain why, although the power of the heater is changed, the rate at which thermal
+energy is transferred from the surroundings to the ice is constant.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(iii) Determine a value for the specific latent heat of fusion L of ice.
+L = ................................................. J g–1 [4]
+(iv) Calculate the rate at which thermal energy is transferred from the surroundings to the
+ice.
+rate = ..................................................... W [2]
+[Total: 10]
+© UCLES 2019 9702/42/O/N/19 [Turn over
+
+10
+4 A ball of mass M is held on a horizontal surface by two identical extended springs, as illustrated in
+Fig. 4.1.
+ball
+mass M
+oscillator
+fixed
+point
+Fig. 4.1
+One spring is attached to a fixed point. The other spring is attached to an oscillator.
+The oscillator is switched off. The ball is displaced sideways along the axis of the springs and is
+then released. The variation with time t of the displacement x of the ball is shown in Fig. 4.2.
+1.5
+x / cm
+1.0
+0.5
+0
+0 0.4 0.8 1.2 1.6 2.0 2.4
+–0.5 t / s
+–1.0
+–1.5
+Fig. 4.2
+(a) State:
+(i) what is meant by damping
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) the evidence provided by Fig. 4.2 that the motion of the ball is damped.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+© UCLES 2019 9702/42/O/N/19
+
+11
+(b) The acceleration a and the displacement x of the ball are related by the expression
+2k
+a=– x
+cMm
+where k is the spring constant of one of the springs.
+The mass M of the ball is 1.2 kg.
+(i) Use data from Fig. 4.2 to determine the angular frequency ω of the oscillations of the
+ball.
+ω = .............................................. rad s–1 [2]
+(ii) Use your answer in (i) to determine the value of k.
+k = ............................................... N m–1 [2]
+© UCLES 2019 9702/42/O/N/19 [Turn over
+
+12
+(c) The oscillator is switched on. The amplitude of oscillation of the oscillator is constant.
+The angular frequency of the oscillations is gradually increased from 0.7ω to 1.3ω, where ω is
+the angular frequency calculated in (b)(i).
+(i) On the axes of Fig. 4.3, show the variation with angular frequency of the amplitude A of
+oscillation of the ball.
+A
+0
+0.7ω 1.0ω 1.3ω
+angular frequency
+Fig. 4.3
+[2]
+(ii) Some sand is now sprinkled on the horizontal surface.
+The angular frequency of the oscillations is again gradually increased from 0.7ω to 1.3ω.
+State two changes that occur to the line you have drawn on Fig. 4.3.
+1. .......................................................................................................................................
+...........................................................................................................................................
+2. .......................................................................................................................................
+...........................................................................................................................................
+[2]
+[Total: 10]
+© UCLES 2019 9702/42/O/N/19
+
+13
+5 (a) (i) State what is meant by the specific acoustic impedance of a medium.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) The density of a sample of bone is 1.8 g cm–3 and the speed of ultrasound in the bone is
+4.1 × 103 m s–1.
+Calculate the specific acoustic impedance Z of the sample of bone.
+B
+Z = ......................................... kg m–2 s–1 [1]
+B
+© UCLES 2019 9702/42/O/N/19 [Turn over
+
+14
+(b) A parallel beam of ultrasound passes normally through a layer of fat and of muscle, as
+illustrated in Fig. 5.1.
+fat muscle
+beam transmitted beam
+of ultrasound of ultrasound
+0.45 cm 2.1 cm
+Fig. 5.1 (not to scale)
+The fat has thickness 0.45 cm and the muscle has thickness 2.1 cm.
+Data for fat and for muscle are given in Fig. 5.2.
+specific acoustic impedance linear attenuation (absorption)
+Z / 106 kg m–2 s–1 coefficient μ / cm–1
+fat 1.3 0.24
+muscle 1.7 0.23
+Fig. 5.2
+The intensity reflection coefficient α at a boundary between two media of specific acoustic
+impedances Z and Z is given by the expression
+1 2
+(Z - Z )2
+α = 2 1 .
+(Z + Z )2
+2 1
+Calculate the fraction of the intensity of the ultrasound that is transmitted through the
+boundary between the fat and the muscle.
+fraction transmitted = ......................................................... [1]
+© UCLES 2019 9702/42/O/N/19
+
+15
+(c) (i) State what is meant by attenuation of an ultrasound wave.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) Data for linear attenuation coefficients are given in Fig. 5.2.
+Determine the ratio
+intensity of ultrasound transmitted through the medium
+intensity of ultrasound entering the medium
+for:
+1. the layer of fat of thickness 0.45 cm
+ratio = ...............................................................
+2. the layer of muscle of thickness 2.1 cm.
+ratio = ...............................................................
+[3]
+(d) Use your answers in (b) and (c)(ii) to determine the fraction of the intensity entering the layer
+of fat that is transmitted through the layer of muscle.
+fraction transmitted = ......................................................... [1]
+[Total: 10]
+© UCLES 2019 9702/42/O/N/19 [Turn over
+
+16
+6 The variation with time of the displacement of an amplitude-modulated (AM) wave is shown in
+Fig. 6.1.
+signal
+displacement
+0
+0 10 20 30 40 50 60 70 80 90 100
+time / μs
+Fig. 6.1
+The sinusoidal information signal has frequency 10 kHz.
+(a) Determine the frequency of the carrier wave.
+frequency = .................................................... Hz [1]
+(b) On the axes of Fig. 6.2, sketch the frequency spectrum of the modulated wave.
+signal
+intensity
+0
+frequency / kHz
+Fig. 6.2
+[3]
+[Total: 4]
+© UCLES 2019 9702/42/O/N/19
+
+17
+7 Describe the principles of computed tomography (CT) scanning.
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+.................................................................................................................................................... [5]
+© UCLES 2019 9702/42/O/N/19 [Turn over
+
+18
+8 Electrons enter a rectangular slice PQRSEFGH of a semiconductor material at right-angles to
+face PQFE, as shown in Fig. 8.1.
+magnetic field
+flux density B
+S
+R
+H
+G
+P
+Q
+E
+F
+direction of
+incident electrons
+Fig. 8.1
+A uniform magnetic field of flux density B is directed into the slice, at right-angles to face PQRS.
+(a) The electrons each have charge –q and drift speed v in the slice.
+State the magnitude and the direction of the force due to the magnetic field on each electron
+as it enters the slice.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The force on the electrons causes a voltage V to be established across the semiconductor
+H
+slice given by the expression
+BI
+V =
+H ntq
+where I is the current in the slice.
+(i) State the two faces between which the voltage V is established.
+H
+face ................................. and face ................................. [1]
+(ii) Use letters from Fig. 8.1 to identify the distance t.
+.......................................................... [1]
+© UCLES 2019 9702/42/O/N/19
+
+19
+(c) Aluminium (27 Al ) has a density of 2.7 g cm–3. Assume that there is one free electron available
+13
+to carry charge per atom of aluminium.
+(i) Show that the number of charge carriers per unit volume in aluminium is 6.0 × 1028 m–3.
+[2]
+(ii) A sample of aluminium foil has a thickness of 0.090 mm. The current in the foil is 4.6 A.
+A uniform magnetic field of flux density 0.15 T acts at right-angles to the foil.
+Use the value in (i) to calculate the voltage V that is generated.
+H
+V = ...................................................... V [2]
+H
+[Total: 8]
+© UCLES 2019 9702/42/O/N/19 [Turn over
+
+20
+9 (a) Define what is meant by electric potential at a point.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) In an α-particle scattering experiment, α-particles are directed towards a thin film of gold, as
+illustrated in Fig. 9.1.
+gold film
+beam of
+α-particles
+Fig. 9.1
+The apparatus is in a vacuum.
+The gold-197 (197 Au) nuclei in the film may be considered to be fixed point charges.
+79
+The α-particles emitted from the source each have an energy of 4.8 MeV.
+Calculate:
+(i) the initial kinetic energy E , in J, of an α-particle emitted from the source
+K
+E = ...................................................... J [1]
+K
+© UCLES 2019 9702/42/O/N/19
+
+21
+(ii) the distance d of closest approach of an α-particle to a gold nucleus.
+d = ..................................................... m [4]
+(c) Use your answer in (b)(ii) to comment on the possible diameter of a gold nucleus.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+[Total: 8]
+© UCLES 2019 9702/42/O/N/19 [Turn over
+
+22
+BLANK PAGE
+© UCLES 2019 9702/42/O/N/19
+
+23
+10 (a) The upper electron energy bands in an intrinsic semiconductor material are illustrated in
+Fig. 10.1.
+conduction
+band
+forbidden
+band
+valence
+band
+Fig. 10.1
+Use band theory to explain why the resistance of an intrinsic semiconductor material
+decreases as its temperature increases.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [4]
+© UCLES 2019 9702/42/O/N/19 [Turn over
+
+24
+(b) A comparator circuit incorporating an ideal operational amplifier (op-amp) is shown in
+Fig. 10.2.
++3.0 V
++5 V
+1.50 kΩ R T
+–5 V
+V
+OUT
+1.20 kΩ 1.76 kΩ
+Fig. 10.2
+The variation with temperature θ of the resistance R of the thermistor is shown in Fig. 10.3.
+T
+3.5
+3.0
+R / kΩ
+T
+2.5
+2.0
+1.5
+1.0
+0 5 10 15 20 25
+θ / °C
+Fig. 10.3
+© UCLES 2019 9702/42/O/N/19
+
+25
+(i) Determine the temperature at which the light-emitting diode (LED) in Fig. 10.2 switches
+on or off.
+temperature = ..................................................... °C [4]
+(ii) State and explain whether the thermistor is above or below the temperature calculated
+in (i) for the LED to emit light.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+[Total: 11]
+© UCLES 2019 9702/42/O/N/19 [Turn over
+
+26
+11 (a) State Faraday’s law of electromagnetic induction.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A solenoid S has a small coil C placed near to one of its ends, as shown in Fig. 11.1.
+solenoid S
+3.6 × 10–2 m
+coil C
+63 turns
+Fig. 11.1
+© UCLES 2019 9702/42/O/N/19
+
+27
+The coil C has a circular cross-section of diameter 3.6 × 10–2 m and contains 63 turns of wire.
+The solenoid S produces a uniform magnetic field of flux density B, in tesla, in the region of
+coil C given by the expression
+B = 9.4 × 10–4 I
+where I is the current, in ampere, in the solenoid S.
+The variation with time t of the current I in solenoid S is shown in Fig. 11.2.
+current I
+0
+0 t t t t t t t
+1 2 3 4 5 6 7
+time t
+Fig. 11.2
+State two times at which:
+(i) there is no electromotive force (e.m.f.) induced in coil C
+time .............................. and time .............................. [1]
+(ii) the induced e.m.f. in coil C is a maximum but with opposite polarities.
+time .............................. and time .............................. [1]
+(c) The alternating current in the solenoid S in (b) is replaced by a constant current of 5.0 A.
+Calculate the average e.m.f. induced in coil C when the current in solenoid S is reversed in a
+time of 6.0 ms.
+e.m.f. induced = ...................................................... V [3]
+[Total: 7]
+© UCLES 2019 9702/42/O/N/19 [Turn over
+
+28
+12 Radon-222 (222 Ra) is a radioactive gas that decays randomly with a decay constant of
+86
+7.55 × 10–3 hour–1.
+(a) State what is meant by:
+(i) random decay
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) decay constant.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(b) The activity of radon gas in a sample of 4.80 × 10–3 m3 of air taken from a building is 0.600 Bq.
+There are 2.52 × 1025 air molecules in a volume of 1.00 m3 of air.
+Calculate, for 1.00 m3 of the air, the ratio
+number of air molecules
+.
+number of radon atoms
+ratio = ......................................................... [5]
+[Total: 8]
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of the University of
+Cambridge Local Examinations Syndicate (UCLES), which itself is a department of the University of Cambridge.
+© UCLES 2019 9702/42/O/N/19

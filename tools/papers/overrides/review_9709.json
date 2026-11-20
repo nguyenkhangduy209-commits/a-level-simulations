@@ -1,0 +1,650 @@
+{
+ "9709_m18_qp_42": {
+  "6(ii)": {
+   "primary_tag": "9709-M5",
+   "qtype": "9709-vehicle-power",
+   "note": "greatest acceleration from P=Fv then N2L; car power question"
+  }
+ },
+ "9709_m19_qp_42": {
+  "4(i)": {
+   "primary_tag": "9709-M5",
+   "note": "resistance from P=Fv at constant speed"
+  }
+ },
+ "9709_m20_qp_42": {
+  "6c": {
+   "primary_tag": "9709-M2",
+   "note": "pure suvat with given deceleration"
+  }
+ },
+ "9709_m21_qp_42": {
+  "Q3": {
+   "qtype": "9709-strings",
+   "note": "particle held by two strings, no friction"
+  },
+  "4a": {
+   "primary_tag": "9709-M2",
+   "note": "acceleration read from v-t graph"
+  },
+  "4b": {
+   "primary_tag": "9709-M2",
+   "note": "displacement zero from v-t graph"
+  },
+  "5a": {
+   "primary_tag": "9709-M2",
+   "note": "acceleration from s=ut+1/2at^2"
+  }
+ },
+ "9709_m22_qp_42": {
+  "3a": {
+   "primary_tag": "9709-M5",
+   "note": "MS main method work-energy equation"
+  }
+ },
+ "9709_m23_qp_42": {
+  "2b": {
+   "primary_tag": "9709-M2",
+   "qtype": "9709-vertical",
+   "note": "two particles meeting in vertical line, no momentum"
+  },
+  "Q5": {
+   "qtype": "9709-strings",
+   "note": "block supported by struts and rope"
+  },
+  "6a(ii)": {
+   "primary_tag": "9709-M1",
+   "note": "R by resolving perpendicular, F=muR"
+  },
+  "6b": {
+   "primary_tag": "9709-M1",
+   "note": "compare with limiting friction"
+  }
+ },
+ "9709_m24_qp_42": {
+  "7a": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-plane-motion",
+   "note": "N2L on smooth slope + suvat, before any collision"
+  },
+  "7b": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-plane-motion",
+   "note": "accelerations on rough slope by N2L, then suvat"
+  }
+ },
+ "9709_m25_qp_42": {
+  "Q3": {
+   "qtype": "9709-vehicle-power",
+   "note": "aeroplane engine power against resistance"
+  },
+  "4b": {
+   "qtype": "9709-pulley-hanging",
+   "note": "free motion of B after A lands in Atwood question"
+  },
+  "6a": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-plane-motion",
+   "note": "N2L down slope then suvat"
+  }
+ },
+ "9709_s18_qp_42": {
+  "7(ii)": {
+   "qtype": "9709-pulley-two-planes",
+   "note": "same situation as 7(i): horizontal plane + inclined plane"
+  }
+ },
+ "9709_s18_qp_43": {
+  "6(ii)": {
+   "primary_tag": "9709-M5",
+   "qtype": "9709-vehicle-power",
+   "note": "greatest acceleration from P=Fv then N2L"
+  }
+ },
+ "9709_s19_qp_41": {
+  "6(ii)(b)": {
+   "primary_tag": "9709-M2",
+   "note": "suvat with acceleration from (a)"
+  },
+  "6(ii)(c)": {
+   "primary_tag": "9709-M5",
+   "qtype": "9709-pulley-table",
+   "note": "energy method required"
+  }
+ },
+ "9709_s19_qp_42": {
+  "Q3": {
+   "primary_tag": "9709-M5",
+   "qtype": "9709-work-power",
+   "note": "asks for work done by force, WD = T x d"
+  },
+  "5(ii)": {
+   "qtype": "9709-pulley-hanging",
+   "note": "free motion of B after A lands in Atwood question"
+  }
+ },
+ "9709_s19_qp_43": {
+  "4(ii)": {
+   "primary_tag": "9709-M2",
+   "note": "after string breaks both move freely under gravity"
+  }
+ },
+ "9709_s20_qp_41": {
+  "2b": {
+   "qtype": "9709-trailer",
+   "note": "car-and-trailer question"
+  },
+  "4b": {
+   "primary_tag": "9709-M4",
+   "note": "acceleration of ring by N2L"
+  },
+  "7b": {
+   "qtype": "9709-collisions",
+   "note": "collision question; friction on horizontal plane"
+  }
+ },
+ "9709_s20_qp_43": {
+  "2a": {
+   "qtype": "9709-vehicle-power",
+   "note": "minibus driving force against resistance"
+  },
+  "2b": {
+   "qtype": "9709-vehicle-power",
+   "note": "minibus power at constant speed"
+  },
+  "5c": {
+   "primary_tag": "9709-M4",
+   "note": "N2L on smooth slope after force removed, then suvat"
+  },
+  "7a": {
+   "primary_tag": "9709-M1",
+   "note": "equilibrium on smooth plane"
+  }
+ },
+ "9709_s21_qp_41": {
+  "2b": {
+   "primary_tag": "9709-M2",
+   "note": "suvat with acceleration from (a)"
+  },
+  "7b": {
+   "qtype": "9709-work-energy",
+   "note": "slide question with work done against resistance"
+  }
+ },
+ "9709_s21_qp_42": {
+  "Q3": {
+   "primary_tag": "9709-M4",
+   "note": "N2L on ring then suvat for time"
+  },
+  "5a(i)": {
+   "qtype": "9709-trailer",
+   "note": "car-and-caravan question"
+  },
+  "5b(i)": {
+   "primary_tag": "9709-M5",
+   "note": "constant speed from P=Fv"
+  },
+  "5b(ii)": {
+   "qtype": "9709-trailer",
+   "note": "car-and-caravan question"
+  }
+ },
+ "9709_s21_qp_43": {
+  "5a": {
+   "primary_tag": "9709-M5",
+   "note": "work-energy for length of hill"
+  },
+  "7c": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-plane-motion",
+   "note": "deceleration up rough plane by N2L after force removed"
+  }
+ },
+ "9709_s22_qp_42": {
+  "Q3": {
+   "qtype": "9709-pulley-hanging",
+   "note": "both particles hang vertically (Atwood)"
+  },
+  "Q4": {
+   "qtype": "9709-two-vehicles",
+   "note": "two particles, when same distance from O"
+  }
+ },
+ "9709_s23_qp_41": {
+  "Q4": {
+   "qtype": "9709-vt-journey",
+   "note": "v-t graph of straight line segments"
+  },
+  "6a": {
+   "primary_tag": "9709-M1",
+   "note": "determine whether particles move: limiting friction comparison"
+  }
+ },
+ "9709_s23_qp_42": {
+  "Q4": {
+   "qtype": "9709-vehicle-power",
+   "note": "athlete producing power / driving force against resistance"
+  },
+  "7b": {
+   "primary_tag": "9709-M2",
+   "note": "suvat with accelerations from (a)"
+  }
+ },
+ "9709_s23_qp_43": {
+  "6b": {
+   "primary_tag": "9709-M2",
+   "note": "distance from v-t graph"
+  }
+ },
+ "9709_s24_qp_41": {
+  "7c": {
+   "primary_tag": "9709-M2",
+   "qtype": "9709-vertical",
+   "note": "vertical kinematics to find next meeting height"
+  }
+ },
+ "9709_s24_qp_42": {
+  "6b": {
+   "primary_tag": "9709-M3",
+   "note": "KE loss in collisions, consistent with other collision parts"
+  }
+ },
+ "9709_s24_qp_43": {
+  "Q2": {
+   "qtype": "9709-strings",
+   "note": "particle held by string and force"
+  },
+  "5b(ii)": {
+   "primary_tag": "9709-M2",
+   "note": "suvat with acceleration from (b)(i)"
+  },
+  "Q7": {
+   "primary_tag": "9709-M5",
+   "qtype": "9709-work-energy",
+   "note": "MS main method work-energy on track"
+  }
+ },
+ "9709_s25_qp_41": {
+  "5a": {
+   "qtype": "9709-collisions",
+   "note": "momentum and KE of particle in collision question"
+  },
+  "6b": {
+   "primary_tag": "9709-M5",
+   "note": "energy method required"
+  }
+ },
+ "9709_s25_qp_42": {
+  "1a": {
+   "primary_tag": "9709-M2",
+   "qtype": "9709-work-power",
+   "note": "speed = distance/time; work-power question"
+  },
+  "Q3": {
+   "qtype": "9709-strings",
+   "note": "particle held by string and force"
+  },
+  "5a": {
+   "qtype": "9709-pulley-two-planes",
+   "note": "three particles with two strings"
+  },
+  "5b": {
+   "qtype": "9709-pulley-two-planes",
+   "note": "three particles with two strings"
+  },
+  "5c": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-pulley-two-planes",
+   "note": "after string breaks A decelerates: N2L"
+  },
+  "Q7": {
+   "primary_tag": "9709-M5",
+   "qtype": "9709-work-energy",
+   "note": "energy method throughout"
+  }
+ },
+ "9709_s25_qp_43": {
+  "Q3": {
+   "qtype": "9709-vt-journey",
+   "note": "v-t graph of straight line segments"
+  },
+  "Q4": {
+   "qtype": "9709-strings",
+   "note": "three blocks in equilibrium on strings"
+  }
+ },
+ "9709_s25_qp_45": {
+  "Q1": {
+   "primary_tag": "9709-M5",
+   "qtype": "9709-work-energy",
+   "note": "work done by pulling force via PE, KE, friction"
+  },
+  "2b": {
+   "primary_tag": "9709-M4",
+   "note": "MS: N2L then suvat"
+  },
+  "7b": {
+   "primary_tag": "9709-M5",
+   "note": "energy method required"
+  }
+ },
+ "9709_s26_qp_41": {
+  "5b": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-plane-motion",
+   "note": "N2L down plane then suvat"
+  }
+ },
+ "9709_s26_qp_42": {
+  "3a": {
+   "qtype": "9709-pulley-two-planes",
+   "note": "A on horizontal plane, B on inclined plane"
+  },
+  "3b": {
+   "qtype": "9709-pulley-two-planes",
+   "note": "A on horizontal plane, B on inclined plane"
+  },
+  "3c": {
+   "primary_tag": "9709-M5",
+   "qtype": "9709-pulley-two-planes",
+   "note": "work done by friction = KE lost"
+  },
+  "4b": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-plane-motion",
+   "note": "N2L down rough plane then suvat"
+  },
+  "Q6": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-friction-horizontal",
+   "note": "crate accelerating on rough ground: N2L"
+  }
+ },
+ "9709_s26_qp_43": {
+  "5b": {
+   "qtype": "9709-trailer",
+   "note": "lorry-and-trailer question"
+  }
+ },
+ "9709_w18_qp_41": {
+  "6(i)": {
+   "primary_tag": "9709-M2",
+   "note": "pure suvat for deceleration and u"
+  }
+ },
+ "9709_w18_qp_42": {
+  "4(i)": {
+   "primary_tag": "9709-M1",
+   "note": "limiting equilibrium"
+  },
+  "7(ii)": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-force-motion",
+   "note": "N2L with water resistance"
+  }
+ },
+ "9709_w18_qp_43": {
+  "Q1": {
+   "qtype": "9709-strings",
+   "note": "smooth ring on string"
+  },
+  "Q2": {
+   "primary_tag": "9709-M1",
+   "note": "constant speed: equilibrium with friction"
+  },
+  "5(ii)": {
+   "primary_tag": "9709-M2",
+   "note": "free vertical motion of P after Q lands"
+  }
+ },
+ "9709_w19_qp_41": {
+  "5(i)": {
+   "qtype": "9709-ring-rod",
+   "note": "ring threaded on rod"
+  },
+  "5(ii)": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-ring-rod",
+   "note": "mass from N2L"
+  },
+  "6(i)": {
+   "qtype": "9709-force-motion",
+   "note": "particle entering water with upward force"
+  },
+  "6(ii)": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-force-motion",
+   "note": "N2L in water"
+  },
+  "6(iii)": {
+   "qtype": "9709-force-motion",
+   "note": "particle entering water with upward force"
+  }
+ },
+ "9709_w19_qp_42": {
+  "Q3": {
+   "qtype": "9709-strings",
+   "note": "particle held by two strings"
+  },
+  "Q5": {
+   "primary_tag": "9709-M2",
+   "qtype": "9709-vertical",
+   "note": "two particles meeting in vertical line, no momentum"
+  },
+  "6(ii)": {
+   "primary_tag": "9709-M1",
+   "note": "R by resolving, mu = F/R"
+  },
+  "6(iii)": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-friction-horizontal",
+   "note": "deceleration from friction by N2L"
+  },
+  "7(ii)": {
+   "primary_tag": "9709-M2",
+   "note": "suvat with acceleration from (i)"
+  }
+ },
+ "9709_w19_qp_43": {
+  "7(ii)": {
+   "primary_tag": "9709-M2",
+   "note": "free fall after string breaks"
+  },
+  "7(iii)": {
+   "qtype": "9709-pulley-hanging",
+   "note": "Atwood question"
+  }
+ },
+ "9709_w20_qp_41": {
+  "2a": {
+   "primary_tag": "9709-M5",
+   "qtype": "9709-vehicle-power",
+   "note": "power = Fv"
+  },
+  "5b": {
+   "primary_tag": "9709-M2",
+   "note": "free vertical motion after other particle lands"
+  },
+  "6a": {
+   "primary_tag": "9709-M5",
+   "note": "energy method required"
+  }
+ },
+ "9709_w20_qp_42": {
+  "Q3": {
+   "qtype": "9709-strings",
+   "note": "block held by two strings"
+  },
+  "8b": {
+   "primary_tag": "9709-M5",
+   "note": "energy method required"
+  }
+ },
+ "9709_w20_qp_43": {
+  "6a(i)": {
+   "qtype": "9709-trailer",
+   "note": "car-and-caravan question"
+  },
+  "6b": {
+   "qtype": "9709-trailer",
+   "note": "car-and-caravan question"
+  }
+ },
+ "9709_w21_qp_42": {
+  "Q6": {
+   "qtype": "9709-strings",
+   "note": "block held by two strings and a force"
+  },
+  "7b": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-plane-motion",
+   "note": "MS: N2L for P then suvat"
+  }
+ },
+ "9709_w21_qp_43": {
+  "1b": {
+   "primary_tag": "9709-M4",
+   "note": "MS: N2L then suvat"
+  },
+  "5b": {
+   "qtype": "9709-calculus",
+   "note": "variable acceleration question"
+  },
+  "5c": {
+   "qtype": "9709-calculus",
+   "note": "variable acceleration question"
+  },
+  "Q6": {
+   "qtype": "9709-pulley-two-planes",
+   "note": "three particles with two strings"
+  }
+ },
+ "9709_w22_qp_41": {
+  "3a": {
+   "primary_tag": "9709-M5",
+   "note": "power = Fv at constant speed"
+  }
+ },
+ "9709_w22_qp_42": {
+  "2b": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-plane-motion",
+   "note": "N2L up plane then suvat"
+  }
+ },
+ "9709_w22_qp_43": {
+  "6a(i)": {
+   "qtype": "9709-trailer",
+   "note": "car-and-caravan question"
+  },
+  "6b": {
+   "qtype": "9709-trailer",
+   "note": "car-and-caravan question"
+  }
+ },
+ "9709_w23_qp_41": {
+  "4a": {
+   "primary_tag": "9709-M4",
+   "note": "deceleration from friction (N2L) then suvat"
+  },
+  "4c": {
+   "qtype": "9709-collisions",
+   "note": "collision question"
+  }
+ },
+ "9709_w23_qp_42": {
+  "6b": {
+   "qtype": "9709-trailer",
+   "note": "engine-and-coach question"
+  }
+ },
+ "9709_w23_qp_43": {
+  "2b": {
+   "primary_tag": "9709-M4",
+   "note": "MS: suvat then N2L"
+  },
+  "3c": {
+   "primary_tag": "9709-M2",
+   "note": "suvat with given acceleration"
+  },
+  "7b": {
+   "primary_tag": "9709-M4",
+   "qtype": "9709-pulley-table",
+   "note": "N2L with friction and pulley, then deceleration"
+  }
+ },
+ "9709_w24_qp_41": {
+  "2b": {
+   "primary_tag": "9709-M5",
+   "qtype": "9709-work-energy",
+   "note": "MS main method work-energy"
+  },
+  "5b": {
+   "primary_tag": "9709-M2",
+   "qtype": "9709-vertical",
+   "note": "height from suvat, no momentum"
+  }
+ },
+ "9709_w24_qp_42": {
+  "Q4": {
+   "qtype": "9709-strings",
+   "note": "particles suspended by strings"
+  },
+  "5a": {
+   "primary_tag": "9709-M2",
+   "qtype": "9709-vertical",
+   "note": "speeds before meeting: vertical kinematics"
+  }
+ },
+ "9709_w24_qp_43": {
+  "5b": {
+   "primary_tag": "9709-M4",
+   "note": "accelerating: N2L"
+  },
+  "Q6": {
+   "qtype": "9709-calculus",
+   "note": "acceleration 0.6t needs integration"
+  },
+  "7a": {
+   "qtype": "9709-pulley-hanging",
+   "note": "both particles hang vertically (Atwood)"
+  },
+  "7b": {
+   "primary_tag": "9709-M2",
+   "qtype": "9709-pulley-hanging",
+   "note": "free vertical motion of A after B lands"
+  }
+ },
+ "9709_w25_qp_42": {
+  "4a": {
+   "primary_tag": "9709-M2",
+   "qtype": "9709-vertical",
+   "note": "meeting height: vertical kinematics"
+  }
+ },
+ "9709_w25_qp_43": {
+  "5b": {
+   "primary_tag": "9709-M2",
+   "note": "suvat with acceleration from (a)"
+  },
+  "5c": {
+   "primary_tag": "9709-M2",
+   "note": "free vertical motion of A after B lands"
+  }
+ },
+ "9709_w25_qp_45": {
+  "5a": {
+   "qtype": "9709-pulley-two-planes",
+   "note": "three particles with two strings"
+  },
+  "5b": {
+   "qtype": "9709-pulley-two-planes",
+   "note": "three particles with two strings"
+  },
+  "5c": {
+   "primary_tag": "9709-M2",
+   "qtype": "9709-pulley-two-planes",
+   "note": "suvat with acceleration from (a)"
+  }
+ }
+}

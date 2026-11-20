@@ -1,0 +1,403 @@
+Cambridge International AS & A Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions October/November 2021
+MARK SCHEME
+Maximum Mark: 100
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the October/November 2021 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 19 printed pages.
+© UCLES 2021 [Turn over
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the
+specific content of the mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these
+marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the
+scope of the syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the
+question as indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently, e.g. in situations where candidates have not followed instructions or in the application of generic level
+descriptors.
+© UCLES 2021 Page 2 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may
+be limited according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or
+grade descriptors in mind.
+Science-Specific Marking Principles
+1 Examiners should consider the context and scientific use of any keywords when awarding marks. Although keywords may be present, marks
+should not be awarded if the keywords are used incorrectly.
+2 The examiner should not choose between contradictory statements given in the same question part, and credit should not be awarded for any
+correct statement that is contradicted within the same question part. Wrong science that is irrelevant to the question should be ignored.
+3 Although spellings do not have to be correct, spellings of syllabus terms must allow for clear and unambiguous separation from other syllabus
+terms with which they may be confused (e.g. ethane / ethene, glucagon / glycogen, refraction / reflection).
+4 The error carried forward (ecf) principle should be applied, where appropriate. If an incorrect answer is subsequently used in a scientifically
+correct way, the candidate should be awarded these subsequent marking points. Further guidance will be included in the mark scheme where
+necessary and any exceptions to this general principle will be noted.
+5 ‘List rule’ guidance
+For questions that require n responses (e.g. State two reasons …):
+• The response should be read as continuous prose, even when numbered answer spaces are provided.
+• Any response marked ignore in the mark scheme should not count towards n.
+• Incorrect responses should not be awarded credit but will still count towards n.
+• Read the entire response to check for any responses that contradict those that would otherwise be credited. Credit should not be
+awarded for any responses that are contradicted within the rest of the response. Where two responses contradict one another, this should
+be treated as a single incorrect response.
+• Non-contradictory responses after the first n responses may be ignored even if they include incorrect science.
+© UCLES 2021 Page 3 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+6 Calculation specific guidance
+Correct answers to calculations should be given full credit even if there is no working or incorrect working, unless the question states ‘show
+your working’.
+For questions in which the number of significant figures required is not stated, credit should be awarded for correct answers when rounded by
+the examiner to the number of significant figures given in the mark scheme. This may not apply to measured values.
+For answers given in standard form (e.g. a × 10n) in which the convention of restricting the value of the coefficient (a) to a value between 1
+and 10 is not followed, credit may still be awarded if the answer can be converted to the answer given in the mark scheme.
+Unless a separate mark is given for a unit, a missing or incorrect unit will normally mean that the final calculation mark is not awarded.
+Exceptions to this general principle will be noted in the mark scheme.
+7 Guidance for chemical equations
+Multiples / fractions of coefficients used in chemical equations are acceptable unless stated otherwise in the mark scheme.
+State symbols given in an equation should be ignored unless asked for in the question or stated otherwise in the mark scheme.
+© UCLES 2021 Page 4 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Abbreviations
+/ Alternative and acceptable answers for the same marking point.
+( ) Bracketed content indicates words which do not need to be explicitly seen to gain credit but which indicate the context for an answer.
+The context does not need to be seen but if a context is given that is incorrect then the mark should not be awarded.
+___ Underlined content must be present in answer to award the mark. This means either the exact word or another word that has the
+same technical meaning.
+Mark categories
+B marks These are independent marks, which do not depend on other marks. For a B mark to be awarded, the point to which it refers must
+be seen specifically in the candidate’s answer.
+M marks These are method marks upon which A marks later depend. For an M mark to be awarded, the point to which it refers must be seen
+specifically in the candidate’s answer. If a candidate is not awarded an M mark, then the later A mark cannot be awarded either.
+C marks These are compensatory marks which can be awarded even if the points to which they refer are not written down by the candidate,
+providing subsequent working gives evidence that they must have known them. For example, if an equation carries a C mark and
+the candidate does not write down the actual equation but does correct working which shows the candidate knew the equation, then
+the C mark is awarded.
+If a correct answer is given to a numerical question, all of the preceding C marks are awarded automatically. It is only necessary to
+consider each of the C marks in turn when the numerical answer is not correct.
+A marks These are answer marks. They may depend on an M mark or allow a C mark to be awarded by implication.
+Annotations
+ Indicates the point at which a mark has been awarded.
+X Indicates an incorrect answer or a point at which a decision is made not to award a mark.
+XP Indicates a physically incorrect equation (‘incorrect physics’). No credit is given for substitution, or subsequent arithmetic, in a
+physically incorrect equation.
+© UCLES 2021 Page 5 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+ECF Indicates ‘error carried forward’. Answers to later numerical questions can always be awarded up to full credit provided they are
+consistent with earlier incorrect answers. Within a section of a numerical question, ECF can be given after AE, TE and POT errors,
+but not after XP.
+AE Indicates an arithmetic error. Do not allow the mark where the error occurs. Then follow through the working/calculation giving full
+subsequent ECF if there are no further errors.
+POT Indicates a power of ten error. Do not allow the mark where the error occurs. Then follow through the working/calculation giving full
+subsequent ECF if there are no further errors.
+TE Indicates incorrect transcription of the correct data from the question, a graph, data sheet or a previous answer. For example, the
+value of 1.6 × 10–19 has been written down as 6.1 × 10–19 or 1.6 × 1019.
+Do not allow the mark where the error occurs. Then follow through the working/calculation giving full subsequent ECF if there are
+no further errors.
+SF Indicates that the correct answer is seen in the working but the final answer is incorrect as it is expressed to too few significant
+figures.
+BOD Indicates that a mark is awarded where the candidate provides an answer that is not totally satisfactory, but the examiner feels that
+sufficient work has been done (‘benefit of doubt’).
+CON Indicates that a response is contradictory.
+I Indicates parts of a response that have been seen but disregarded as irrelevant.
+M0 Indicates where an A category mark has not been awarded due to the M category mark upon which it depends not having
+previously been awarded.
+^ Indicates where more is needed for a mark to be awarded (what is written is not wrong, but not enough). May also be used to
+annotate a response space that has been left completely blank.
+SEEN Indicates that a page has been seen.
+© UCLES 2021 Page 6 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+1(a) acceleration perpendicular to velocity B1
+1(b)(i) decreases B1
+1(b)(ii) (acceleration of) 9.8ms–2 is caused by weight of car B1
+or
+centripetal force must be greater than weight of car
+(acceleration > 9.8ms–2) requires contact force from track B1
+or
+(centripetal force > weight) requires contact force from track
+1(c) ½mv 2 = ½mv 2 – mgh C1
+Y X
+a = v2 / r C1
+v 2 = 3.82 – 2 × 9.81 × 0.62 so v = 1.5ms–1 A1
+Y Y
+a = 1.52 / 0.31 = 7.3ms–2 (which is less than 9.8ms–2) so no
+or
+v = √(9.81 × 0.31) = 1.74 m s–1 so v 2 = 1.742 + 2 × 9.81 × 0.62 (A1)
+Y X
+v = 3.9 m s–1 (which is greater than 3.8 m s–1) so no
+X
+1(d) acceleration is independent of mass so makes no difference B1
+or
+mass cancels in the equation so makes no difference
+© UCLES 2021 Page 7 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+2(a) (gravitational) field strength equals (gravitational) potential gradient M1
+reference to minus sign A1
+2(b)(i) potential is zero at infinity B1
+(gravitational) force is attractive B1
+(test) mass getting closer (from infinity) loses potential energy B1
+2(b)(ii) • potential at (surface of) planet is smaller than at (surface of) moon B2
+• potential gradient at (surface of) planet is smaller than at (surface of) moon
+• magnitude of potential varies inversely with distance from centre near the spheres
+• (point of) maximum potential is nearer to moon than planet
+Any two points, 1 mark each
+2(b)(iii) sketch: one curve, starting with gradient of decreasing magnitude at 2R and finishing with gradient of increasing magnitude B1
+at D – R
+field strength shown as zero (only) near the point of maximum potential B1
+negative field strength near one sphere and positive field strength near the other B1
+© UCLES 2021 Page 8 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+3(a)(i) no loss of kinetic energy B1
+3(a)(ii) • molecules have negligible volume (compared with gas/container) B2
+• no forces between molecules (except during collisions)
+• molecules are in random motion
+• collisions are instantaneous
+Any two points, 1 mark each
+3(b)(i) 2mu A1
+3(b)(ii) 2L / u A1
+3(b)(iii) force = change in momentum / time = 2mu / (2L / u) A1
+= mu2 / L
+3(b)(iv) pressure = force / area = (mu2 / L) / L2 A1
+= mu2 / L3
+3(c) pV = NkT C1
+NkT = ⅓Nm<c2> leading to ½m<c2> = (3/2)kT and ½m<c2> = E A1
+K
+3(d) ½ × 3.34 × 10–27 × <c2> = (3/2) × 1.38 × 10–23 × (25 + 273) C1
+r.m.s. speed = 1.9 × 103 m s–1 A1
+© UCLES 2021 Page 9 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+4(a) straight line through the origin B1
+negative gradient B1
+4(b) a = (–)ω2x and T = 2π / ω C1
+e.g. ω = √(0.80 / 0.12) (any correct pair of values of a and x) C1
+( = 2.58 rad s–1)
+T = 2π / 2.58 A1
+= 2.4 s
+4(c)(i) Point labelled P at one end of the line B1
+4(c)(ii) Point labelled Q at displacement with magnitude more than half but less than maximum B1
+© UCLES 2021 Page 10 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+5(a)(i) unmodulated (radio) waves would interfere with each other B1
+or
+not modulating would require aerials too long (to be practical)
+5(a)(ii) advantage: B1
+• can transmit higher frequencies
+• higher quality reproduction
+• less prone to interference
+• same frequency can be used in different areas
+(any one point)
+disadvantage: B1
+• takes up greater bandwidth
+• shorter range of transmission
+• requires a greater number of transmitting aerials
+(any one point)
+5(b) AM amplitude: min. 8 mV and max. 12 mV B1
+AM frequency: min. 100 kHz and max. 100 kHz B1
+FM amplitude: min. 10 mV and max. 10 mV B1
+FM frequency: min. 90 kHz and max. 110 kHz B1
+5(c) 8.4 kHz A1
+© UCLES 2021 Page 11 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+6(a) work done per unit charge B1
+(work done in) moving positive charge from infinity B1
+6(b) C = Q / V C1
+V = Q / (4πεr) and so C = Q / [Q / (4πεr)] = 4πεr A1
+0 0 0
+6(c) Q = 4πεrV = 4π × 8.85 × 10–12 × 0.13 × 4500 C1
+0
+( = 6.5 × 10–8 C)
+(Q – q) / 13 = q / 5.2 C1
+5.2Q – 5.2q = 13q, so q = (5.2 / 18.2)Q A1
+q = (5.2 / 18.2) × 6.5 × 10–8
+= 1.9 × 10–8 C
+or
+V = Q / C (C1)
+T T T
+= 6.5 × 10–8 / [4π × 8.85 × 10–12 × (0.13 + 0.052)]
+( = 3210 V)
+q = 4π × 8.85 × 10–12 × 0.052 × 3210 (A1)
+= 1.9 × 10–8 C
+© UCLES 2021 Page 12 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+7(a) output voltage / input voltage M1
+input (voltage) is difference between (inverting and non-inverting) inputs A1
+7(b) • reduces the gain B2
+• greater bandwidth
+• more stable
+Any two points, 1 mark each
+7(c)(i) inverting amplifier B1
+7(c)(ii) X marked anywhere between right-hand edge of 480Ω resistor, left-hand edge of 1.2kΩ resistor and the inverting input B1
+7(c)(iii) gain = (–)R / R C1
+f i
+= (–)1200 / 480 A1
+= –2.5
+7(c)(iv) V = 6.5 / (–2.5) A1
+IN
+= –2.6 V
+7(c)(v) (–2.5) × (–5.4) = +13.5 V, and so output saturates A1
+V = (+)8.0 V
+OUT
+© UCLES 2021 Page 13 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+8(a)(i) arrow from Q pointing downwards, labelled B B1
+8(a)(ii) arrow from Q pointing towards P, labelled F B1
+8(b)(i) force is proportional to product of both currents (I and 2I) B1
+or
+Newton’s third law
+forces are equal B1
+8(b)(ii) opposite B1
+© UCLES 2021 Page 14 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+9(a)(i) emission of electrons (from a metal surface) B1
+when electromagnetic radiation is incident (on electrons) B1
+9a(ii) minimum energy required for an electron to leave surface B1
+9(b)(i) threshold (frequency) B1
+9(b)(ii) • photons are (discrete) packets of energy B2
+• energy of photons depends on frequency (of EM radiation)
+• electrons can only absorb a single photon (of energy)
+Any two points, 1 mark each
+emission only possible if photon energy is at least the work function B1
+9(b)(iii) work function = hf = 6.63 × 10–34 × 6.93 × 1014 C1
+0
+= 4.59 × 10–19 (J) A1
+= 4.59 × 10–19 / 1.60 × 10–19 (eV)
+= 2.87 eV
+© UCLES 2021 Page 15 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+10(a)(i) to increase the magnetic flux linkage (between the coils) B1
+10(a)(ii) to reduce energy losses B1
+by reducing induced currents B1
+10(b)(i) maximum V = 12 000 × (625 / 25000) A1
+OUT
+= 300 V
+10(b)(ii) r.m.s. current = 300 / (640 × √2) A1
+= 0.33 A
+10(b)(iii) sketch: sinusoidal shape in positive half of the graph, sitting with ‘minima’ resting on the time-axis (at P = 0) B1
+each ‘cycle’ shown repeating every 20 ms B1
+maximum P shown as 140 W B1
+10(c) power curve is symmetrical about the midpoint (on the power axis) B1
+mean power is half the peak power B1
+© UCLES 2021 Page 16 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+11(a) generates ultrasound B1
+detects reflected ultrasound B1
+applied p.d. causes crystal to vibrate B1
+or
+vibrations cause crystal to generate an e.m.f.
+11(b)(i) product of density and speed M1
+speed of ultrasound in medium A1
+11(b)(ii) difference between (the specific acoustic impedances) C1
+• if similar/same then reflection coefficient is zero/very low A1
+• if very different then reflection coefficient is (nearly) 1
+• the lower the difference means lower the reflection coefficient
+(any one point)
+© UCLES 2021 Page 17 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+12(a)(i) cannot predict when a particular nucleus will decay B1
+or
+cannot predict which nucleus will decay next
+12(a)(ii) (decay is) not affected by external (environmental) factors B1
+12(b)(i) A = A exp (–λt) and so ln A = ln A – λt C1
+0 0
+gradient of line = (–)λ
+λ = (36.4 – 35.0) / (20 – 0) C1
+( = 0.07(0) min–1)
+half-life = ln 2 / λ A1
+= ln 2 / 0.070
+= 10 min
+or
+A = exp (–36.4) = 6.43 × 1015 (Bq) (C1)
+0
+A / 2 = 3.21 × 1015 (Bq), so ln (A / 2) = 35.7 (C1)
+0 0
+read off half-life = 10 min (A1)
+or
+(at one half-life,) ln A = 36.4 – ln 2 (C1)
+= 35.7 (C1)
+read off half-life = 10 min (A1)
+© UCLES 2021 Page 18 of 19
+
+9702/42 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+12(b)(ii) A = λN C1
+N = mass / (nucleon number × u) C1
+or
+N = (mass / nucleon number) × N
+A
+exp(36.4) = (1.17 × 10–3 × 5.66 × 10–7) / (nucleon number × 1.66 × 10–27) A1
+or
+exp(36.4) = (1.17 × 10–3 × 5.66 × 10–4 × 6.02 × 1023) / nucleon number
+nucleon number = 62
+© UCLES 2021 Page 19 of 19

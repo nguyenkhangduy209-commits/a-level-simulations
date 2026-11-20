@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vehicle and trailer</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/mech-dynamics.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, DY = SIM.dyn;
+  var course = ui.course('9709'), g = ui.gFor(course), is02 = course === '9702';
+  var pg = ui.page({ title: 'Vehicle and trailer: driving force, power P = Fv, hills', g: g,
+    tags: is02 ? ['9702 5 Work, energy and power', '9702 3 Dynamics'] : ['9709 4.4 Newton’s laws (car and trailer)', '9709 4.5 Power P = Fv'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 16 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 20, onFrame: function () { drawScene(); drawPlots(); } });
+  ui.legend(sceneCard, [{ color: 'var(--c-applied)', label: 'driving force' }, { color: 'var(--c-friction)', label: 'resistance / braking' },
+    { color: 'var(--c-tension)', label: 'tension (or thrust)' }, { color: 'var(--c-component)', label: 'weight component' }, { color: 'var(--c-accel)', label: 'acceleration' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pF = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'force / N', xLabel: 'v / m s⁻¹' });
+  var pV = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'v / m s⁻¹ (animation only)' });
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var prm = ui.params(paramCard, [
+    { key: 'm1', label: 'Mass of vehicle', sym: 'm<sub>1</sub>', unit: 'kg', min: 10, max: 200000, step: 1, value: 1700 },
+    { key: 'm2', label: 'Mass of trailer (0 = none)', sym: 'm<sub>2</sub>', unit: 'kg', min: 0, max: 100000, step: 1, value: 300 },
+    { key: 'theta', label: 'Hill angle (+ uphill, − downhill)', sym: 'θ', unit: '°', min: -15, max: 15, step: 0.01, value: 0 },
+    { key: 's', label: 'sin θ (when given as a ratio)', sym: 'sin θ', unit: '', min: -0.25, max: 0.25, step: 0.0001, value: 0, hidden: true },
+    { key: 'R1', label: 'Resistance on the vehicle', sym: 'R<sub>1</sub>', unit: 'N', min: 0, max: 60000, step: 1, value: 400 },
+    { key: 'R2', label: 'Resistance on the trailer', sym: 'R<sub>2</sub>', unit: 'N', min: 0, max: 60000, step: 1, value: 150 },
+    { key: 'k', label: 'Extra resistance k vⁿ on the vehicle (only if the question says so)', sym: 'k', unit: '', min: 0, max: 50, step: 0.01, value: 0 },
+    { key: 'D', label: 'Driving force', sym: 'D', unit: 'N', min: 0, max: 300000, step: 1, value: 1000, hidden: true },
+    { key: 'P', label: 'Power of the engine', sym: 'P', unit: 'kW', min: 0, max: 5000, step: 0.001, value: 14 },
+    { key: 'v', label: 'Speed at this instant', sym: 'v', unit: 'm s<sup>−1</sup>', min: 0.1, max: 80, step: 0.01, value: 20 },
+    { key: 'B', label: 'Braking force on the vehicle', sym: 'B', unit: 'N', min: 0, max: 60000, step: 1, value: 0 },
+    { key: 'aT', label: 'Target acceleration (for “solve for”)', sym: 'a', unit: 'm s<sup>−2</sup>', min: -5, max: 5, step: 0.001, value: 0, hidden: true },
+    { key: 'T', label: 'Animation time', sym: 't<sub>max</sub>', unit: 's', min: 2, max: 300, step: 1, value: 30 }
+  ], update);
+  var useSin = ui.toggle(paramCard, { label: 'Hill given as sin θ' }, update);
+  var modeSel = ui.select(paramCard, { label: 'Engine', value: 'power', options: [{ value: 'power', label: 'power P (D = P ÷ v)' }, { value: 'force', label: 'driving force D' }] }, update);
+  var nSel = ui.select(paramCard, { label: 'k vⁿ with n =', value: '1', options: [{ value: '1', label: '1 (k v)' }, { value: '2', label: '2 (k v²)' }] }, update);
+  var coup = ui.select(paramCard, { label: 'Coupling', value: 'rope', options: [{ value: 'rope', label: 'rope / cable (tension only)' }, { value: 'bar', label: 'rigid tow-bar (tension or thrust)' }] }, update);
+  var solveSel = ui.select(paramCard, { label: 'Solve for', value: 'a', options: [
+    { value: 'a', label: 'acceleration and tension' }, { value: 'P', label: 'power needed for acceleration a at speed v' },
+    { value: 'theta', label: 'hill angle for constant speed v at power P' }, { value: 'R', label: 'vehicle resistance R₁ for acceleration a' },
+    { value: 'v', label: 'speed v at which power P gives acceleration a' }] }, update);
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+  var eq0 = R.eq; R.eq = function (l, w, v, u) { return eq0(l, w, typeof v === 'number' ? fmtX(v) : v, u); };
+  /* exact values (e.g. 172.5) are shown in full; others to 3 s.f. */
+  function fmtX(x) {
+    if (typeof x !== 'number' || !isFinite(x)) return U.sf(x);
+    for (var d = 0; d <= 4; d++) {
+      var y = x * Math.pow(10, d);
+      if (Math.abs(y - Math.round(y)) < 1e-9 * Math.max(1, Math.abs(y))) {
+        var str = x.toFixed(d), dig = str.replace(/[-.]/g, '').replace(/^0+/, '').length;
+        return dig <= 6 && Math.abs(x) < 1e6 && (Math.abs(x) >= 1e-3 || x === 0) ? str.replace('-', '−') : U.sf(x);
+      }
+    }
+    return U.sf(x);
+  }
+  function pn(x) { return x < 0 ? '(' + U.sf(x) + ')' : U.sf(x); }
+
+  var base = { m2: 0, theta: 0, s: 0, R1: 0, R2: 0, k: 0, D: 1000, P: 10, v: 10, B: 0, aT: 0, T: 30 };
+  function pre(name, vals, o, note) { return Object.assign({ name: name, values: Object.assign({}, base, vals), note: note }, o); }
+  var list9709 = [
+    pre('9709/41 M/J 24 Q4: car 1700 kg + trailer 300 kg, 400 N / 150 N, 14 kW at 20 m s⁻¹', { m1: 1700, m2: 300, R1: 400, R2: 150, P: 14, v: 20 }, { mode: 'power', coup: 'rope', solve: 'a' },
+      'D = 14000 ÷ 20 = 700 N. System: 700 − 550 = 2000a ⇒ a = 0.075. Trailer: T − 150 = 300a ⇒ T = 172.5 N.'),
+    pre('9709/42 O/N 23 Q6(a): engine 120 000 kg + coach 60 000 kg, sin θ = 0.02, D = 125 000 N', { m1: 120000, m2: 60000, s: 0.02, R1: 22000, R2: 13000, D: 125000, v: 30, T: 60 }, { mode: 'force', coup: 'bar', solve: 'a', sin: true },
+      'a = (125000 − 35000 − 180000g × 0.02) ÷ 180000 = 0.3; coach: T − 13000 − 60000g(0.02) = 60000a ⇒ T = 43 000 N.'),
+    pre('9709/42 O/N 23 Q6(b): 4500 kW at constant 30 m s⁻¹ up a hill — find the angle', { m1: 120000, m2: 60000, R1: 22000, R2: 13000, P: 4500, v: 30, T: 60 }, { mode: 'power', coup: 'bar', solve: 'theta' },
+      '4 500 000 ÷ 30 = 150 000 = 35 000 + 180 000g sin β ⇒ sin β = 0.0639 ⇒ β = 3.7°.'),
+    pre('9709/41 M/J 26 Q2(a): car 1200 kg, 600 N, 27 kW at 18 m s⁻¹', { m1: 1200, R1: 600, P: 27, v: 18 }, { mode: 'power', solve: 'a' },
+      'D = 27000 ÷ 18 = 1500 N ⇒ a = (1500 − 600) ÷ 1200 = 0.75 m s⁻².'),
+    pre('9709/41 M/J 26 Q2(b): 22 kW, constant 12 m s⁻¹ up a hill, 650 N — find θ', { m1: 1200, R1: 650, P: 22, v: 12 }, { mode: 'power', solve: 'theta' },
+      '22000 ÷ 12 = 650 + 1200g sin θ ⇒ sin θ = 0.0986 ⇒ θ = 5.7°.'),
+    pre('9709/43 M/J 22 Q5(a): cyclist 70 kg, a = 0.3 at 4 m s⁻¹, 30 N — find the power', { m1: 70, R1: 30, P: 0.204, v: 4, aT: 0.3, T: 30 }, { mode: 'power', solve: 'P' },
+      'D = 70 × 0.3 + 30 = 51 N ⇒ P = 51 × 4 = 204 W.'),
+    pre('9709/42 F/M 26 Q1: winch at 4000 W pulls a 200 kg block (μ = 0.8) at constant speed', { m1: 200, R1: 1600, P: 4, v: 2.5, aT: 0, T: 10 }, { mode: 'power', solve: 'v' },
+      'Constant speed ⇒ D = μmg = 0.8 × 200 × 10 = 1600 N ⇒ v = 4000 ÷ 1600 = 2.5 m s⁻¹. (Resistance R₁ set to μmg.)'),
+    pre('Braking with a tow-bar: the trailer pushes the car (thrust)', { m1: 1000, m2: 500, R1: 100, R2: 50, D: 0, B: 3000, v: 15, T: 6 }, { mode: 'force', coup: 'bar', solve: 'a' },
+      'a = −3150 ÷ 1500 = −2.1; trailer: T − 50 = 500(−2.1) ⇒ T = −1000 N: a THRUST of 1000 N in the bar. With a rope this is impossible (rope slack).'),
+    pre('Maximum speed up a hill at constant power', { m1: 1500, m2: 0, theta: 4, R1: 500, P: 40, v: 10, T: 120 }, { mode: 'power', solve: 'a' },
+      'v_max when D = R + mg sin θ: v_max = 40000 ÷ (500 + 15000 sin 4°) = 26.0 m s⁻¹. The animation shows the speed approaching v_max.')
+  ];
+  var list9702 = [
+    pre('Car at constant power: acceleration at a given speed (P = Fv)', { m1: 1200, R1: 600, P: 27, v: 18 }, { mode: 'power', solve: 'a' }, 'D = P ÷ v, then F = ma with the resultant force.'),
+    pre('Maximum speed on the level: driving force = resistance', { m1: 1200, R1: 900, P: 45, v: 20, T: 120 }, { mode: 'power', solve: 'a' }, 'At v_max the acceleration is zero: P = Rv ⇒ v = 45000 ÷ 900 = 50 m s⁻¹.'),
+    pre('Power needed to climb a hill at constant speed', { m1: 1200, theta: 5, R1: 650, P: 22, v: 12 }, { mode: 'power', solve: 'P' }, 'P = (R + mg sin θ)v.'),
+    pre('Car towing a trailer: tension in the tow-rope', { m1: 1700, m2: 300, R1: 400, R2: 150, P: 14, v: 20 }, { mode: 'power', coup: 'rope', solve: 'a' }, 'Treat the system first, then the trailer alone.')
+  ];
+  var presetCtl = ui.presets(presetCard, is02 ? list9702 : list9709, function (p) {
+    clock.pause(); modeSel.set(p.mode || 'power', true); coup.set(p.coup || 'rope', true); solveSel.set(p.solve || 'a', true); useSin.set(!!p.sin, true);
+    prm.set(p.values); clock.seek(0);
+  });
+
+  ui.notes(noteCard, [
+    'With power P at speed v the driving force is <b>D = P ÷ v</b> — it changes as the speed changes. P is in watts (1 kW = 1000 W).',
+    'Take the whole system for the acceleration, then ONE body for the tension: the trailer is simplest (T − R₂ − m₂g sin θ = m₂a).',
+    'A negative tension means the coupling is pushing (a thrust). A rigid tow-bar can do this; a rope or cable cannot.',
+    'Maximum (steady) speed: a = 0, so D = total resistance + Mg sin θ ⇒ v<sub>max</sub> = P ÷ (R + Mg sin θ).',
+    'Going downhill the weight component helps: sin θ < 0 here.',
+    'Exam questions ask for values at an instant; the animation (constant power) is only to show how v approaches v<sub>max</sub>.'
+  ]);
+
+  /* ---------- model ---------- */
+  var res = null, trk = null, solved = null;
+  function sinT() { return useSin.get() ? prm.values.s : Math.sin(U.rad(prm.values.theta)); }
+  function update() {
+    var v = prm.values, mode = modeSel.get(), sv = solveSel.get();
+    prm.show('s', useSin.get()); prm.show('theta', !useSin.get());
+    prm.show('D', mode === 'force'); prm.show('P', mode === 'power' || sv === 'P' || sv === 'theta' || sv === 'v');
+    prm.show('aT', sv === 'P' || sv === 'R' || sv === 'v');
+    nSel.row.style.display = v.k > 0 ? '' : 'none';
+    coup.row.style.display = v.m2 > 0 ? '' : 'none';
+    ['P', 'theta', 's', 'R1', 'v'].forEach(function (k) { prm.lock(k, false); });
+    var s = sinT(), M = v.m1 + v.m2, Rtot = v.R1 + v.R2 + v.B, n = Number(nSel.get());
+    var Pw = v.P * 1000, vv = v.v, R1 = v.R1;
+    solved = null;
+    if (sv === 'P') { var kvR = v.k * Math.pow(vv, n); Pw = DY.powerFor({ M: M, a: v.aT, R: Rtot + kvR, v: vv, g: g, s: s }); solved = { k: 'P', val: Pw }; prm.lock('P', true, Pw / 1000); }
+    else if (sv === 'theta') {
+      var kv2 = v.k * Math.pow(vv, n), ha = DY.hillAngle({ P: Pw, v: vv, R: Rtot + kv2, M: M, g: g });
+      solved = { k: 'theta', val: ha.theta, s: ha.s };
+      if (isFinite(ha.theta)) { s = ha.s; if (useSin.get()) prm.lock('s', true, ha.s); else prm.lock('theta', true, ha.theta); }
+    } else if (sv === 'R') { var D0 = mode === 'power' ? Pw / vv : v.D; R1 = D0 - M * v.aT - M * g * s - v.R2 - v.B - v.k * Math.pow(vv, n); solved = { k: 'R', val: R1 }; prm.lock('R1', true, R1); }
+    else if (sv === 'v') { vv = DY.speedFor({ P: Pw, M: M, a: v.aT, R: Rtot, g: g, s: s }); solved = { k: 'v', val: vv }; if (isFinite(vv)) prm.lock('v', true, vv); }
+    var useMode = (sv === 'P' || sv === 'theta' || sv === 'v') ? 'power' : mode;
+    res = DY.vehicle({ g: g, m1: v.m1, m2: v.m2, sinTheta: s, R1: R1, R2: v.R2, k: v.k, n: n, mode: useMode, D: v.D, P: Pw, v: isFinite(vv) && vv > 0 ? vv : NaN, brake: v.B, coupling: coup.get() });
+    res.Pw = Pw; res.vv = vv; res.mode = useMode; res.Rv1 = R1;
+    trk = (isFinite(vv) && vv > 0) || useMode === 'force' ? DY.track({ M: M, g: g, s: s, mode: useMode, P: Pw, D: v.D, R0: R1 + v.R2 + v.B, k: v.k, n: n, v0: isFinite(vv) && vv > 0 ? vv : 0, tMax: v.T, dt: Math.max(0.005, v.T / 4000) }) : null;
+    clock.setDuration(v.T);
+    ui.writeHash(Object.assign({}, v, { mode: mode, solve: sv, sin: +useSin.get(), coup: coup.get() }));
+    drawScene(); drawPlots(); readout();
+  }
+
+  /* ---------- scene ---------- */
+  function drawScene() {
+    if (!res) return;
+    var col = ui.colors(), s = U.clamp(res.s, -1, 1), th = Math.asin(s), v = prm.values;
+    var L = 20; vp.fit(-L / 2 - 1, L / 2 + 1, -L * 0.28, L * 0.28);
+    var c = vp.begin();
+    var ct = Math.cos(th), st = Math.sin(th);
+    var p0 = [-L / 2 * ct, -L / 2 * st], p1 = [L / 2 * ct, L / 2 * st];
+    D.ground(c, vp.X(p0[0]), vp.Y(p0[1]), vp.X(p1[0]), vp.Y(p1[1]));
+    D.label(c, (s >= 0 ? 'uphill ' : 'downhill ') + U.dp(Math.abs(U.deg(th)), 1) + '° (sin θ = ' + U.sf(s) + ')', 10, 14, col.muted, { align: 'left', size: 11 });
+    var dist = trk ? trk.at(clock.t).s : 0;
+    var off = ((dist * 0.25) % 2 + 2) % 2;   // road markings move backwards; the vehicle stays in view
+    for (var m = -10; m <= 10; m += 2) { var xx = m - off; D.line(c, [vp.P(xx * ct, xx * st + 0.02), vp.P((xx + 0.8) * ct, (xx + 0.8) * st + 0.02)], col.muted, { width: 2 }); }
+    var ang = th, carC = [1.5 * ct, 1.5 * st], trC = [-2.6 * ct, -2.6 * st];
+    var sx = vp.X(carC[0]), sy = vp.Y(carC[1]);
+    D.block(c, sx, sy, 70, 30, ang, { label: 'car' });
+    var list = [res.D, res.R1, res.R2, Math.abs(res.T), Math.abs(res.Wpar1), Math.abs(res.Wpar2), res.brake];
+    var kf = SIM.view.forceScale(list, 90);
+    var up = [-Math.sin(ang) * 15, -Math.cos(ang) * 15];
+    var cx = sx + up[0], cy = sy + up[1];
+    if (res.D > 0) D.arrowPolar(c, cx + Math.cos(ang) * 35, cy - Math.sin(ang) * 35, ang, res.D * kf, col.applied, { label: 'D = ' + U.sf(res.D) + ' N' });
+    if (res.R1 + res.brake > 0) D.arrowPolar(c, cx, cy + 6, ang + Math.PI, (res.R1 + res.brake) * kf, col.friction, { label: 'R₁' + (res.brake ? ' + B' : '') + ' = ' + U.sf(res.R1 + res.brake) + ' N' });
+    if (Math.abs(res.Wpar1) > 1e-9) D.arrowPolar(c, cx, cy - 8, ang + (res.Wpar1 > 0 ? Math.PI : 0), Math.abs(res.Wpar1) * kf, col.component, { dash: [5, 4], width: 1.6, label: 'm₁g sin θ' });
+    if (v.m2 > 0) {
+      var tx = vp.X(trC[0]), ty = vp.Y(trC[1]);
+      D.block(c, tx, ty, 54, 24, ang, { label: 'trailer' });
+      D.line(c, [[tx + Math.cos(ang) * 27 + up[0] * 0.8, ty - Math.sin(ang) * 27 + up[1] * 0.8], [sx - Math.cos(ang) * 35 + up[0] * 0.8, sy + Math.sin(ang) * 35 + up[1] * 0.8]],
+        res.slack ? col.warn : col['object-line'], { width: coup.get() === 'bar' ? 4 : 1.5, dash: res.slack ? [4, 4] : null });
+      var tcx = tx + up[0] * 0.8, tcy = ty + up[1] * 0.8;
+      if (Math.abs(res.T) > 1e-9 && !res.slack) {
+        var tdir = res.T > 0 ? ang : ang + Math.PI;
+        D.arrowPolar(c, tcx + Math.cos(ang) * 27, tcy - Math.sin(ang) * 27, tdir, Math.abs(res.T) * kf, col.tension, { label: (res.T > 0 ? 'T = ' : 'thrust = ') + U.sf(Math.abs(res.T)) + ' N' });
+      }
+      if (res.R2 > 0) D.arrowPolar(c, tcx - Math.cos(ang) * 27, tcy + Math.sin(ang) * 27 + 6, ang + Math.PI, res.R2 * kf, col.friction, { label: 'R₂ = ' + U.sf(res.R2) });
+    }
+    if (res.invalid) D.label(c, res.invalid, vp.w / 2, vp.h - 16, col.warn, { bold: true });
+    else if (Math.abs(res.a) > 1e-9) D.arrowPolar(c, sx, sy + 30, ang + (res.a > 0 ? 0 : Math.PI), 20 + Math.min(60, Math.abs(res.a) * 30), col.accel, { width: 2, label: 'a = ' + U.sf(res.a) + ' m/s²' });
+    if (trk) D.label(c, 'animation: v = ' + U.sf(trk.at(clock.t).v) + ' m/s', vp.w - 10, 14, col.muted, { align: 'right', size: 11 });
+  }
+
+  /* ---------- plots ---------- */
+  function drawPlots() {
+    if (!res) return;
+    var col = ui.colors(), v = prm.values, M = v.m1 + v.m2, n = Number(nSel.get());
+    var resist = function (x) { return res.Rv1 + v.R2 + v.B + v.k * Math.pow(Math.max(0, x), n) + M * g * res.s; };
+    var vm = res.vmax, xmax = Math.max(10, isFinite(vm) ? vm * 1.6 : 0, (res.vv || 0) * 1.5);
+    var series = [{ fn: resist, color: col.friction }];
+    var mk = [];
+    if (res.mode === 'power' && res.Pw > 0) {
+      series.unshift({ fn: function (x) { return x > 0.05 ? res.Pw / x : NaN; }, color: col.applied });
+      if (isFinite(vm)) mk.push({ x: vm, y: resist(vm), label: 'v_max = ' + U.sf(vm) });
+      if (res.vv > 0) mk.push({ x: res.vv, y: res.Pw / res.vv, label: 'D at v', color: col.applied });
+    } else series.unshift({ fn: function () { return v.D; }, color: col.applied });
+    var ymax = Math.max(resist(xmax), resist(0), res.D || 0, 1) * 2;
+    pF.draw({ x: [0, xmax], y: [Math.min(0, resist(0)) * 1.1, ymax], series: series, markers: mk, title: 'D (orange) vs resistance + Mg sin θ' });
+    if (trk) pV.draw({ x: [0, v.T], series: [{ fn: function (t) { return trk.at(t).v; }, color: col.velocity }], cursor: clock.t, hlines: isFinite(vm) && res.mode === 'power' ? [{ y: vm, label: 'v_max' }] : [], title: res.mode === 'power' ? 'constant power (RK4)' : 'constant force' });
+    else pV.draw({ x: [0, v.T], series: [], title: 'no animation (speed undefined)' });
+  }
+
+  /* ---------- live working ---------- */
+  function readout() {
+    R.clear(); if (!res) return;
+    var v = prm.values, s3 = fmtX, M = res.M, s = res.s;
+    R.html('<div style="font-size:12.5px;color:var(--muted)">Positive direction: the direction of motion' + (s !== 0 ? ' (θ measured uphill)' : '') + '. g = ' + g + ' m s⁻².</div>');
+    if (solved) {
+      R.head('Solve');
+      if (solved.k === 'P') { R.eq('D', 'Ma + R + Mg sin θ = ' + s3(M) + ' × ' + s3(v.aT) + ' + ' + s3(v.R1 + v.R2 + v.B) + (s ? ' + ' + s3(M * g * s) : ''), solved.val / v.v, 'N'); R.eq('P', 'D × v = ' + s3(solved.val / v.v) + ' × ' + s3(v.v), solved.val, 'W'); }
+      if (solved.k === 'theta') {
+        R.eq('D', 'P ÷ v = ' + s3(res.Pw) + ' ÷ ' + s3(v.v), res.Pw / v.v, 'N');
+        R.eq('sin θ', '(D − R) ÷ (Mg) = (' + s3(res.Pw / v.v) + ' − ' + s3(v.R1 + v.R2 + v.B) + ') ÷ ' + s3(M * g), solved.s, '');
+        if (isFinite(solved.val)) R.eq('θ', 'constant speed ⇒ a = 0', U.dp(solved.val, 1) + '° (' + U.sf(solved.val, 6) + '°)', '');
+        else R.badge('|sin θ| > 1: no hill angle gives constant speed with these values.', 'warn');
+      }
+      if (solved.k === 'R') R.eq('R₁', 'D − Ma − Mg sin θ − R₂ − B', solved.val, 'N');
+      if (solved.k === 'v') { if (isFinite(solved.val)) R.eq('v', 'P ÷ (Ma + R + Mg sin θ)', solved.val, 'm s<sup>−1</sup>'); else R.badge('No positive speed: Ma + R + Mg sin θ ≤ 0.', 'warn'); }
+      if (solved.k === 'R' && solved.val < 0) R.badge('Negative resistance: impossible with these values.', 'warn');
+    }
+    if (res.invalid) { R.badge(res.invalid, 'warn').render(); return; }
+    R.head('Driving force');
+    if (res.mode === 'power') R.eq('D', 'P ÷ v = ' + s3(res.Pw) + ' ÷ ' + s3(res.vv), res.D, 'N');
+    else R.eq('D', 'given', res.D, 'N');
+    res.warn.forEach(function (w) { R.badge(w, 'warn'); });
+    R.head('Whole system (mass ' + s3(M) + ' kg)');
+    var terms = 'D − R₁ − R₂' + (res.brake ? ' − B' : '') + (s ? ' − Mg sin θ' : '');
+    R.eq('a', '(' + terms + ') ÷ M = (' + s3(res.D) + ' − ' + s3(res.R1) + ' − ' + s3(res.R2) + (res.brake ? ' − ' + s3(res.brake) : '') + (s ? ' − ' + s3(M * g * s) : '') + ') ÷ ' + s3(M), res.a, 'm s<sup>−2</sup>');
+    if (v.k > 0) R.badge('Resistance includes k vⁿ = ' + s3(v.k * Math.pow(res.vv || 0, Number(nSel.get()))) + ' N — only when the question states a speed-dependent resistance.', 'info');
+    if (v.m2 > 0) {
+      R.head('Trailer alone');
+      R.eq('T', 'm₂a + R₂ + m₂g sin θ = ' + s3(v.m2) + ' × ' + pn(res.a) + ' + ' + s3(res.R2) + (s ? ' + ' + s3(res.Wpar2) : ''), res.T, 'N');
+      R.eq('check (car)', 'D − R₁ − T − m₁g sin θ − m₁a', Math.abs(res.carCheck) < 1e-9 * (1 + res.D) ? 0 : res.carCheck, 'N ✓');
+      if (res.thrust) R.badge(coup.get() === 'bar' ? 'T &lt; 0: the tow-bar is in THRUST (pushing) with ' + s3(-res.T) + ' N.' : 'T &lt; 0: a rope cannot push — it goes slack and this model is invalid (the trailer would run into the car).', 'warn');
+      else R.badge('Tension (pulling) in the coupling: ' + s3(res.T) + ' N', 'ok');
+    }
+    R.head('Power and maximum speed');
+    if (res.mode === 'power') {
+      R.eq('P', 'D × v', res.Pw, 'W');
+      if (isFinite(res.vmax)) R.eq('v<sub>max</sub>', v.k > 0 ? 'solve P ÷ v = R + k vⁿ + Mg sin θ' : 'P ÷ (R + Mg sin θ) = ' + s3(res.Pw) + ' ÷ ' + s3(res.R1 + res.R2 + res.brake + M * g * s - (v.k ? 0 : 0)), res.vmax, 'm s<sup>−1</sup>');
+      else R.badge('No maximum speed: the total resistance + Mg sin θ is not positive (it keeps accelerating).', 'info');
+    } else R.eq('power of D', 'D × v = ' + s3(res.D) + ' × ' + s3(v.v), res.D * v.v, 'W');
+    if (Math.abs(res.a) < 1e-9) R.badge('a = 0: moving at constant (steady) speed.', 'ok');
+    R.render();
+  }
+
+  ui.onTheme(function () { drawScene(); drawPlots(); });
+  vp.onResize = drawScene;
+  var hsh = ui.readHash();
+  if (typeof hsh.mode === 'string') modeSel.set(hsh.mode, true);
+  if (typeof hsh.solve === 'string') solveSel.set(hsh.solve, true);
+  if (typeof hsh.coup === 'string') coup.set(hsh.coup, true);
+  if (hsh.sin) useSin.set(true, true);
+  var init = {}; Object.keys(prm.values).forEach(function (k) { if (typeof hsh[k] === 'number') init[k] = hsh[k]; });
+  prm.set(init, true);
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

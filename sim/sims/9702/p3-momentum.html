@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Momentum and collisions</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-dynamics.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, DY = SIM.dynamics;
+  var course = ui.course('9702'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Momentum: collisions, Newton’s third law and F = Δp/Δt', g: g,
+    tags: ['9702 3.1 Momentum & Newton’s laws', '9702 3.3 Conservation of momentum'] });
+
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 20 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 3, onFrame: function () { drawScene(); drawPlots(); readout(); } });
+  ui.legend(sceneCard, [{ color: 'var(--c-s1)', label: 'body 1' }, { color: 'var(--c-s2)', label: 'body 2' }, { color: 'var(--c-applied)', label: 'contact forces (third-law pair)' }, { color: 'var(--c-velocity)', label: 'velocity' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var cVt = ui.canvas(plotWrap), cFt = ui.canvas(plotWrap);
+  var pV = new SIM.plot.Plot(cVt, { yLabel: 'v / m s⁻¹ (right +)' }), pF = new SIM.plot.Plot(cFt, { yLabel: 'F / N (area = Δp)' });
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var mode = ui.select(paramCard, { label: 'Situation', value: 'collide', options: [
+    { value: 'collide', label: 'Two bodies collide on a straight line' }, { value: 'single', label: 'One body: momentum change in time Δt (e.g. rebound from a wall)' },
+    { value: 'stream', label: 'Stream of mass: gas or water ejected each second' }] }, update);
+  var outc = ui.select(paramCard, { label: 'Collision type', value: 'elastic', options: [
+    { value: 'elastic', label: 'Elastic (KE conserved: speed of approach = speed of separation)' }, { value: 'stick', label: 'Bodies stick together (perfectly inelastic)' },
+    { value: 'given', label: 'Final velocity of body 1 is given' }] }, update);
+  var shape = ui.select(paramCard, { label: 'Force during contact', value: 'rect', options: [{ value: 'rect', label: 'constant (average) force' }, { value: 'tri', label: 'rises then falls (same area, peak = 2 × average)' }] }, update);
+  var prm = ui.params(paramCard, [
+    { key: 'm1', label: 'Mass of body 1', sym: 'm<sub>1</sub>', unit: 'kg', min: 0.01, max: 200, step: 0.01, value: 2 },
+    { key: 'u1', label: 'Initial velocity of body 1 (right +)', sym: 'u<sub>1</sub>', unit: 'm s<sup>−1</sup>', min: -20, max: 20, step: 0.01, value: 3 },
+    { key: 'm2', label: 'Mass of body 2', sym: 'm<sub>2</sub>', unit: 'kg', min: 0.01, max: 200, step: 0.01, value: 1 },
+    { key: 'u2', label: 'Initial velocity of body 2 (right +)', sym: 'u<sub>2</sub>', unit: 'm s<sup>−1</sup>', min: -20, max: 20, step: 0.01, value: 0 },
+    { key: 'v1', label: 'Final velocity of body 1 (given)', sym: 'v<sub>1</sub>', unit: 'm s<sup>−1</sup>', min: -30, max: 30, step: 0.01, value: 0 },
+    { key: 'dt', label: 'Contact time', sym: 'Δt', unit: 's', min: 0.001, max: 0.5, step: 0.001, value: 0.05 },
+    { key: 'm', label: 'Mass', sym: 'm', unit: 'kg', min: 0.01, max: 2000, step: 0.01, value: 0.15 },
+    { key: 'u', label: 'Initial velocity (right +)', sym: 'u', unit: 'm s<sup>−1</sup>', min: -50, max: 50, step: 0.01, value: 20 },
+    { key: 'v', label: 'Final velocity (right +)', sym: 'v', unit: 'm s<sup>−1</sup>', min: -50, max: 50, step: 0.01, value: -15 },
+    { key: 'dts', label: 'Time taken for the change', sym: 'Δt', unit: 's', min: 0.001, max: 10, step: 0.001, value: 0.05 },
+    { key: 'mu', label: 'Mass ejected per second', sym: 'Δm/Δt', unit: 'kg s<sup>−1</sup>', min: 0, max: 500, step: 0.1, value: 90 },
+    { key: 'dv', label: 'Speed change of the ejected mass', sym: 'Δv', unit: 'm s<sup>−1</sup>', min: 0, max: 500, step: 0.1, value: 190 }
+  ], update);
+
+  ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  function C(v, o) { return Object.assign({ mode: 'collide', out: o || 'elastic', shape: 'rect', v: Object.assign({ dt: 0.05, v1: 0 }, v) }); }
+  var presetCtl = ui.presets(presetCard, [
+    Object.assign({ name: 'Elastic: 2.0 kg at 3.0 m s⁻¹ hits 1.0 kg at rest', note: 'v₁ = 1.0, v₂ = 4.0 m s<sup>−1</sup>. Approach 3.0 = separation 3.0; KE 9.0 J before and after.' }, C({ m1: 2, u1: 3, m2: 1, u2: 0 })),
+    Object.assign({ name: 'Trolleys, elastic: 0.25 kg at 0.48, 0.75 kg at 0.12 m s⁻¹ (9702/21 O/N 23 Q3)', note: 'Contact lasts 0.20 s. B: 0.12 → 0.30 m s<sup>−1</sup>, a = 0.18 ÷ 0.20 = 0.90 m s<sup>−2</sup>. A ends at −0.06 m s<sup>−1</sup> (to the left).' }, C({ m1: 0.25, u1: 0.48, m2: 0.75, u2: 0.12, dt: 0.2 })),
+    Object.assign({ name: 'Ball X 240 g at 16 m s⁻¹ hits Y 480 g at rest, X stops; contact 2.0 ms (9702/23 O/N 24 Q2)', note: 'v<sub>Y</sub> = 8.0 m s<sup>−1</sup>; KE falls by 15 J; force on X = 0.24 × 16 ÷ 0.0020 = 1900 N to the left; force on Y equal and opposite.' }, C({ m1: 0.24, u1: 16, m2: 0.48, u2: 0, v1: 0, dt: 0.002 }, 'given')),
+    Object.assign({ name: 'Sack 23 kg at 3.4 m s⁻¹ sticks to a 160 kg boat (9702/22 F/M 26 Q2)', note: 'v = 23 × 3.4 ÷ 183 = 0.43 m s<sup>−1</sup>. E₂/E₁ = 23 ÷ 183 = 0.13: inelastic.' }, C({ m1: 23, u1: 3.4, m2: 160, u2: 0, dt: 0.1 }, 'stick')),
+    Object.assign({ name: 'Equal masses, elastic: the velocities swap', note: 'Moving body stops; the target moves off with the original velocity.' }, C({ m1: 1, u1: 5, m2: 1, u2: 0 })),
+    Object.assign({ name: 'Head-on, stick: 1.5 kg at +4 m s⁻¹ meets 0.5 kg at −6 m s⁻¹', note: 'Velocities have signs: total p = 6.0 − 3.0 = 3.0 N s ⇒ v = 1.5 m s<sup>−1</sup>.' }, C({ m1: 1.5, u1: 4, m2: 0.5, u2: -6 }, 'stick')),
+    Object.assign({ name: 'Given v₁ that would increase the KE', note: 'Momentum can be conserved while KE increases only if stored energy is released (spring, explosion).' }, C({ m1: 1, u1: 4, m2: 1, u2: 0, v1: -1 }, 'given')),
+    { name: 'Ball rebounds from a wall: 0.15 kg, 20 → −15 m s⁻¹ in 0.050 s', mode: 'single', v: { m: 0.15, u: 20, v: -15, dts: 0.05 }, shape: 'rect', note: 'Δp = 0.15 × (−15 − 20) = −5.25 N s; F = −105 N (105 N away from the wall). The ball also pushes the wall with 105 N.' },
+    { name: 'Car brakes: 1200 kg from 25 m s⁻¹ to rest in 5.0 s', mode: 'single', v: { m: 1200, u: 25, v: 0, dts: 5 }, shape: 'rect', note: 'Average resultant force = Δp ÷ Δt = −30 000 ÷ 5.0 = −6000 N.' },
+    { name: 'Rocket ejects 90 kg of gas per second at 190 m s⁻¹ (9702/12 M/J 25 Q9)', mode: 'stream', v: { mu: 90, dv: 190 }, note: 'F = (Δm/Δt) × Δv = 90 × 190 = 17 100 N ≈ 17 kN on the gas; by Newton’s third law the gas pushes the rocket forward with the same force.' }
+  ], function (p) { clock.pause(); mode.set(p.mode, true); if (p.out) outc.set(p.out, true); shape.set(p.shape || 'rect', true); prm.set(p.v); clock.seek(0); });
+
+  ui.notes(noteCard, [
+    'Momentum p = mv is a <b>vector</b>: give velocities a sign (here right is +). Total momentum is conserved in every collision if no external resultant force acts.',
+    'Elastic: total KE conserved <b>and</b> relative speed of approach = relative speed of separation. Inelastic: KE is lost, momentum is still conserved.',
+    'Force = rate of change of momentum: F = Δp ÷ Δt. The area under a force–time graph is the change in momentum Δp.',
+    'Newton’s third law: the force of 1 on 2 and of 2 on 1 are equal in size, opposite in direction, act on <b>different</b> bodies, are the same type and last the same time.',
+    'Rebound from a wall: Δv = v − u = (−15) − (+20) = −35 m s<sup>−1</sup>, not 5 m s<sup>−1</sup>.',
+    'Resultant force and acceleration are always in the same direction (F = ma).'
+  ]);
+
+  /* ---------- model ---------- */
+  var res = null, tc = 1, tr1 = null, tr2 = null;
+  function collideParams() { var v = prm.values; return { m1: v.m1, m2: v.m2, u1: v.u1, u2: v.u2, mode: outc.get(), v1: v.v1 }; }
+  function update() {
+    var md = mode.get(), v = prm.values;
+    var col = md === 'collide', sg = md === 'single', st = md === 'stream';
+    ['m1', 'u1', 'm2', 'u2', 'dt'].forEach(function (k) { prm.show(k, col); });
+    prm.show('v1', col && outc.get() === 'given');
+    ['m', 'u', 'v', 'dts'].forEach(function (k) { prm.show(k, sg); });
+    ['mu', 'dv'].forEach(function (k) { prm.show(k, st); });
+    outc.row.style.display = col ? '' : 'none'; shape.row.style.display = st ? 'none' : '';
+    cVt.style.display = st ? 'none' : ''; cFt.style.display = st ? 'none' : '';
+    if (col) {
+      res = DY.collide1D(collideParams());
+      tc = 1;
+      if (!res.noCollision) { tr1 = DY.contactTrack(v.u1, res.v1, tc, v.dt, shape.get(), 0); tr2 = DY.contactTrack(v.u2, res.v2, tc, v.dt, shape.get(), 0); }
+      else { tr1 = DY.contactTrack(v.u1, v.u1, tc, v.dt, 'rect', 0); tr2 = DY.contactTrack(v.u2, v.u2, tc, v.dt, 'rect', 0); }
+      clock.setDuration(2 + v.dt);
+    } else if (sg) {
+      res = { dp: v.m * (v.v - v.u) }; res.F = DY.forceFromMomentum(res.dp, v.dts);
+      tc = Math.max(0.5, v.dts); tr1 = DY.contactTrack(v.u, v.v, tc, v.dts, shape.get(), 0);
+      clock.setDuration(2 * tc + v.dts);
+    } else { res = { F: v.mu * v.dv }; clock.setDuration(1); }
+    drawScene(); drawPlots(); readout();
+  }
+
+  /* ---------- scene ---------- */
+  function drawScene() {
+    if (!res) return;
+    var c, col = ui.colors(), md = mode.get(), t = clock.t, v = prm.values, T = clock.duration;
+    if (md === 'stream') {
+      vp.fit(-5, 5, -2, 2); c = vp.begin();
+      c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(vp.X(-1.5), vp.Y(0.5)); c.lineTo(vp.X(1.5), vp.Y(0.5)); c.lineTo(vp.X(2.4), vp.Y(0)); c.lineTo(vp.X(1.5), vp.Y(-0.5)); c.lineTo(vp.X(-1.5), vp.Y(-0.5)); c.closePath(); c.fill(); c.stroke();
+      for (var k = 0; k < 6; k++) { var yy = -0.35 + k * 0.14; D.arrow(c, vp.X(-1.6), vp.Y(yy), vp.X(-3.6 - (k % 2) * 0.4), vp.Y(yy), col.s2, { width: 1.2, head: 7 }); }
+      D.label(c, 'gas: ' + U.num(v.mu, 1) + ' kg every second, speed change ' + U.num(v.dv, 1) + ' m/s', vp.X(-2.6), vp.Y(-1.1), col.s2, { size: 12 });
+      D.arrow(c, vp.X(2.5), vp.Y(0), vp.X(4.6), vp.Y(0), col.applied, { width: 3, label: 'F on rocket' });
+      D.arrow(c, vp.X(-1.6), vp.Y(0.9), vp.X(-3.6), vp.Y(0.9), col.applied, { width: 2, label: 'F on gas' });
+      return;
+    }
+    if (md === 'single') {
+      var xs = [], k2;
+      for (k2 = 0; k2 <= 60; k2++) xs.push(tr1.x(T * k2 / 60));
+      var lo = Math.min.apply(null, xs), hi = Math.max.apply(null, xs), span = Math.max(hi - lo, 1e-3), wall = v.u * v.v < 0;
+      vp.fit(lo - span * 0.35, hi + span * 0.35, -span * 0.25, span * 0.3); c = vp.begin();
+      D.ground(c, 0, vp.Y(0), vp.w, vp.Y(0));
+      var x = tr1.x(t), bw = 34, dir = v.u >= 0 ? 1 : -1;
+      if (wall) { c.fillStyle = col.surface; c.fillRect(vp.X(0) + (dir > 0 ? 0 : -14), vp.Y(span * 0.28), 14, vp.Y(0) - vp.Y(span * 0.28)); }
+      var cx = vp.X(x) - dir * bw / 2;
+      D.particle(c, cx, vp.Y(0) - 16, 15, { fill: col.s1, label: 'm' });
+      var vel = tr1.v(t);
+      if (Math.abs(vel) > 1e-9) D.arrowPolar(c, cx, vp.Y(0) - 46, vel > 0 ? 0 : Math.PI, 20 + Math.min(70, Math.abs(vel) * 3), col.velocity, { label: 'v = ' + U.num(vel, 2) + ' m/s', width: 2 });
+      var inC = t > tc && t < tc + v.dts;
+      if (inC && Math.abs(res.F) > 0) {
+        D.arrowPolar(c, cx, vp.Y(0) - 16, res.F > 0 ? 0 : Math.PI, 50, col.applied, { width: 3, label: 'F on body' });
+        if (wall) D.arrowPolar(c, vp.X(0) + dir * 16, vp.Y(0) - 60, res.F > 0 ? Math.PI : 0, 40, col.applied, { width: 2, label: 'F on wall' });
+      }
+      return;
+    }
+    // collision
+    var X1 = [], X2 = [];
+    for (var i = 0; i <= 80; i++) { var tt = T * i / 80; X1.push(tr1.x(tt)); X2.push(tr2.x(tt)); }
+    var all = X1.concat(X2), lo2 = Math.min.apply(null, all), hi2 = Math.max.apply(null, all), sp = Math.max(hi2 - lo2, 1e-3);
+    vp.fit(lo2 - sp * 0.3, hi2 + sp * 0.3, -sp * 0.2, sp * 0.3); c = vp.begin();
+    D.ground(c, 0, vp.Y(0), vp.w, vp.Y(0));
+    var x1 = tr1.x(t), x2 = tr2.x(t);
+    if (x1 > x2) { var mid = (x1 + x2) / 2; x1 = mid; x2 = mid; }
+    var s1 = 20 + 14 * Math.cbrt(v.m1 / Math.max(v.m1, v.m2)), s2 = 20 + 14 * Math.cbrt(v.m2 / Math.max(v.m1, v.m2));
+    var y0 = vp.Y(0);
+    c.fillStyle = col.s1; c.globalAlpha = 0.85; c.fillRect(vp.X(x1) - 2 * s1, y0 - 2 * s1, 2 * s1, 2 * s1);
+    c.fillStyle = col.s2; c.fillRect(vp.X(x2), y0 - 2 * s2, 2 * s2, 2 * s2); c.globalAlpha = 1;
+    D.label(c, '1: ' + U.num(v.m1, 2) + ' kg', vp.X(x1) - s1, y0 - s1, col.panel, { bold: true, size: 11 });
+    D.label(c, '2: ' + U.num(v.m2, 2) + ' kg', vp.X(x2) + s2, y0 - s2, col.panel, { bold: true, size: 11 });
+    var w1 = tr1.v(t), w2 = tr2.v(t);
+    if (Math.abs(w1) > 1e-9) D.arrowPolar(c, vp.X(x1) - s1, y0 - 2 * s1 - 14, w1 > 0 ? 0 : Math.PI, 16 + Math.min(60, Math.abs(w1) * 4), col.velocity, { label: U.num(w1, 2) + ' m/s', width: 2 });
+    if (Math.abs(w2) > 1e-9) D.arrowPolar(c, vp.X(x2) + s2, y0 - 2 * s2 - 14, w2 > 0 ? 0 : Math.PI, 16 + Math.min(60, Math.abs(w2) * 4), col.velocity, { label: U.num(w2, 2) + ' m/s', width: 2 });
+    if (!res.noCollision && t > tc && t < tc + v.dt) {
+      var F21 = res.dp2 / v.dt * DY.profile(shape.get(), (t - tc) / v.dt);
+      if (Math.abs(F21) > 1e-12) {
+        D.arrowPolar(c, vp.X(x2) + 4, y0 - s2 * 0.5, F21 > 0 ? 0 : Math.PI, 46, col.applied, { width: 3, label: 'F on 2 by 1' });
+        D.arrowPolar(c, vp.X(x1) - 4, y0 - s1 * 0.5, F21 > 0 ? Math.PI : 0, 46, col.applied, { width: 3, label: 'F on 1 by 2' });
+      }
+    }
+    keBars(c, col, t);
+    if (res.noCollision) D.label(c, 'Body 1 is not catching body 2 (u₁ ≤ u₂): no collision', vp.w / 2, 16, col.warn, { bold: true });
+    else if (res.flag === 'pass') D.label(c, 'Impossible: body 1 would pass through body 2', vp.w / 2, 16, col.warn, { bold: true });
+  }
+
+  /** stacked KE bars (KE of each body at this instant) with the initial total dashed */
+  function keBars(c, col, t) {
+    var v = prm.values, w1 = tr1.v(t), w2 = tr2.v(t), k1 = 0.5 * v.m1 * w1 * w1, k2 = 0.5 * v.m2 * w2 * w2;
+    var k0 = res.KE0, kEnd = res.noCollision ? k0 : res.KE1, mx = Math.max(k0, kEnd, k1 + k2, 1e-12);
+    var bx = vp.w - 70, top = 34, base = Math.min(vp.h - 30, 150), bw = 26, h1 = (base - top) * k1 / mx, h2 = (base - top) * k2 / mx;
+    c.save(); c.globalAlpha = 0.85;
+    c.fillStyle = col.s1; c.fillRect(bx, base - h1, bw, h1); c.fillStyle = col.s2; c.fillRect(bx, base - h1 - h2, bw, h2); c.restore();
+    var y0 = base - (base - top) * k0 / mx;
+    c.save(); c.strokeStyle = col.muted; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(bx - 8, y0); c.lineTo(bx + bw + 8, y0); c.stroke(); c.restore();
+    D.label(c, 'KE now', bx + bw / 2, base + 10, col.ink, { size: 11 });
+    D.label(c, 'start', bx - 10, y0, col.muted, { size: 10, align: 'right' });
+    D.label(c, U.sf(k1 + k2).replace(/<[^>]+>/g, '') + ' J', bx + bw / 2, base + 24, col.ink, { size: 11 });
+    if (res.noCollision) return;
+    var dur = mode.get() === 'collide' ? v.dt : 0;
+    if (t > tc && t < tc + dur) D.label(c, 'in contact: some KE stored as elastic energy', bx + bw, top - 14, col.muted, { size: 10, align: 'right' });
+    else if (t >= tc + dur) {
+      var lost = k0 - kEnd, el = Math.abs(lost) <= 1e-9 * Math.max(1, k0);
+      D.label(c, el ? 'KE conserved (elastic)' : lost > 0 ? 'KE lost ' + U.sf(lost).replace(/<[^>]+>/g, '') + ' J' : 'KE gained ' + U.sf(-lost).replace(/<[^>]+>/g, '') + ' J', bx + bw, top - 14, el ? col.ok : col.warn, { size: 11, bold: true, align: 'right' });
+    }
+  }
+
+  /* ---------- plots ---------- */
+  function drawPlots() {
+    if (!res || mode.get() === 'stream') return;
+    var col = ui.colors(), v = prm.values, T = clock.duration, t = clock.t, sh = shape.get();
+    if (mode.get() === 'single') {
+      pV.draw({ x: [0, T], series: [{ fn: tr1.v, color: col.s1, steps: 600 }], cursor: t, vlines: [{ x: tc, label: 'contact' }] });
+      var a0 = Math.max(0, tc - 0.5 * v.dts), a1 = tc + 1.5 * v.dts;
+      pF.draw({ x: [a0, a1], series: [{ fn: function (x) { return res.F * DY.profile(sh, (x - tc) / v.dts); }, color: col.applied, shade: true, steps: 600, breaks: [tc, tc + v.dts] }],
+        cursor: t, hlines: [{ y: res.F, label: 'average F = ' + U.sf(res.F).replace(/<[^>]+>/g, '') + ' N' }], xLabel: 't / s', title: 'area = Δp = ' + U.sf(res.dp).replace(/<[^>]+>/g, '') + ' N s' });
+      return;
+    }
+    pV.draw({ x: [0, T], series: [{ fn: tr1.v, color: col.s1, steps: 800 }, { fn: tr2.v, color: col.s2, steps: 800 }], cursor: t });
+    if (res.noCollision) { pF.draw({ x: [0, T], series: [{ fn: function () { return 0; }, color: col.applied }], title: 'no collision' }); return; }
+    var b0 = tc - 0.5 * v.dt, b1 = tc + 1.5 * v.dt, Fav = res.dp2 / v.dt;
+    pF.draw({ x: [b0, b1], series: [
+      { fn: function (x) { return Fav * DY.profile(sh, (x - tc) / v.dt); }, color: col.s2, shade: true, steps: 600, breaks: [tc, tc + v.dt] },
+      { fn: function (x) { return -Fav * DY.profile(sh, (x - tc) / v.dt); }, color: col.s1, shade: true, steps: 600, breaks: [tc, tc + v.dt] }],
+      cursor: t, title: 'force on 2 (red) and on 1 (blue): equal and opposite' });
+  }
+
+  /* ---------- live working ---------- */
+  function P(x) { return x < 0 ? '(' + U.sf(x) + ')' : U.sf(x); }
+  function readout() {
+    if (!res) return;
+    var md = mode.get(), v = prm.values, ms = 'm s<sup>−1</sup>';
+    R.clear();
+    if (md === 'stream') {
+      R.badge('Force = rate of change of momentum', 'info');
+      R.eq('Δp each second', '(Δm/Δt) × Δv = ' + U.num(v.mu, 1) + ' × ' + U.num(v.dv, 1), res.F, 'N s per s');
+      R.eq('F', 'Δp ÷ Δt', res.F, 'N');
+      R.badge('Newton’s third law: the gas pushes the rocket with ' + U.sf(res.F) + ' N in the opposite direction', 'ok');
+      R.render(); return;
+    }
+    R.badge('Sign convention: velocities and forces to the right are positive', 'info');
+    if (md === 'single') {
+      R.head('Change in momentum');
+      R.eq('Δp', 'm(v − u) = ' + U.num(v.m, 4) + ' × (' + P(v.v) + ' − ' + P(v.u) + ')', res.dp, 'N s');
+      R.eq('F', 'Δp ÷ Δt = ' + U.sf(res.dp) + ' ÷ ' + U.num(v.dts, 4), res.F, 'N');
+      R.eq('a', 'F ÷ m = (v − u) ÷ Δt', res.F / v.m, 'm s<sup>−2</sup>');
+      if (shape.get() === 'tri') R.eq('peak force', '2 × average (triangular force–time graph, same area)', 2 * res.F, 'N');
+      if (v.u * v.v < 0) R.badge('Rebound: the body pushes the wall with ' + U.sf(Math.abs(res.F)) + ' N towards the wall (third-law pair)', 'ok');
+      R.eq('KE change', '½m(v² − u²)', 0.5 * v.m * (v.v * v.v - v.u * v.u), 'J');
+      R.render(); return;
+    }
+    if (res.noCollision) { R.badge('No collision: body 1 must move faster to the right than body 2 (u₁ > u₂)', 'warn'); R.eq('total momentum', 'm₁u₁ + m₂u₂', res.p0, 'N s'); R.render(); return; }
+    R.head('Conservation of momentum');
+    R.eq('p before', 'm₁u₁ + m₂u₂ = ' + U.num(v.m1, 4) + ' × ' + P(v.u1) + ' + ' + U.num(v.m2, 4) + ' × ' + P(v.u2), res.p0, 'N s');
+    var oc = outc.get();
+    if (oc === 'elastic') {
+      R.head('Elastic: also v₂ − v₁ = u₁ − u₂ (approach = separation)');
+      R.eq('v₁', '((m₁ − m₂)u₁ + 2m₂u₂) ÷ (m₁ + m₂)', res.v1, ms);
+      R.eq('v₂', '((m₂ − m₁)u₂ + 2m₁u₁) ÷ (m₁ + m₂)', res.v2, ms);
+    } else if (oc === 'stick') {
+      R.eq('v', 'p ÷ (m₁ + m₂) = ' + U.sf(res.p0) + ' ÷ ' + U.num(v.m1 + v.m2, 4), res.v1, ms);
+    } else {
+      R.eq('v₂', '(p − m₁v₁) ÷ m₂ = (' + U.sf(res.p0) + ' − ' + U.num(v.m1, 4) + ' × ' + P(v.v1) + ') ÷ ' + U.num(v.m2, 4), res.v2, ms);
+    }
+    R.eq('p after', 'm₁v₁ + m₂v₂', res.p1, 'N s');
+    R.head('Relative speeds');
+    R.eq('approach', 'u₁ − u₂ = ' + P(v.u1) + ' − ' + P(v.u2), res.approach, ms);
+    R.eq('separation', 'v₂ − v₁ = ' + P(res.v2) + ' − ' + P(res.v1), res.separation, ms);
+    R.head('Kinetic energy');
+    R.eq('KE before', '½m₁u₁² + ½m₂u₂²', res.KE0, 'J');
+    R.eq('KE after', '½m₁v₁² + ½m₂v₂²', res.KE1, 'J');
+    R.eq('ΔKE', 'after − before', res.dKE, 'J');
+    if (res.flag === 'pass') R.badge('Impossible: v₁ > v₂ means body 1 passes through body 2', 'warn');
+    else if (res.flag === 'gain') R.badge('KE increases: only possible if stored energy is released (spring, explosive)', 'warn');
+    else R.badge('This collision is ' + res.kind, res.kind === 'elastic' ? 'ok' : 'info');
+    R.head('Forces during contact (Newton’s third law)');
+    R.eq('Δp₁', 'm₁(v₁ − u₁)', res.dp1, 'N s'); R.eq('Δp₂', 'm₂(v₂ − u₂)', res.dp2, 'N s');
+    R.eq('F on 2 by 1', 'Δp₂ ÷ Δt = ' + U.sf(res.dp2) + ' ÷ ' + U.num(v.dt, 4), res.dp2 / v.dt, 'N');
+    R.eq('F on 1 by 2', 'Δp₁ ÷ Δt', res.dp1 / v.dt, 'N');
+    R.eq('a₂', 'F ÷ m₂ (average)', res.dp2 / v.dt / v.m2, 'm s<sup>−2</sup>');
+    R.eq('a₁', 'F ÷ m₁ (average)', res.dp1 / v.dt / v.m1, 'm s<sup>−2</sup>');
+    if (shape.get() === 'tri') R.eq('peak force', '2 × average', 2 * Math.abs(res.dp2 / v.dt), 'N');
+    R.render();
+  }
+
+  ui.onTheme(function () { drawScene(); drawPlots(); });
+  vp.onResize = drawScene;
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

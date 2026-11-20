@@ -1,0 +1,270 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+PHYSICS 9702/43
+Paper 4 A Level Structured Questions May/June 2018
+MARK SCHEME
+Maximum Mark: 100
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the May/June 2018 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level and Cambridge Pre-U components, and
+some Cambridge O Level components.
+IGCSE™ is a registered trademark.
+This document consists of 14 printed pages.
+© UCLES 2018 [Turn over
+
+9702/43 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the
+specific content of the mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these
+marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the
+scope of the syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the
+question as indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently e.g. in situations where candidates have not followed instructions or in the application of generic level
+descriptors.
+© UCLES 2018 Page 2 of 14
+
+9702/43 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may
+be limited according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or
+grade descriptors in mind.
+© UCLES 2018 Page 3 of 14
+
+9702/43 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+1(a) force proportional to product of masses and inversely proportional to square of separation B1
+idea of force between point masses B1
+1(b)(i) velocity changes/direction of motion changes/there is an acceleration/there is a resultant force B1
+so not in equilibrium
+1(b)(ii)1. gravitational force equals/is centripetal force C1
+GMm/R2 = mRω2 and ω = 2π/T M1
+or
+Gm/R2 = mv2/R and v = 2πr/T
+or
+GMm/R2 = mR (2π/T)2
+convincing algebra leading to k = GM/4π2 A1
+1(b)(ii)2. correct use of R3/T2 for one planet C1
+(c gives 3.54 × 1021; e and g both give 3.56 × 1021)
+3.5(5) × 1021 = (6.67 × 10–11 × M) / 4π2 A1
+M = 2.1 × 1033kg
+two or three values of R3/T2 correctly calculated and used in a valid way to find a value for M based on more than one k B1
+© UCLES 2018 Page 4 of 14
+
+9702/43 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+2(a)(i) straight line through origin indicates acceleration ∝ displacement B1
+negative gradient shows acceleration and displacement are in opposite directions B1
+2(a)(ii) a = –ω2y and ω = 2πf C1
+4.5 = (2π × f)2 × 8.0 × 10–3 (or other valid read-off)
+f = 3.8 Hz A1
+2(b)(i) maximum displacement upwards/above rest/above the equilibrium position B1
+2(b)(ii) (just leaves plate when) acceleration = 9.81ms–2 C1
+9.81 = (2π × 3.8)2 × y C1
+0
+or
+9.81 = 563 × y
+0
+amplitude = 17 mm A1
+© UCLES 2018 Page 5 of 14
+
+9702/43 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+3(a)(i) sum of potential and kinetic energies (of molecules/atoms/particles) B1
+(energy of) molecules/atoms/particles in random motion B1
+3(a)(ii) (in ideal gas) no intermolecular forces so no potential energy B1
+internal energy is (solely) kinetic energy (of particles) B1
+(mean) kinetic energy (of particles) proportional to (thermodynamic) temperature of gas B1
+3(b) pV = NkT C1
+6.4 × 106 × 1.8 × 104 × 10–6 = N × 1.38 × 10–23 × 298 C1
+or
+pV = nRT and N = n × N (C1)
+A
+6.4 × 106 × 1.8 × 104 × 10–6 = n × 8.31 × 298 (C1)
+n = 46.5 (mol)
+N = 46.5 × 6.02 × 1023
+N = 2.8 × 1025 A1
+© UCLES 2018 Page 6 of 14
+
+9702/43 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+4(a) e.g. microphone B1
+weighing scales/pressure sensor
+lighters/spark generation
+watches/clocks/regulation of time
+4(b) pulses (of ultrasound) B1
+reflected at boundaries (between media) B1
+(reflected pulses) detected by (ultrasound) generator B1
+Any three from: B3
+• time delay (between transmission and receipt) gives information about depth (of boundary)
+• intensity of reflected pulse gives information about (nature of) boundary
+• gel used to minimise reflection at skin/maximise transmission into skin
+• degree of reflection depends upon impedances of two media (at boundary)
+© UCLES 2018 Page 7 of 14
+
+9702/43 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+5(a)(i) west to east B1
+5(a)(ii) above the Equator B1
+5(a)(iii) value in range (1–300) × 109 Hz A1
+5(b)(i) gain/dB = 10 lg(P /P ) C1
+2 1
+–195 = 10 lg(P/3000) C1
+or
+195 = 10 lg(3000/P)
+power = 9.5 × 10–17 W A1
+5(b)(ii) up-link has been (greatly) attenuated (before reaching satellite) B1
+or
+down-link signal must be (greatly) amplified (before transmission back to Earth)
+or
+up-link has (much) smaller intensity/power than down-link
+(different frequency) prevents down-link (signal) swamping up-link (signal) B1
+Question Answer Marks
+6(a) force per unit charge B1
+6(b) E = Q/(4πεr2) C1
+0
+2.0 × 104 = Q / (4π × 8.85 × 10–12 × 0.262) A1
+charge = 1.5 × 10–7C
+6(c) charge (= Q [52/26]2) = 4Q C1
+additional charge = 3Q A1
+© UCLES 2018 Page 8 of 14
+
+9702/43 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+7(a) (capacitance =) charge/potential M1
+charge is (numerically equal to) charge on one plate A1
+potential is potential difference between plates A1
+7(b)(i) 4.5 × 10–6C A1
+7(b)(ii) 9.0 × 10–8C A1
+7(b)(iii) capacitance = (9.0 × 10–8) / 120 C1
+= 7.5 × 10–10 F A1
+7(c) total capacitance is halved B1
+current is halved B1
+© UCLES 2018 Page 9 of 14
+
+9702/43 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+8(a)(i) (fraction of) output is combined with the input M1
+output (fraction) subtracted/deducted from input A1
+8(a)(ii) any two valid points e.g.: B2
+• greater bandwidth/gain constant over a larger range of frequencies/greater bandwidth
+• smaller gain
+8(b)(i) gain = (–)9600/800 C1
+= –12 A1
+8(b)(ii) 1. 1.2V B1
+2. –6V B1
+8(b)(iii) replace the 9600Ω resistor with an LDR B1
+© UCLES 2018 Page 10 of 14
+
+9702/43 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+9(a) using Fleming’s left-hand rule force on wire is upwards B1
+by Newton’s third law, force on magnet is downwards B1
+9(b)(i) F = BIL C1
+= 3.7 × 10–3 × 5.1 × 8.5 × 10–2 A1
+= 1.6 × 10–3N
+9(b)(ii) F = 1.6 × 10–3N A1
+9(c) sketch: sinusoidal wave with two cycles B1
+amplitude 2.3 × 10–3N B1
+period 0.05s B1
+Question Answer Marks
+10(a) induced e.m.f. proportional to rate M1
+of change of (magnetic) flux (linkage) A1
+or
+of cutting (magnetic) flux
+10(b) current in coil produces flux B1
+(by Faraday’s law) changing flux induces e.m.f. in ring B1
+current in ring causes field (around ring) B1
+(by Lenz’s law) field around ring opposes field around coil B1
+© UCLES 2018 Page 11 of 14
+
+9702/43 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+11(a)(i) packet/quantum/discrete amount of energy M1
+of electromagnetic radiation A1
+11(a)(ii) (maximum) energy of emitted electrons is independent of intensity B1
+or
+no emission of electrons below the threshold frequency regardless of intensity
+or
+no emission of electrons when photon energy is less than work function (energy) regardless of intensity
+11(b) in darkness: conduction band empty so high resistance B1
+in daylight: electrons in valence band absorb photons B1
+in daylight: electrons ‘jump’ to conduction band B1
+this leaves holes in valence band B1
+more charge carriers in daylight so resistance decreases B1
+© UCLES 2018 Page 12 of 14
+
+9702/43 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+12(a)(i) I = I e–µx C1
+0
+= I exp(–0.90 × 2.8) A1
+0
+= 0.080I
+0
+12(a)(ii) I = I exp[(–0.90 × 1.5) × (–3.0 × 1.3)] C1
+0
+= I (0.259 × 0.20) A1
+0
+= 0.0052I
+0
+12(b)(i) difference in degrees of blackening M1
+between structures A1
+12(b)(ii) large difference in intensities so good contrast B1
+© UCLES 2018 Page 13 of 14
+
+9702/43 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+13(a) emission of particles/radiation by unstable nucleus B1
+spontaneous emission B1
+13(b)(i) use of graph to determine half-life = 14 minutes B1
+hence λ = ln 2 / (14 × 60) (s–1) C1
+N at 14 minutes = 4.4 × 107 and A = λN C1
+activity = 4.4 × 107 × ln2 / (14 × 60) A1
+= 3.6 × 104 Bq
+or
+correct tangent drawn at time t = 14 minutes (B1)
+magnitude of gradient of tangent identified as activity (C1)
+correct working for gradient leading to activity (C1)
+activity = 3.6 × 104 Bq (A1)
+13(b)(ii) 3.6 × 104 = λ × 4.4 × 107 C1
+or
+λ = ln2 / (14.0 × 60)
+λ = 8.2 × 10–4 s–1 A1
+© UCLES 2018 Page 14 of 14

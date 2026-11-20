@@ -1,0 +1,580 @@
+Cambridge International AS & A Level
+This document has 28 pages. Any blank pages are indicated.
+*5099427420*
+PHYSICS 9702/43
+Paper 4 A Level Structured Questions May/June 2021
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen or correction fluid.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+DC (MB) 212428
+© UCLES 2021 [Turn over
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2021 9702/43/M/J/21
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1 at2
+2
+v 2 = u 2+2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p =
+1Nm
+〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω (x 2-x2)
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2021 9702/43/M/J/21 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 The Earth may be assumed to be an isolated uniform sphere with its mass of 6.0 × 1024 kg
+concentrated at its centre.
+A satellite of mass 1200 kg is in a circular orbit about the Earth in the Earth’s gravitational field.
+The period of the orbit is 94 minutes.
+(a) Define gravitational field strength.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) Calculate the radius of the orbit of the satellite.
+radius = ..................................................... m [3]
+(c) Rockets on the satellite are fired so that the satellite enters a different circular orbit that has
+a period of 150 minutes. The change in the mass of the satellite may be assumed to be
+negligible.
+(i) Show that the radius of the new orbit is 9.4 × 106 m.
+[2]
+(ii) State, with a reason, whether the gravitational potential energy of the satellite increases
+or decreases.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+© UCLES 2021 9702/43/M/J/21
+
+5
+(iii) Determine the magnitude of the change in the gravitational potential energy of the
+satellite.
+change in potential energy = ...................................................... J [3]
+[Total: 10]
+© UCLES 2021 9702/43/M/J/21 [Turn over
+
+6
+2 An ideal gas is contained in a cylinder by means of a movable frictionless piston, as illustrated in
+Fig. 2.1.
+cylinder
+movement
+of piston
+piston
+gas
+molecule
+Fig. 2.1
+Initially, the gas has a volume of 1.8 × 10−3 m3 at a pressure of 3.3 × 105 Pa and a temperature of
+310 K.
+(a) Show that the number of gas molecules in the cylinder is 1.4 × 1023.
+[2]
+(b) Use kinetic theory to explain why, when the piston is moved so that the gas expands, this
+causes a decrease in the temperature of the gas.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+© UCLES 2021 9702/43/M/J/21
+
+7
+(c) The gas expands so that its volume increases to 2.4 × 10−3 m3 at a pressure of 2.3 × 105 Pa
+and a temperature of 288 K, as shown in Fig. 2.2.
+1.8 × 10−3 m3 2.4 × 10−3 m3
+3.3 × 105 Pa 2.3 × 105 Pa
+310 K 288 K
+Fig. 2.2
+(i) The average translational kinetic energy E of a molecule of an ideal gas is given by
+K
+3
+E = kT
+K 2
+where k is the Boltzmann constant and T is the thermodynamic temperature.
+Calculate the increase in internal energy ΔU of the gas during the expansion.
+ΔU = ...................................................... J [3]
+(ii) The work done by the gas during the expansion is 76 J.
+Use your answer in (i) to explain whether thermal energy is transferred to or from the gas
+during the expansion.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 10]
+© UCLES 2021 9702/43/M/J/21 [Turn over
+
+8
+3 (a) State what is meant by simple harmonic motion.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A trolley of mass m is held on a horizontal surface by means of two springs. One spring is
+attached to a fixed point P. The other spring is connected to an oscillator, as shown in Fig. 3.1.
+spring trolley spring oscillator
+P
+Fig. 3.1
+The springs, each having spring constant k of 130 N m−1, are always extended.
+The oscillator is switched off. The trolley is displaced along the line of the springs and then
+released. The resulting oscillations of the trolley are simple harmonic.
+The acceleration a of the trolley is given by the expression
+⎛ 2 k ⎞
+a = − x
+⎝ m ⎠
+where x is the displacement of the trolley from its equilibrium position.
+The mass of the trolley is 840 g.
+Calculate the frequency f of oscillation of the trolley.
+f = .................................................... Hz [3]
+© UCLES 2021 9702/43/M/J/21
+
+9
+(c) The oscillator in (b) is switched on. The frequency of oscillation of the oscillator is varied,
+keeping its amplitude of oscillation constant.
+The amplitude of oscillation of the trolley is seen to vary. The amplitude is a maximum at the
+frequency calculated in (b).
+(i) State the name of the effect giving rise to this maximum.
+..................................................................................................................................... [1]
+(ii) At any given frequency, the amplitude of oscillation of the trolley is constant.
+Explain how this indicates that there are resistive forces opposing the motion of the
+trolley.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 8]
+© UCLES 2021 9702/43/M/J/21 [Turn over
+
+10
+BLANK PAGE
+© UCLES 2021 9702/43/M/J/21
+
+11
+4 Outline the use of ultrasound to obtain diagnostic information about internal body structures.
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+.................................................................................................................................................... [5]
+© UCLES 2021 9702/43/M/J/21 [Turn over
+
+12
+5 (a) State what is meant by the amplitude modulation (AM) of a radio wave.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A radio wave is modulated by an audio signal.
+The variation with frequency f of the amplitude of the modulated wave is shown in Fig. 5.1.
+amplitude
+0
+292 300 308
+f / kHz
+Fig. 5.1
+Determine:
+(i) the wavelength of the carrier wave
+wavelength = ..................................................... m [1]
+(ii) the bandwidth of the modulated wave
+bandwidth = .................................................. kHz [1]
+(iii) the maximum frequency of the audio signal.
+maximum frequency = .................................................. kHz [1]
+© UCLES 2021 9702/43/M/J/21
+
+13
+(c) The power of a radio signal at a transmitter is P .
+T
+At a receiver, the received power P is given by the expression
+R
+0.082 P
+T
+P =
+R x2
+where x is the distance, in metres, between the transmitter and the receiver.
+For the transmission of this signal, the attenuation is 73 dB.
+Determine the distance x.
+x = ..................................................... m [3]
+[Total: 8]
+© UCLES 2021 9702/43/M/J/21 [Turn over
+
+14
+6 (a) An isolated metal sphere of radius r is charged so that the electric field strength at its surface
+is E .
+0
+On Fig. 6.1, sketch the variation of the electric field strength E with distance x from the centre
+of the sphere. Your sketch should extend from x = 0 to x = 3r.
+E
+0
+field
+strength E
+0
+0 r 2r 3r
+distance x
+Fig. 6.1
+[3]
+(b) The de Broglie wavelength of a particle is λ when its momentum is p .
+0 0
+On Fig. 6.2, sketch the variation with momentum p of the de Broglie wavelength λ of the
+p
+particle for values of momentum from 0 to p .
+2 0
+2λ
+0
+wavelengthλ
+λ
+0
+0
+0 p p
+0 0
+2
+momentum p
+Fig. 6.2
+[2]
+© UCLES 2021 9702/43/M/J/21
+
+15
+(c) A radioactive isotope decays with a half-life of 15 s to form a stable product.
+A fresh sample of the radioactive isotope at time t = 0 contains N nuclei and no nuclei of the
+0
+stable product.
+On Fig. 6.3, sketch the variation with t of the number n of nuclei of the stable product for time
+t = 0 to time t = 45 s.
+N
+0
+number n
+0.5 N
+0
+0
+0 15 30 45
+time t / s
+Fig. 6.3
+[3]
+[Total: 8]
+© UCLES 2021 9702/43/M/J/21 [Turn over
+
+16
+7 (a) State what is meant by the capacitance of a parallel plate capacitor.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A capacitor of capacitance C is connected into the circuit shown in Fig. 7.1.
+A B
+sensitive
++ ammeter
+V A
+–
+C
+Fig. 7.1
+When the two-way switch is in position A, the capacitor is charged so that the potential
+difference across it is V.
+The switch moves to position B and the capacitor fully discharges through the sensitive
+ammeter.
+The switch moves repeatedly between A and B so that the capacitor charges and then
+discharges with frequency f.
+(i) Show that the average current I in the ammeter is given by the expression
+I = fCV.
+[2]
+© UCLES 2021 9702/43/M/J/21
+
+17
+(ii) For a potential difference V of 150 V and a frequency f of 60 Hz, the average current in
+the ammeter is 4.8 μA.
+Calculate the capacitance, in pF, of the capacitor.
+capacitance = .................................................... pF [2]
+(c) A second capacitor, having the same capacitance as the capacitor in (b), is connected into
+the circuit of Fig. 7.1. The two capacitors are connected in series.
+State and explain the new reading on the ammeter.
+new reading = ......................................................... μA
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+[Total: 9]
+© UCLES 2021 9702/43/M/J/21 [Turn over
+
+18
+8 The variation with temperature of the resistance of a thermistor is shown in Fig. 8.1.
+4.0
+3.0
+resistance / kΩ
+2.0
+1.0
+0
+0 10 20 30
+temperature / °C
+Fig. 8.1
+A student includes the thermistor and an ideal operational amplifier (op-amp) in the circuit of
+Fig. 8.2.
++3.0 V
+2.5 kΩ
++
+–
++
+–
+3.0 kΩ 5.0 kΩ
+Fig. 8.2
+© UCLES 2021 9702/43/M/J/21
+
+19
+(a) Calculate the potential V + at the non-inverting input of the op-amp.
+V + = ...................................................... V [2]
+(b) At 10 °C, the resistance of the thermistor is 2.5 kΩ.
+State and explain whether the light-emitting diode (LED) is emitting light.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(c) Explain why the student’s circuit will not indicate any change in temperature above 0 °C.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(d) The resistor of resistance 5.0 kΩ is changed to a resistor of resistance R so that the LED
+switches on or off at a temperature of 20 °C.
+Determine R in kΩ.
+R = .................................................... kΩ [3]
+[Total: 9]
+© UCLES 2021 9702/43/M/J/21 [Turn over
+
+20
+9 (a) State what is meant by a magnetic field.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A rectangular piece of aluminium foil is situated in a uniform magnetic field of flux density B,
+as shown in Fig. 9.1.
+magnetic field,
+flux density B
+Q R
+T
+aluminium
+movement foil
+of electrons
+P S
+V W
+Fig. 9.1
+The magnetic field is normal to the face PQRS of the foil.
+Electrons, each of charge −q, enter the foil at right angles to the face PQTV.
+(i) On Fig. 9.1, shade the face of the foil on which electrons initially accumulate. [1]
+(ii) Explain why electrons do not continuously accumulate on the face you have shaded.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+© UCLES 2021 9702/43/M/J/21
+
+21
+(c) The Hall voltage V developed across the foil in (b) is given by the expression
+H
+BI
+V =
+H ntq
+where I is the current in the foil.
+(i) State the meaning of the quantity n.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) Using the letters on Fig. 9.1, identify the distance t.
+..................................................................................................................................... [1]
+(d) Suggest why, in practice, Hall probes are usually made using a semiconductor material rather
+than a metal.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+[Total: 9]
+© UCLES 2021 9702/43/M/J/21 [Turn over
+
+22
+10 (a) State Lenz’s law.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A metal ring is suspended from a fixed point P by means of a thread, as shown in Fig. 10.1.
+P P
+metal
+magnet
+ring
+pole piece
+metal
+ring
+N S
+Fig. 10.1 Fig. 10.2
+The ring is displaced a distance d and then released. The ring completes many oscillations
+before coming to rest.
+The poles of a magnet are now placed near to the ring so that the ring hangs midway between
+the poles of the magnet, as shown in Fig. 10.2.
+The ring is again displaced a distance d and then released.
+Explain why the ring completes fewer oscillations before coming to rest.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [4]
+© UCLES 2021 9702/43/M/J/21
+
+23
+(c) The ring in (b) is now cut so that it has the shape shown in Fig. 10.3.
+Fig. 10.3
+Explain why, when the procedure in (b) is repeated, the cut ring completes more oscillations
+than the complete ring when oscillating between the poles of the magnet.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+[Total: 9]
+© UCLES 2021 9702/43/M/J/21 [Turn over
+
+24
+11 (a) State how, in a modern X-ray tube, the intensity of the X-ray beam and its hardness are
+controlled.
+intensity: ...................................................................................................................................
+...................................................................................................................................................
+hardness: ..................................................................................................................................
+...................................................................................................................................................
+[2]
+(b) A model of a limb consists of soft tissue and bone, as illustrated in Fig. 11.1.
+3.0 cm
+I I
+0 C
+incident transmitted
+intensity intensity
+I I
+0 S
+bone soft
+tissue
+9.0 cm
+Fig. 11.1
+The soft tissue has a thickness of 9.0 cm. The bone within the soft tissue has a thickness of
+3.0 cm.
+Data for the linear attenuation (absorption) coefficient μ of X-rays in soft tissue and in bone
+are shown in Table 11.1.
+Table 11.1
+μ / cm−1
+soft tissue 0.92
+bone 2.90
+© UCLES 2021 9702/43/M/J/21
+
+25
+A parallel beam of X-rays of intensity I is incident normally on the model.
+0
+Calculate, in terms of I :
+0
+(i) the transmitted intensity I through soft tissue alone
+S
+I = ..................................................... I [2]
+S 0
+(ii) the transmitted intensity I through soft tissue and bone.
+C
+I = ..................................................... I [2]
+C 0
+(c) By reference to your answers in (b), suggest, with a reason, whether good contrast on an
+X-ray image would be obtained.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+[Total: 7]
+© UCLES 2021 9702/43/M/J/21 [Turn over
+
+26
+BLANK PAGE
+© UCLES 2021 9702/43/M/J/21
+
+27
+12 (a) Electromagnetic radiation of a single constant frequency is incident on a metal surface. This
+causes an electron to be emitted.
+Explain why the maximum kinetic energy of the electron is independent of the intensity of the
+incident radiation.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+(b) Ultraviolet radiation of wavelength 250 nm is incident on the surface of a sheet of zinc.
+The maximum kinetic energy of the emitted electrons is 1.4 eV.
+Determine, in eV:
+(i) the energy of a photon of the ultraviolet radiation
+energy = .................................................... eV [3]
+(ii) the work function energy of the surface of the zinc.
+energy = .................................................... eV [2]
+[Total: 8]
+© UCLES 2021 9702/43/M/J/21
+
+28
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of the University of
+Cambridge Local Examinations Syndicate (UCLES), which itself is a department of the University of Cambridge.
+© UCLES 2021 9702/43/M/J/21

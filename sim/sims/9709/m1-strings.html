@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Particle held by strings</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/mech-forces.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, FO = SIM.forces;
+  var course = ui.course('9709'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Particle or smooth ring held by strings: equilibrium and triangle of forces', g: g,
+    tags: course === '9709' ? ['9709 4.1 Forces & equilibrium'] : ['9702 4 Forces: vector triangle'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 22 });
+  ui.legend(sceneCard, [
+    { color: 'var(--c-weight)', label: 'weight mg' }, { color: 'var(--c-tension)', label: 'tension' },
+    { color: 'var(--c-applied)', label: 'applied force P' }, { color: 'var(--c-component)', label: 'angles / geometry' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var triCv = ui.canvas(plotWrap);
+  var vp2 = new SIM.view.Viewport(triCv, { pad: 26 });
+  var tableBox = ui.h('div', { style: 'overflow-x:auto' }); plotWrap.appendChild(tableBox);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  /* ---------- controls ---------- */
+  var cfgSel = ui.select(paramCard, { label: 'Set-up', value: 'two', options: [
+    { value: 'two', label: 'Two strings to fixed points' },
+    { value: 'ring', label: 'Smooth ring threaded on one string (same T both sides)' },
+    { value: 'one', label: 'One string and an applied force P' }] }, update);
+  var geoSel = ui.select(paramCard, { label: 'Geometry', value: 'angles', options: [
+    { value: 'angles', label: 'given by angles' }, { value: 'lengths', label: 'given by lengths (cosine rule / right-angled triangle)' }] }, update);
+  var PAIRS = [
+    { value: 'T1,T2', label: 'T₁ and T₂' }, { value: 'T,m', label: 'T and m (ring)' }, { value: 'T,P', label: 'T and P (ring)' },
+    { value: 'T1,P', label: 'T₁ and P' }, { value: 'T2,P', label: 'T₂ and P' }, { value: 'T1,m', label: 'T₁ and m' }, { value: 'T2,m', label: 'T₂ and m' },
+    { value: 'm,P', label: 'm and P' }, { value: 'T2,dir2', label: 'T₂ and the angle of string 2' }, { value: 'P,phi', label: 'P and its direction' }];
+  var pairSel = ui.select(paramCard, { label: 'Find', value: 'T1,T2', options: PAIRS }, update);
+  var ORIENTS = [
+    { value: 'UL-v', label: 'up-left, α from the vertical' }, { value: 'UL-h', label: 'up-left, α from the horizontal' },
+    { value: 'UR-v', label: 'up-right, α from the vertical' }, { value: 'UR-h', label: 'up-right, α from the horizontal' },
+    { value: 'DL-v', label: 'down-left, α from the vertical' }, { value: 'DL-h', label: 'down-left, α from the horizontal' },
+    { value: 'DR-v', label: 'down-right, α from the vertical' }, { value: 'DR-h', label: 'down-right, α from the horizontal' }];
+  var o1Sel = ui.select(paramCard, { label: 'String 1 goes', value: 'UL-h', options: ORIENTS }, update);
+  var o2Sel = ui.select(paramCard, { label: 'String 2 goes', value: 'UR-h', options: ORIENTS }, update);
+  var pmSel = ui.select(paramCard, { label: 'Direction of P', value: 'angle', options: [
+    { value: 'angle', label: 'at angle φ (anticlockwise from +x)' },
+    { value: 'perp1cw', label: 'perpendicular to string 1 (string turned 90° clockwise)' },
+    { value: 'perp1ccw', label: 'perpendicular to string 1 (string turned 90° anticlockwise)' },
+    { value: 'along2', label: 'along string 2, away from its fixed point' }] }, update);
+
+  var prm = ui.params(paramCard, [
+    { key: 'm', label: 'Mass', sym: 'm', unit: 'kg', min: 0.01, max: 100, step: 0.01, value: 10 },
+    { key: 'a1', label: 'Angle of string 1', sym: 'α<sub>1</sub>', unit: '°', min: 0, max: 90, step: 0.5, value: 35 },
+    { key: 'a2', label: 'Angle of string 2', sym: 'α<sub>2</sub>', unit: '°', min: 0, max: 90, step: 0.5, value: 40 },
+    { key: 'L1', label: 'Length of string 1', sym: 'L<sub>1</sub>', unit: 'm', min: 0.1, max: 5, step: 0.01, value: 0.8 },
+    { key: 'L2', label: 'Length of string 2', sym: 'L<sub>2</sub>', unit: 'm', min: 0.1, max: 5, step: 0.01, value: 0.6 },
+    { key: 'd', label: 'Distance between the fixed points (same level)', sym: 'd', unit: 'm', min: 0.1, max: 6, step: 0.01, value: 1 },
+    { key: 'h', label: 'Depth of the particle below the fixed point', sym: 'h', unit: 'm', min: 0, max: 5, step: 0.01, value: 2.4 },
+    { key: 'P', label: 'Applied force', sym: 'P', unit: 'N', min: 0, max: 300, step: 0.1, value: 0 },
+    { key: 'phi', label: 'Direction of P (anticlockwise from +x)', sym: 'φ', unit: '°', min: 0, max: 360, step: 0.5, value: 0 },
+    { key: 'T1', label: 'Tension in string 1 (when given)', sym: 'T<sub>1</sub>', unit: 'N', min: 0, max: 300, step: 0.1, value: 4 },
+    { key: 'T2', label: 'Tension in string 2 (when given)', sym: 'T<sub>2</sub>', unit: 'N', min: 0, max: 300, step: 0.1, value: 4 }
+  ], update);
+  var alongTog = ui.toggle(paramCard, { label: 'Also resolve along and perpendicular to string 1' }, update);
+  var lamiTog = ui.toggle(paramCard, { label: 'Show Lami’s theorem check (optional; not required)' }, update);
+  var locked = {};
+
+  var exam = ui.examToggle(outCard, outCard);
+  exam.el.querySelector('input').addEventListener('change', function () { update(); });
+  var R = ui.Readout(outCard);
+
+  var gNote = course === '9702' ? ' (Mark-scheme answers use g = 10; here g = 9.81.)' : '';
+  var presetCtl = ui.presets(presetCard, [
+    { name: '9709/43 M/J 22 Q4(a): strings 0.8 m and 0.6 m, right angle at C, F = 20 N', cfg: 'two', geo: 'lengths', pair: 'T1,T2', pm: 'angle',
+      values: { m: 10, L1: 0.8, L2: 0.6, d: 1, P: 20, phi: 0 }, note: 'AB = 1 m, so cos A = 0.8, cos B = 0.6. MS: T_AC = 76 N, T_BC = 68 N.' + gNote },
+    { name: '9709/43 M/J 22 Q4(b): greatest F before string BC goes slack', cfg: 'two', geo: 'lengths', pair: 'T1,T2', pm: 'angle',
+      values: { m: 10, L1: 0.8, L2: 0.6, d: 1, P: 400 / 3, phi: 0 }, toCritical: true, note: 'Greatest F when T_BC = 0: F = 400/3 = 133 N (MS). See “P range” in the working.' + gNote },
+    { name: 'Too large a force: a string would go slack (F = 150 N)', cfg: 'two', geo: 'lengths', pair: 'T1,T2', pm: 'angle',
+      values: { m: 10, L1: 0.8, L2: 0.6, d: 1, P: 150, phi: 0 }, note: 'The equations give T_BC < 0. A string cannot push, so equilibrium in this position is impossible.' },
+    { name: '9709/41 O/N 23 Q2: 2.4 kg on strings at 35° and 40° to the horizontal', cfg: 'two', geo: 'angles', pair: 'T1,T2', pm: 'angle', o1: 'UL-h', o2: 'UR-h',
+      values: { m: 2.4, a1: 35, a2: 40, P: 0 }, note: 'MS: 19.0 N (35° string) and 20.4 N (40° string). The steeper string carries more tension.' + gNote },
+    { name: '9709/43 O/N 21 Q2: 8 kg on strings at 60° and 45° above the horizontal', cfg: 'two', geo: 'angles', pair: 'T1,T2', pm: 'angle', o1: 'UL-h', o2: 'UR-h',
+      values: { m: 8, a1: 60, a2: 45, P: 0 }, note: 'MS: T₁ = 58.6 N, T₂ = 41.4 N. Lami’s theorem is an optional alternative.' + gNote },
+    { name: '9709/42 F/M 21 Q3: string up to a wall (60°) and down to the floor (30°)', cfg: 'two', geo: 'angles', pair: 'T1,T2', pm: 'angle', o1: 'UL-h', o2: 'DR-h',
+      values: { m: 0.2, a1: 60, a2: 30, P: 0 }, note: 'The floor string pulls DOWN on the particle. MS: T_P = 3.46 N (2√3), T_R = 2 N.' + gNote },
+    { name: '9709/42 O/N 22 Q3: tension 4 N known; find the wall string’s tension and α', cfg: 'two', geo: 'angles', pair: 'T2,dir2', pm: 'angle', o1: 'UL-h', o2: 'DR-v',
+      values: { m: 0.3, a1: 60, a2: 77, T1: 4, P: 0 }, note: 'α is measured from the wall (vertical). MS: T = 2.05 N, α = 76.9.' + gNote },
+    { name: '9709/42 M/J 25 Q3: one string 2.6 m, depth 2.4 m, 35 N perpendicular to the string', cfg: 'one', geo: 'lengths', pair: 'T1,m', pm: 'perp1cw',
+      values: { L1: 2.6, h: 2.4, P: 35, m: 9 }, note: 'cos α = 2.4/2.6 = 12/13. Resolving perpendicular to the string: 35 = mg × 5/13. MS: m = 9.1, T = 84.' + gNote },
+    { name: '9709/43 M/J 24 Q2: string at 30° to a wall, force X perpendicular to the string', cfg: 'one', geo: 'angles', pair: 'T1,P', pm: 'perp1cw', o1: 'UL-v',
+      values: { m: 0.2, a1: 30, P: 1 }, note: 'Resolve along the string: T = mg cos 30°; perpendicular: X = mg sin 30°. MS: T = 1.73 N, X = 1.' + gNote },
+    { name: '9709/42 O/N 18 Q1: smooth ring, angle ARB = 90°, 2.5 N along BR', cfg: 'ring', geo: 'angles', pair: 'T,m', pm: 'along2', o1: 'UL-v', o2: 'DL-v',
+      values: { a1: 45, a2: 45, P: 2.5, m: 0.2 }, note: 'Smooth ring ⇒ the same tension T in AR and BR. MS: T = 1.25 N, m = 0.177 (√2/8).' + gNote },
+    { name: '9709/43 M/J 23 Q3: smooth ring, AR 60° to the vertical, BR horizontal, X ⟂ AR', cfg: 'ring', geo: 'angles', pair: 'T,P', pm: 'perp1cw', o1: 'UL-v', o2: 'UL-h',
+      values: { a1: 60, a2: 0, m: 0.2, P: 2 }, note: 'Same T both sides. MS: T = 0.536 N (4 − 2√3), X = 2.' + gNote },
+    { name: 'Smooth ring: parts at 30° and 40° to the vertical, 2 N horizontal; find T and m', cfg: 'ring', geo: 'angles', pair: 'T,m', pm: 'angle', o1: 'UL-v', o2: 'DL-v',
+      values: { a1: 30, a2: 40, P: 2, phi: 0, m: 0.02 }, note: '→: T sin 30° + T sin 40° = 2 ⇒ T = 1.75 N; ↑: T cos 30° − T cos 40° = mg ⇒ m = 0.0175 kg (g = 10).' },
+    { name: 'Both strings horizontal: the weight cannot be supported', cfg: 'two', geo: 'angles', pair: 'T1,T2', pm: 'angle', o1: 'UL-h', o2: 'UR-h',
+      values: { m: 1, a1: 0, a2: 0, P: 0 }, note: 'Neither tension has a vertical component, so nothing balances mg: the strings must sag.' }
+  ], function (pr) {
+    unlockAll();
+    cfgSel.set(pr.cfg, true); geoSel.set(pr.geo, true); pairSel.set(pr.pair, true); pmSel.set(pr.pm, true);
+    if (pr.o1) o1Sel.set(pr.o1, true); if (pr.o2) o2Sel.set(pr.o2, true);
+    prm.set(pr.values);
+    // "greatest P" presets: put P exactly at the critical value for this g (g = 9.81 moves it)
+    if (pr.toCritical && M && M.range && !M.range.empty && isFinite(M.range.hi)) prm.set({ P: M.range.hi });
+  });
+
+  ui.notes(noteCard, [
+    'A string can only <b>pull</b>. If your simultaneous equations give a negative tension, that string would be slack: the particle cannot be in equilibrium in that position.',
+    '“Greatest force before a string goes slack”: set that tension to 0 and solve. Beyond it the equations give T < 0.',
+    'Angle from the <b>vertical</b> ⇒ vertical component T cos α and horizontal T sin α. Angle from the <b>horizontal</b> ⇒ the other way round. Check which line the angle is marked from.',
+    'A <b>smooth</b> ring on a string: the tension is the same on both sides (one T, not T₁ and T₂).',
+    'A force perpendicular to a string has no component along it: resolving along/perpendicular to the string can give one unknown per equation.',
+    'Lengths given (e.g. 0.8 m and 0.6 m with AB = 1 m): use the cosine rule, or spot a right angle (3-4-5), to get the angles first.',
+    'A string going <b>down</b> to the floor pulls the particle downwards: include its vertical component with the weight.',
+    'Lami’s theorem and the triangle of forces are optional alternatives' + (course === '9709' ? ' (not required by 9709).' : '.'),
+    'Take g = ' + g + ' m s<sup>−2</sup>' + (course === '9709' ? ' (9709 papers say “use 10”).' : ' (data sheet).')
+  ]);
+
+  /* ---------- model ---------- */
+  var SYMS = { T1: 'T₁', T2: 'T₂', T: 'T', m: 'm', P: 'P', dir2: 'α₂', phi: 'φ' };
+  function unlockAll() {
+    Object.keys(locked).forEach(function (k) { if (locked[k]) { prm.lock(k, false); var o = {}; o[k] = prm.values[k]; prm.set(o, true); locked[k] = false; } });
+  }
+  function lock(k, v) { prm.lock(k, true, v); locked[k] = true; }
+  function frameOf(orient, alpha) {
+    return { ref: orient.slice(-1) === 'h' ? 'h' : 'v', alpha: alpha, sx: orient.indexOf('R') >= 0 ? 1 : -1, sy: orient.charAt(0) === 'U' ? 1 : -1, orient: orient };
+  }
+  function frameFromDir(dir) {
+    var di = FO.dirInfo(dir);
+    if (di.ref === 'up' || di.ref === 'down') return { ref: 'v', alpha: 0, sx: 1, sy: di.ref === 'up' ? 1 : -1 };
+    return { ref: 'h', alpha: di.beta, sx: di.ref === '+x' ? 1 : -1, sy: di.side === 'above' ? 1 : -1 };
+  }
+  var M = null;
+  function compute() {
+    var v = prm.values, cfg = cfgSel.get(), geo = cfg === 'ring' ? 'angles' : geoSel.get();
+    var out = { cfg: cfg, geo: geo, pair: pairSel.get().split(','), errors: [] };
+    // geometry → directions of the strings (from the particle to the fixed points)
+    if (geo === 'lengths') {
+      if (cfg === 'two') {
+        var G = FO.lengthsGeometry(v.L1, v.L2, v.d); out.G = G;
+        if (!G.ok) { out.errors.push(G.msg); return out; }
+        out.dir1 = G.dir1; out.dir2 = G.dir2;
+        out.f1 = { ref: 'h', alpha: G.A, sx: -1, sy: 1 };
+        out.f2 = G.B <= 90 ? { ref: 'h', alpha: G.B, sx: 1, sy: 1 } : { ref: 'h', alpha: 180 - G.B, sx: -1, sy: 1 };
+      } else {
+        var G1 = FO.oneStringGeometry(v.L1, v.h); out.G = G1;
+        if (!G1.ok) { out.errors.push(G1.msg); return out; }
+        out.dir1 = G1.dir1; out.f1 = { ref: 'v', alpha: G1.alpha, sx: -1, sy: 1 };
+      }
+    } else {
+      out.dir1 = FO.orientDir(v.a1, o1Sel.get()); out.f1 = frameOf(o1Sel.get(), v.a1);
+      if (cfg !== 'one') { out.dir2 = FO.orientDir(v.a2, o2Sel.get()); out.f2 = frameOf(o2Sel.get(), v.a2); }
+    }
+    var p = out.pair.slice().sort().join(',');
+    if (!FO.pairAllowed(cfg, out.pair[0], out.pair[1])) {
+      out.errors.push(cfg === 'ring' ? 'For a smooth ring there is one tension T: choose “T and m”, “T and P”, “m and P” or “P and its direction”.'
+        : cfg === 'one' ? 'With one string choose from T₁, m and P (or P and its direction).' : 'Choose two of T₁, T₂, m, P (or T₂ and its angle, or P and its direction).');
+      return out;
+    }
+    if (p === 'T2,dir2' && geo === 'lengths') { out.errors.push('“T₂ and the angle of string 2” needs the angles geometry (the lengths fix the angle).'); return out; }
+    // direction of P
+    var pm = pmSel.get(), phi = v.phi;
+    out.pmRel = false;
+    if (p !== 'P,phi') {
+      if (pm === 'perp1cw') { phi = out.dir1 - 90; out.pmRel = true; }
+      else if (pm === 'perp1ccw') { phi = out.dir1 + 90; out.pmRel = true; }
+      else if (pm === 'along2') {
+        if (cfg === 'one') { out.errors.push('There is no string 2 in this set-up: choose another direction for P.'); return out; }
+        if (p === 'T2,dir2') { out.errors.push('P is along string 2, so the angle of string 2 cannot also be the unknown.'); return out; }
+        phi = out.dir2 + 180; out.pmRel = true;
+      }
+    }
+    out.phi = FO.norm360(phi);
+    out.spec = { g: g, m: v.m, config: cfg, dir1: out.dir1, dir2: out.dir2 === undefined ? 0 : out.dir2, T1: v.T1, T2: v.T2, P: v.P, phi: out.phi, unknowns: out.pair };
+    out.res = FO.solveParticle(out.spec);
+    out.range = FO.pRange(out.spec);
+    return out;
+  }
+  function has(k) { return M && M.pair && M.pair.indexOf(k) >= 0; }
+
+  function update() {
+    unlockAll();
+    var cfg = cfgSel.get(), geo = cfg === 'ring' ? 'angles' : geoSel.get();
+    geoSel.row.style.display = cfg === 'ring' ? 'none' : '';
+    o1Sel.row.style.display = geo === 'angles' ? '' : 'none';
+    o2Sel.row.style.display = geo === 'angles' && cfg !== 'one' ? '' : 'none';
+    prm.show('a1', geo === 'angles'); prm.show('a2', geo === 'angles' && cfg !== 'one');
+    prm.show('L1', geo === 'lengths'); prm.show('L2', geo === 'lengths' && cfg === 'two'); prm.show('d', geo === 'lengths' && cfg === 'two');
+    prm.show('h', geo === 'lengths' && cfg === 'one');
+    prm.show('T2', cfg === 'two');
+    prm.label('T1', cfg === 'ring' ? 'Tension T in the string (when given) <span class="sym">T</span>' : 'Tension in string 1 (when given) <span class="sym">T<sub>1</sub></span>');
+    M = compute();
+    var r = M.res;
+    // lock unknowns and show solved values in their sliders
+    if (r && r.values && !/invalid/.test(r.status)) {
+      var vals = r.values;
+      M.pair.forEach(function (k) {
+        if (k === 'T' || k === 'T1') lock('T1', vals.T1);
+        else if (k === 'T2') lock('T2', vals.T2);
+        else if (k === 'm') lock('m', vals.m);
+        else if (k === 'P') lock('P', vals.P);
+        else if (k === 'phi') lock('phi', vals.phi);
+        else if (k === 'dir2') { var af = FO.alphaFromDir(vals.dir2, o2Sel.get()); lock('a2', af.ok ? af.alpha : undefined); }
+      });
+    }
+    if (M.pmRel && !has('phi')) lock('phi', M.phi);
+    prm.show('phi', pmSel.get() === 'angle' || has('phi') || M.pmRel);
+    tableBox.classList.toggle('exam-hidden', exam.get());
+    var hv = Object.assign({}, prm.values, { cfg: cfg, geo: geoSel.get(), pair: pairSel.get(), o1: o1Sel.get(), o2: o2Sel.get(), pm: pmSel.get() });
+    ui.writeHash(hv);
+    drawScene(); drawTriangle(); drawTable(); readout();
+  }
+
+  /* ---------- labels ---------- */
+  function forceName(f) { return f.key === 'W' ? 'mg' : f.key === 'T' ? 'T' : f.key === 'T1' ? 'T₁' : f.key === 'T2' ? 'T₂' : 'P'; }
+  function isSolved(f) {
+    if (!M || !M.pair) return false;
+    if (f.key === 'W') return has('m');
+    if (f.key === 'T') return has('T');
+    if (f.key === 'T1') return has('T1');
+    if (f.key === 'T2') return has('T2');
+    return has('P');
+  }
+  function fLabel(f) {
+    var nm = forceName(f);
+    if (exam.get() && isSolved(f)) return nm;
+    return nm + ' = ' + U.num(f.mag, 3) + ' N';
+  }
+  function fColor(col, f) { return f.key === 'W' ? col.weight : f.key === 'P' ? col.applied : col.tension; }
+
+  /* ---------- scene: geometry + free-body diagram ---------- */
+  function anchorMark(c, x, y, dir, col) {
+    // ceiling above / floor below / wall at the side, depending on the string direction (from particle to anchor)
+    var u = FO.unit(dir), s = 18;
+    if (Math.abs(u[1]) >= Math.abs(u[0]) * 0.58) {
+      if (u[1] > 0) D.ground(c, x - s, y, x + s, y, { flip: true }); else D.ground(c, x + s, y, x - s, y, { flip: true });
+    } else {
+      if (u[0] > 0) D.ground(c, x, y - s, x, y + s, { flip: true }); else D.ground(c, x, y + s, x, y - s, { flip: true });
+    }
+    c.save(); c.fillStyle = col['object-line']; c.beginPath(); c.arc(x, y, 2.5, 0, Math.PI * 2); c.fill(); c.restore();
+  }
+  function frameArc(c, x, y, r, f, dir, color, label) {
+    // arc from the reference line to the string, at the particle
+    if (!f) return;
+    var a0;
+    if (f.ref === 'v') a0 = f.sy > 0 ? Math.PI / 2 : -Math.PI / 2; else a0 = f.sx > 0 ? 0 : Math.PI;
+    var a1 = U.rad(dir), dA = Math.atan2(Math.sin(a1 - a0), Math.cos(a1 - a0));
+    if (Math.abs(dA) < 1e-6) return;
+    D.line(c, [[x, y], [x + Math.cos(a0) * (r + 14), y - Math.sin(a0) * (r + 14)]], color, { dash: [3, 3], width: 1 });
+    D.arc(c, x, y, r, a0, a0 + dA, color, label);
+  }
+  function drawScene() {
+    if (!M) return;
+    var col = ui.colors(), c;
+    var r = M.res, v = prm.values;
+    if (M.errors.length || !r || !r.values) {
+      vp.fit(-1, 1, -1, 1); c = vp.begin();
+      D.label(c, M.errors[0] || (r && r.message) || 'Invalid set-up', vp.w / 2, vp.h / 2, col.warn, { bold: true, bg: true });
+      return;
+    }
+    var vals = r.values, dir2 = M.cfg === 'one' ? null : vals.dir2;
+    // anchor points (world): lengths ⇒ true geometry (metres); angles ⇒ unit-length strings
+    var A, B, Ls1 = 1, Ls2 = 1;
+    if (M.geo === 'lengths' && M.cfg === 'two') { Ls1 = v.L1; Ls2 = v.L2; }
+    if (M.geo === 'lengths' && M.cfg === 'one') { Ls1 = v.L1; }
+    var u1 = FO.unit(vals.dir1); A = [u1[0] * Ls1, u1[1] * Ls1];
+    if (dir2 !== null) { var u2 = FO.unit(dir2); B = [u2[0] * Ls2, u2[1] * Ls2]; }
+    var S = Math.max(Ls1, dir2 !== null ? Ls2 : 0);
+    var pts = [[0, 0], A, [S * 0.95, 0], [-S * 0.95, 0], [0, S * 0.95], [0, -S * 0.95]]; if (B) pts.push(B);
+    var xs = pts.map(function (q) { return q[0]; }), ys = pts.map(function (q) { return q[1]; });
+    var mg = 0.12 * S;
+    vp.fit(Math.min.apply(null, xs) - mg, Math.max.apply(null, xs) + mg, Math.min.apply(null, ys) - mg, Math.max.apply(null, ys) + mg);
+    c = vp.begin();
+    var cx = vp.X(0), cy = vp.Y(0);
+    // strings
+    var slack1 = r.slack && (r.slack.indexOf('T1') >= 0 || r.slack.indexOf('T') >= 0), slack2 = r.slack && (r.slack.indexOf('T2') >= 0 || r.slack.indexOf('T') >= 0);
+    D.line(c, [[cx, cy], vp.P(A[0], A[1])], col['object-line'], { width: 1.6, dash: slack1 ? [6, 5] : null });
+    if (B) D.line(c, [[cx, cy], vp.P(B[0], B[1])], col['object-line'], { width: 1.6, dash: slack2 ? [6, 5] : null });
+    if (M.geo === 'lengths' && M.cfg === 'two') {
+      D.ground(c, vp.X(A[0]) - 20, vp.Y(A[1]), vp.X(B[0]) + 20, vp.Y(B[1]), { flip: true });
+      D.label(c, 'A', vp.X(A[0]) - 10, vp.Y(A[1]) + 12, col.ink, { bold: true });
+      D.label(c, 'B', vp.X(B[0]) + 10, vp.Y(B[1]) + 12, col.ink, { bold: true });
+      D.label(c, 'L₁ = ' + U.num(v.L1, 3) + ' m', vp.X(A[0] / 2) - 8, vp.Y(A[1] / 2) - 8, col.muted, { align: 'right', size: 12, bg: true });
+      D.label(c, 'L₂ = ' + U.num(v.L2, 3) + ' m', vp.X(B[0] / 2) + 8, vp.Y(B[1] / 2) - 8, col.muted, { align: 'left', size: 12, bg: true });
+      D.arc(c, vp.X(A[0]), vp.Y(A[1]), 26, 0, -U.rad(M.G.A), col.component, U.dp(M.G.A, 1) + '°');
+      D.arc(c, vp.X(B[0]), vp.Y(B[1]), 26, Math.PI, Math.PI + U.rad(M.G.B), col.component, U.dp(M.G.B, 1) + '°');
+      if (Math.abs(M.G.C - 90) < 1e-6) D.rightAngle(c, cx, cy, U.rad(FO.norm180(vals.dir1 - vals.dir2) > 0 ? vals.dir2 : vals.dir1), 9, col.component);
+      else D.arc(c, cx, cy, 18, U.rad(vals.dir2), U.rad(vals.dir1), col.component, U.dp(M.G.C, 1) + '°');
+    } else {
+      anchorMark(c, vp.X(A[0]), vp.Y(A[1]), vals.dir1, col);
+      D.label(c, M.cfg === 'ring' ? 'A' : 'A', vp.X(A[0]) + (A[0] < 0 ? -12 : 12), vp.Y(A[1]) + (A[1] > 0 ? -10 : 12), col.ink, { bold: true });
+      if (B) { anchorMark(c, vp.X(B[0]), vp.Y(B[1]), dir2, col); D.label(c, 'B', vp.X(B[0]) + (B[0] < 0 ? -12 : 12), vp.Y(B[1]) + (B[1] > 0 ? -10 : 12), col.ink, { bold: true }); }
+      if (M.geo === 'lengths' && M.cfg === 'one') {
+        D.line(c, [vp.P(A[0], A[1]), vp.P(A[0], 0)], col.component, { dash: [4, 4], width: 1 });
+        D.line(c, [vp.P(A[0], 0), [cx, cy]], col.component, { dash: [4, 4], width: 1 });
+        D.label(c, 'h = ' + U.num(v.h, 3) + ' m', vp.X(A[0]) - 6, vp.Y(A[1] / 2), col.muted, { align: 'right', size: 12, bg: true });
+        D.label(c, 'L = ' + U.num(v.L1, 3) + ' m', vp.X(A[0] / 2) + 8, vp.Y(A[1] / 2) - 6, col.muted, { align: 'left', size: 12, bg: true });
+      }
+      var a2lab = exam.get() && has('dir2') ? 'α₂' : null;
+      frameArc(c, cx, cy, 34, M.f1, vals.dir1, col.component, M.f1 && M.f1.alpha > 0 ? U.dp(M.f1.alpha, 1) + '°' : null);
+      if (B) {
+        var f2 = M.f2;
+        if (has('dir2')) { var af = FO.alphaFromDir(vals.dir2, o2Sel.get()); f2 = frameOf(o2Sel.get(), af.alpha); }
+        frameArc(c, cx, cy, 46, f2, dir2, col.component, a2lab || (f2 && Math.abs(f2.alpha) > 1e-9 ? U.dp(Math.abs(f2.alpha), 1) + '°' : null));
+      }
+    }
+    // free-body diagram at the particle
+    var forces = r.forces.filter(function (f) { return Math.abs(f.mag) > 1e-12; });
+    var k = SIM.view.forceScale(forces.map(function (f) { return f.mag; }), Math.min(0.8 * S * vp.scale, vp.h * 0.42));
+    forces.forEach(function (f) {
+      D.arrowPolar(c, cx, cy, U.rad(f.dir), f.mag * k, fColor(col, f), { label: fLabel(f), width: 2.6, dash: f.mag < 0 ? [6, 4] : null });
+    });
+    if (M.cfg === 'ring') D.particle(c, cx, cy, 7, { fill: col.panel }); else D.particle(c, cx, cy, 6, {});
+    if (r.status !== 'ok') D.label(c, r.message.split(':')[0], vp.w / 2, 14, col.warn, { bold: true, bg: true });
+  }
+
+  /* ---------- triangle (polygon) of forces ---------- */
+  function drawTriangle() {
+    if (!M) return;
+    var col = ui.colors(), c, r = M.res;
+    if (M.errors.length || !r || !r.values) { vp2.fit(-1, 1, -1, 1); c = vp2.begin(); D.label(c, 'No triangle of forces to draw', vp2.w / 2, vp2.h / 2, col.muted, {}); return; }
+    var forces = r.forces.filter(function (f) { return Math.abs(f.mag) > 1e-12; }), pts = [[0, 0]], p = [0, 0];
+    forces.forEach(function (f) { var u = FO.unit(f.dir); p = [p[0] + f.mag * u[0], p[1] + f.mag * u[1]]; pts.push(p); });
+    var xs = pts.map(function (q) { return q[0]; }), ys = pts.map(function (q) { return q[1]; });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+    var span = Math.max(x1 - x0, y1 - y0, 1e-9), m = span * 0.2;
+    vp2.fit(x0 - m, x1 + m, y0 - m - span * 0.08, y1 + m);
+    c = vp2.begin();
+    D.label(c, forces.length === 3 ? 'Triangle of forces (tip to tail)' : 'Polygon of forces (tip to tail)', 8, 12, col.muted, { align: 'left', size: 12, bold: true });
+    forces.forEach(function (f, i) {
+      var a = pts[i], b = pts[i + 1];
+      D.arrow(c, vp2.X(a[0]), vp2.Y(a[1]), vp2.X(b[0]), vp2.Y(b[1]), fColor(col, f), { label: fLabel(f), dash: f.mag < 0 ? [6, 4] : null });
+    });
+    var end = pts[pts.length - 1], gap = Math.hypot(end[0], end[1]);
+    var ok = gap <= 1e-6 * Math.max(1, span);
+    D.label(c, ok ? (r.status === 'ok' ? 'closes ⇒ equilibrium' : 'closes only with a negative force ⇒ impossible') : 'does not close', vp2.w / 2, vp2.h - 12, ok && r.status === 'ok' ? col.ok : col.warn, { size: 12, bold: true });
+  }
+
+  function drawTable() {
+    if (!M || M.errors.length || !M.res || !M.res.values) { tableBox.innerHTML = ''; return; }
+    var rows = '';
+    M.res.forces.forEach(function (f) {
+      var u = FO.unit(f.dir), cls = isSolved(f) ? ' class="res"' : '';
+      rows += '<tr><td>' + forceName(f) + '</td><td' + cls + '>' + U.sf(f.mag) + '</td><td' + (has('dir2') && f.second || has('phi') && f.key === 'P' ? ' class="res"' : '') + '>' + FO.dirInfo(f.dir).text +
+        '</td><td' + cls + '>' + U.sf(f.mag * u[0]) + '</td><td' + cls + '>' + U.sf(f.mag * u[1]) + '</td></tr>';
+    });
+    tableBox.innerHTML = '<table class="tbl"><tr><th>force</th><th>N</th><th>direction</th><th>→</th><th>↑</th></tr>' + rows + '</table>' +
+      '<p style="font-size:12.5px;color:var(--muted)">Components: → and ↑ positive. Each column sums to 0 in equilibrium.</p>';
+  }
+
+  /* ---------- live working ---------- */
+  var COSL = { h: { x: 'cos', y: 'sin' }, v: { x: 'sin', y: 'cos' } };
+  function trig(fn, a) { var r = U.rad(a); return fn === 'cos' ? Math.cos(r) : Math.sin(r); }
+  /** items in the resolving equations: {key, sym (unknown) or val (known magnitude), frame, symAngle} */
+  function items() {
+    var v = prm.values, it = [], ring = M.cfg === 'ring';
+    it.push({ key: 'm', mag: has('m') ? null : v.m * g, sym: U.num(g, 3) + 'm', frame: { ref: 'v', alpha: 0, sx: 1, sy: -1 }, name: 'mg' });
+    it.push({ key: ring ? 'T' : 'T1', mag: has(ring ? 'T' : 'T1') ? null : v.T1, sym: ring ? 'T' : 'T₁', frame: M.f1 });
+    if (M.cfg !== 'one') {
+      var f2 = M.f2, symA = null;
+      if (has('dir2')) { f2 = frameOf(o2Sel.get(), 0); symA = 'α₂'; }
+      it.push({ key: ring ? 'T' : 'T2', mag: has(ring ? 'T' : 'T2') ? null : v.T2, sym: ring ? 'T' : 'T₂', frame: f2, symAngle: symA });
+    }
+    var showP = has('P') || has('phi') || v.P > 0;
+    if (showP) it.push({ key: 'P', mag: has('P') ? null : v.P, sym: 'P', frame: has('phi') ? null : frameFromDir(M.phi), symAngle: has('phi') ? 'φ' : null });
+    return it;
+  }
+  /** one axis: symbolic string and numeric-coefficient string */
+  function axisEq(axis) {
+    var sym = [], num = [];
+    items().forEach(function (q) {
+      var mag = q.mag === null ? q.sym : U.num(q.mag, 4);
+      if (q.symAngle === 'φ') { sym.push({ s: mag + (axis === 'x' ? ' cos φ' : ' sin φ'), sg: 1 }); num.push({ s: mag + (axis === 'x' ? ' cos φ' : ' sin φ'), sg: 1 }); return; }
+      var fr = q.frame, fn = COSL[fr.ref][axis], sg = axis === 'x' ? fr.sx : fr.sy;
+      if (q.symAngle) { sym.push({ s: mag + ' ' + fn + ' ' + q.symAngle, sg: sg }); num.push({ s: mag + ' ' + fn + ' ' + q.symAngle, sg: sg }); return; }
+      var t = trig(fn, fr.alpha);
+      if (Math.abs(t) < 1e-12) return;
+      var isOne = Math.abs(t - 1) < 1e-12;
+      sym.push({ s: isOne ? mag : mag + ' ' + fn + ' ' + U.num(fr.alpha, 2) + '°', sg: sg });
+      if (q.mag === null) num.push({ s: isOne ? q.sym : U.sf(t) + ' ' + q.sym, sg: sg });
+      else num.push({ s: U.sf(q.mag * t), sg: sg });
+    });
+    function j(arr) { var s = ''; arr.forEach(function (t) { s += (s === '' ? (t.sg < 0 ? '−' : '') : (t.sg < 0 ? ' − ' : ' + ')) + t.s; }); return (s || '0') + ' = 0'; }
+    return { sym: j(sym), num: j(num) };
+  }
+  function strName(n) { return M.cfg === 'ring' ? (n === 1 ? 'part RA' : 'part RB') : (M.geo === 'lengths' && M.cfg === 'two' ? (n === 1 ? 'AC' : 'BC') : 'string ' + n); }
+
+  function readout() {
+    if (!M) return;
+    R.clear();
+    var r = M.res, v = prm.values;
+    if (M.errors.length) { R.badge(M.errors[0], 'warn').render(); return; }
+    if (r.status === 'invalid') { R.badge(r.message, 'warn').render(); return; }
+    var vals = r.values;
+    if (r.status === 'ok') R.badge('In equilibrium: all tensions ≥ 0, triangle of forces closes', 'ok');
+    else R.badge(r.message, 'warn');
+    R.html('<div style="font-size:12.5px;color:var(--muted)">Sign convention: → and ↑ positive. String directions point from the particle towards the fixed points.' + (M.cfg === 'ring' ? ' Smooth ring ⇒ one tension T throughout the string.' : '') + '</div>');
+    if (M.geo === 'lengths') {
+      R.head('Geometry');
+      if (M.cfg === 'two') {
+        var G = M.G;
+        R.eq('cos A', '(L₁² + d² − L₂²) ÷ (2L₁d) = (' + U.num(v.L1, 4) + '² + ' + U.num(v.d, 4) + '² − ' + U.num(v.L2, 4) + '²) ÷ (2 × ' + U.num(v.L1, 4) + ' × ' + U.num(v.d, 4) + ')', G.cosA);
+        R.eq('A', 'angle of AC below the horizontal', U.dp(G.A, 1) + '°');
+        R.eq('cos B', '(L₂² + d² − L₁²) ÷ (2L₂d)', G.cosB);
+        R.eq('B', 'angle of BC below the horizontal', U.dp(G.B, 1) + '°');
+        R.eq('angle ACB', '180° − A − B', U.dp(G.C, 1) + '°');
+        if (G.degenerate) R.badge(G.msg, 'warn');
+      } else {
+        R.eq('cos α', 'h ÷ L = ' + U.num(v.h, 4) + ' ÷ ' + U.num(v.L1, 4) + ' (α from the vertical)', M.G.cosA);
+        R.eq('sin α', '√(L² − h²) ÷ L = ' + U.sf(M.G.horiz) + ' ÷ ' + U.num(v.L1, 4), M.G.sinA);
+        R.eq('α', '', U.dp(M.G.alpha, 1) + '°');
+      }
+    }
+    if (M.pmRel) R.eq('φ', pmSel.get() === 'along2' ? 'direction of P = direction of string 2 + 180°' : 'direction of P = direction of string 1 ' + (pmSel.get() === 'perp1cw' ? '− 90°' : '+ 90°'), U.dp(M.phi, 1) + '°');
+    R.head('Resolve horizontally and vertically');
+    var ex = axisEq('x'), ey = axisEq('y');
+    R.eq('→', ex.sym + (ex.num !== ex.sym ? '<br>' + ex.num : ''), '');
+    R.eq('↑', ey.sym + (ey.num !== ey.sym ? '<br>' + ey.num : ''), '');
+    if (/parallel|zero/.test(r.status)) { R.render(); return; }
+    R.head('Solve');
+    var p = M.pair.slice().sort().join(',');
+    if (p === 'T2,dir2') {
+      var u2 = FO.unit(vals.dir2), hx = Math.abs(vals.T2 * u2[0]), hy = Math.abs(vals.T2 * u2[1]);
+      R.eq('horizontal part of T₂', 'from →', hx, 'N'); R.eq('vertical part of T₂', 'from ↑', hy, 'N');
+      R.eq('T₂', 'square and add: √(' + U.sf(hx) + '² + ' + U.sf(hy) + '²)', vals.T2, 'N');
+      var af = FO.alphaFromDir(vals.dir2, o2Sel.get()), isV = o2Sel.get().slice(-1) === 'v';
+      if (af.ok) R.eq('α₂', 'tan⁻¹(' + (isV ? U.sf(hx) + ' ÷ ' + U.sf(hy) : U.sf(hy) + ' ÷ ' + U.sf(hx)) + '), from the ' + (isV ? 'vertical' : 'horizontal'), U.dp(af.alpha, 1) + '°');
+      else R.badge('String 2 would have to point ' + FO.dirInfo(vals.dir2).text + ': change “String 2 goes”.', 'warn');
+    } else if (p === 'P,phi') {
+      R.eq('P', 'square and add the two components P must supply', vals.P, 'N');
+      R.eq('φ', 'direction of P', U.dp(vals.phi, 1) + '° (' + FO.dirInfo(vals.phi).text + ')');
+    } else {
+      M.pair.forEach(function (k) {
+        var val = k === 'T' ? vals.T1 : vals[k];
+        R.eq(SYMS[k], 'solve the two equations simultaneously', val, k === 'm' ? 'kg' : 'N');
+      });
+      if (r.det !== null && r.det !== undefined) R.html('<div style="font-size:12.5px;color:var(--muted)">Determinant of the coefficients = ' + U.sf(r.det) + ' (zero would mean the unknowns act along one line).</div>');
+    }
+    r.slack.forEach(function (k) { R.badge((k === 'T' ? 'T' : SYMS[k]) + ' = ' + U.sf(k === 'T2' ? vals.T2 : vals.T1) + ' N &lt; 0: ' + strName(k === 'T2' ? 2 : 1) + ' would be slack. Equilibrium impossible.', 'warn'); });
+    // range of P keeping the strings taut
+    if (M.range && !has('P') && v.P > 0) {
+      R.head('Range of P (direction fixed at ' + U.dp(M.phi, 1) + '°)');
+      M.range.crit.forEach(function (cr) { R.eq(cr.key === 'm' ? 'm = 0 when' : (cr.key === 'T' ? 'T' : SYMS[cr.key]) + ' = 0 when', 'that unknown is linear in P', 'P = ' + U.sf(cr.P), 'N'); });
+      if (M.range.empty) R.badge('No value of P (in this direction) keeps every string taut', 'warn');
+      else {
+        R.eq('equilibrium for', 'every solved tension ≥ 0', U.sf(M.range.lo) + ' ≤ P ≤ ' + (isFinite(M.range.hi) ? U.sf(M.range.hi) : '∞'), 'N');
+        if (isFinite(M.range.hi)) R.eq('greatest P', 'beyond this a string goes slack', M.range.hi, 'N');
+      }
+    }
+    // optional: along / perpendicular to string 1
+    if (alongTog.get()) {
+      R.head('Resolve along and perpendicular to string 1 (solved values)');
+      ['along', 'perp'].forEach(function (w) {
+        var e = w === 'along' ? vals.dir1 : vals.dir1 + 90, al = FO.resolveAlong(r.forces, e), s = '';
+        al.terms.forEach(function (t, i) {
+          if (Math.abs(t.comp) < 1e-12 * Math.max(1, Math.abs(t.mag))) return;
+          var piece = U.num(Math.abs(t.mag), 4) + (Math.abs(t.angle) < 1e-9 || Math.abs(t.angle - 180) < 1e-9 ? '' : ' cos ' + U.num(Math.min(t.angle, 180 - t.angle), 2) + '°');
+          var sg = t.comp < 0 ? -1 : 1;
+          s += (s === '' ? (sg < 0 ? '−' : '') : (sg < 0 ? ' − ' : ' + ')) + piece;
+        });
+        R.eq(w === 'along' ? '∥ string 1' : '⟂ string 1', (s || '0') + ' = ' + U.sf(al.sum), '');
+      });
+      R.html('<div style="font-size:12.5px;color:var(--muted)">A force perpendicular to string 1 is missing from the ∥ equation; if the two strings are perpendicular, each equation contains only one tension.</div>');
+    }
+    if (lamiTog.get()) {
+      var L = FO.lami(r.forces);
+      R.head('Lami’s theorem (optional check, not required' + (course === '9709' ? ' for 9709' : '') + ')');
+      if (!L) R.html('<div style="font-size:12.5px;color:var(--muted)">Lami’s theorem needs exactly three non-zero forces.</div>');
+      else L.forEach(function (q) { R.eq(forceName(q) + ' ÷ sin ' + U.dp(q.angle, 1) + '°', 'angle between the other two forces', isFinite(q.ratio) ? q.ratio : '—'); });
+    }
+    R.render();
+  }
+
+  ui.onTheme(function () { drawScene(); drawTriangle(); });
+  vp.onResize = drawScene; vp2.onResize = drawTriangle;
+  // restore a shared set-up from the URL hash
+  var hsh = ui.readHash();
+  if (typeof hsh.m === 'number') {
+    [['cfg', cfgSel], ['geo', geoSel], ['pair', pairSel], ['o1', o1Sel], ['o2', o2Sel], ['pm', pmSel]].forEach(function (q) { if (typeof hsh[q[0]] === 'string') q[1].set(hsh[q[0]], true); });
+    var init = {}; ['m', 'a1', 'a2', 'L1', 'L2', 'd', 'h', 'P', 'phi', 'T1', 'T2'].forEach(function (k) { if (typeof hsh[k] === 'number') init[k] = hsh[k]; });
+    prm.set(init, true);
+  } else { o1Sel.set('UL-h', true); o2Sel.set('UR-h', true); prm.set({ m: 2.4, a1: 35, a2: 40, P: 0 }, true); }
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion graphs</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-measure.js"></script>
+<script src="../../engine/phys-motion.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, MO = SIM.motion;
+  var course = ui.course('9702'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Motion graphs: displacement, velocity and acceleration against time', g: g,
+    tags: ['9702 2.1.1–2.1.5 graphs', '9702 2.1.6–2.1.7 suvat', 'bouncing ball'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 26 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 5, onFrame: function () { drawScene(); drawPlots(); readout(); } });
+  ui.legend(sceneCard, [{ color: 'var(--c-s1)', label: 'displacement s' }, { color: 'var(--c-velocity)', label: 'velocity v (shaded: area between t<sub>A</sub> and t<sub>B</sub>)' },
+    { color: 'var(--c-accel)', label: 'acceleration a' }, { color: 'var(--c-component)', label: 'tangent / chord' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var cS = ui.canvas(plotWrap), cV = ui.canvas(plotWrap), cA = ui.canvas(plotWrap), cD = ui.canvas(plotWrap), cSp = ui.canvas(plotWrap);
+  var pS = new SIM.plot.Plot(cS, { yLabel: 's / m' }), pV = new SIM.plot.Plot(cV, { yLabel: 'v / m s⁻¹' }), pA = new SIM.plot.Plot(cA, { yLabel: 'a / m s⁻²' });
+  var pD = new SIM.plot.Plot(cD, { yLabel: 'distance / m' }), pSp = new SIM.plot.Plot(cSp, { yLabel: 'speed / m s⁻¹' });
+  var tblCard = pg.card('left', 'Stage table');
+  var tblEl = ui.h('div', { style: 'overflow-x:auto' }); tblCard.appendChild(tblEl);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var mode = ui.select(paramCard, { label: 'Motion', value: 'stages', options: [{ value: 'stages', label: 'Straight line: stages of constant acceleration' }, { value: 'bounce', label: 'Ball dropped (or thrown) and bouncing' }] }, update);
+  var TYPES = [{ value: 'off', label: '(not used)' }, { value: 'a', label: 'acceleration a for time t' }, { value: 'v', label: 'reach velocity v in time t' },
+    { value: 'c', label: 'constant velocity for time t' }, { value: 'd', label: 'reach velocity v over displacement s' }, { value: 'fall', label: 'free fall (a = −g, up +) for time t' }];
+  var NST = 4, types = [];
+  var specs = [{ key: 'u0', label: 'Initial velocity', sym: 'u', unit: 'm s<sup>−1</sup>', min: -60, max: 60, step: 0.01, value: 0 }];
+  for (var i = 1; i <= NST; i++) {
+    specs.push({ key: 't' + i, label: 'Stage ' + i + ': time', sym: 't<sub>' + i + '</sub>', unit: 's', min: 0, max: 300, step: 0.01, value: 10 });
+    specs.push({ key: 'a' + i, label: 'Stage ' + i + ': acceleration', sym: 'a<sub>' + i + '</sub>', unit: 'm s<sup>−2</sup>', min: -50, max: 50, step: 0.01, value: 1 });
+    specs.push({ key: 'v' + i, label: 'Stage ' + i + ': final velocity', sym: 'v<sub>' + i + '</sub>', unit: 'm s<sup>−1</sup>', min: -60, max: 60, step: 0.01, value: 10 });
+    specs.push({ key: 'd' + i, label: 'Stage ' + i + ': displacement', sym: 's<sub>' + i + '</sub>', unit: 'm', min: -2000, max: 2000, step: 0.1, value: 50 });
+  }
+  specs = specs.concat([
+    { key: 'h', label: 'Release height above the ground', sym: 'h', unit: 'm', min: 0, max: 20, step: 0.01, value: 1.25 },
+    { key: 'ub', label: 'Initial velocity (up +)', sym: 'u', unit: 'm s<sup>−1</sup>', min: -20, max: 20, step: 0.01, value: 0 },
+    { key: 'k', label: 'Rebound fraction: speed after ÷ speed before', sym: 'k', unit: '', min: 0, max: 1, step: 0.01, value: 0.6 },
+    { key: 'T', label: 'Time shown', sym: 't<sub>max</sub>', unit: 's', min: 0.5, max: 20, step: 0.1, value: 3 },
+    { key: 'tA', label: 'Time A (tangent / start of area)', sym: 't<sub>A</sub>', unit: 's', min: 0, max: 60, step: 0.01, value: 1 },
+    { key: 'tB', label: 'Time B (chord / end of area)', sym: 't<sub>B</sub>', unit: 's', min: 0, max: 60, step: 0.01, value: 2 }
+  ]);
+  var typeBox = ui.h('div'); paramCard.appendChild(typeBox);
+  for (var j = 1; j <= NST; j++) types.push(ui.select(typeBox, { label: 'Stage ' + j + ' type', value: j === 1 ? 'a' : 'off', options: TYPES }, update));
+  var prm = ui.params(paramCard, specs, update);
+  var down = ui.toggle(paramCard, { label: 'Take <b>downwards</b> as positive (bounce)' }, update);
+  var extra = ui.toggle(paramCard, { label: 'Also show distance–time and speed–time graphs' }, update);
+  var derive = ui.toggle(paramCard, { label: 'Derive the suvat equations for the stage containing t<sub>A</sub>', value: true }, update);
+
+  ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  function st(u0, list) {   // preset helper: list of [type, {t,a,v,d}]
+    var v = { u0: u0 }, ty = [];
+    for (var n = 1; n <= NST; n++) { var s = list[n - 1]; ty.push(s ? s[0] : 'off'); if (s) Object.keys(s[1]).forEach(function (k) { v[k + n] = s[1][k]; }); }
+    return { mode: 'stages', v: v, types: ty };
+  }
+  var presetCtl = ui.presets(presetCard, [
+    Object.assign({ name: 'Speed up, cruise, brake: 0 → 20 m s⁻¹ in 10 s, 30 s steady, stop in 20 s', note: 'Distance = area under v–t = 100 + 600 + 200 = 900 m.' },
+      st(0, [['v', { t: 10, v: 20 }], ['c', { t: 30 }], ['v', { t: 20, v: 0 }]])),
+    Object.assign({ name: 'Car brakes from 25 m s⁻¹ to rest in 50 m', note: 'a = (v² − u²) ÷ 2s = −625 ÷ 100 = −6.25 m s<sup>−2</sup>; t = 2s ÷ (u + v) = 4.0 s.' },
+      st(25, [['d', { d: 50, v: 0 }]])),
+    Object.assign({ name: 'Ball thrown up at 15 m s⁻¹ and caught at the same height (up +)', note: 'v–t is one straight line of gradient −g through v = 0 at the top. Displacement 0, distance 2 × 11.5 m.' },
+      st(15, [['fall', { t: 3.0581 }]])),
+    Object.assign({ name: 'Velocity reverses: u = 10 m s⁻¹, a = −2 m s⁻² for 8 s', note: 'Stops at t = 5 s (s = 25 m) then returns 9 m: displacement 16 m, distance 34 m.' },
+      st(10, [['a', { t: 8, a: -2 }]])),
+    Object.assign({ name: 'Stone dropped down a 36 m well (9702/23 M/J 23 Q1)', note: 's = ½gt² ⇒ t = √(2 × 36 ÷ 9.81) = 2.71 s. Here up is +, so the displacement is −36 m.' },
+      st(0, [['fall', { t: 2.7091 }]])),
+    Object.assign({ name: '1 kg falling at 60 m s⁻¹; extra 50 N upwards for 2 s (9702/12 M/J 25 Q7)', note: 'Up +: a = (50 − 9.81) ÷ 1 = +40.19 m s<sup>−2</sup>. v = −60 + 40.19 × 2 = +20.4 m s<sup>−1</sup>: speed about 20 m s<sup>−1</sup>, now moving up.' },
+      st(-60, [['a', { t: 2, a: 40.19 }]])),
+    { name: 'Ball dropped from 1.25 m (no bounce)', mode: 'bounce', v: { h: 1.25, ub: 0, k: 0, T: 1 }, down: false, note: 'Lands after √(2h ÷ g) = 0.505 s at √(2gh) = 4.95 m s<sup>−1</sup>.' },
+    { name: 'Bouncing ball, rebound speed 60% of impact speed (up +)', mode: 'bounce', v: { h: 1.25, ub: 0, k: 0.6, T: 3 }, down: false, note: 'v–t: parallel lines of gradient −g; at each bounce v jumps from −v to +0.6v. Each rebound height is 0.36 × the previous.' },
+    { name: 'Bouncing ball with downwards positive', mode: 'bounce', v: { h: 1.25, ub: 0, k: 0.6, T: 3 }, down: true, note: 'Same motion; every graph flips sign. Gradient of v–t is now +g.' },
+    { name: 'Ball thrown upwards at 5 m s⁻¹ from 2 m, bounces (k = 0.5)', mode: 'bounce', v: { h: 2, ub: 5, k: 0.5, T: 3 }, down: false, note: 'Rises first (v > 0), stops at the top, then falls past its start point.' }
+  ], function (p) {
+    clock.pause(); mode.set(p.mode, true);
+    if (p.types) p.types.forEach(function (t, n) { types[n].set(t, true); });
+    if (p.mode === 'bounce') down.set(!!p.down, true);
+    prm.set(p.v, true); prm.set({ tA: 0.3, tB: 0.6 }, true);
+    update(); var T = duration(); prm.set({ tA: Math.round(T * 30) / 100, tB: Math.round(T * 60) / 100 }, true); update(); clock.seek(0);
+  });
+
+  ui.notes(noteCard, [
+    '<b>Gradient</b> of s–t = velocity; <b>gradient</b> of v–t = acceleration; <b>area</b> under v–t = displacement (area below the axis counts as negative).',
+    'Distance is the total area ignoring sign; displacement is the signed area. Average speed = distance ÷ time; average velocity = displacement ÷ time.',
+    'At the top of a vertical throw v = 0 but a = −g (the acceleration is never zero in free fall).',
+    'For a bouncing ball the v–t lines are all parallel (gradient g); the velocity reverses at each bounce. The contact time is taken as negligible.',
+    'Choose a positive direction first and keep it: a ball falling with “down +” has a = +9.81 m s<sup>−2</sup>.',
+    'suvat only applies when the acceleration is constant: use one stage at a time.'
+  ]);
+
+  /* ---------- model ---------- */
+  var J = null, B = null;
+  function sgn() { return mode.get() === 'bounce' && down.get() ? -1 : 1; }
+  function stages() {
+    var v = prm.values, out = [];
+    for (var n = 1; n <= NST; n++) {
+      var ty = types[n - 1].get(); if (ty === 'off') continue;
+      out.push({ type: ty, t: v['t' + n], a: v['a' + n], v: v['v' + n], d: v['d' + n], slot: n });
+    }
+    return out;
+  }
+  function duration() { return mode.get() === 'bounce' ? prm.values.T : (J && J.T > 0 ? J.T : 1); }
+  // unified state accessors (displayed sign convention)
+  function S(t) {
+    if (mode.get() === 'bounce') { var b = B.stateAt(t); return { s: sgn() * (b.y - prm.values.h), v: sgn() * b.v, a: sgn() * b.a, dist: b.dist, y: b.y }; }
+    var q = J.stateAt(t); return { s: q.s, v: q.v, a: q.a, dist: q.dist };
+  }
+  function breaks() {
+    if (mode.get() === 'bounce') return B.impacts.map(function (i) { return i.t; });
+    return J.segs.map(function (s) { return s.t1; });
+  }
+  function update() {
+    var md = mode.get(), v = prm.values, bounce = md === 'bounce';
+    typeBox.style.display = bounce ? 'none' : '';
+    prm.show('u0', !bounce);
+    for (var n = 1; n <= NST; n++) {
+      var ty = types[n - 1].get(), on = !bounce && ty !== 'off';
+      types[n - 1].row.style.display = bounce ? 'none' : '';
+      prm.show('t' + n, on && ty !== 'd'); prm.show('a' + n, on && ty === 'a'); prm.show('v' + n, on && (ty === 'v' || ty === 'd')); prm.show('d' + n, on && ty === 'd');
+    }
+    ['h', 'ub', 'k', 'T'].forEach(function (k) { prm.show(k, bounce); });
+    down.el.style.display = bounce ? '' : 'none';
+    [cD, cSp].forEach(function (c) { c.style.display = extra.get() ? '' : 'none'; });
+    if (bounce) { B = MO.bounce(v.h, v.ub, v.k, g); J = null; }
+    else { J = MO.journey(v.u0, stages(), g); B = null; }
+    var T = duration();
+    prm.range('tA', 0, T, 0.01); prm.range('tB', 0, T, 0.01);
+    clock.setDuration(T);
+    drawScene(); drawPlots(); readout();
+  }
+
+  /* ---------- scene ---------- */
+  function drawScene() {
+    if (!J && !B) return;
+    var c, col = ui.colors(), t = clock.t, q = S(t);
+    if (mode.get() === 'bounce') {
+      var ymax = B.flights.reduce(function (m, f) { return Math.max(m, f.y0 + (f.v0 > 0 ? f.v0 * f.v0 / (2 * g) : 0)); }, prm.values.h);
+      ymax = Math.max(ymax, 0.2);
+      vp.fit(-ymax * 0.9, ymax * 0.9, -ymax * 0.08, ymax * 1.1);
+      c = vp.begin();
+      D.ground(c, vp.X(-ymax * 0.6), vp.Y(0), vp.X(ymax * 0.6), vp.Y(0));
+      D.line(c, [vp.P(-ymax * 0.3, prm.values.h), vp.P(ymax * 0.3, prm.values.h)], col.muted, { dash: [4, 4] });
+      D.label(c, 'start', vp.X(ymax * 0.3) + 4, vp.Y(prm.values.h), col.muted, { align: 'left', size: 11 });
+      var by = vp.Y(q.y), r = Math.max(6, Math.min(16, vp.scale * ymax * 0.05));
+      D.particle(c, vp.X(0), by - r, r, {});
+      var ar = sgn() > 0 ? 'up +' : 'down +';
+      D.arrow(c, vp.X(-ymax * 0.7), vp.Y(ymax * 0.5), vp.X(-ymax * 0.7), vp.Y(ymax * 0.5) + (sgn() > 0 ? -40 : 40), col.muted, { label: ar, width: 1.4 });
+      if (Math.abs(q.v) > 1e-6) D.arrow(c, vp.X(0) + r + 6, by - r, vp.X(0) + r + 6, by - r - U.sgn(sgn() * q.v) * (16 + Math.min(60, Math.abs(q.v) * 8)), col.velocity, { label: 'v = ' + U.num(q.v, 2) + ' m/s', width: 2 });
+      return;
+    }
+    var smin = 0, smax = 0, T = duration();
+    for (var i = 0; i <= 200; i++) { var s = J.stateAt(T * i / 200).s; smin = Math.min(smin, s); smax = Math.max(smax, s); }
+    var span = Math.max(smax - smin, 1e-6), pad = span * 0.08;
+    vp.fit(smin - pad, smax + pad, -span * 0.25, span * 0.3);
+    c = vp.begin();
+    D.line(c, [vp.P(smin - pad, 0), vp.P(smax + pad, 0)], col['object-line'], { width: 2 });
+    U.niceTicks(smin, smax, 6).ticks.forEach(function (tk) { if (tk < smin - pad || tk > smax + pad) return; D.line(c, [[vp.X(tk), vp.Y(0)], [vp.X(tk), vp.Y(0) + 6]], col.muted); D.label(c, U.num(tk, 3), vp.X(tk), vp.Y(0) + 16, col.muted, { size: 10 }); });
+    D.label(c, 's = 0', vp.X(0), vp.Y(0) - 28, col.muted, { size: 11 });
+    D.particle(c, vp.X(q.s), vp.Y(0) - 10, 10, {});
+    if (Math.abs(q.v) > 1e-6) D.arrowPolar(c, vp.X(q.s), vp.Y(0) - 32, q.v > 0 ? 0 : Math.PI, 18 + Math.min(70, Math.abs(q.v) * 3), col.velocity, { label: 'v = ' + U.num(q.v, 2) + ' m/s', width: 2 });
+    if (Math.abs(q.a) > 1e-9) D.arrowPolar(c, vp.X(q.s), vp.Y(0) - 56, q.a > 0 ? 0 : Math.PI, 30, col.accel, { label: 'a', width: 1.6 });
+    D.label(c, '+ direction →', vp.w - 12, 14, col.muted, { align: 'right', size: 11 });
+    if (J.invalid) D.label(c, J.invalid, vp.w / 2, vp.h - 14, col.warn, { bold: true, size: 12 });
+  }
+
+  /* ---------- plots ---------- */
+  function drawPlots() {
+    if (!J && !B) return;
+    var col = ui.colors(), T = duration(), br = breaks(), t = clock.t, tA = prm.values.tA, tB = prm.values.tB;
+    var lo = Math.min(tA, tB), hi = Math.max(tA, tB), qA = S(tA), qB = S(tB);
+    var vl = br.filter(function (x) { return x > 1e-9 && x < T - 1e-9; }).map(function (x) { return { x: x }; });
+    var tan = function (x) { return qA.s + qA.v * (x - tA); };
+    var chord = Math.abs(tB - tA) > 1e-9 ? function (x) { return x >= lo && x <= hi ? qA.s + (qB.s - qA.s) / (tB - tA) * (x - tA) : NaN; } : null;
+    var sSeries = [{ fn: function (x) { return S(x).s; }, color: col.s1, breaks: br }, { fn: tan, color: col.component, dash: [5, 4], width: 1.4 }];
+    if (chord) sSeries.push({ fn: chord, color: col.accent, width: 1.4 });
+    pS.draw({ x: [0, T], series: sSeries, cursor: t, vlines: vl, markers: [{ x: tA, y: qA.s, label: 'A' }, { x: tB, y: qB.s, label: 'B' }], yLabel: mode.get() === 'bounce' ? 's / m from start (' + (sgn() > 0 ? 'up +' : 'down +') + ')' : 's / m' });
+    var vSeries = [{ fn: function (x) { return x >= lo && x <= hi ? S(x).v : NaN; }, color: col.velocity, shade: true, breaks: br, width: 0.1 },
+      { fn: function (x) { return S(x).v; }, color: col.velocity, breaks: br }];
+    var stg = stageAt(tA);
+    if (derive.get() && stg) vSeries.push({ fn: function (x) { return x >= stg.t0 && x <= stg.t1 ? stg.u : NaN; }, color: col.component, dash: [4, 4], width: 1.2 });
+    pV.draw({ x: [0, T], series: vSeries, cursor: t, vlines: vl, markers: [{ x: tA, y: qA.v, label: 'A' }], yLabel: 'v / m s⁻¹' + (mode.get() === 'bounce' ? ' (' + (sgn() > 0 ? 'up +' : 'down +') + ')' : '') });
+    pA.draw({ x: [0, T], series: [{ fn: function (x) { return S(x).a; }, color: col.accel, breaks: br, steps: 800 }], cursor: t, vlines: vl });
+    if (extra.get()) {
+      pD.draw({ x: [0, T], series: [{ fn: function (x) { return S(x).dist; }, color: col.s3, breaks: br }], cursor: t, vlines: vl });
+      pSp.draw({ x: [0, T], series: [{ fn: function (x) { return Math.abs(S(x).v); }, color: col.s4, breaks: br }], cursor: t, vlines: vl });
+    }
+  }
+  /** constant-acceleration piece containing time t: {t0, t1, u, v, a} */
+  function stageAt(t) {
+    if (mode.get() === 'bounce') {
+      for (var i = 0; i < B.flights.length; i++) { var f = B.flights[i]; if (t >= f.t0 - 1e-12 && t <= f.t1 + 1e-12 && f.t1 > f.t0) return { t0: f.t0, t1: f.t1, u: sgn() * f.v0, v: sgn() * (f.v0 - g * (f.t1 - f.t0)), a: -sgn() * g, name: 'flight ' + (i + 1) }; }
+      return null;
+    }
+    for (var k = 0; k < J.segs.length; k++) { var s = J.segs[k]; if (t >= s.t0 - 1e-12 && t <= s.t1 + 1e-12) return { t0: s.t0, t1: s.t1, u: s.u, v: s.v, a: s.a, name: 'stage ' + (s.i + 1) }; }
+    return null;
+  }
+
+  /* ---------- live working ---------- */
+  function P(x) { return x < 0 ? '(' + U.sf(x) + ')' : U.sf(x); }
+  function readout() {
+    if (!J && !B) return;
+    var v = prm.values, tA = v.tA, tB = v.tB, qA = S(tA), qB = S(tB), mu = 'm s<sup>−1</sup>', ma = 'm s<sup>−2</sup>';
+    R.clear();
+    if (J && J.invalid) R.badge(J.invalid, 'warn');
+    if (J && !J.segs.length) { R.badge('Choose at least one stage with a time greater than zero', 'warn'); }
+    R.badge('Sign convention: ' + (mode.get() === 'bounce' ? (sgn() > 0 ? 'up is positive' : 'down is positive') + ', s measured from the release point' : 'positive to the right (for vertical motion: up)'), 'info');
+    if (B) {
+      var i0 = B.impacts[0];
+      R.head('First fall');
+      if (v.ub === 0) {
+        R.eq('t', '√(2h ÷ g) = √(2 × ' + U.num(v.h, 3) + ' ÷ ' + g + ')', i0.t, 's');
+        R.eq('impact speed', '√(2gh) = √(2 × ' + g + ' × ' + U.num(v.h, 3) + ')', -i0.vIn, mu);
+      } else {
+        R.eq('t', '½gt² − ut − h = 0, larger root', i0.t, 's');
+        R.eq('impact speed', '√(u² + 2gh) = √(' + U.num(v.ub, 3) + '² + 2 × ' + g + ' × ' + U.num(v.h, 3) + ')', -i0.vIn, mu);
+      }
+      if (v.k > 0 && B.impacts.length > 1) {
+        R.eq('rebound speed', 'k × impact speed = ' + U.num(v.k, 3) + ' × ' + U.sf(-i0.vIn), i0.vOut, mu);
+        R.eq('rebound height', '(rebound speed)² ÷ 2g', i0.vOut * i0.vOut / (2 * g), 'm');
+        R.eq('time to next bounce', '2 × rebound speed ÷ g', 2 * i0.vOut / g, 's');
+      } else if (v.k === 0) R.badge('k = 0: the ball does not bounce', 'info');
+      if (B.impacts.length > 1 && B.impacts[B.impacts.length - 1].last && B.tRest < v.T) R.eq('comes to rest', 'bounces die away (model)', B.tRest, 's');
+    } else if (J.segs.length) {
+      R.head('Totals for the whole journey');
+      R.eq('displacement', 'signed area under v–t', J.totals.disp, 'm');
+      R.eq('distance', 'total area, ignoring sign', J.totals.dist, 'm');
+      R.eq('average speed', 'distance ÷ time = ' + U.sf(J.totals.dist) + ' ÷ ' + U.sf(J.T), J.totals.avgSpeed, mu);
+      R.eq('average velocity', 'displacement ÷ time', J.totals.avgVel, mu);
+    }
+    R.head('Graph tools');
+    R.eq('v at t<sub>A</sub> = ' + U.num(tA, 2) + ' s', 'gradient of the s–t tangent', qA.v, mu);
+    R.eq('a at t<sub>A</sub>', 'gradient of v–t', qA.a, ma);
+    if (Math.abs(tB - tA) > 1e-9) {
+      R.eq('chord gradient', '(s<sub>B</sub> − s<sub>A</sub>) ÷ (t<sub>B</sub> − t<sub>A</sub>) = (' + U.sf(qB.s) + ' − ' + P(qA.s) + ') ÷ ' + P(tB - tA), (qB.s - qA.s) / (tB - tA), mu);
+      R.eq('area under v–t', 'from t<sub>A</sub> to t<sub>B</sub> = displacement', qB.s - qA.s, 'm');
+      R.eq('distance', 'unsigned area from t<sub>A</sub> to t<sub>B</sub>', Math.abs(qB.dist - qA.dist), 'm');
+    }
+    var stg = stageAt(tA);
+    if (derive.get() && stg && stg.t1 - stg.t0 > 1e-9) {
+      var dt = stg.t1 - stg.t0, s = stg.u * dt + 0.5 * stg.a * dt * dt;
+      R.head('suvat from the v–t graph of ' + stg.name + ' (u = ' + U.sf(stg.u) + ', v = ' + U.sf(stg.v) + ', t = ' + U.sf(dt) + ')');
+      R.eq('a', 'gradient = (v − u) ÷ t ⇒ v = u + at', stg.a, ma);
+      R.eq('s', 'area = rectangle ut + triangle ½(v − u)t = ut + ½at² = ' + P(stg.u) + ' × ' + U.sf(dt) + ' + ½ × ' + P(stg.a) + ' × ' + U.sf(dt) + '²', s, 'm');
+      R.eq('s', 'trapezium = ½(u + v)t', 0.5 * (stg.u + stg.v) * dt, 'm');
+      R.eq('v²', 'eliminate t: v² = u² + 2as = ' + P(stg.u) + '² + 2 × ' + P(stg.a) + ' × ' + P(s), stg.u * stg.u + 2 * stg.a * s, 'm<sup>2</sup> s<sup>−2</sup>');
+    }
+    R.head('Now (t = ' + clock.t.toFixed(2) + ' s)');
+    var q = S(clock.t);
+    R.eq('s', '', q.s, 'm'); R.eq('v', '', q.v, mu); R.eq('a', '', q.a, ma);
+    R.render();
+    // table
+    if (J) {
+      tblEl.innerHTML = J.segs.length ? '<table class="tbl"><tr><th>stage</th><th>u / m s⁻¹</th><th>v / m s⁻¹</th><th>a / m s⁻²</th><th>t / s</th><th>s / m</th><th>distance / m</th></tr>' +
+        J.segs.map(function (sg) { return '<tr><td>' + (sg.i + 1) + '</td><td>' + U.sf(sg.u) + '</td><td>' + U.sf(sg.v) + '</td><td>' + U.sf(sg.a) + '</td><td>' + U.sf(sg.dur) + '</td><td>' + U.sf(sg.ds) + '</td><td>' + U.sf(sg.dist) + '</td></tr>'; }).join('') + '</table>' : '';
+    } else {
+      tblEl.innerHTML = '<table class="tbl"><tr><th>bounce</th><th>time / s</th><th>speed before / m s⁻¹</th><th>speed after / m s⁻¹</th><th>next height / m</th></tr>' +
+        B.impacts.slice(0, 8).map(function (im) { return '<tr><td>' + im.n + '</td><td>' + U.sf(im.t) + '</td><td>' + U.sf(-im.vIn) + '</td><td>' + U.sf(im.vOut) + '</td><td>' + U.sf(im.vOut * im.vOut / (2 * g)) + '</td></tr>'; }).join('') + '</table>';
+    }
+  }
+
+  ui.onTheme(function () { drawScene(); drawPlots(); });
+  vp.onResize = drawScene;
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

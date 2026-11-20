@@ -1,0 +1,555 @@
+*5153644824*
+Cambridge International AS & A Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions October/November 2020
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen or correction fluid.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+This document has 24 pages. Blank pages are indicated.
+DC (NF/SW) 183249/4
+© UCLES 2020 [Turn over
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2020 9702/42/O/N/20
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1 at2
+2
+v2 = u2+2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω √  ( x  2  –   x 2 )
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2020 9702/42/O/N/20 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 (a) Define gravitational potential at a point.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The Earth may be considered to be a uniform sphere of radius 6.4 × 106 m with its mass of
+6.0 × 1024 kg concentrated at its centre.
+A satellite of mass 2.4 × 103 kg is launched from the Equator. It is placed in an equatorial orbit
+at a height of 5.6 × 106 m above the Earth’s surface.
+(i) Calculate the change ΔE in gravitational potential energy of the satellite for its movement
+P
+from the surface of the Earth to its position in the equatorial orbit.
+ΔE = ....................................................... J [3]
+P
+(ii) Determine the speed of the satellite when in orbit.
+speed = ................................................ m s–1 [3]
+© UCLES 2020 9702/42/O/N/20
+
+5
+(c) Before the satellite in (b) is launched, its speed at the Equator due to the Earth’s rotation is
+470 m s–1.
+Suggest why the energy required to launch the satellite depends on whether the satellite, in
+its orbit, is travelling from west to east or from east to west.
+���������������������������������������������������������������������������������������������������������������������������������������������������
+............................................................................................................................................. [1]
+[Total: 9]
+© UCLES 2020 9702/42/O/N/20 [Turn over
+
+6
+2 (a) State what is meant by the internal energy of a system.
+���������������������������������������������������������������������������������������������������������������������������������������������������
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The atoms of an ideal gas occupy a container of volume 2.30 × 10–3 m3 at pressure
+2.60 × 105 Pa and temperature 180 K, as illustrated in Fig. 2.1.
+2.30 × 10–3 m3 3.80 × 10–3 m3
+2.60 × 105 Pa 2.60 × 105 Pa
+180 K T
+980 J
+Fig. 2.1
+The gas is heated at constant pressure so that its volume becomes 3.80 × 10–3 m3 at a
+temperature T.
+For the fixed mass of gas, calculate:
+(i) the amount of substance, in mol
+amount = ................................................... mol [2]
+(ii) the temperature T, in K.
+T = ...................................................... K [2]
+© UCLES 2020 9702/42/O/N/20
+
+7
+(c) During the change in (b), the thermal energy supplied to the gas is 980 J.
+(i) Determine the work done on the gas during this change. Explain your working.
+work done = ....................................................... J [3]
+(ii) Determine the change ΔU in internal energy of the gas.
+ΔU = ....................................................... J [1]
+[Total: 10]
+© UCLES 2020 9702/42/O/N/20 [Turn over
+
+8
+3 A simple pendulum consists of a metal sphere suspended from a fixed point by means of a thread,
+as illustrated in Fig. 3.1.
+thread
+L sphere
+mass 94.0 g
+0.90 cm
+12.7 cm
+Fig. 3.1 (not to scale)
+The sphere of mass 94.0 g is displaced to one side through a horizontal distance of 12.7 cm. The
+centre of gravity of the sphere rises vertically by 0.90 cm.
+The sphere is released so that it oscillates. The sphere may be assumed to oscillate with simple
+harmonic motion.
+(a) State what is meant by simple harmonic motion.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) (i) State the kinetic energy of the sphere when the sphere returns to the displaced position
+shown in Fig. 3.1.
+kinetic energy = ....................................................... J [1]
+(ii) Calculate the total energy E of the oscillations.
+T
+E = ....................................................... J [2]
+T
+© UCLES 2020 9702/42/O/N/20
+
+9
+(iii) Use your answer in (ii) to show that the angular frequency ω of the oscillations of the
+pendulum is 3.3 rad s–1.
+[2]
+(c) The period T of oscillation of the pendulum is given by the expression
+L
+ 
+T = 2π
+g
+where g is the acceleration of free fall and L is the length of the pendulum.
+Use data from (b) to determine L.
+L = ...................................................... m [3]
+[Total: 10]
+© UCLES 2020 9702/42/O/N/20 [Turn over
+
+10
+4 (a) State two advantages of the transmission of data in digital, rather than analogue, form.
+1. ...............................................................................................................................................
+...................................................................................................................................................
+2. ...............................................................................................................................................
+...................................................................................................................................................
+[2]
+(b) An analogue signal is to be transmitted in digital form.
+The transmission system may be represented in block form as in Fig. 4.1.
+digital-to-
+analogue-to-
+analogue analogue analogue
+digital converter
+signal converter signal
+ADC
+DAC
+Fig. 4.1
+The variation with time t of part of the input analogue signal is shown in Fig. 4.2.
+7
+6
+input 5
+analogue
+signal
+4
+/ mV
+3
+2
+1
+0
+0 0.1 0.2 0.3 0.4 0.5
+t / ms
+Fig. 4.2
+The analogue signal is sampled at time intervals of 0.10 ms. The first sample is taken at time
+t = 0.
+Some values of the sampled analogue signal and the corresponding digital signals are shown
+in Table 4.1.
+Each digitised number contains four bits.
+© UCLES 2020 9702/42/O/N/20
+
+11
+Table 4.1
+time t / ms 0 0.10 0.20 0.30 0.40 0.50
+analogue signal
+0 5.7 6.2
+/ mV
+................. ................. .................
+digital signal 0000 0101 0110
+................. ................. .................
+(i) In Table 4.1, underline the least significant bit (LSB) in the digital signal for the time of
+0.20 ms. [1]
+(ii) Complete Table 4.1. [3]
+(c) A single bit from the output of the digital-to-analogue converter corresponds to an output
+analogue signal of 1.0 mV.
+Assume that the conversion and transmission do not introduce a time delay.
+On the axes of Fig. 4.3, show the variation with time t of the output from the digital-to-analogue
+converter.
+7
+6
+output 5
+analogue
+signal 4
+/ mV
+3
+2
+1
+0
+0 0.1 0.2 0.3 0.4 0.5
+t / ms
+Fig. 4.3
+[3]
+[Total: 9]
+© UCLES 2020 9702/42/O/N/20 [Turn over
+
+12
+5 (a) (i) State what is meant by a field of force.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) State one similarity and one difference between the electric field due to a point charge
+and the gravitational field due to a point mass.
+similarity: ...........................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+difference: ..........................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+[2]
+(b) An isolated solid metal sphere of radius 0.15 m is situated in a vacuum, as illustrated in
+Fig. 5.1.
+0.15 m
+P
+x
+Fig. 5.1
+The electric field strength at the surface of the sphere is 84 V m–1.
+Determine:
+(i) the charge Q on the sphere
+Q = ...................................................... C [2]
+© UCLES 2020 9702/42/O/N/20
+
+13
+(ii) the electric field strength at point P, a distance x = 0.45 m from the centre of the sphere.
+electric field strength = ................................................ V m–1 [2]
+(c) Use information from (b) to show, on the axes of Fig. 5.2, the variation of the electric field
+strength E with distance x from the centre of the sphere for values of x from x = 0 to x = 0.45 m.
+100
+80
+E / V m–1
+60
+40
+20
+0
+0 0.1 0.2 0.3 0.4 0.5
+x / m
+Fig. 5.2
+[3]
+[Total: 11]
+© UCLES 2020 9702/42/O/N/20 [Turn over
+
+14
+6 (a) (i) Define the capacitance of a parallel plate capacitor.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) State three functions of capacitors in electrical circuits.
+1. .......................................................................................................................................
+2. .......................................................................................................................................
+3. .......................................................................................................................................
+[3]
+(b) A student has available three capacitors, each of capacitance 12 μF.
+Draw diagrams, one in each case, to show how the student connects the capacitors to give a
+combined capacitance between the terminals of:
+(i) 18 μF
+[1]
+(ii) 8 μF.
+[1]
+[Total: 7]
+© UCLES 2020 9702/42/O/N/20
+
+15
+7 Electrons in a beam are travelling at high speed in a vacuum. The electrons are incident on a
+metal target, causing X-ray radiation to be emitted.
+The variation with wavelength λ of the intensity I of the emitted X-ray radiation is shown in Fig. 7.1.
+I
+0
+0
+λ
+Fig. 7.1
+Explain why:
+(a) there is a continuous distribution of wavelengths
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+(b) at certain wavelengths, there are narrow peaks of increased intensity.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+[Total: 6]
+© UCLES 2020 9702/42/O/N/20 [Turn over
+
+16
+8 (a) An ideal operational amplifier (op-amp) is said to have infinite bandwidth and infinite slew
+rate.
+State what is meant by:
+(i) infinite bandwidth
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) infinite slew rate.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(b) An amplifier circuit incorporating an op-amp is shown in Fig. 8.1.
+R
++5.0 V
+–
++
+–5.0 V
+V 800 Ω V
+IN OUT
+Fig. 8.1
+The resistance of resistor R is to be fixed so that, for an input potential difference V of
+IN
+0.40 V, the amplifier is on the point of saturation.
+Determine:
+(i) the gain of the amplifier circuit
+gain = ......................................................... [2]
+© UCLES 2020 9702/42/O/N/20
+
+17
+(ii) the resistance of resistor R.
+resistance = ...................................................... Ω [2]
+[Total: 6]
+9 (a) A small coil is placed close to one end of a solenoid connected to a power supply. The plane
+of the small coil is normal to the axis of the solenoid, as illustrated in Fig. 9.1.
+solenoid small coil
+power supply
+Fig. 9.1
+© UCLES 2020 9702/42/O/N/20 [Turn over
+
+18
+The power supply causes the current I in the solenoid to vary with time t as shown in Fig. 9.2.
+current I
+0
+t t
+1 2 time t
+Fig. 9.2
+(i) State Faraday’s law of electromagnetic induction.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) On the axes of Fig. 9.3, sketch a graph to show the variation with time t of the
+electromotive force (e.m.f.) induced in the small coil.
+e.m.f.
+0
+t t time t
+1 2
+Fig. 9.3
+[4]
+© UCLES 2020 9702/42/O/N/20
+
+19
+(b) The small coil in (a) is now replaced by a Hall probe.
+The Hall probe is positioned so that the reading for the probe is a maximum.
+The current I in the solenoid varies again as shown in Fig. 9.2.
+On the axes of Fig. 9.4, sketch a graph to show the variation with time t of the reading V of
+H
+the probe.
+V
+H
+0
+t t time t
+1 2
+Fig. 9.4
+[2]
+[Total: 8]
+© UCLES 2020 9702/42/O/N/20 [Turn over
+
+20
+10 (a) A long straight vertical wire A carries a current in an upward direction.
+The wire passes through the centre of a horizontal card, as illustrated in Fig. 10.1.
+card
+current-carrying
+wire A
+Fig. 10.1
+The card is viewed from above. The card is shown from above in Fig. 10.2.
+card
+wire A carrying
+current out
+of plane of paper
+Fig. 10.2
+On Fig. 10.2, draw four lines to represent the magnetic field produced by the current-carrying
+wire. [3]
+© UCLES 2020 9702/42/O/N/20
+
+21
+(b) Two wires A and B are now placed through a card. The two wires are parallel and carrying
+currents in the same direction, as illustrated in Fig. 10.3.
+wire B
+wire A
+card
+Fig. 10.3
+(i) Explain why a magnetic force is exerted on each wire.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) State the directions of the forces.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(c) The currents in the two wires are not equal.
+Explain whether the magnetic forces on the two wires are equal in magnitude.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [1]
+[Total: 7]
+© UCLES 2020 9702/42/O/N/20 [Turn over
+
+22
+11 (a) Electromagnetic radiation is incident on a metal surface.
+It is observed that there is a minimum frequency of electromagnetic radiation below which
+emission of electrons does not occur.
+This observation provides evidence for a particulate nature of electromagnetic radiation.
+State two other observations associated with photoelectric emission that provide evidence
+for a particulate nature of electromagnetic radiation.
+1. ...............................................................................................................................................
+...................................................................................................................................................
+2. ...............................................................................................................................................
+..................................................................................................................................................
+[2]
+(b) The maximum kinetic energy E of electrons emitted from a metal surface is determined
+MAX
+for different wavelengths λ of the electromagnetic radiation incident on the surface.
+1
+The variation with of E is shown in Fig. 11.1.
+λ MAX
+0.6
+E / eV
+MAX
+0.4
+0.2
+0
+1.9 2.0 2.1 2.2 2.3 2.4
+1
+/ 106 m–1
+λ
+Fig. 11.1
+© UCLES 2020 9702/42/O/N/20
+
+23
+(i) Use Fig. 11.1 to determine the threshold frequency f .
+0
+f = .................................................... Hz [2]
+0
+(ii) Use the gradient of the line on Fig. 11.1 to determine a value for the Planck constant h.
+Explain your working.
+h = ..................................................... J s [4]
+(c) The electromagnetic radiation is now incident on a metal with a larger work function energy
+than the metal in (b).
+1
+On Fig. 11.1, sketch the variation with of E . [2]
+λ MAX
+[Total: 10]
+© UCLES 2020 9702/42/O/N/20 [Turn over
+
+24
+12 (a) (i) Define nuclear binding energy.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) Explain what is meant by a nuclear fission reaction.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(b) A student suggests that one possible nuclear reaction is
+56Fe + 1n 20F + 37Cl.
+26 0 9 17
+The binding energy per nucleon of a nucleus varies with the nucleon number.
+Use this variation to explain why the reaction would not result in an overall release of energy.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+[Total: 7]
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of the University of
+Cambridge Local Examinations Syndicate (UCLES), which itself is a department of the University of Cambridge.
+© UCLES 2020 9702/42/O/N/20

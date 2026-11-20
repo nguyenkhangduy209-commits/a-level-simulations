@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kirchhoff's laws and resistor networks</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-circuits.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, CI = SIM.circuits;
+  var pg = ui.page({ title: 'Kirchhoff’s laws: series, parallel and two-cell circuits', g: 9.81,
+    tags: ['9702 10.2 Kirchhoff’s laws', '9702 10.1.1–2 circuit diagrams', '9702 10.1.5 internal resistance'] });
+  (function hideG() { try { var t = document.querySelector('header').children[2], l = t.children[t.children.length - 1]; if (l && /g =/.test(l.innerHTML)) l.style.display = 'none'; } catch (e) { /* header layout changed */ } })();
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 10 });
+  ui.legend(sceneCard, [{ color: 'var(--c-applied)', label: 'conventional current (arrow = direction)' }, { color: 'var(--c-s1)', label: 'node potential (negative terminal of cell 1 = 0 V)' }, { color: 'var(--muted)', label: 'dashed box: internal resistance' }]);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var tpl = ui.select(paramCard, { label: 'Circuit', value: 'series', options: [
+    { value: 'series', label: 'Series: R1, R2, R3' }, { value: 'parallel', label: 'Parallel: R1 ∥ R2 ∥ R3' },
+    { value: 'mixed', label: 'Mixed: R1 then (R2 ∥ R3)' }, { value: 'branches', label: 'Two branches: (R1 + R2) ∥ (R3 + R4)' },
+    { value: 'twocells', label: 'Two cells in parallel branches with R3' }] }, update);
+  var pol = ui.select(paramCard, { label: 'Cell 2', value: 'aid', options: [{ value: 'aid', label: '+ terminal towards the top junction' }, { value: 'oppose', label: 'reversed (+ towards the bottom)' }] }, update);
+  var prm = ui.params(paramCard, [
+    { key: 'E', label: 'e.m.f. of cell 1', sym: 'E₁', unit: 'V', min: 0, max: 24, step: 0.01, value: 12 },
+    { key: 'r', label: 'Internal resistance of cell 1', sym: 'r₁', unit: 'Ω', min: 0, max: 10, step: 0.01, value: 0 },
+    { key: 'R1', label: 'Resistance R1', sym: 'R₁', unit: 'Ω', min: 0, max: 1000, step: 0.1, value: 2 },
+    { key: 'R2', label: 'Resistance R2', sym: 'R₂', unit: 'Ω', min: 0, max: 1000, step: 0.1, value: 4 },
+    { key: 'R3', label: 'Resistance R3', sym: 'R₃', unit: 'Ω', min: 0, max: 1000, step: 0.1, value: 6 },
+    { key: 'R4', label: 'Resistance R4', sym: 'R₄', unit: 'Ω', min: 0, max: 1000, step: 0.1, value: 240 },
+    { key: 'E2', label: 'e.m.f. of cell 2', sym: 'E₂', unit: 'V', min: 0, max: 24, step: 0.01, value: 6 },
+    { key: 'r2', label: 'Internal resistance of cell 2', sym: 'r₂', unit: 'Ω', min: 0, max: 10, step: 0.01, value: 0 },
+    { key: 'Rv', label: 'Voltmeter resistance', sym: 'R<sub>V</sub>', unit: 'Ω', min: 10, max: 100000, step: 10, value: 2000 }
+  ], update);
+  var meter = ui.toggle(paramCard, { label: 'Real voltmeter (resistance R<sub>V</sub>) across R2' }, update);
+  var showV = ui.toggle(paramCard, { label: 'Show node potentials', value: true }, update);
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Series: 12 V (r = 0), 2 Ω, 4 Ω, 6 Ω', tpl: 'series', values: { E: 12, r: 0, R1: 2, R2: 4, R3: 6 }, note: 'Same current everywhere: I = 12/12 = 1.0 A. The p.d.s 2 V + 4 V + 6 V add up to the e.m.f.' },
+    { name: 'Parallel: 6.0 V, 2 Ω ∥ 3 Ω ∥ 6 Ω', tpl: 'parallel', values: { E: 6, r: 0, R1: 2, R2: 3, R3: 6 }, note: '1/R = 1/2 + 1/3 + 1/6 = 1 ⇒ R = 1.0 Ω; the cell supplies 6.0 A = 3 + 2 + 1 A.' },
+    { name: 'Mixed: 12 V, r = 1.0 Ω, 4.0 Ω in series with 6.0 Ω ∥ 3.0 Ω', tpl: 'mixed', values: { E: 12, r: 1, R1: 4, R2: 6, R3: 3 }, note: 'R = 4 + 2 = 6 Ω; I = 12/(6 + 1) = 1.71 A; it splits 1 : 2 between 6 Ω and 3 Ω.' },
+    { name: '9702/22 M/J 25 Q6: 8.0 V, (210 Ω + R) ∥ (430 Ω + 240 Ω), R = 230 Ω', tpl: 'branches', values: { E: 8, r: 0, R1: 210, R2: 230, R3: 430, R4: 240 }, note: 'I₁ = 8.0/(430 + 240) = 0.012 A; I₂ = 0.030 − 0.012 = 0.018 A; R = (8.0 − 0.018 × 210)/0.018 = 230 Ω.' },
+    { name: 'Two cells: 12 V with 2 Ω, 6 V with 3 Ω, 6 Ω across', tpl: 'twocells', pol: 'aid', values: { E: 12, r: 0, R1: 2, E2: 6, r2: 0, R2: 3, R3: 6 }, note: 'Top junction at 8 V: 2 A from the 12 V cell, 0.67 A INTO the 6 V cell (it is being charged), 1.33 A through 6 Ω.' },
+    { name: 'Two cells opposing each other', tpl: 'twocells', pol: 'oppose', values: { E: 9, r: 0.5, R1: 3, E2: 4, r2: 0.5, R2: 5, R3: 7 }, note: 'Write one loop equation per loop, taking each e.m.f. as + if you pass from − to + terminal in your direction of travel.' },
+    { name: 'Voltmeter loading: 9.0 V, 1 kΩ and 2 kΩ, voltmeter 2 kΩ across 2 kΩ', tpl: 'series', meter: true, values: { E: 9, r: 0, R1: 1000, R2: 2000, R3: 0, Rv: 2000 }, note: 'An ideal voltmeter would read 6.0 V; this one makes 2 kΩ ∥ 2 kΩ = 1 kΩ, so it reads 4.5 V.' },
+    { name: '9702/21 M/J 24 Q6: 1.50 V cell, r = 2.8 Ω, 10 Ω and 15 Ω', tpl: 'series', values: { E: 1.5, r: 2.78, R1: 10, R2: 15, R3: 0 }, note: 'Terminal p.d. = IR_total = 0.054 × 25 = 1.35 V; ΣE = ΣIR including Ir.' }
+  ], function (p) { tpl.set(p.tpl, true); if (p.pol) pol.set(p.pol, true); meter.set(!!p.meter, true); prm.set(p.values); });
+
+  ui.notes(noteCard, [
+    '<b>Kirchhoff’s first law</b>: the sum of currents into a junction equals the sum out (conservation of charge).',
+    '<b>Kirchhoff’s second law</b>: round any closed loop, the sum of e.m.f.s equals the sum of p.d.s (IR, including Ir inside cells) — conservation of energy.',
+    'Signs: going round a loop, count an e.m.f. as + when you pass from its − to its + terminal; count IR as + when you go in the direction of the current.',
+    'If a current comes out negative, it flows the other way — a cell with current into its + terminal is being <b>charged</b>.',
+    'Series: R = R₁ + R₂ + …, same current. Parallel: 1/R = 1/R₁ + 1/R₂ + …, same p.d.; R is less than the smallest resistor.',
+    'A voltmeter with finite resistance in parallel lowers the resistance of that part of the circuit and so reads <b>less</b> than the ideal value.',
+    'A 0 Ω “resistor” is drawn as a plain wire.'
+  ]);
+
+  /* ---------- layouts (world box 0…16 × 0…9). Each element: [pa, pb] = drawn end at node a, at node b. ---------- */
+  var LAYOUT = {
+    series: { el: { E1: [[7, 1], [9, 1]], R1: [[3, 7], [6, 7]], R2: [[8, 7], [11, 7]], R3: [[14, 5.6], [14, 2.4]], V: [[8.7, 8.6], [10.3, 8.6]] },
+      wires: [[[7, 1], [2, 1], [2, 7], [3, 7]], [[6, 7], [8, 7]], [[11, 7], [14, 7], [14, 5.6]], [[14, 2.4], [14, 1], [9, 1]]],
+      meterWires: [[[7, 7], [7, 8.6], [8.7, 8.6]], [[10.3, 8.6], [12, 8.6], [12, 7]]],
+      nodes: { 0: [12, 1], 1: [2, 4], 2: [7, 7], 3: [12.6, 7] } },
+    parallel: { el: { E1: [[7, 1], [9, 1]], R1: [[5, 7.2], [5, 3.8]], R2: [[9, 7.2], [9, 3.8]], R3: [[13, 7.2], [13, 3.8]] },
+      wires: [[[7, 1], [2, 1], [2, 8], [13, 8], [13, 7.2]], [[5, 8], [5, 7.2]], [[9, 8], [9, 7.2]], [[9, 1], [15, 1], [15, 3], [5, 3], [5, 3.8]], [[9, 3], [9, 3.8]], [[13, 3], [13, 3.8]]],
+      nodes: { 0: [15, 2], 1: [2, 5.5] } },
+    mixed: { el: { E1: [[7, 1], [9, 1]], R1: [[3, 8], [6.5, 8]], R2: [[9, 7.2], [9, 3.8]], R3: [[13, 7.2], [13, 3.8]] },
+      wires: [[[7, 1], [2, 1], [2, 8], [3, 8]], [[6.5, 8], [13, 8], [13, 7.2]], [[9, 8], [9, 7.2]], [[9, 1], [15, 1], [15, 3], [9, 3], [9, 3.8]], [[13, 3], [13, 3.8]]],
+      nodes: { 0: [15, 2], 1: [2, 5], 2: [7.6, 8] } },
+    branches: { el: { E1: [[7, 1], [9, 1]], R1: [[4, 7.5], [7, 7.5]], R2: [[9, 7.5], [12, 7.5]], R3: [[4, 4.5], [7, 4.5]], R4: [[9, 4.5], [12, 4.5]] },
+      wires: [[[7, 1], [2, 1], [2, 7.5], [4, 7.5]], [[2, 4.5], [4, 4.5]], [[7, 7.5], [9, 7.5]], [[7, 4.5], [9, 4.5]], [[12, 7.5], [14, 7.5], [14, 1], [9, 1]], [[12, 4.5], [14, 4.5]]],
+      nodes: { 0: [14, 3], 1: [2, 6], 2: [8, 7.5], 3: [8, 4.5] } },
+    twocells: { el: { E1: [[3, 4.2], [3, 2.8]], R1: [[3, 5.0], [3, 7.4]], E2: [[8, 4.2], [8, 2.8]], R2: [[8, 5.0], [8, 7.4]], R3: [[13, 6.6], [13, 3.6]] },
+      wires: [[[3, 7.4], [3, 8], [13, 8], [13, 6.6]], [[8, 8], [8, 7.4]], [[3, 4.2], [3, 5.0]], [[8, 4.2], [8, 5.0]], [[3, 2.8], [3, 2], [13, 2], [13, 3.6]], [[8, 2.8], [8, 2]]],
+      nodes: { 0: [10.5, 2], 1: [10.5, 8], 2: [3, 4.6], 3: [8, 4.6] } }
+  };
+
+  /* ---------- model ---------- */
+  var M = null;
+  function params() {
+    var v = prm.values;
+    return { E: v.E, r: v.r, R1: v.R1, R2: v.R2, R3: v.R3, R4: v.R4, E2: v.E2, r2: v.r2, polarity2: pol.get(), meter: meter.get() && tpl.get() === 'series', Rv: v.Rv };
+  }
+  function update() {
+    var t = tpl.get();
+    prm.show('R4', t === 'branches'); prm.show('E2', t === 'twocells'); prm.show('r2', t === 'twocells');
+    pol.row.style.display = t === 'twocells' ? '' : 'none';
+    meter.el.style.display = t === 'series' ? '' : 'none'; prm.show('Rv', t === 'series' && meter.get());
+    prm.label('R1', t === 'twocells' ? 'Resistance R1 (in series with cell 1)' : 'Resistance R1');
+    prm.label('R2', t === 'twocells' ? 'Resistance R2 (in series with cell 2)' : 'Resistance R2');
+    var p = params(), net = CI.template(t, p), sol = CI.solve(net);
+    M = { t: t, p: p, net: net, sol: sol, k: sol.error ? null : CI.kirchhoff(net, sol, net.loops) };
+    if (p.meter && !sol.error) { var ideal = CI.solve(CI.template('series', Object.assign({}, p, { meter: false }))); M.ideal = ideal.error ? NaN : ideal.V[2] - ideal.V[3]; }
+    drawScene(); readout();
+  }
+
+  /* ---------- drawing ---------- */
+  var NAMES = { E1: 'cell 1', E2: 'cell 2', R1: 'R₁', R2: 'R₂', R3: 'R₃', R4: 'R₄', V: 'voltmeter' };
+  function drawScene() {
+    if (!M) return;
+    var col = ui.colors(), c, L = col['object-line'], lay = LAYOUT[M.t], sol = M.sol, p = M.p;
+    vp.fit(0.6, 16, 0.2, 9.2);
+    c = vp.begin();
+    function P(q) { return vp.P(q[0], q[1]); }
+    function wire(pts) { D.line(c, pts.map(P), L, { width: 2 }); }
+    lay.wires.forEach(wire);
+    if (p.meter && lay.meterWires) lay.meterWires.forEach(wire);
+    var u = vp.scale;
+    M.net.elements.forEach(function (e) {
+      var ends = lay.el[e.id]; if (!ends) return;
+      var pa = ends[0], pb = ends[1];
+      if (e.id === 'E2' && e.a === 0) { pa = ends[1]; pb = ends[0]; } // reversed cell 2: + end at the bottom
+      var A = P(pa), B = P(pb), dx = B[0] - A[0], dy = B[1] - A[1], len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len, nx = -uy, ny = ux;
+      var mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2;
+      c.strokeStyle = L; c.lineWidth = 2; c.fillStyle = col.panel;
+      var labelTxt = '';
+      if (e.type === 'E') {
+        var g = 0.16 * u; // half gap between plates
+        D.line(c, [A, [mx - ux * g, my - uy * g]], L, { width: 2 }); D.line(c, [[mx + ux * g, my + uy * g], B], L, { width: 2 });
+        c.beginPath(); c.moveTo(mx - ux * g + nx * 0.55 * u, my - uy * g + ny * 0.55 * u); c.lineTo(mx - ux * g - nx * 0.55 * u, my - uy * g - ny * 0.55 * u); c.stroke(); // long plate (+) on the a side
+        c.lineWidth = 3.5; c.beginPath(); c.moveTo(mx + ux * g + nx * 0.28 * u, my + uy * g + ny * 0.28 * u); c.lineTo(mx + ux * g - nx * 0.28 * u, my + uy * g - ny * 0.28 * u); c.stroke();
+        if (e.r > 0) { c.save(); c.setLineDash([4, 3]); c.lineWidth = 1.2; c.strokeStyle = col.muted; var bw = 0.9 * u; c.strokeRect(mx - bw, my - bw, 2 * bw, 2 * bw); c.restore(); }
+        labelTxt = U.sf(e.E) + ' V' + (e.r > 0 ? ', r = ' + U.sf(e.r) + ' Ω' : '');
+      } else if (e.id === 'V') {
+        D.line(c, [A, B], L, { width: 2 });
+        c.beginPath(); c.arc(mx, my, 0.55 * u, 0, 7); c.fill(); c.stroke(); D.label(c, 'V', mx, my, col.ink, { bold: true });
+        labelTxt = U.sf(sol.error ? NaN : sol.Vab.V) + ' V';
+      } else if (e.R > 1e-9) {
+        var hl = Math.min(len * 0.38, 1.1 * u), hw = 0.32 * u;
+        D.line(c, [A, [mx - ux * hl, my - uy * hl]], L, { width: 2 }); D.line(c, [[mx + ux * hl, my + uy * hl], B], L, { width: 2 });
+        c.beginPath(); c.moveTo(mx - ux * hl + nx * hw, my - uy * hl + ny * hw); c.lineTo(mx + ux * hl + nx * hw, my + uy * hl + ny * hw);
+        c.lineTo(mx + ux * hl - nx * hw, my + uy * hl - ny * hw); c.lineTo(mx - ux * hl - nx * hw, my - uy * hl - ny * hw); c.closePath(); c.fill(); c.stroke();
+        labelTxt = NAMES[e.id] + ' = ' + U.sf(e.R) + ' Ω';
+      } else { D.line(c, [A, B], L, { width: 2 }); labelTxt = NAMES[e.id] + ' = 0 (wire)'; }
+      // label on one side, current arrow on the other
+      var lx = mx + (Math.abs(uy) > 0.5 ? 1.05 * u : 0), ly = my + (Math.abs(uy) > 0.5 ? 0 : -0.85 * u);
+      if (e.type === 'E') { lx = mx + (Math.abs(uy) > 0.5 ? 1.1 * u : 0); ly = my + (Math.abs(uy) > 0.5 ? 0 : 1.15 * u); }
+      var al = Math.abs(uy) > 0.5 ? 'left' : 'center';
+      if (e.id === 'V') { lx = mx + 0.8 * u; ly = my; al = 'left'; }
+      D.label(c, labelTxt, lx, ly, col.ink, { size: 11, bg: true, align: al });
+      if (!sol.error) {
+        var I = sol.I[e.id], dir = e.type === 'E' ? -1 : 1; // + I: a→b for resistors, b→a (out of +) for cells
+        if (Math.abs(I) > 1e-12 && e.id !== 'V') {
+          // vertical element: label on the right, arrow on the left; horizontal resistor: label above, arrow below;
+          // horizontal cell: label below, arrow above
+          var s = U.sgn(I) * dir, vert = Math.abs(uy) > 0.5;
+          var ox = vert ? -0.75 * u : 0, oy = vert ? 0 : (e.type === 'E' ? -0.9 * u : 0.8 * u);
+          var cx0 = mx + ox - s * ux * 0.5 * u, cy0 = my + oy - s * uy * 0.5 * u, cx1 = mx + ox + s * ux * 0.5 * u, cy1 = my + oy + s * uy * 0.5 * u;
+          D.arrow(c, cx0, cy0, cx1, cy1, col.applied, { head: 7, width: 2 });
+          D.label(c, U.sf(Math.abs(I)) + ' A', mx + ox * 1.9, my + oy * (e.type === 'E' ? 1.25 : 1.6), col.applied, { size: 11, bg: true, align: Math.abs(uy) > 0.5 ? 'right' : 'center' });
+        }
+      }
+    });
+    if (sol.error) { D.label(c, sol.error, vp.w / 2, 14, col.warn, { bold: true, bg: true, size: 12 }); return; }
+    if (showV.get()) Object.keys(lay.nodes).forEach(function (k) {
+      var q = P(lay.nodes[k]), Vn = sol.V[Number(k)];
+      c.fillStyle = col.s1; c.beginPath(); c.arc(q[0], q[1], 4, 0, 7); c.fill();
+      D.label(c, (Number(k) === 0 ? '0 V' : U.sf(Vn) + ' V'), q[0] + 7, q[1] + 11, col.s1, { size: 11, bg: true, align: 'left', bold: true });
+    });
+  }
+
+  /* ---------- live working ---------- */
+  function readout() {
+    if (!M) return;
+    var s3 = U.sf, p = M.p, sol = M.sol, t = M.t;
+    R.clear();
+    if (sol.error) { R.badge(sol.error, 'warn').render(); return; }
+    var IE = sol.I.E1;
+    if (t !== 'twocells') {
+      R.head('Combined external resistance');
+      var Rx = M.net.Rext, fm = '';
+      if (t === 'series') fm = p.meter ? 'R₁ + (R₂ ∥ R<sub>V</sub>) + R₃ = ' + s3(p.R1) + ' + (1/' + s3(p.R2) + ' + 1/' + s3(p.Rv) + ')<sup>−1</sup> + ' + s3(p.R3) : 'R₁ + R₂ + R₃ = ' + s3(p.R1) + ' + ' + s3(p.R2) + ' + ' + s3(p.R3);
+      if (t === 'parallel') fm = '(1/R₁ + 1/R₂ + 1/R₃)<sup>−1</sup> = (1/' + s3(p.R1) + ' + 1/' + s3(p.R2) + ' + 1/' + s3(p.R3) + ')<sup>−1</sup>';
+      if (t === 'mixed') fm = 'R₁ + (1/R₂ + 1/R₃)<sup>−1</sup> = ' + s3(p.R1) + ' + (1/' + s3(p.R2) + ' + 1/' + s3(p.R3) + ')<sup>−1</sup>';
+      if (t === 'branches') fm = '(1/(R₁ + R₂) + 1/(R₃ + R₄))<sup>−1</sup> = (1/' + s3(p.R1 + p.R2) + ' + 1/' + s3(p.R3 + p.R4) + ')<sup>−1</sup>';
+      R.eq('R', fm, Rx, 'Ω');
+      R.eq('I', 'E ÷ (R + r) = ' + s3(p.E) + ' ÷ (' + s3(Rx) + ' + ' + s3(p.r) + ')', IE, 'A');
+      if (p.r > 0) R.eq('terminal p.d.', 'E − Ir = ' + s3(p.E) + ' − ' + s3(IE) + ' × ' + s3(p.r), p.E - IE * p.r, 'V');
+    }
+    R.head('Each component');
+    M.net.elements.forEach(function (e) {
+      var I = sol.I[e.id];
+      if (e.type === 'E') {
+        R.eq(NAMES[e.id], I >= 0 ? 'current out of its + terminal' : 'current INTO its + terminal: being charged', Math.abs(I), 'A');
+      } else if (e.id === 'V') {
+        R.eq('voltmeter reading', 'p.d. across R₂ with the meter connected', sol.Vab.V, 'V');
+        if (isFinite(M.ideal)) R.eq('ideal voltmeter', 'reading if R<sub>V</sub> were infinite', M.ideal, 'V');
+      } else if (e.R > 1e-9) {
+        R.eq(NAMES[e.id], 'I = ' + s3(Math.abs(I)) + ' A, V = IR = ' + s3(Math.abs(I)) + ' × ' + s3(e.R) + ', P = I²R', s3(Math.abs(sol.Vab[e.id])) + ' V, ' + s3(sol.P[e.id]) + ' W');
+      }
+    });
+    if (t === 'branches') R.eq('p.d. between the midpoints', 'V(R₁/R₂ junction) − V(R₃/R₄ junction)', sol.V[2] - sol.V[3], 'V');
+    R.head('Kirchhoff’s first law (junctions)');
+    if (!M.k.junctions.length) R.html('<div class="eq">No junctions: in a series circuit the current is the same everywhere (' + s3(IE) + ' A).</div>');
+    M.k.junctions.forEach(function (j) {
+      var ins = j.terms.filter(function (q) { return q.into > 1e-12; }), outs = j.terms.filter(function (q) { return q.into < -1e-12; });
+      var fmt = function (arr) { return arr.length ? arr.map(function (q) { return s3(Math.abs(q.into)) + ' (' + NAMES[q.id] + ')'; }).join(' + ') : '0'; };
+      R.eq('junction at ' + (j.node === 0 ? '0 V' : s3(sol.V[j.node]) + ' V'), 'in: ' + fmt(ins) + ' A; out: ' + fmt(outs) + ' A', 'Σ = ' + s3(Math.abs(j.sum) < 1e-12 ? 0 : j.sum) + ' A');
+    });
+    R.head('Kirchhoff’s second law (loops)');
+    M.k.loops.forEach(function (l) {
+      var eTxt = l.emf.length ? l.emf.map(function (q) { return (q.val < 0 ? '− ' : '+ ') + s3(Math.abs(q.val)); }).join(' ').replace(/^\+ /, '') : '0';
+      var irTxt = l.ir.length ? l.ir.map(function (q) { return (q.val < 0 ? '− ' : '+ ') + s3(Math.abs(q.I)) + '×' + s3(q.R); }).join(' ').replace(/^\+ /, '') : '0';
+      R.eq(l.name, 'ΣE = ' + eTxt + ' = ' + s3(l.sumE) + ' V;  ΣIR = ' + irTxt + ' = ' + s3(l.sumIR) + ' V', Math.abs(l.sumE - l.sumIR) < 1e-9 * Math.max(1, Math.abs(l.sumE)) ? 'ΣE = ΣIR ✓' : 'mismatch');
+    });
+    R.render();
+  }
+
+  ui.onTheme(drawScene);
+  vp.onResize = drawScene;
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

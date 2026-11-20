@@ -1,0 +1,738 @@
+Cambridge International AS & A Level
+PHYSICS 9702/41
+Paper 4 A Level Structured Questions May/June 2026
+MARK SCHEME
+Maximum Mark: 100
+Published
+This mark scheme contains the instructions and marking guidance that our examiners used to mark
+candidate responses for this component.
+Before they start marking, examiners complete a standardisation process. They review a range of candidate
+responses and discuss the mark scheme in detail to agree which answers can and cannot be accepted.
+Examiners award marks where it is clear that candidate responses have met the requirements of the mark
+scheme. These requirements may vary between different components or different versions of the same
+component, depending on the exact requirements of the question and the candidate responses seen during
+the standardisation process.
+Sometimes, our mark schemes may allow marks to be awarded to responses which contain elements that
+are factually incorrect or for content not covered by the syllabus. We do this in response to the demands of a
+specific question to support candidates and make sure that our assessments are fair. However, these
+allowances should not be used as a guide for teaching and learning.
+We cannot discuss the mark scheme with schools, and we recommend that schools read the mark scheme
+together with the assessment material and the Principal Examiner Report for Teachers.
+This document consists of 23 printed pages.
+© Cambridge University Press & Assessment 2026 [Turn over
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+General marking principles
+All examiners must apply these marking principles when marking candidate responses.
+1 Examiners must award marks for each response in line with:
+• the specific content defined in the mark scheme
+• the specific skills defined in the mark scheme or in the level descriptions
+• the standard of response required as exemplified by the standardisation scripts.
+2 Examiners must award whole marks (not half marks, or other fractions).
+3 Examiners must award marks positively. This means that:
+• marks are not deducted for errors or omissions
+• marks are awarded for correct/valid answers as defined in the mark scheme and also for other valid answers which go beyond the
+scope of the syllabus and mark scheme referring to your team leader as appropriate
+• the quality of spelling, punctuation and grammar are judged only when the mark scheme indicates that these features are specifically
+assessed in the question. However, the meaning of all responses must be unambiguous.
+4 Examiners must consistently apply the requirements of the mark scheme and any rules for what to do when candidates have not followed
+instructions correctly.
+5 Examiners must use the full range of marks defined in the mark scheme, unless limited by the quality of the candidate responses seen.
+6 Examiners must award marks according to the mark scheme and must not award marks with grade thresholds or grade descriptions in
+mind.
+© Cambridge University Press & Assessment 2026 Page 2 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Science-Specific Marking Principles
+1 Examiners should consider the context and scientific use of any keywords when awarding marks. Although keywords may be present, marks
+should not be awarded if the keywords are used incorrectly.
+2 The examiner should not choose between contradictory statements given in the same question part, and credit should not be awarded for
+any correct statement that is contradicted within the same question part. Wrong science that is irrelevant to the question should be ignored.
+3 Although spellings do not have to be correct, spellings of syllabus terms must allow for clear and unambiguous separation from other
+syllabus terms with which they may be confused (e.g. ethane / ethene, glucagon / glycogen, refraction / reflection).
+4 The error carried forward (ecf) principle should be applied, where appropriate. If an incorrect answer is subsequently used in a scientifically
+correct way, the candidate should be awarded these subsequent marking points. Further guidance will be included in the mark scheme
+where necessary and any exceptions to this general principle will be noted.
+5 ‘List rule’ guidance
+For questions that require n responses (e.g. State two reasons …):
+• The response should be read as continuous prose, even when numbered answer spaces are provided.
+• Any response marked ignore in the mark scheme should not count towards n.
+• Incorrect responses should not be awarded credit but will still count towards n.
+• Read the entire response to check for any responses that contradict those that would otherwise be credited. Credit should not be
+awarded for any responses that are contradicted within the rest of the response. Where two responses contradict one another, this
+should be treated as a single incorrect response.
+• Non-contradictory responses after the first n responses may be ignored even if they include incorrect science.
+© Cambridge University Press & Assessment 2026 Page 3 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+6 Calculation specific guidance
+Correct answers to calculations should be given full credit even if there is no working or incorrect working, unless the question states ‘show
+your working’.
+For questions in which the number of significant figures required is not stated, credit should be awarded for correct answers when rounded
+by the examiner to the number of significant figures given in the mark scheme. This may not apply to measured values.
+For answers given in standard form (e.g. a  10n) in which the convention of restricting the value of the coefficient (a) to a value between 1
+and 10 is not followed, credit may still be awarded if the answer can be converted to the answer given in the mark scheme.
+Unless a separate mark is given for a unit, a missing or incorrect unit will normally mean that the final calculation mark is not awarded.
+Exceptions to this general principle will be noted in the mark scheme.
+7 Guidance for chemical equations
+Multiples / fractions of coefficients used in chemical equations are acceptable unless stated otherwise in the mark scheme.
+State symbols given in an equation should be ignored unless asked for in the question or stated otherwise in the mark scheme.
+© Cambridge University Press & Assessment 2026 Page 4 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Annotations guidance for centres
+Examiners use a system of annotations as a shorthand for communicating their marking decisions to one another. Examiners are trained during the
+standardisation process on how and when to use annotations. The purpose of annotations is to inform the standardisation and monitoring
+processes and guide the supervising examiners when they are checking the work of examiners within their team. The meaning of annotations and
+how they are used is specific to each component and is understood by all examiners who mark the component.
+We publish annotations in our mark schemes to help centres understand the annotations they may see on copies of scripts. Note that there may
+not be a direct correlation between the number of annotations on a script and the mark awarded. Similarly, the use of an annotation may not be an
+indication of the quality of the response.
+The annotations listed below were available to examiners marking this component in this series.
+Annotations
+Annotation Meaning
+arithmetic error
+benefit of the doubt given
+contradiction in response, mark not awarded
+correct point or mark awarded
+error carried forward applied
+error in number of significant figures
+incorrect or insufficient point ignored while marking the rest of the response
+incorrect physics
+incorrect point or mark not awarded
+information missing or insufficient for credit
+© Cambridge University Press & Assessment 2026 Page 5 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Annotation Meaning
+mandatory mark not awarded
+point has been noted, but no credit has been given
+or
+blank page seen
+power of ten error
+transcription error
+© Cambridge University Press & Assessment 2026 Page 6 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Abbreviations
+/ Alternative and acceptable answers for the same marking point.
+( ) Bracketed content indicates words which do not need to be explicitly seen to gain credit but which indicate the context for an answer.
+The context does not need to be seen but if a context is given that is incorrect then the mark should not be awarded.
+___ Underlined content must be present in answer to award the mark. This means either the exact word or another word that has the same
+technical meaning.
+AFC Automatic full credit (A and C marks) for correct numerical answer (see science-specific marking principle 6).
+Mark categories
+B marks These are independent marks, which do not depend on other marks. For a B mark to be awarded, the point to which it refers must
+be seen specifically in the candidate’s answer.
+M marks These are mandatory marks upon which A marks later depend. For an M mark to be awarded, the point to which it refers must be
+seen specifically in the candidate’s answer. If a candidate is not awarded an M mark, then the later A mark cannot be awarded
+either.
+C marks These are compensatory marks which can be awarded even if the points to which they refer are not written down by the candidate,
+providing subsequent working gives evidence that they must have known them. For example, if an equation carries a C mark and
+the candidate does not write down the actual equation but does correct working which shows the candidate knew the equation, then
+the C mark is awarded.
+If a correct answer is given to a numerical question, all of the preceding C marks are awarded automatically. It is only necessary to
+consider each of the C marks in turn when the numerical answer is not correct.
+A marks These are answer marks. They may depend on an M mark or allow a C mark to be awarded by implication.
+© Cambridge University Press & Assessment 2026 Page 7 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+1(a) work done per unit mass B1 Ratio must be clear.
+Allow ‘energy’ for ‘work done’.
+Ignore symbols unless they are defined.
+Ignore references to units.
+Not any other type of named energy.
+work done (on mass) moving mass from infinity (to the point) B1 Allow work done by mass moving to infinity.
+1(b)(i) potential is (defined as) zero at infinity B1 Allow ‘it’ /  / GPE = 0 at infinity
+work is done on (two) masses to move them apart from each B1 Allow ‘mass and planet’ for ‘two masses’.
+other Allow ‘increasing the separation of’ for ‘move them apart’.
+or Allow ‘decreasing the separation of’ for ‘they move towards
+work is done by (two) masses as they move towards each each other’
+other Allow ‘potential energy of (two) masses decrease as they
+move toward each other’
+Allow ‘potential energy of (two) masses increase as they
+move away from each other’
+1(b)(ii) M = R / G M1 Allow with a minus sign.
+Allow ϕ for .
+G is the (universal) gravitational constant A1 Ignore references to numerical value.
+Ignore ‘gravity constant’
+1(b)(iii) g =  / R A1 Allow with a minus sign.
+0
+Allow ϕ for .
+No ECF of wrong expression in 1(b)(ii)
+© Cambridge University Press & Assessment 2026 Page 8 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+1(b)(iv) curve in at least one quadrant passing through (±R, ±g ) and
+0
+(±2R, ±
+© Cambridge University Press & Assessment 2026 Page 9 of 23
+1
+4
+g
+0
+B1 Ignore anything drawn in the –R to R region.
+) and a non-zero value of g at ±3R
+Allow ±½ small square tolerance vertically.
+curve between –3R and –R of increasing magnitude of B1 Curves must get to within 2 small squares horizontally of
+gradient and magnitude of g and curve between R and 3R –3R and 3R, and, if horizontal, horizontal for no more than
+of decreasing magnitude of gradient and magnitude of g 4 small squares.
+If in doubt, use ruler to test curvature between ±R and ±3R,
+±R and ±2R, and ±2R and ±3R. Drawn line must be entirely
+on the correct side of the ruler, and not touching it apart from
+at the end points.
+two lines drawn, one in the top left quadrant, the other in the B1 Do not allow if lines are drawn in either of the other two
+bottom right quadrant quadrants.
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+2(a) gas which obeys pV  T (under all conditions) M1 Allow pV = nRT or pV = NkT for pV  T.
+where T is the thermodynamic temperature A1 Allow ‘absolute’ or ‘Kelvin’ for ‘thermodynamic’.
+2(b)(i) B1 Allow reverse argument.
+measures absolute temperature (unlike liquid in glass) Allow ‘thermodynamic temperature’
+or Ignore ‘Kelvin’
+much greater range of temperature (than liquid in glass) Allow ‘liquid in glass only accurate at fixed points’.
+or Allow ‘measures higher / lower temperatures’.
+gives a measurement that does not depend on the
+properties of a (real) substance
+2(b)(ii) very small mass of substance B1 Allow ‘amount’ or ‘volume’ for ‘mass’.
+or Allow remote reading using a thermocouple.
+rapidly changing temperatures Ignore ‘small changes in temperature’
+2(c) 3572 + 4242 + 5092 + 2862 + 4352 (= 837 327) C1 Value 167 465 or 915 implies C1.
+A1 Must be given to 3 significant figures. AFC.
+837327
+c
+0
+=
+  5  
+Answer given to more than 3SF, that rounds to 409, implies
+the C1 mark.
+= 409 m s–1
+2(d)(i) N = n  N C1
+A
+n = (5.0  1023) / (6.02  1023) A1 Correct to at least 2 significant figures. AFC. (0.831)
+= 0.83 mol
+© Cambridge University Press & Assessment 2026 Page 10 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+2(d)(ii) ½m <c2> = (3/2) kT C1 1Nm
+Allow pV = NkT and p= c2 .
+  
+3 V 
+Allow pV = nRT and
+© Cambridge University Press & Assessment 2026 Page 11 of 23
+p =
+ 1
+3
+  N
+V
+m 
+ c 2 
+3kT 
+Allow c2 =
+ 
+ m 
+Allow c for
+rms
+ c 2 
+Ignore <c>2
+T = [(3.34  10–27)  4092] / (3  1.38  10–23) A1 Possible ECF from 2(c) or 2(d)(i).
+0
+Correct to at least 3 significant figures. AFC. (13.51)
+= 13.5 K
+2(d)(iii) line starting at (T , c ) with positive gradient at that point B1
+0 0
+line with decreasing positive gradient B1 Allow line becoming horizontal at the end but not negative
+gradient.
+line that passes through (0, 0) when extrapolated back from B1 Ignore any line drawn by candidate before T .
+0
+T = T Extrapolate candidate’s line from T and beyond back to
+0 0
+T= 0. Award MP3 if there is a conceivable reasonable
+extension of their line that passes through the test box
+centred on the origin, without having to resort to incorrect
+curvature.
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+3(a) sum of potential energy and kinetic energy B1 Allow ‘PE’ or ‘E ’ for ‘potential energy’.
+P
+Allow ‘KE’ or ‘E ’ for ‘kinetic energy’.
+K
+(total) energy of random motion of particles B1 Allow ‘distribution’ for ‘motion’.
+Allow ‘random energy of particles’.
+Allow ‘atoms’ or ‘molecules’ for ‘particles’.
+Do not allow ‘system’ or ‘gas’ for ‘particles’.
+Do not allow ‘a particle’ for ‘particles’.
+Ignore any reference to first law of thermodynamics.
+3(b)(i) pV = NkT C1 Allow pV = nRT and N = nN .
+A
+V = (8.7  1023  1.38  10–23  300) / (2.0  105) = 0.018 m3 A1 Full substitution and answer needed.
+Unit not needed but any unit given must be correct.
+Allow ‘8.31 / 6.02  1023’ for ‘1.38  10–23’.
+3(b)(ii) potential energy of molecules is zero B1 Allow ‘E ’ or ‘PE’ for ‘potential energy’
+P
+Allow ‘PE = 0 because there are no intermolecular forces’
+internal energy =
+© Cambridge University Press & Assessment 2026 Page 12 of 23
+ 3
+2
+
+ N k T
+C1
+Allow internal energy =
+ 3
+2
+
+pV.
+=
+ 3
+2
+ A1 Correct to at least 2 significant figures. (5403).
+ 8.7  1023  1.38  10–23  300
+Allow 5.4 kJ if unit is clear.
+= 5400 J
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+3(c) Any three points from: B3 List Rules apply.
+All numerical values must be given with a unit and be correct
+to at least 2 significant figures.
+Ignore points that are simply descriptions of or direct read-
+offs from the graph.
+Ignore working space. No ECF.
+Throughout: Must be clear which aspect of the cycle each
+point is being made in relation to.
+Ignore points that are not related to internal energy, thermal
+energy or work done
+Ignore symbols unless defined
+Up to two points relating to change AB
+• no change in internal energy
+• work done = thermal energy transferred Allow ‘heat’ for ‘thermal energy’.
+• work done on the gas and thermal energy transferred
+from it
+Up to two points relating to change BC
+• internal energy is halved Allow ‘internal energy decreases’ unless quantified as a
+factor different than halving.
+• no work done (on/by gas)
+Allow internal energy becomes 2.7 kJ.
+• decrease in internal energy = thermal energy removed
+Allow thermal energy removed = 2.7 kJ.
+Up to two points relating to change CA
+Allow ‘internal energy increases’ unless quantified as a
+• internal energy is doubled
+factor different than two.
+• work done by gas = 1.8 kJ
+Allow ‘internal energy becomes 5.4 kJ / increases by 2.7 kJ’
+• thermal energy transferred to gas = 4.5 kJ
+Up to two points relating to the complete cycle ABCA
+• no overall change in internal energy
+• overall work is done on gas and thermal energy is
+removed from it
+• net work done = net thermal energy transferred
+© Cambridge University Press & Assessment 2026 Page 13 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+4(a)(i) magnitudes (of electric fields) are equal B1 Allow ‘strength’ for ‘magnitude’
+Any two from: B2 Allow towards electron / away from proton
+• (electric field) due to proton is to the right Allow towards electron / away from proton.
+• (electric field) due to electron is to the right Do not allow if both directions given to the left.
+• directions (of electric fields) are the same
+If all three points are attempted, and two are correct and one
+is incorrect, treat as one contradiction and award 1/2 (CON).
+4(a)(ii) magnitudes (of electric potentials) are equal B1
+Any two from: B2 Do not allow if the signs are the wrong way around.
+• (electric potential) due to proton is positive Do not allow ‘in opposite directions’
+• (electric potential) due to electron is negative
+• signs (of electric potentials) are opposite If all three points are attempted, and two are correct and one
+is incorrect, treat as one contradiction and award 1/2 (CON).
+If BP3 is incorrect purely due to use of ‘in opposite
+directions’, this does not negate BP1 and BP2.
+4(b)(i) F = Q Q / 4R2 C1 C1 mark is for any correct general statement of Coulomb’s
+1 2 0
+law, using standard symbols.
+Allow Q, q and e for Q and Q .
+1 2
+Allow x or r for R.
+F = e2 / 16x2 A1 Treat correct answer as AFC.
+0
+Ignore sign
+4(b)(ii) E = 2Fx A1 Ignore sign
+P
+© Cambridge University Press & Assessment 2026 Page 14 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+5(a) charge / potential (difference) M1 Ratio must be clear.
+Allow ‘p.d.’ or ‘voltage’ for ‘potential difference’.
+Ignore any symbols unless they are defined.
+Ignore any reference to units.
+charge is charge on one plate and potential is p.d. between A1 Allow ‘across both plates’ or ‘across parallel plates’ for
+the plates ‘between the plates’.
+For the A1 mark, must be in terms of p.d. or potential
+difference, not just voltage.
+5(b) E = V = V B1 Must be an explicit statement. Allow in words provided all
+X Y
+three terms in the expression are clear.
+Allow V or V for E
+T
+Allow in terms of V and V
+1 2
+Q = Q + Q M1 Must be an explicit statement. Allow in words provided all
+T X Y
+three terms in the expression are clear.
+Allow Q for Q
+T
+Allow in terms of Q and Q
+1 2
+C V = C V + C V leading to C = C + C A1 Allow any one of E, V , V , V for V provided same symbol
+T X Y T X Y T X Y
+or is used for all three terms.
+Q / V = Q / V + Q / V leading to C = C + C Allow the first part left in terms of E, V and V if the explicit
+T X Y T X Y X Y
+B1 mark statement is clear.
+Everything required for the A1 mark must be in terms of C ,
+T
+C and C ,
+X Y
+© Cambridge University Press & Assessment 2026 Page 15 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+5(c)
+E =
+© Cambridge University Press & Assessment 2026 Page 16 of 23
+1
+2
+C1 Independent C1 marks – neither implies the other, and XP in
+CV2
+one does not negate the other.
+Allow E =
+1
+2
+QV and Q = CV
+C = (1 / C + 1 / 2C)–1 or 1 / C = 1 / C + 1 / 2C
+T T
+(C =
+T
+2
+3
+C1 2 2
+C1 is for the working leading to C. C does not need to
+3 3
+be seen, but its appearance implies C1.
+C)
+1.30  10–3 =
+1
+2
+
+2
+3
+A1
+C  6.002
+This line of working implies both C1 marks.
+C = 1.08  10–4 F
+Correct value of C in F implies both C1 marks.
+= 108 F
+Correct to at least 3 significant figures. (AFC).
+Must be in F for the A1 mark.
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+6(a) • force per unit length B2 Ratio must be clear.
+• force per unit current Ignore symbols unless defined.
+Ignore references to units.
+‘Force per unit (current  length)’ achieves both BP1 and
+BP2.
+• length / current perpendicular to field Allow ‘wire perpendicular to field’.
+Allow ‘flux (density)’ for ‘field’.
+1 mark for any two bullet points, 2 marks for all three bullet Do not allow ‘force’ for ‘field’.
+points.
+6(b)(i) (at X, magnetic) force on particles is to the left B1
+left hand rule tells us the (effective) current is in the direction B1 Allow ‘beam’ or ‘velocity’ for ‘movement’
+of movement (of the particles), so charge is positive Allow ‘down’ for ‘direction of movement’
+6(b)(ii) (magnetic) force is always perpendicular to the direction of B1 Allow ‘beam’ or ‘velocity’ for ‘direction of motion’.
+motion (of the particles) Allow ‘centripetal’ for ‘magnetic’
+(magnetic) force changes direction only, and not the speed B1 Allow ‘centripetal’ for ‘magnetic’
+of the particles
+or
+(magnetic) force causes centripetal acceleration
+6(c)(i) a = v2 / r C1 Allow F = ma and F = mv2 / r
+= (7.3  104)2 / (0.5  8.2  10–2) = 1.3  1011 m s–2 A1 Full substitution and answer needed.
+Allow 0.041 for 0.5  8.2  10–2
+Unit not needed, but if a unit is given it must be correct.
+© Cambridge University Press & Assessment 2026 Page 17 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+6(c)(ii) BQv = ma C1 Allow Bq = mv / r.
+No ECF from 6(c)(i).
+B = (2.0  10–26  1.3  1011) / (3.2  10–19  7.3  104) A1 Correct to at least 2 significant figures. AFC. (0.111)
+Unit needed with answer for A1 mark.
+= 0.11 T
+Allow kg A–1 s–2 for T
+Allow kg C–1 s–1 for T
+Allow N A–1 m–1 for T
+Allow Wb m–2 for T
+Allow V s m–2 for T
+6(d) beam shown entering the field at X along same line, and B1
+deflecting in same direction in field
+circular path with half the radius along the whole length of B1 Judge half the radius approximately by eye
+the curve
+© Cambridge University Press & Assessment 2026 Page 18 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+7(a)(i) allows the current (unhindered) in one direction B1 Allow ‘converts a.c. into d.c.’
+blocks the current (completely) in the other direction B1
+7(a)(ii) diode shown connecting the wires in one gap, and direct B1 Allow two diodes if in consistent directions
+connection across the other gap Allow a single diode in parallel with resistor
+Ignore a capacitor in parallel with resistor
+Do not allow if there any other components added into the
+circuit that would stop the circuit from working as a
+rectification circuit.
+correct symbol used for diode B1 Ignore presence / absence of circle and / or line through the
+triangle.
+If more than one diode in circuit, all must have the correct
+symbol
+7(b) V unrectified: r.m.s. voltage shown as V / √2 B1
+1 0
+V unrectified: r.m.s. voltage shown as V B1
+2 0
+V rectified: r.m.s. voltage shown as V / 2 B1
+1 0
+V rectified: r.m.s. voltage shown as V / √2 B1
+2 0
+© Cambridge University Press & Assessment 2026 Page 19 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+8(a) packet / quantum of energy M1 Allow ‘discrete amount of energy’.
+(Not just ‘value’ for ‘amount’).
+Allow ‘quanta’ or ‘bundle’ for ‘packet’.
+of electromagnetic radiation A1 Allow ‘em’ for ‘electromagnetic’.
+Allow ‘wave’ or ‘emission’ for ‘radiation’.
+Ignore any specific named part of the spectrum (such as
+‘light’).
+Do not allow the second mark if the idea is conveyed that
+the em radiation is ‘carrying’ the photons. (It needs to be
+clear that the photons are the em radiation). E.g. not ‘in’ or
+‘from’ for ‘of’.
+‘Quantum / packet of electromagnetic energy’ is awarded full
+credit.
+8(b)(i) electrons B1
+8(b)(ii) electrons are decelerated by target B1 Allow ‘charged particles’ for ‘electrons’ throughout (but not
+an incorrectly named particle).
+Allow ‘anode’ for ‘target’
+Allow ‘metal’ for ‘target’
+(some) kinetic energy of electrons becomes energy of B1 Allow ‘X-ray’ for ‘energy of’
+photons
+© Cambridge University Press & Assessment 2026 Page 20 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+8(b)(iii) some electron kinetic energy dissipated as thermal energy B1 Do not allow ‘electrons have a range of kinetic energies’
+(in target) Allow ‘heat’ for ‘thermal energy’.
+Allow omission of ‘electron’ or ‘kinetic’ but not both.
+Allow ‘electron KE’ for ‘electron kinetic energy’.
+wavelength (of X-rays) is inversely proportional to photon B1 Ignore E = hc /  unless E defined as photon energy, 
+energy defined as wavelength, and hc stated as constant
+maximum photon energy (and therefore minimum B1 Allow omission of ‘electron’ or ‘kinetic’ but not both.
+wavelength) when all of the electron kinetic energy becomes Allow ‘electron KE’ for ‘electron kinetic energy’.
+the energy of a photon
+8(b)(iv) hc /  = qV C1 Allow hf = qV and f = c / 
+Allow e for q.
+No credit for hv /  = qV unless v is clarified as speed of light
+in substitution.
+ = (6.63  10–34  3.00  108) / (1.60  10–19  52.0  103) C1
+= 2.39  10–11 m A1 Correct to at least 3 significant figures. AFC. (2.391)
+8(c) discussion of differences in (linear) attenuation coefficient B1 Allow ‘absorption coefficient’ for ‘attenuation coefficient’
+good contrast when the transmitted intensities (through the B1 Allow ‘not good contrast when the transmitted intensities
+two materials) are very different (through the two materials) are similar’.
+Allow ‘pass through’ for ‘transmitted’
+© Cambridge University Press & Assessment 2026 Page 21 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+9(a) difference between mass of nucleus and mass of constituent M1 Allow ‘protons and neutrons’ for ‘nucleons’.
+nucleons Mass must be mentioned once.
+when separated to infinity A1 Ignore ‘mass equivalence of binding energy’.
+9(b)(i) alpha decay identified as producing Ra-224 (plus He-4) B1
++ decay identified as producing Ac-228 and – decay as B1 Must be the correct way around.
+producing Pa-228
+alpha decay products calculated to have total mass defect of B1 Any appearance of the value 1.877217u is sufficient to
+1.877217u award the mark.
+reaction only happens if mass defect of products is greater B1
+than mass defect of parent nucleus (so decay is alpha and is
+not beta)
+9(b)(ii) E = ()mc2 C1
+= (1.877217 – 1.871290)  1.66  10–27  (3.00  108)2 C1 1.877217 may be left as 1.846840 + 0.030377.
+1.877217 – 1.871290 may be substituted as 0.005927
+Allow subtraction either way round
+Treat use of 1.67  10–27 as a TE in this C1 mark (gives an
+answer of 5.57 MeV).
+( = 8.85  10–13 J) A1 Correct 3 SF answer in J implies both C1 marks.
+= 5.53 MeV Must be given to 3 significant figures.
+Answer must be positive for A1.
+© Cambridge University Press & Assessment 2026 Page 22 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9702/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+10(a) temperature inversely proportional to wavelength M1 Allow ‘product of wavelength and temperature is a constant’
+Ignore symbols unless defined.
+Ignore references to units.
+Allow ‘absolute’ or ‘in Kelvin’ for ‘thermodynamic’.
+temperature is thermodynamic temperature of surface, and A1 Not ‘maximum wavelength’.
+wavelength is the wavelength at which maximum emission Allow ‘intensity’ for ‘emission rate’
+rate occurs
+10(b)(i) L = 4  5.67  10–8  (6.96  108)2  57704 C1
+= 3.83  1026 W A1 Correct to at least 3 significant figures. AFC. (3.826)
+10(b)(ii) F = L / 4d2 C1
+= 3.83  1026 / (4  (1.52  1011)2) C1 Possible ECF from 10(b)(i).
+= 1320 W m–2 A1 Correct to at least 3 significant figures. AFC. (1317)
+Unit needed with answer for A1 mark.
+Allow J s–1 m–2 for W m–2
+10(b)(iii) temperature = 5770 / 0.581 A1 Correct to at least 3 significant figures. AFC.
+= 9930 K
+© Cambridge University Press & Assessment 2026 Page 23 of 23
+Trace ID: PC-84105B537D
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a02p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9702/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/

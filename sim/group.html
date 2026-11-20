@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulation</title>
+<link rel="stylesheet" href="assets/theme.css">
+<script src="catalog/groups.js"></script>
+</head>
+<body>
+<div class="group-shell">
+  <header class="sim-head">
+    <a class="crumb" href="index.html">← All simulations</a>
+    <h1 id="gTitle">Simulation</h1>
+    <div class="tags" id="gTags"></div>
+    <button class="theme-btn" id="themeBtn">Light / dark</button>
+  </header>
+  <nav class="modes" id="modes" role="tablist" aria-label="Modes"></nav>
+  <iframe id="frame" title="Simulation"></iframe>
+</div>
+<script>
+(function () {
+  'use strict';
+  var q = new URLSearchParams(location.search);
+  var groups = window.SIM_GROUPS || [];
+  var g = groups.filter(function (x) { return x.id === q.get('g'); })[0] || groups[0];
+  var modeId = q.get('m'), firstPreset = q.get('preset');
+  var mode = g.modes.filter(function (m) { return m.id === modeId; })[0] || g.modes[0];
+  var TOPIC_NAMES = { '9709-M1': '4.1 Forces & equilibrium', '9709-M2': '4.2 Kinematics', '9709-M3': '4.3 Momentum', '9709-M4': '4.4 Newton’s laws', '9709-M5': '4.5 Energy, work & power',
+    '9702-1': '1 Quantities & units', '9702-2': '2 Kinematics', '9702-3': '3 Dynamics', '9702-4': '4 Forces, density & pressure', '9702-5': '5 Work, energy & power', '9702-6': '6 Deformation',
+    '9702-7': '7 Waves', '9702-8': '8 Superposition', '9702-9': '9 Electricity', '9702-10': '10 D.C. circuits', '9702-11': '11 Particle physics' };
+
+  var theme = null;
+  try { theme = localStorage.getItem('sim-theme'); } catch (e) { /* storage blocked */ }
+  if (theme) document.documentElement.setAttribute('data-theme', theme);
+
+  document.title = g.title;
+  document.getElementById('gTitle').textContent = g.title;
+  var tags = document.getElementById('gTags');
+  g.topics.forEach(function (t) { var s = document.createElement('span'); s.className = 'chip'; s.textContent = g.course + ' ' + (TOPIC_NAMES[t] || t); tags.appendChild(s); });
+  if (['waves', 'superposition', 'electricity', 'particles'].indexOf(g.id) < 0) { var gc = document.createElement('span'); gc.className = 'chip g'; gc.innerHTML = 'g = ' + (g.course === '9702' ? '9.81' : '10') + ' m s<sup>−2</sup>'; tags.appendChild(gc); }
+
+  var nav = document.getElementById('modes'), frame = document.getElementById('frame');
+  if (g.modes.length < 2) nav.style.display = 'none';
+  function src(m, preset) {
+    var p = m.path, sep = p.indexOf('?') >= 0 ? '&' : '?';
+    var pr = preset !== null && preset !== undefined ? preset : (m.preset !== undefined ? m.preset : null);
+    return p + sep + 'embed=1' + (theme ? '&theme=' + theme : '') + (pr !== null ? '&preset=' + pr : '');
+  }
+  function show(m, preset) {
+    mode = m;
+    Array.prototype.forEach.call(nav.children, function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-m') === m.id)); });
+    frame.src = src(m, preset);
+    var u = new URLSearchParams(); u.set('g', g.id); u.set('m', m.id); if (preset !== null && preset !== undefined) u.set('preset', preset);
+    history.replaceState(null, '', location.pathname + '?' + u.toString());
+  }
+  g.modes.forEach(function (m) {
+    var b = document.createElement('button'); b.setAttribute('role', 'tab'); b.setAttribute('data-m', m.id); b.textContent = m.label;
+    b.addEventListener('click', function () { show(m, null); });
+    nav.appendChild(b);
+  });
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var d = document.documentElement, cur = d.getAttribute('data-theme');
+    var dark = cur ? cur === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    theme = dark ? 'light' : 'dark'; d.setAttribute('data-theme', theme);
+    try { localStorage.setItem('sim-theme', theme); } catch (e) { /* ignore */ }
+    show(mode, null);
+  });
+  show(mode, firstPreset);
+})();
+</script>
+</body>
+</html>

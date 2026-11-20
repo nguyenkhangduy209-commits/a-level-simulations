@@ -1,0 +1,808 @@
+{
+ "9702_m23_qp_42": {
+  "1c": {
+   "primary_tag": "9702-13",
+   "qtype": "9702-grav-potential",
+   "note": "grav vs electric potential comparison inside a gravitation question"
+  }
+ },
+ "9702_m24_qp_42": {
+  "1b(iii)": {
+   "qtype": "9702-grav-potential",
+   "note": "energy to move satellite to infinity: gravitational potential energy"
+  },
+  "2b(ii)": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-ideal-gas",
+   "note": "final temperature of gas from V/T at constant pressure"
+  },
+  "4c(ii)": {
+   "primary_tag": "9702-19",
+   "qtype": "9702-capacitor-discharge",
+   "note": "time constant from exponential decay of smoothed output"
+  },
+  "5a": {
+   "primary_tag": "9702-12",
+   "qtype": "9702-circular",
+   "note": "general uniform circular motion (quantities that vary)"
+  },
+  "5b(iv)": {
+   "primary_tag": "9702-20",
+   "note": "crossed fields / velocity selector E = vB"
+  },
+  "8b(iv)": {
+   "qtype": "9702-decay",
+   "note": "ratio of decayed to undecayed nuclei after time t"
+  },
+  "9a(i)": {
+   "qtype": "9702-xray",
+   "note": "minimum X-ray wavelength from accelerating p.d."
+  },
+  "9a(ii)": {
+   "qtype": "9702-xray",
+   "note": "choice of tungsten for X-ray target"
+  }
+ },
+ "9702_m25_qp_42": {
+  "4a": {
+   "primary_tag": "9702-17",
+   "qtype": "9702-shm",
+   "note": "angular frequency of vibrating crystal (SHM)"
+  },
+  "4b": {
+   "primary_tag": "9702-17",
+   "qtype": "9702-shm",
+   "note": "maximum acceleration in SHM"
+  },
+  "4c": {
+   "primary_tag": "9702-17",
+   "qtype": "9702-shm",
+   "note": "energy of SHM vibration"
+  },
+  "8b(ii)": {
+   "qtype": "9702-photoelectric",
+   "note": "photon emission rate from beam power"
+  },
+  "8b(iii)": {
+   "qtype": "9702-photoelectric",
+   "note": "force from photon momentum"
+  }
+ },
+ "9702_m26_qp_42": {
+  "2b(i)": {
+   "qtype": "9702-electric-field",
+   "note": "draw field lines between plates"
+  },
+  "2c(i)": {
+   "qtype": "9702-electric-field",
+   "note": "E = V/x expression"
+  }
+ },
+ "9702_s22_qp_41": {
+  "2a(i)": {
+   "qtype": "9702-charged-particle",
+   "note": "direction of B from magnetic force on moving charge"
+  },
+  "2a(ii)": {
+   "primary_tag": "9702-20",
+   "note": "circular motion caused by magnetic force on the charge"
+  },
+  "2c": {
+   "qtype": "9702-charged-particle",
+   "note": "B from magnetic force Bqv providing centripetal force"
+  },
+  "3b(i)": {
+   "primary_tag": "9702-16",
+   "qtype": "9702-first-law",
+   "note": "work done p dV during change AB"
+  },
+  "5c(i)": {
+   "primary_tag": "9702-21",
+   "qtype": "9702-ac",
+   "note": "adding smoothing capacitor to rectifier"
+  },
+  "5c(iii)": {
+   "qtype": "9702-capacitor-discharge",
+   "note": "capacitance from exponential ripple decay"
+  },
+  "6c": {
+   "qtype": "9702-induction",
+   "note": "induced current / Lenz effect on coil"
+  },
+  "8b(i)": {
+   "qtype": "9702-binding-energy",
+   "note": "naming fusion"
+  }
+ },
+ "9702_s22_qp_42": {
+  "2c(i)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "electron-positron annihilation to gamma (PET physics)"
+  },
+  "2c(ii)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "medical application of annihilation = PET"
+  },
+  "3b(i)": {
+   "primary_tag": "9702-14",
+   "qtype": "9702-heat-capacity",
+   "note": "q = mL"
+  },
+  "3b(iii)": {
+   "primary_tag": "9702-16",
+   "qtype": "9702-first-law",
+   "note": "work done p dV expanding against atmosphere"
+  },
+  "8a(i)": {
+   "qtype": "9702-photoelectric",
+   "note": "evidence for particulate nature of EM radiation"
+  },
+  "8c": {
+   "qtype": "9702-de-broglie",
+   "note": "diffraction of people: de Broglie wavelength"
+  }
+ },
+ "9702_s22_qp_43": {
+  "2a(i)": {
+   "qtype": "9702-charged-particle",
+   "note": "direction of B from magnetic force on moving charge"
+  },
+  "2a(ii)": {
+   "primary_tag": "9702-20",
+   "note": "circular motion caused by magnetic force on the charge"
+  },
+  "2c": {
+   "qtype": "9702-charged-particle",
+   "note": "B from magnetic force Bqv providing centripetal force"
+  },
+  "3b(i)": {
+   "primary_tag": "9702-16",
+   "qtype": "9702-first-law",
+   "note": "work done p dV during change AB"
+  },
+  "5c(i)": {
+   "primary_tag": "9702-21",
+   "qtype": "9702-ac",
+   "note": "adding smoothing capacitor to rectifier"
+  },
+  "5c(iii)": {
+   "qtype": "9702-capacitor-discharge",
+   "note": "capacitance from exponential ripple decay"
+  },
+  "6c": {
+   "qtype": "9702-induction",
+   "note": "induced current / Lenz effect on coil"
+  },
+  "8b(i)": {
+   "qtype": "9702-binding-energy",
+   "note": "naming fusion"
+  }
+ },
+ "9702_s23_qp_41": {
+  "5a(ii)": {
+   "primary_tag": "9702-21",
+   "qtype": "9702-ac",
+   "note": "effect of smoothing capacitor on rectified output"
+  },
+  "7c(i)": {
+   "qtype": "9702-de-broglie",
+   "note": "electron diffraction pattern at higher p.d."
+  }
+ },
+ "9702_s23_qp_42": {
+  "2a(ii)": {
+   "primary_tag": "9702-14",
+   "qtype": "9702-temperature",
+   "note": "absolute zero in degrees Celsius"
+  },
+  "2c": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-kinetic-theory",
+   "note": "r.m.s. speed vs temperature sketch"
+  },
+  "5b(iii)": {
+   "qtype": "9702-capacitors",
+   "note": "energy loss when charge shared between capacitors (no RC decay)"
+  }
+ },
+ "9702_s23_qp_43": {
+  "5a(ii)": {
+   "primary_tag": "9702-21",
+   "qtype": "9702-ac",
+   "note": "effect of smoothing capacitor on rectified output"
+  },
+  "7c(i)": {
+   "qtype": "9702-de-broglie",
+   "note": "electron diffraction pattern at higher p.d."
+  }
+ },
+ "9702_s24_qp_41": {
+  "4b(i)": {
+   "qtype": "9702-damping",
+   "note": "naming damping"
+  },
+  "4b(ii)": {
+   "qtype": "9702-damping",
+   "note": "decrease of amplitude: damping"
+  },
+  "4c": {
+   "qtype": "9702-damping",
+   "note": "amplitude vs driving frequency: resonance"
+  },
+  "5c(i)": {
+   "qtype": "9702-charged-particle",
+   "note": "direction of B for undeviated electron (velocity selector)"
+  },
+  "5c(ii)": {
+   "primary_tag": "9702-20",
+   "note": "velocity selector: balanced electric and magnetic forces"
+  },
+  "5c(iii)": {
+   "qtype": "9702-charged-particle",
+   "note": "B = E/v for velocity selector"
+  },
+  "6a": {
+   "qtype": "9702-capacitor-discharge",
+   "note": "shape of discharge current graph"
+  },
+  "6b(i)": {
+   "qtype": "9702-capacitor-discharge",
+   "note": "R from initial discharge current"
+  },
+  "6c": {
+   "qtype": "9702-capacitor-discharge",
+   "note": "C from time constant and R"
+  }
+ },
+ "9702_s24_qp_43": {
+  "4b(i)": {
+   "qtype": "9702-damping",
+   "note": "naming damping"
+  },
+  "4b(ii)": {
+   "qtype": "9702-damping",
+   "note": "decrease of amplitude: damping"
+  },
+  "4c": {
+   "qtype": "9702-damping",
+   "note": "amplitude vs driving frequency: resonance"
+  },
+  "5c(i)": {
+   "qtype": "9702-charged-particle",
+   "note": "direction of B for undeviated electron (velocity selector)"
+  },
+  "5c(ii)": {
+   "primary_tag": "9702-20",
+   "note": "velocity selector: balanced electric and magnetic forces"
+  },
+  "5c(iii)": {
+   "qtype": "9702-charged-particle",
+   "note": "B = E/v for velocity selector"
+  },
+  "6a": {
+   "qtype": "9702-capacitor-discharge",
+   "note": "shape of discharge current graph"
+  },
+  "6b(i)": {
+   "qtype": "9702-capacitor-discharge",
+   "note": "R from initial discharge current"
+  },
+  "6c": {
+   "qtype": "9702-capacitor-discharge",
+   "note": "C from time constant and R"
+  }
+ },
+ "9702_s25_qp_41": {
+  "2c(i)": {
+   "qtype": "9702-charged-particle",
+   "note": "orbital speed of electron under electric force"
+  },
+  "2c(ii)": {
+   "qtype": "9702-charged-particle",
+   "note": "orbital period of electron under electric force"
+  },
+  "6a(ii)": {
+   "primary_tag": "9702-21",
+   "qtype": "9702-ac",
+   "note": "purpose of smoothing capacitor"
+  },
+  "6b(i)": {
+   "primary_tag": "9702-21",
+   "qtype": "9702-ac",
+   "note": "V = A cos Bt for alternating input"
+  },
+  "6c": {
+   "qtype": "9702-capacitor-discharge",
+   "note": "R from time constant and C"
+  },
+  "7c(i)": {
+   "qtype": "9702-charged-particle",
+   "note": "electric field added to make velocity selector"
+  },
+  "7c(ii)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-charged-particle",
+   "note": "velocity selector v = E/B"
+  },
+  "8c": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "electron/positron comparison in annihilation context"
+  },
+  "8d(i)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "annihilation"
+  },
+  "8d(ii)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "annihilation"
+  },
+  "8d(iii)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "annihilation: two gamma photons"
+  },
+  "8d(iv)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "annihilation energy calculation"
+  },
+  "8d(v)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "gamma wavelength from annihilation"
+  }
+ },
+ "9702_s25_qp_42": {
+  "6c(i)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-xray",
+   "note": "minimum wavelength of X-rays from accelerated electrons"
+  },
+  "6c(ii)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-xray",
+   "note": "region of EM spectrum: X-rays"
+  },
+  "6c(iii)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-xray",
+   "note": "X-ray imaging of internal structures"
+  }
+ },
+ "9702_s25_qp_43": {
+  "2c(i)": {
+   "qtype": "9702-charged-particle",
+   "note": "orbital speed of electron under electric force"
+  },
+  "2c(ii)": {
+   "qtype": "9702-charged-particle",
+   "note": "orbital period of electron under electric force"
+  },
+  "6a(ii)": {
+   "primary_tag": "9702-21",
+   "qtype": "9702-ac",
+   "note": "purpose of smoothing capacitor"
+  },
+  "6b(i)": {
+   "primary_tag": "9702-21",
+   "qtype": "9702-ac",
+   "note": "V = A cos Bt for alternating input"
+  },
+  "6c": {
+   "qtype": "9702-capacitor-discharge",
+   "note": "R from time constant and C"
+  },
+  "7c(i)": {
+   "qtype": "9702-charged-particle",
+   "note": "electric field added to make velocity selector"
+  },
+  "7c(ii)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-charged-particle",
+   "note": "velocity selector v = E/B"
+  },
+  "8c": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "electron/positron comparison in annihilation context"
+  },
+  "8d(i)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "annihilation"
+  },
+  "8d(ii)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "annihilation"
+  },
+  "8d(iii)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "annihilation: two gamma photons"
+  },
+  "8d(iv)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "annihilation energy calculation"
+  },
+  "8d(v)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "gamma wavelength from annihilation"
+  }
+ },
+ "9702_s26_qp_41": {
+  "2b(i)": {
+   "primary_tag": "9702-14",
+   "qtype": "9702-temperature",
+   "note": "ideal-gas vs liquid-in-glass thermometer"
+  },
+  "2b(ii)": {
+   "primary_tag": "9702-14",
+   "qtype": "9702-temperature",
+   "note": "when a thermocouple is preferable"
+  },
+  "2d(i)": {
+   "qtype": "9702-ideal-gas",
+   "note": "amount n = N/NA"
+  },
+  "2d(ii)": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-kinetic-theory",
+   "note": "T from r.m.s. speed via (1/2)m<c2> = (3/2)kT"
+  },
+  "6c(i)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-charged-particle",
+   "note": "centripetal acceleration of ion in mass spectrometer field"
+  },
+  "6c(ii)": {
+   "qtype": "9702-charged-particle",
+   "note": "B from Bqv = ma for ion"
+  }
+ },
+ "9702_s26_qp_42": {
+  "4b(i)": {
+   "qtype": "9702-kinetic-theory",
+   "note": "kinetic-theory derivation: momentum change"
+  },
+  "4b(ii)": {
+   "qtype": "9702-kinetic-theory",
+   "note": "kinetic-theory derivation: time between collisions"
+  },
+  "4b(iii)": {
+   "qtype": "9702-kinetic-theory",
+   "note": "kinetic-theory derivation: mean force"
+  },
+  "4b(iv)": {
+   "qtype": "9702-kinetic-theory",
+   "note": "kinetic-theory derivation: pressure"
+  },
+  "6c(iv)": {
+   "primary_tag": "9702-19",
+   "qtype": "9702-capacitors",
+   "note": "energy stored by charged dome (capacitor energy)"
+  },
+  "Q7": {
+   "qtype": "9702-magnetic-force",
+   "note": "Hall probe / Hall voltage, not induction"
+  },
+  "9c(i)": {
+   "qtype": "9702-de-broglie",
+   "note": "speed of accelerated electron for de Broglie calc"
+  }
+ },
+ "9702_w22_qp_41": {
+  "5b(i)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-induction",
+   "note": "emf induced in wire Q by changing current in P"
+  },
+  "5b(ii)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-induction",
+   "note": "sketch of induced emf"
+  },
+  "7b(i)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-ultrasound",
+   "note": "piezoelectric crystal generating ultrasound"
+  },
+  "10c": {
+   "qtype": "9702-binding-energy",
+   "note": "mass of products vs parent: mass-energy"
+  }
+ },
+ "9702_w22_qp_42": {
+  "Q6": {
+   "qtype": "9702-capacitor-discharge",
+   "note": "capacitor discharge graphs and time constant"
+  },
+  "8b(i)": {
+   "primary_tag": "9702-21",
+   "qtype": "9702-ac",
+   "note": "sinusoidal current I = X sin Yt"
+  },
+  "8b(ii)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-induction",
+   "note": "induced emf in secondary coil"
+  },
+  "9b(i)": {
+   "primary_tag": "9702-25",
+   "qtype": "9702-redshift",
+   "note": "naming redshift"
+  }
+ },
+ "9702_w22_qp_43": {
+  "5b(i)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-induction",
+   "note": "emf induced in wire Q by changing current in P"
+  },
+  "5b(ii)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-induction",
+   "note": "sketch of induced emf"
+  },
+  "7b(i)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-ultrasound",
+   "note": "piezoelectric crystal generating ultrasound"
+  },
+  "10c": {
+   "qtype": "9702-binding-energy",
+   "note": "mass of products vs parent: mass-energy"
+  }
+ },
+ "9702_w23_qp_41": {
+  "3c(ii)": {
+   "primary_tag": "9702-25",
+   "qtype": "9702-luminosity",
+   "note": "star radius via Stefan-Boltzmann"
+  },
+  "6b(i)": {
+   "qtype": "9702-charged-particle",
+   "note": "electrons in magnetic field"
+  },
+  "6b(ii)": {
+   "qtype": "9702-charged-particle",
+   "note": "force Bqv on electron"
+  },
+  "6b(iii)": {
+   "qtype": "9702-charged-particle",
+   "note": "centripetal acceleration of electron in field"
+  },
+  "6b(iv)": {
+   "qtype": "9702-charged-particle",
+   "note": "radius of electron path"
+  },
+  "6c": {
+   "qtype": "9702-charged-particle",
+   "note": "positron path in magnetic field"
+  },
+  "9c(i)": {
+   "qtype": "9702-binding-energy",
+   "note": "point on binding-energy-per-nucleon curve"
+  }
+ },
+ "9702_w23_qp_42": {
+  "2c": {
+   "primary_tag": "9702-13",
+   "qtype": "9702-grav-potential",
+   "note": "escape speed from Moon"
+  },
+  "2e": {
+   "qtype": "9702-kinetic-theory",
+   "note": "compares molecular r.m.s. speed with escape speed"
+  },
+  "5b": {
+   "qtype": "9702-electric-field",
+   "note": "Coulomb force between droplets"
+  },
+  "5c(ii)": {
+   "qtype": "9702-electric-field",
+   "note": "draw field lines between plates"
+  },
+  "6a(i)": {
+   "qtype": "9702-capacitors",
+   "note": "energy stored = area under V-Q"
+  },
+  "6a(ii)": {
+   "qtype": "9702-capacitors",
+   "note": "capacitance from V-Q graph"
+  },
+  "9c(i)": {
+   "primary_tag": "9702-23",
+   "qtype": "9702-decay",
+   "note": "initial activity from decay constant"
+  }
+ },
+ "9702_w23_qp_43": {
+  "3c(ii)": {
+   "primary_tag": "9702-25",
+   "qtype": "9702-luminosity",
+   "note": "star radius via Stefan-Boltzmann"
+  },
+  "6b(i)": {
+   "qtype": "9702-charged-particle",
+   "note": "electrons in magnetic field"
+  },
+  "6b(ii)": {
+   "qtype": "9702-charged-particle",
+   "note": "force Bqv on electron"
+  },
+  "6b(iii)": {
+   "qtype": "9702-charged-particle",
+   "note": "centripetal acceleration of electron in field"
+  },
+  "6b(iv)": {
+   "qtype": "9702-charged-particle",
+   "note": "radius of electron path"
+  },
+  "6c": {
+   "qtype": "9702-charged-particle",
+   "note": "positron path in magnetic field"
+  },
+  "9c(i)": {
+   "qtype": "9702-binding-energy",
+   "note": "point on binding-energy-per-nucleon curve"
+  }
+ },
+ "9702_w24_qp_41": {
+  "6b(ii)": {
+   "primary_tag": "9702-21",
+   "qtype": "9702-ac",
+   "note": "purpose of smoothing capacitor"
+  },
+  "6c(ii)": {
+   "qtype": "9702-capacitor-discharge",
+   "note": "R from discharge time constant"
+  },
+  "9b(i)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "annihilation of beta-plus and electron forms PET image"
+  },
+  "9b(ii)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "suitable half-life for tracer"
+  },
+  "10b(i)": {
+   "qtype": "9702-luminosity",
+   "note": "distance from luminosity and radiant flux intensity"
+  }
+ },
+ "9702_w24_qp_42": {
+  "1a(i)": {
+   "primary_tag": "9702-12",
+   "qtype": "9702-circular",
+   "note": "speed v = r omega of point on wheel"
+  },
+  "2c(iii)": {
+   "primary_tag": "9702-25",
+   "qtype": "9702-luminosity",
+   "note": "Sun radius via Stefan-Boltzmann"
+  },
+  "4b": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-kinetic-theory",
+   "note": "molecular origin of gas pressure"
+  },
+  "4c": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-kinetic-theory",
+   "note": "mean-square speed and pV vs T conclusions"
+  }
+ },
+ "9702_w24_qp_43": {
+  "6b(ii)": {
+   "primary_tag": "9702-21",
+   "qtype": "9702-ac",
+   "note": "purpose of smoothing capacitor"
+  },
+  "6c(ii)": {
+   "qtype": "9702-capacitor-discharge",
+   "note": "R from discharge time constant"
+  },
+  "9b(i)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "annihilation of beta-plus and electron forms PET image"
+  },
+  "9b(ii)": {
+   "primary_tag": "9702-24",
+   "qtype": "9702-pet",
+   "note": "suitable half-life for tracer"
+  },
+  "10b(i)": {
+   "qtype": "9702-luminosity",
+   "note": "distance from luminosity and radiant flux intensity"
+  }
+ },
+ "9702_w25_qp_41": {
+  "1d(i)": {
+   "primary_tag": "9702-17",
+   "qtype": "9702-shm",
+   "note": "amplitude of SHM of shadow"
+  },
+  "1d(ii)": {
+   "primary_tag": "9702-17",
+   "qtype": "9702-shm",
+   "note": "period of SHM of shadow"
+  },
+  "1d(iii)": {
+   "primary_tag": "9702-17",
+   "qtype": "9702-shm",
+   "note": "maximum acceleration of SHM"
+  },
+  "1e": {
+   "primary_tag": "9702-17",
+   "qtype": "9702-shm",
+   "note": "position of maximum SHM acceleration"
+  },
+  "4b(i)": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-ideal-gas",
+   "note": "pV proportional to kT: ideal gas"
+  },
+  "8b(i)": {
+   "qtype": "9702-binding-energy",
+   "note": "nuclide mass from energy released (mass-energy)"
+  },
+  "8b(ii)": {
+   "qtype": "9702-binding-energy",
+   "note": "gamma energy from mass-energy balance"
+  },
+  "8b(iii)": {
+   "qtype": "9702-binding-energy",
+   "note": "effect of recoil energy on mass-energy balance"
+  }
+ },
+ "9702_w25_qp_43": {
+  "1d(i)": {
+   "primary_tag": "9702-17",
+   "qtype": "9702-shm",
+   "note": "amplitude of SHM of shadow"
+  },
+  "1d(ii)": {
+   "primary_tag": "9702-17",
+   "qtype": "9702-shm",
+   "note": "period of SHM of shadow"
+  },
+  "1d(iii)": {
+   "primary_tag": "9702-17",
+   "qtype": "9702-shm",
+   "note": "maximum acceleration of SHM"
+  },
+  "1e": {
+   "primary_tag": "9702-17",
+   "qtype": "9702-shm",
+   "note": "position of maximum SHM acceleration"
+  },
+  "4b(i)": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-ideal-gas",
+   "note": "pV proportional to kT: ideal gas"
+  },
+  "8b(i)": {
+   "qtype": "9702-binding-energy",
+   "note": "nuclide mass from energy released (mass-energy)"
+  },
+  "8b(ii)": {
+   "qtype": "9702-binding-energy",
+   "note": "gamma energy from mass-energy balance"
+  },
+  "8b(iii)": {
+   "qtype": "9702-binding-energy",
+   "note": "effect of recoil energy on mass-energy balance"
+  }
+ }
+}

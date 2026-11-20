@@ -1,0 +1,592 @@
+Cambridge International AS & A Level
+PHYSICS 9702/43
+Paper 4 A Level Structured Questions October/November 2021
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen or correction fluid.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+This document has 28 pages. Any blank pages are indicated.
+*3067433712*
+DC (CJ/SW) 199360/3
+© UCLES 2021 [Turn over
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2021 9702/43/O/N/21
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1 at2
+2
+v2 = u2+2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω √  ( x  2  –   x 2 )
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2021 9702/43/O/N/21 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 (a) With reference to velocity and acceleration, describe uniform circular motion.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Two cars are moving around a horizontal circular track. One car follows path X and the other
+follows path Y, as shown in Fig. 1.1.
+start and finish line
+track
+path X
+27 m 318 m
+path Y
+Fig. 1.1 (not to scale)
+The radius of path X is 318 m. Path Y is parallel to, and 27 m outside, path X. Both cars have
+mass 790 kg. The maximum lateral (sideways) friction force F that the cars can experience
+without sliding is the same for both cars.
+(i) The maximum speed at which the car on path X can move around the track without
+sliding is 94 m s–1.
+Calculate F.
+F = ..................................................... N [2]
+© UCLES 2021 9702/43/O/N/21
+
+5
+(ii) Both cars move around the track. Each car has the maximum speed at which it can
+move without sliding.
+Complete Table 1.1, by placing one tick in each row, to indicate how the quantities
+indicated for the car on path Y compare with the car on path X.
+Table 1.1
+Y less than X Y same as X Y greater than X
+centripetal
+acceleration
+maximum speed
+time taken for one lap
+of the track
+[3]
+[Total: 7]
+© UCLES 2021 9702/43/O/N/21 [Turn over
+
+6
+2 (a) Define gravitational potential.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The Earth E and the Moon M can both be considered as isolated point masses at their
+centres. The mass of the Earth is 5.98 × 1024 kg and the mass of the Moon is 7.35 × 1022 kg.
+The Earth and the Moon are separated by a distance of 3.84 × 108 m, as shown in Fig. 2.1.
+3.84 × 108 m
+x
+P
+Earth E Moon M
+mass 5.98 × 1024 kg mass 7.35 × 1022 kg
+Fig. 2.1 (not to scale)
+P is a point, on the line joining the centres of E and M, where the resultant gravitational field
+strength is zero. Point P is at a distance x from the centre of the Earth.
+(i) Explain how it is possible for the gravitational field strength to be zero despite the
+presence of two large masses nearby.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) Show that x is approximately 3.5 × 108 m.
+[2]
+© UCLES 2021 9702/43/O/N/21
+
+7
+(iii) Calculate the gravitational potential φ at point P.
+φ = ............................................... J kg–1 [3]
+[Total: 9]
+© UCLES 2021 9702/43/O/N/21 [Turn over
+
+8
+3 (a) Define specific heat capacity.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A sealed container of fixed volume V contains N molecules, each of mass m, of an ideal gas
+at pressure p.
+(i) State an expression, in terms of V, N, p and the Boltzmann constant k, for the
+thermodynamic temperature T of the gas.
+..................................................................................................................................... [1]
+(ii) Show that the mean translational kinetic energy E of a molecule of the gas is given by
+K
+3
+E = kT.
+K 2
+[2]
+(iii) Explain why the internal energy of the gas is equal to the total kinetic energy of the
+molecules.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(c) The gas in (b) is supplied with thermal energy Q.
+(i) Explain, with reference to the first law of thermodynamics, why the increase in internal
+energy of the gas is Q.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+© UCLES 2021 9702/43/O/N/21
+
+9
+(ii) Use the expression in (b)(ii) and the information in (c)(i) to show that the specific heat
+capacity c of the gas is given by
+3k
+c = .
+2m
+[2]
+(d) The container in (b) is now replaced with one that does not have a fixed volume. Instead, the
+gas is able to expand, so that the pressure of the gas remains constant as thermal energy is
+supplied.
+Suggest, with a reason, how the specific heat capacity of the gas would now compare with
+the value in (c)(ii).
+...................................................................................................................................................
+...................................................................................................................................................
+..................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 13]
+© UCLES 2021 9702/43/O/N/21 [Turn over
+
+10
+4 A trolley on a track is attached by springs to fixed blocks X and Y, as shown in Fig. 4.1. The track
+contains many small holes through which air is blown vertically upwards. This results in the trolley
+resting on a cushion of air rather than being in direct contact with the track.
+springs
+L
+trolley
+X Y
+fixed block holes track fixed block
+Fig. 4.1
+The trolley is pulled to one side of its equilibrium position and then released so that it oscillates
+initially with simple harmonic motion. After a short time, the air blower is switched off. The variation
+with time t of the distance L of the trolley from block X is shown in Fig. 4.2.
+30
+L / cm
+25
+20
+15
+10
+0 4 8 12 16 20 24
+t / s
+Fig. 4.2
+(a) Use Fig. 4.2 to determine:
+(i) the initial amplitude of the oscillations
+amplitude = ................................................... cm [1]
+© UCLES 2021 9702/43/O/N/21
+
+11
+(ii) the angular frequency ω of the oscillations
+ω = .............................................. rad s–1 [2]
+(iii) the maximum speed v , in cm s–1, of the oscillating trolley.
+0
+v = .............................................. cm s–1 [2]
+0
+(b) Apart from the quantities in (a), describe what may be deduced from Fig. 4.2 about the motion
+of the trolley between time t = 0 and time t = 24 s. No calculations are required.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+(c) On Fig. 4.3, sketch the variation with L of the velocity v of the trolley for its first complete
+oscillation.
+10
+v / cm s–1
+5
+0
+0 5 10 15 20 25 30
+L / cm
+–5
+–10
+Fig. 4.3
+[3]
+[Total: 11]
+© UCLES 2021 9702/43/O/N/21 [Turn over
+
+12
+BLANK PAGE
+© UCLES 2021 9702/43/O/N/21
+
+13
+5 An analogue signal is to be transmitted to a receiver. Before transmission, the signal passes
+through an analogue-to-digital converter (ADC). After transmission it passes through a
+digital-to-analogue converter (DAC) before finally reaching the receiver, as shown in Fig. 5.1.
+transmission line
+input
+ADC DAC receiver
+signal
+Fig. 5.1
+(a) State two advantages of converting the signal into digital form for transmission.
+1. ...............................................................................................................................................
+...................................................................................................................................................
+2. ...............................................................................................................................................
+...................................................................................................................................................
+[2]
+(b) The variation with time of the potential difference (p.d.) of the input signal is shown in Fig. 5.2.
+8
+p.d. / mV
+6
+4
+2
+0
+0 2 4 6 8 10 12
+time / ms
+Fig. 5.2
+The ADC has a sampling frequency of 250 Hz and uses 4-bit sampling, with the least
+significant bit corresponding to 1 mV. The signal is first sampled at time 0, when the sampled
+bits are 0001.
+(i) State the sampled bits at time 4 ms and time 8 ms.
+4 ms: ............................................. 8 ms: ............................................. [1]
+© UCLES 2021 9702/43/O/N/21 [Turn over
+
+14
+(ii) Part of the signal received by the receiver, after the sampled signal has passed through
+the DAC, is shown in Fig. 5.3.
+8
+p.d. / mV
+6
+4
+2
+0
+0 2 4 6 8 10 12
+time / ms
+Fig. 5.3
+On Fig. 5.3, complete the line to show the received signal for time 0 to time 12 ms. [2]
+© UCLES 2021 9702/43/O/N/21
+
+15
+(c) The ADC in (b) is replaced with one that has a sampling frequency of 500 Hz and uses 3-bit
+sampling, with the least significant bit corresponding to 2 mV.
+On Fig. 5.4, sketch the signal that is now received, after passing through the DAC, from
+time 0 to time 12 ms.
+8
+p.d. / mV
+6
+4
+2
+0
+0 2 4 6 8 10 12
+time / ms
+Fig. 5.4
+[3]
+[Total: 8]
+© UCLES 2021 9702/43/O/N/21 [Turn over
+
+16
+6 (a) A capacitor consists of two parallel metal plates, separated by air, at a variable distance x
+apart, as shown in Fig. 6.1. The capacitance C is inversely proportional to x.
+x
+metal plates
+Fig. 6.1
+The capacitor is charged by a supply so that there is a potential difference (p.d.) V between
+the plates.
+State expressions, in terms of C and V, for the charge Q on one of the plates and for the
+energy E stored in the capacitor.
+Q = ............................................. E = ............................................. [1]
+(b) The charged capacitor in (a) is now disconnected from the supply. The plates of the capacitor
+are initially separated by distance L. They are then moved closer together by a distance D, as
+shown in Fig. 6.2.
+D new position
+original position
+L
+Fig. 6.2
+State expressions, in terms of C, V, L and D, for:
+(i) the new capacitance C
+N
+C = ......................................................... [1]
+N
+© UCLES 2021 9702/43/O/N/21
+
+17
+(ii) the new charge Q on one of the plates
+N
+Q = ......................................................... [1]
+N
+(iii) the new p.d. V between the plates.
+N
+V = ......................................................... [1]
+N
+(c) Explain whether reducing the separation of the plates in (b) results in an increase or decrease
+in the energy stored in the capacitor.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [1]
+[Total: 5]
+© UCLES 2021 9702/43/O/N/21 [Turn over
+
+18
+7 (a) State two properties of an ideal operational amplifier (op-amp).
+1. . ..............................................................................................................................................
+...................................................................................................................................................
+2. . ..............................................................................................................................................
+...................................................................................................................................................
+[2]
+(b) Fig. 7.1 shows a circuit that includes an ideal op-amp and two identical resistors R.
++5 V
+R
+V
+L
+–
++
+Y
+R
+X
+–5 V
+Fig. 7.1
+State the names of components X and Y.
+X: ............................................ Y: ............................................ [1]
+(c) (i) Explain why the op-amp in Fig. 7.1 has only two possible output states.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) State the name of the type of op-amp circuit in which the op-amp behaves as in (c)(i).
+..................................................................................................................................... [1]
+© UCLES 2021 9702/43/O/N/21
+
+19
+(iii) Describe the environmental condition under which the lamp L in Fig. 7.1 will light.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(iv) Suggest the purpose of the variable resistor V in the circuit.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+[Total: 9]
+© UCLES 2021 9702/43/O/N/21 [Turn over
+
+20
+8 (a) Define the tesla.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A stiff metal wire is used to form a rectangular frame measuring 8.0 cm × 6.0 cm. The frame is
+open at the top, and is suspended from a sensitive newton meter, as shown in Fig. 8.1.
+newton meter
+insulating thread
+5.0 A
+8.0 cm
+frame
+P Q
+6.0 cm
+Fig. 8.1
+The open ends of the frame are connected to a power supply so that there is a current of
+5.0 A in the frame in the direction indicated in Fig. 8.1.
+The frame is slowly lowered into a uniform magnetic field of flux density B so that all of side
+PQ is in the field. The magnetic field lines are horizontal and at an angle of 50° to PQ, as
+shown in Fig. 8.2.
+B
+P Q view from above
+50°
+Fig. 8.2
+When side PQ of the frame first enters the magnetic field, the reading on the newton meter
+changes by 1.0 mN.
+© UCLES 2021 9702/43/O/N/21
+
+21
+(i) Determine the magnetic flux density B, in mT.
+B = ................................................... mT [2]
+(ii) State, with a reason, whether the change in the reading on the newton meter is an
+increase or a decrease.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(iii) The frame is lowered further so that the vertical sides start to enter the magnetic field.
+Suggest what effect this will have on the frame.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [1]
+[Total: 6]
+© UCLES 2021 9702/43/O/N/21 [Turn over
+
+22
+9 (a) State, by reference to the power dissipated in a resistor, what is meant by the
+root-mean-square (r.m.s.) value of an alternating voltage.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A coil is rotating freely, on frictionless bearings, at constant speed in a uniform magnetic
+field. This rotation causes an induced alternating electromotive force (e.m.f.) across the open
+terminals of the coil. The induced e.m.f. has r.m.s. value 12 V and frequency 50 Hz.
+The speed of rotation of the coil is now doubled.
+(i) State and explain, with reference to the principles of electromagnetic induction, the effect
+of the increased speed of rotation on the r.m.s. value of the induced e.m.f.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) On Fig. 9.1, sketch the variation with time t of the induced e.m.f. E across the terminals
+of the coil at the increased speed of rotation. Your line should extend from time t = 0 to
+time t = 20 ms. Assume that E = 0 when t = 0.
+40
+E / V
+20
+0
+0 5 10 15 20
+t / ms
+–20
+–40
+Fig. 9.1
+[3]
+© UCLES 2021 9702/43/O/N/21
+
+23
+(c) State and explain the effect on the motion of the coil in (b) of connecting a load resistor
+across its terminals.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 9]
+© UCLES 2021 9702/43/O/N/21 [Turn over
+
+24
+10 (a) State an experimental phenomenon that provides evidence for:
+(i) the particulate nature of electromagnetic radiation
+..................................................................................................................................... [1]
+(ii) the wave nature of matter.
+..................................................................................................................................... [1]
+(b) A particle of matter moves with momentum p.
+(i) State the equation that gives the effective wavelength λ of the particle. State the name of
+any other symbols used.
+[2]
+(ii) State the name given to the wavelength of the moving particle.
+..................................................................................................................................... [1]
+(c) Electrons are accelerated from rest through a potential difference (p.d.) of 4.8 kV.
+(i) Show that the final speed of the electrons is 4.1 × 107 m s–1.
+[2]
+(ii) Calculate the effective wavelength of a beam of electrons moving at the speed in (c)(i).
+wavelength = ..................................................... m [2]
+[Total: 9]
+© UCLES 2021 9702/43/O/N/21
+
+25
+11 (a) State, for an X-ray image, what is meant by:
+(i) sharpness
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) contrast.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(b) A parallel X-ray beam passes through a thickness of 2.3 cm of soft body tissue. The intensity
+of the emerging beam is 12% of the intensity of the incident beam.
+Calculate the linear attenuation (absorption) coefficient μ of the soft body tissue. Give a unit
+with your answer.
+μ = .......................................... unit ..................... [3]
+(c) In medical diagnosis, X-rays may be used to produce a single X-ray image or may be used in
+computed tomography (CT scanning).
+Suggest an advantage and a disadvantage of CT scanning compared with single X-ray
+imaging for diagnosis.
+advantage: ................................................................................................................................
+...................................................................................................................................................
+disadvantage: ...........................................................................................................................
+...................................................................................................................................................
+[2]
+[Total: 7]
+© UCLES 2021 9702/43/O/N/21 [Turn over
+
+26
+12 (a) Define radioactive decay constant.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A sample of radioactive iodine-131 (131I) of mass 5.87 × 10–10 kg has an activity of
+53
+2.92 × 109 Bq.
+Determine the decay constant of iodine-131.
+decay constant = ................................................... s–1 [3]
+(c) Suggest two reasons why a detector placed near to the sample in (b) would record a count
+rate much less than 2.92 × 109 counts per second.
+1. ...............................................................................................................................................
+...................................................................................................................................................
+2. ...............................................................................................................................................
+...................................................................................................................................................
+[2]
+[Total: 7]
+© UCLES 2021 9702/43/O/N/21
+
+27
+BLANK PAGE
+© UCLES 2021 9702/43/O/N/21
+
+28
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of the University of
+Cambridge Local Examinations Syndicate (UCLES), which itself is a department of the University of Cambridge.
+© UCLES 2021 9702/43/O/N/21

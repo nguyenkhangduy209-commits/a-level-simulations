@@ -1,0 +1,539 @@
+Cambridge International AS & A Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions October/November 2021
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen or correction fluid.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+This document has 24 pages. Any blank pages are indicated.
+*4079990532*
+DC (CJ/SG) 199361/2
+© UCLES 2021 [Turn over
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2021 9702/42/O/N/21
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1 at2
+2
+v2 = u2+2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω √  ( x  2  –   x 2 )
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2021 9702/42/O/N/21 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 (a) State what is meant by centripetal acceleration.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) An unpowered toy car moves freely along a smooth track that is initially horizontal. The track
+contains a vertical circular loop around which the car travels, as shown in Fig. 1.1.
+62 cm
+Y
+loop
+toy car
+mass 230 g
+track
+X
+Fig. 1.1
+The mass of the car is 230 g and the diameter of the loop is 62 cm. Assume that the resistive
+forces acting on the car are negligible.
+(i) State what happens to the magnitude of the centripetal acceleration of the car as it
+moves around the loop from X to Y.
+..................................................................................................................................... [1]
+(ii) Explain, if the car remains in contact with the track, why the centripetal acceleration of
+the car at point Y must be greater than 9.8 m s–2.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+© UCLES 2021 9702/42/O/N/21
+
+5
+(c) The initial speed at which the car in (b) moves along the track is 3.8 m s–1.
+Determine whether the car is in contact with the track at point Y. Show your working.
+[3]
+(d) Suggest, with a reason but without calculation, whether your conclusion in (c) would be
+different for a car of mass 460 g moving with the same initial speed.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [1]
+[Total: 8]
+© UCLES 2021 9702/42/O/N/21 [Turn over
+
+6
+2 (a) State the relationship between gravitational potential and gravitational field strength.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A moon of mass M and radius R orbits a planet of mass 3M and radius 2R. At a particular
+time, the distance between their centres is D, as shown in Fig. 2.1.
+D
+x
+P
+planet moon
+mass 3M mass M
+radius 2R radius R
+Fig. 2.1
+Point P is a point along the line between the centres of the planet and the moon, at a variable
+distance x from the centre of the planet.
+The variation with x of the gravitational potential φ at point P, for points between the planet
+and the moon, is shown in Fig. 2.2.
+φ
+0 x
+0 2R D – R
+Fig. 2.2
+© UCLES 2021 9702/42/O/N/21
+
+7
+(i) Explain why φ is negative throughout the entire range x = 2R to x = D – R.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(ii) One of the features of Fig. 2.2 is that φ is negative throughout.
+Describe two other features of Fig. 2.2.
+1. .......................................................................................................................................
+...........................................................................................................................................
+2. .......................................................................................................................................
+...........................................................................................................................................
+[2]
+(iii) On Fig. 2.3, sketch the variation with x of the gravitational field strength g at point P
+between x = 2R and x = D – R.
+g
+0 x
+0 2R D – R
+Fig. 2.3
+[3]
+[Total: 10]
+© UCLES 2021 9702/42/O/N/21 [Turn over
+
+8
+3 (a) One of the assumptions of the kinetic theory of gases is that all collisions involving molecules
+of the gas are elastic.
+(i) State what is meant by an elastic collision.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) State two other assumptions of the kinetic theory of gases.
+1. .......................................................................................................................................
+...........................................................................................................................................
+2. .......................................................................................................................................
+...........................................................................................................................................
+[2]
+(b) A molecule of an ideal gas has mass m and is contained in a cubic box of side length L. The
+molecule is moving with velocity u towards the face of the box that is shaded in Fig. 3.1.
+L
+molecule
+u
+Fig. 3.1
+The molecule collides elastically with the shaded face and the face opposite to it alternately.
+Deduce expressions, in terms of m, u and L, for:
+(i) the magnitude of the change in momentum of the molecule on colliding with a face
+change in momentum = ......................................................... [1]
+(ii) the time between consecutive collisions of the molecule with the shaded face
+time = ......................................................... [1]
+© UCLES 2021 9702/42/O/N/21
+
+9
+(iii) the average force exerted by the molecule on the shaded face
+force = ......................................................... [1]
+(iv) the pressure on the shaded face if the force in (iii) is exerted over the whole area of the
+face.
+pressure = ......................................................... [1]
+(c) When the model described in (b) is extended to three dimensions, and to a gas containing N
+molecules, each of mass m, travelling with mean-square speed 〈c2〉, it can be shown that
+pV = 1 Nm〈c2〉
+3
+where p is the pressure exerted by the gas and V is the volume of the gas.
+Use this expression, together with the equation of state of an ideal gas, to show that the
+average translational kinetic energy E of a molecule of an ideal gas is given by
+K
+3
+E = kT
+K 2
+where T is the thermodynamic temperature of the gas and k is the Boltzmann constant.
+[2]
+(d) The mass of a hydrogen molecule is 3.34 × 10–27 kg.
+Use the expression for E in (c) to determine the root-mean-square (r.m.s.) speed of a
+K
+molecule of hydrogen gas at 25 °C.
+r.m.s. speed = ............................................... m s–1 [2]
+[Total: 11]
+© UCLES 2021 9702/42/O/N/21 [Turn over
+
+10
+4 A trolley on a smooth surface is attached by springs to fixed blocks as shown in Fig. 4.1.
+springs
+trolley
+fixed block smooth surface fixed block
+Fig. 4.1
+The trolley oscillates horizontally about its equilibrium position with an amplitude of 12 cm. Fig. 4.2
+shows the variation of the acceleration a of the trolley with displacement x from its equilibrium
+position. Friction between the trolley and the surface can be assumed to be negligible.
+0.8
+a / m s–2
+0.4
+0
+–12 –8 – 4 0 4 8 12
+x / cm
+– 0.4
+–0.8
+Fig. 4.2
+(a) Describe the features of the line in Fig. 4.2 that demonstrate that the motion of the trolley is
+simple harmonic.
+...................................................................................................................................................
+..................................................................................................................................................
+............................................................................................................................................. [2]
+© UCLES 2021 9702/42/O/N/21
+
+11
+(b) Use Fig. 4.2 to determine the period T of the oscillations of the trolley.
+T = ...................................................... s [3]
+(c) (i) On the line of the graph of Fig. 4.2, label with the letter P one point where the kinetic
+energy of the trolley is zero. [1]
+(ii) On the line of the graph of Fig. 4.2, label with the letter Q an approximate position of one
+point where the kinetic energy of the trolley is equal to the potential energy stored in the
+springs. [1]
+[Total: 7]
+© UCLES 2021 9702/42/O/N/21 [Turn over
+
+12
+5 (a) (i) When audio signals are transmitted over long distances, modulation of radio waves is
+used.
+Suggest a reason why modulation is used.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) State a technical advantage and a technical disadvantage of using frequency modulation
+rather than amplitude modulation.
+advantage: ........................................................................................................................
+...........................................................................................................................................
+disadvantage: ....................................................................................................................
+...........................................................................................................................................
+[2]
+(b) An audio signal of amplitude 2.0 μV and frequency 4.2 kHz is to be transmitted using a carrier
+wave of amplitude 10.0 mV and frequency 100 kHz.
+Either amplitude modulation or frequency modulation may be used.
+The amplitude modulation is at a rate of 1 mV μV–1.
+The frequency modulation is at a rate of 5 kHz μV–1.
+Complete Table 5.1 to show the maximum and minimum values of the amplitude and of the
+frequency of the modulated wave for each type of modulation.
+Table 5.1
+amplitude / mV frequency / kHz
+minimum maximum minimum maximum
+amplitude modulation
+frequency modulation
+[4]
+(c) For the amplitude modulated wave in (b), determine the bandwidth.
+bandwidth = .................................................. kHz [1]
+[Total: 8]
+© UCLES 2021 9702/42/O/N/21
+
+13
+6 (a) Define electric potential.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) An isolated conducting sphere in a vacuum has radius r and is initially uncharged. It is then
+charged by friction so that it carries a final charge Q. This charge can be considered to be
+acting at the centre of the sphere.
+By considering the electric potential at its surface, show that the capacitance C of the sphere
+is given by
+C = 4πεr
+0
+where ε is the permittivity of free space.
+0
+[2]
+(c) The dome of an electrostatic generator is a spherical conductor of radius 13 cm. It is initially
+charged so that the electric potential at the surface is 4.5 kV.
+A smaller isolated sphere of radius 5.2 cm, initially uncharged, is brought near to the dome.
+Sparking causes a current between the two spheres until they reach the same potential.
+Assume that any charge on a sphere may be considered to act as a point charge at its centre.
+Calculate the charge that is transferred between the two spheres.
+charge = ..................................................... C [3]
+[Total: 7]
+© UCLES 2021 9702/42/O/N/21 [Turn over
+
+14
+7 (a) An operational amplifier (op-amp) has two input terminals and one output terminal.
+State what is meant by the gain of an op-amp.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) State two effects of negative feedback on the gain of an amplifier circuit that uses an op-amp.
+1. ...............................................................................................................................................
+...................................................................................................................................................
+2. ...............................................................................................................................................
+...................................................................................................................................................
+[2]
+(c) Fig. 7.1 shows an op-amp circuit that uses negative feedback.
+1.2 kΩ
++8.0 V
+480 Ω
+V
+IN –
+V
+OUT
++
+–8.0 V
+0 V 0 V
+Fig. 7.1
+(i) State the name of the type of circuit shown in Fig. 7.1.
+..................................................................................................................................... [1]
+(ii) On Fig. 7.1, label with the letter X a point in the circuit that is considered to be a virtual
+earth. [1]
+© UCLES 2021 9702/42/O/N/21
+
+15
+(iii) Calculate the gain of the circuit in Fig. 7.1.
+gain = ......................................................... [2]
+(iv) Determine the value of V when V is +6.5 V.
+IN OUT
+V = .......................................................V [1]
+IN
+(v) Determine the value of V when V is –5.4 V.
+OUT IN
+V = .......................................................V [1]
+OUT
+[Total: 10]
+© UCLES 2021 9702/42/O/N/21 [Turn over
+
+16
+8 Two long straight parallel wires P and Q carry currents into the plane of the paper, as shown in
+Fig. 8.1.
+P Q
+current I current 2I
+Fig. 8.1
+The current in P is I and the current in Q is 2I.
+(a) (i) On Fig. 8.1, draw an arrow to show the direction of the magnetic field at wire Q due to
+the current in wire P. Label this arrow B. [1]
+(ii) On Fig. 8.1, draw another arrow to show the direction of the force acting on wire Q due to
+the current in wire P. Label this arrow F. [1]
+(b) (i) State, with a reason, how the magnitude of the force acting on wire P compares with the
+magnitude of the force acting on wire Q.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) State how the direction of the force on wire P compares with the direction of the force on
+wire Q.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+[Total: 5]
+© UCLES 2021 9702/42/O/N/21
+
+17
+9 (a) State what is meant by:
+(i) the photoelectric effect
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) work function energy.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(b) A polished calcium plate in a vacuum is investigated by illuminating the surface with light.
+It is found that no photoelectric current is produced when the frequency of the light is less
+than 6.93 × 1014 Hz.
+(i) State the name of the frequency below which no photoelectric current is produced.
+..................................................................................................................................... [1]
+(ii) Explain how the photon model of electromagnetic radiation accounts for this phenomenon.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(iii) Calculate the work function energy, in eV, of calcium.
+work function energy = .................................................... eV [2]
+[Total: 9]
+© UCLES 2021 9702/42/O/N/21 [Turn over
+
+18
+10 Fig. 10.1 shows a simple laminated iron-cored transformer consisting of a primary coil of 25 000
+turns and a secondary coil of 625 turns.
+laminated iron core
+25 000 625
+V 640 Ω V
+IN turns turns OUT
+Fig. 10.1
+The output potential difference (p.d.) V is applied to a load resistor of resistance 640 Ω.
+OUT
+(a) (i) State the function of the iron core.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) Explain why the iron core is laminated.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(b) The input p.d. V is a sinusoidal alternating voltage of peak value 12 kV and period 40 ms.
+IN
+(i) Calculate the maximum value of V .
+OUT
+maximum V = ...................................................... V [1]
+OUT
+© UCLES 2021 9702/42/O/N/21
+
+19
+(ii) Calculate the root-mean-square (r.m.s.) current in the load resistor.
+r.m.s. current = ...................................................... A [1]
+(iii) On Fig. 10.2, sketch the variation with time t of the power P dissipated in the load resistor
+for time t = 0 to t = 40 ms. Assume that P = 0 when t = 0.
+200
+P / W
+100
+0
+0 10 20 30 40
+t / ms
+–100
+–200
+Fig. 10.2
+[3]
+(c) Explain, with reference to Fig.10.2, why the mean power in the load resistor is 70 W.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 10]
+© UCLES 2021 9702/42/O/N/21 [Turn over
+
+20
+BLANK PAGE
+© UCLES 2021 9702/42/O/N/21
+
+21
+11 (a) A piezoelectric transducer containing a quartz crystal is used to obtain diagnostic information
+about internal structures.
+Describe the function of the quartz crystal.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+(b) (i) Define specific acoustic impedance.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) Describe, qualitatively, how the specific acoustic impedances of two materials affect the
+intensity reflection coefficient at a boundary between the materials.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 7]
+© UCLES 2021 9702/42/O/N/21 [Turn over
+
+22
+12 (a) Radioactive decay is both random and spontaneous.
+State what is meant by:
+(i) random
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) spontaneous.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(b) A sample of radioactive material contains atoms of an unstable nuclide X. The activity of the
+sample due to the atoms of X is A. The variation with time t of ln A is shown in Fig. 12.1.
+36.6
+In (A / Bq)
+36.2
+35.8
+35.4
+35.0
+0 5 10 15 20 25
+t / min
+Fig. 12.1
+© UCLES 2021 9702/42/O/N/21
+
+23
+(i) Use Fig. 12.1 to determine the half-life, in minutes, of nuclide X.
+half-life = .................................................. min [3]
+(ii) At time t = 0, the mass of the atoms of X in the sample is 5.66 × 10–7 kg.
+Determine the nucleon number of X.
+nucleon number = ......................................................... [3]
+[Total: 8]
+© UCLES 2021 9702/42/O/N/21
+
+24
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of the University of
+Cambridge Local Examinations Syndicate (UCLES), which itself is a department of the University of Cambridge.
+© UCLES 2021 9702/42/O/N/21

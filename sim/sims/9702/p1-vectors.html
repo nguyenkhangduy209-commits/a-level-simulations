@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adding and resolving vectors</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-dynamics.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, DY = SIM.dynamics;
+  var course = ui.course('9702'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Scalars and vectors: add, subtract and resolve coplanar vectors', g: g, tags: ['9702 1.4 Scalars and vectors'] });
+
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 34 });
+  ui.legend(sceneCard, [{ color: 'var(--c-s1)', label: 'vector A' }, { color: 'var(--c-s2)', label: 'vector B (or −B, −A)' },
+    { color: 'var(--c-resultant)', label: 'result R' }, { color: 'var(--c-component)', label: 'components of R along the chosen axes' }]);
+  var tblCard = pg.card('left', 'Components');
+  var tblEl = ui.h('div', { style: 'overflow-x:auto' }); tblCard.appendChild(tblEl);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var QTY = { gen: { u: 'units', n: 'vector' }, disp: { u: 'm', n: 'displacement' }, vel: { u: 'm s<sup>−1</sup>', n: 'velocity' }, force: { u: 'N', n: 'force' } };
+  var qty = ui.select(paramCard, { label: 'Quantity', value: 'vel', options: [{ value: 'vel', label: 'velocity (m s⁻¹)' }, { value: 'disp', label: 'displacement (m)' }, { value: 'force', label: 'force (N)' }, { value: 'gen', label: 'any vector' }] }, update);
+  var op = ui.select(paramCard, { label: 'Operation', value: 'add', options: [{ value: 'add', label: 'R = A + B' }, { value: 'sub', label: 'R = A − B' },
+    { value: 'dv', label: 'R = B − A  (change Δv = v₂ − v₁, with v₁ = A, v₂ = B)' }, { value: 'res', label: 'Resolve A into two perpendicular components' }] }, update);
+  var prm = ui.params(paramCard, [
+    { key: 'A', label: 'Magnitude of A', sym: '|A|', unit: '', min: 0, max: 300, step: 0.1, value: 4 },
+    { key: 'tA', label: 'Direction of A (anticlockwise from +x)', sym: 'θ<sub>A</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: 90 },
+    { key: 'B', label: 'Magnitude of B', sym: '|B|', unit: '', min: 0, max: 300, step: 0.1, value: 3 },
+    { key: 'tB', label: 'Direction of B (anticlockwise from +x)', sym: 'θ<sub>B</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: 0 },
+    { key: 'phi', label: 'Axes for components: x′ axis at angle', sym: 'φ', unit: '°', min: -90, max: 90, step: 0.5, value: 0 },
+    { key: 'psi', label: 'Wanted direction of A + B (for the aim button)', sym: 'ψ', unit: '°', min: -180, max: 180, step: 0.5, value: 90 }
+  ], update);
+  var para = ui.toggle(paramCard, { label: 'Show parallelogram as well as the triangle' }, update);
+  var comps = ui.toggle(paramCard, { label: 'Show components of the result', value: true }, update);
+  var btnRow = ui.h('div', { class: 'row' }); paramCard.appendChild(btnRow);
+  var aimMsg = '';
+  btnRow.appendChild(ui.h('button', { class: 'btn', text: 'Aim A so that A + B points along ψ', onclick: function () {
+    var v = prm.values, rel = v.B * Math.sin(U.rad(v.tB - v.psi)) / (v.A || 1e-300);
+    if (op.get() !== 'add') { aimMsg = 'The aim button works with R = A + B.'; update(); return; }
+    if (!(v.A > 0) || Math.abs(rel) > 1) { aimMsg = 'Impossible: |A| is too small to cancel the component of B across the wanted direction.'; update(); return; }
+    // need A sin(θA − ψ) = −B sin(θB − ψ); two choices, keep the one whose resultant points along +ψ
+    var base = Math.asin(-rel), cands = [base, Math.PI - base], best = null;
+    cands.forEach(function (c) {
+      var th = U.deg(c) + v.psi, along = v.A * Math.cos(c) + v.B * Math.cos(U.rad(v.tB - v.psi));
+      if (along > 1e-9 && (best === null || along > best.along)) best = { th: th, along: along };
+    });
+    if (!best) { aimMsg = 'Impossible: the result would point the opposite way.'; update(); return; }
+    var th = ((best.th + 540) % 360) - 180; aimMsg = '';
+    prm.set({ tA: Math.round(th * 1e4) / 1e4 });
+  } }));
+
+  ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Boat heads straight across at 4.0 m s⁻¹; river flows at 3.0 m s⁻¹', q: 'vel', op: 'add', v: { A: 4, tA: 90, B: 3, tB: 0, phi: 0, psi: 90 }, note: 'Resultant 5.0 m s<sup>−1</sup> at 53.1° to the bank (downstream). The boat drifts downstream.' },
+    { name: 'Boat aims upstream to cross straight over (2.5 in water, river 1.5)', q: 'vel', op: 'add', v: { A: 2.5, tA: 126.869898, B: 1.5, tB: 0, phi: 0, psi: 90 }, note: 'Heading 36.9° upstream of straight across gives a resultant of 2.0 m s<sup>−1</sup> straight across. Try the aim button.' },
+    { name: 'Plane 200 km h⁻¹ heading north, wind from the west at 50 km h⁻¹', q: 'gen', op: 'add', v: { A: 200, tA: 90, B: 50, tB: 0, phi: 0, psi: 90 }, note: 'A wind FROM the west blows TOWARDS the east. Ground velocity 206 km h<sup>−1</sup> at 14.0° east of north (76.0° from +x). Units here are km h<sup>−1</sup>.' },
+    { name: 'Plane must fly due north: wind 50 km h⁻¹ from the west', q: 'gen', op: 'add', v: { A: 200, tA: 104.477512, B: 50, tB: 0, phi: 0, psi: 90 }, note: 'Heading 14.5° west of north cancels the wind: ground speed √(200² − 50²) = 194 km h<sup>−1</sup>.' },
+    { name: 'Ball rebounds from a wall: 8 m s⁻¹ in, 6 m s⁻¹ out', q: 'vel', op: 'dv', v: { A: 8, tA: 0, B: 6, tB: 180, phi: 0, psi: 90 }, note: 'Δv = v₂ − v₁ = (−6) − (+8) = −14 m s<sup>−1</sup>: magnitude 14, not 2.' },
+    { name: 'Turning a corner at constant speed 10 m s⁻¹ (east → north)', q: 'vel', op: 'dv', v: { A: 10, tA: 0, B: 10, tB: 90, phi: 0, psi: 90 }, note: 'Speed is unchanged but velocity changes: |Δv| = 10√2 = 14.1 m s<sup>−1</sup>, pointing north-west.' },
+    { name: 'Two forces at right angles: 3.0 N and 4.0 N', q: 'force', op: 'add', v: { A: 4, tA: 0, B: 3, tB: 90, phi: 0, psi: 0 }, note: 'R = 5.0 N at 36.9° to the 4.0 N force.' },
+    { name: 'Two equal forces of 10 N at 120°', q: 'force', op: 'add', v: { A: 10, tA: 0, B: 10, tB: 120, phi: 0, psi: 0 }, note: 'Resultant 10 N along the bisector (60°). Not 20 N.' },
+    { name: 'Resolve a 20 N force at 30° above the horizontal', q: 'force', op: 'res', v: { A: 20, tA: 30, B: 0, tB: 0, phi: 0, psi: 0 }, note: 'Horizontal 20 cos 30° = 17.3 N, vertical 20 sin 30° = 10.0 N.' },
+    { name: 'Resolve a weight of 50 N along and perpendicular to a 30° slope', q: 'force', op: 'res', v: { A: 50, tA: -90, B: 0, tB: 0, phi: 30, psi: 0 }, note: 'Along the slope: 50 sin 30° = 25 N (down the slope). Perpendicular: 50 cos 30° = 43.3 N (into the slope).' },
+    { name: 'Displacement: 3.0 km east then 4.0 km north', q: 'disp', op: 'add', v: { A: 3, tA: 0, B: 4, tB: 90, phi: 0, psi: 0 }, note: 'Distance travelled 7.0 km (scalar); displacement 5.0 km at 53.1° north of east (vector). Units here are km.' }
+  ], function (p) { qty.set(p.q, true); op.set(p.op, true); aimMsg = ''; prm.set(p.v); });
+
+  ui.notes(noteCard, [
+    '<b>Scalars</b> have magnitude only (distance, speed, mass, time, energy, power, pressure). <b>Vectors</b> have magnitude and direction (displacement, velocity, acceleration, force, weight, momentum).',
+    'Add vectors <b>tip to tail</b>; the resultant goes from the first tail to the last tip. Magnitudes only add when the vectors are parallel.',
+    'Subtracting: A − B = A + (−B). A change in velocity Δv = v₂ − v₁ (final minus initial).',
+    'Components of a vector of size F at angle θ to an axis: F cos θ along the axis, F sin θ perpendicular to it.',
+    'Wind or current “<b>from</b> the west” moves <b>towards</b> the east.',
+    'Give a direction with the resultant: an angle to a stated line (e.g. “53° to the bank”).'
+  ]);
+
+  var res = null;
+  function sq(x) { return x < 0 ? '(' + U.sf(x) + ')²' : U.sf(x) + '²'; }
+  function V(m, t) { return DY.polar(m, t); }
+  function update() {
+    var v = prm.values, o = op.get(), u = QTY[qty.get()].u;
+    var resolving = o === 'res';
+    ['B', 'tB'].forEach(function (k) { prm.show(k, !resolving); });
+    prm.show('psi', o === 'add'); btnRow.style.display = o === 'add' ? '' : 'none';
+    para.el.style.display = o === 'add' ? '' : 'none';
+    var A = V(v.A, v.tA), B = V(v.B, v.tB), Rv, first, second, lab2;
+    if (o === 'add') { Rv = DY.add(A, B); first = { v: A, n: 'A' }; second = { v: B, n: 'B' }; }
+    else if (o === 'sub') { Rv = DY.add(A, DY.scale(B, -1)); first = { v: A, n: 'A' }; second = { v: DY.scale(B, -1), n: '−B' }; }
+    else if (o === 'dv') { Rv = DY.add(B, DY.scale(A, -1)); first = { v: B, n: 'B (v₂)' }; second = { v: DY.scale(A, -1), n: '−A (−v₁)' }; }
+    else { Rv = A; first = { v: A, n: 'A' }; second = null; }
+    var tiny = 1e-6 * Math.max(v.A, v.B, 1e-9);
+    Rv = Rv.map(function (x) { return Math.abs(x) < tiny ? 0 : x; });
+    var ma = DY.magAng(Rv), ph = U.rad(v.phi), ex = [Math.cos(ph), Math.sin(ph)], ey = [-Math.sin(ph), Math.cos(ph)];
+    var Rx = Rv[0] * ex[0] + Rv[1] * ex[1], Ry = Rv[0] * ey[0] + Rv[1] * ey[1];
+    if (Math.abs(Rx) < tiny) Rx = 0; if (Math.abs(Ry) < tiny) Ry = 0;
+    res = { A: A, B: B, R: Rv, first: first, second: second, Rx: Rx, Ry: Ry, ex: ex, ey: ey };
+    var ang = function (x) { return U.dp(x, 1) + '°'; };
+    var nm = QTY[qty.get()].n;
+    R.clear();
+    if (aimMsg) R.badge(aimMsg, 'warn');
+    R.badge('Angles measured anticlockwise from the +x axis' + (Math.abs(v.phi) > 1e-9 ? '; components along x′ at ' + ang(v.phi) + ' and y′ perpendicular' : ''), 'info');
+    R.head('Components (x, y)');
+    R.eq('A<sub>x</sub>', U.num(v.A, 4) + ' cos ' + ang(v.tA), A[0], u); R.eq('A<sub>y</sub>', U.num(v.A, 4) + ' sin ' + ang(v.tA), A[1], u);
+    if (!resolving) {
+      R.eq('B<sub>x</sub>', U.num(v.B, 4) + ' cos ' + ang(v.tB), B[0], u); R.eq('B<sub>y</sub>', U.num(v.B, 4) + ' sin ' + ang(v.tB), B[1], u);
+      var sx = o === 'add' ? ' + ' : ' − ', a1 = o === 'dv' ? 'B' : 'A', a2 = o === 'dv' ? 'A' : 'B', p1 = o === 'dv' ? B : A, p2 = o === 'dv' ? A : B;
+      R.head('Result R = ' + a1 + sx + a2 + (o === 'dv' ? ' (Δv)' : ''));
+      R.eq('R<sub>x</sub>', a1 + '<sub>x</sub>' + sx + a2 + '<sub>x</sub> = ' + U.sf(p1[0]) + sx + '(' + U.sf(p2[0]) + ')', Rv[0], u);
+      R.eq('R<sub>y</sub>', a1 + '<sub>y</sub>' + sx + a2 + '<sub>y</sub> = ' + U.sf(p1[1]) + sx + '(' + U.sf(p2[1]) + ')', Rv[1], u);
+      R.eq('|R|', '√(R<sub>x</sub>² + R<sub>y</sub>²) = √(' + sq(Rv[0]) + ' + ' + sq(Rv[1]) + ')', ma.mag, u);
+      if (ma.mag > 1e-9) R.eq('direction', 'tan⁻¹(R<sub>y</sub> ÷ R<sub>x</sub>), quadrant from the signs', ang(ma.ang), '');
+      else R.badge('The result is zero: the vectors cancel, so it has no direction', 'ok');
+      var pv = first.v, qv = second.v, mp = Math.hypot(pv[0], pv[1]), mq = Math.hypot(qv[0], qv[1]);
+      if (mp > 1e-12 && mq > 1e-12) {
+        var between = U.deg(Math.acos(U.clamp((pv[0] * qv[0] + pv[1] * qv[1]) / (mp * mq), -1, 1)));
+        R.head('Check with the cosine rule: angle between ' + first.n + ' and ' + second.n + ' (tail to tail) = ' + ang(between));
+        R.eq('|R|', '√(' + U.sf(mp) + '² + ' + U.sf(mq) + '² + 2(' + U.sf(mp) + ')(' + U.sf(mq) + ') cos ' + ang(between) + ')', Math.sqrt(Math.max(0, mp * mp + mq * mq + 2 * mp * mq * Math.cos(U.rad(between)))), u);
+      }
+    } else {
+      R.head('Resolve A along x′ (at ' + ang(v.phi) + ') and y′ (at ' + ang(v.phi + 90) + ')');
+      var rel = v.tA - v.phi;
+      R.eq('A<sub>x′</sub>', U.num(v.A, 4) + ' cos(' + ang(v.tA) + ' − ' + ang(v.phi) + ') = ' + U.num(v.A, 4) + ' cos ' + ang(rel), Rx, u);
+      R.eq('A<sub>y′</sub>', U.num(v.A, 4) + ' sin ' + ang(rel), Ry, u);
+      R.eq('check', '√(A<sub>x′</sub>² + A<sub>y′</sub>²)', Math.hypot(Rx, Ry), u);
+    }
+    if (!resolving && Math.abs(v.phi) > 1e-9) { R.head('Components of R along the rotated axes'); R.eq('R<sub>x′</sub>', 'R · x̂′', Rx, u); R.eq('R<sub>y′</sub>', 'R · ŷ′', Ry, u); }
+    if (nm === 'velocity' && o === 'dv') R.badge('Δv is a vector: an object at constant speed that changes direction has a non-zero Δv', 'info');
+    R.render();
+    var rows = [['A', A]].concat(resolving ? [] : [['B', B]]).concat([['R', Rv]]);
+    tblEl.innerHTML = '<table class="tbl"><tr><th>vector</th><th>x</th><th>y</th><th>magnitude</th><th>direction</th></tr>' +
+      rows.map(function (r) { var m = DY.magAng(r[1]); return '<tr><td>' + r[0] + '</td><td>' + U.sf(r[1][0]) + '</td><td>' + U.sf(r[1][1]) + '</td><td>' + U.sf(m.mag) + '</td><td>' + (m.mag > 1e-9 ? U.dp(m.ang, 1) + '°' : '—') + '</td></tr>'; }).join('') + '</table>';
+    draw();
+  }
+
+  function draw() {
+    if (!res) return;
+    var c, col = ui.colors(), pts = [[0, 0], res.first.v, res.R];
+    if (res.second) { pts.push(DY.add(res.first.v, res.second.v)); pts.push(res.second.v); }
+    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+    var span = Math.max(x1 - x0, y1 - y0, 1e-6), m = span * 0.12;
+    vp.fit(x0 - m, x1 + m, y0 - m, y1 + m);
+    c = vp.begin();
+    var O = vp.P(0, 0), P = function (v) { return vp.P(v[0], v[1]); };
+    // axes through origin
+    c.strokeStyle = col.grid; c.lineWidth = 1; c.beginPath(); c.moveTo(0, O[1]); c.lineTo(vp.w, O[1]); c.moveTo(O[0], 0); c.lineTo(O[0], vp.h); c.stroke();
+    D.label(c, '+x', vp.w - 14, O[1] - 10, col.muted, { size: 11 }); D.label(c, '+y', O[0] + 12, 10, col.muted, { size: 11 });
+    var f = P(res.first.v);
+    if (res.second) {
+      var tip = P(DY.add(res.first.v, res.second.v));
+      if (para.get() && op.get() === 'add') {
+        var sb = P(res.second.v);
+        D.arrow(c, O[0], O[1], sb[0], sb[1], col.s2, { dash: [5, 4], width: 1.4 });
+        D.line(c, [sb, tip], col.s1, { dash: [5, 4], width: 1.2 });
+      }
+      D.arrow(c, O[0], O[1], f[0], f[1], col.s1, { label: res.first.n });
+      D.arrow(c, f[0], f[1], tip[0], tip[1], col.s2, { label: res.second.n });
+    } else D.arrow(c, O[0], O[1], f[0], f[1], col.s1, { label: 'A' });
+    var Rp = P(res.R), rm = DY.magAng(res.R);
+    if (res.second && rm.mag > 1e-9) D.arrow(c, O[0], O[1], Rp[0], Rp[1], col.resultant, { width: 3, label: 'R = ' + U.sf(rm.mag).replace(/<[^>]+>/g, '') });
+    if (comps.get() && rm.mag > 1e-9) {
+      var kx = res.Rx, ky = res.Ry, cx = [res.ex[0] * kx, res.ex[1] * kx], cy = [res.ey[0] * ky, res.ey[1] * ky];
+      var pcx = P(cx);
+      D.arrow(c, O[0], O[1], pcx[0], pcx[1], col.component, { dash: [5, 4], width: 1.8, label: 'x′: ' + U.sf(kx).replace(/<[^>]+>/g, '') });
+      var e2 = P(DY.add(cx, cy));
+      D.arrow(c, pcx[0], pcx[1], e2[0], e2[1], col.component, { dash: [5, 4], width: 1.8, label: 'y′: ' + U.sf(ky).replace(/<[^>]+>/g, '') });
+      if (Math.abs(prm.values.phi) > 1e-9) {
+        var L = span * 0.6, a = P([res.ex[0] * L, res.ex[1] * L]), b = P([-res.ex[0] * L, -res.ex[1] * L]);
+        D.line(c, [b, a], col.component, { dash: [2, 4], width: 1 }); D.label(c, 'x′', a[0], a[1] - 10, col.component, { size: 11 });
+      }
+    }
+    if (rm.mag > 1e-9) D.arc(c, O[0], O[1], 26, 0, U.rad(rm.ang), col.muted, U.dp(rm.ang, 1) + '°');
+  }
+
+  ui.onTheme(draw);
+  vp.onResize = draw;
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

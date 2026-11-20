@@ -1,0 +1,654 @@
+{
+ "9702_m18_qp_42": {
+  "2b(i)": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-ideal-gas",
+   "note": "new volume at constant pressure: ideal gas equation"
+  },
+  "2c(i)": {
+   "primary_tag": "9702-16",
+   "qtype": "9702-first-law",
+   "note": "external work done p dV in expansion"
+  },
+  "2c(ii)": {
+   "primary_tag": "9702-16",
+   "qtype": "9702-first-law",
+   "note": "total thermal energy = dU + work (first law)"
+  },
+  "4a": {
+   "qtype": "9702-damping",
+   "note": "natural frequency in a resonance question"
+  },
+  "4b(i)": {
+   "qtype": "9702-damping",
+   "note": "name the effect: resonance"
+  },
+  "4c": {
+   "qtype": "9702-damping",
+   "note": "example where resonance is useful"
+  },
+  "10c": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-induction",
+   "note": "e.m.f. induced in coil by a.c. in solenoid: induction"
+  },
+  "11a": {
+   "primary_tag": "9702-22",
+   "qtype": "9702-energy-levels",
+   "note": "band theory: metal resistance vs temperature (quantum physics, energy bands)"
+  },
+  "11b": {
+   "primary_tag": "9702-22",
+   "qtype": "9702-energy-levels",
+   "note": "band theory: LDR resistance vs light intensity"
+  }
+ },
+ "9702_m19_qp_42": {
+  "2a(ii)": {
+   "qtype": "9702-kinetic-theory",
+   "note": "meaning of mean-square speed <c2>"
+  },
+  "4c": {
+   "primary_tag": "9702-LEGACY-communication",
+   "qtype": "9702-communication",
+   "note": "geostationary vs polar-orbiting satellites for communication (legacy comms syllabus)"
+  },
+  "8a(i)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-magnetic-force",
+   "note": "direction of force on current-carrying wire in magnet (d.c.)"
+  },
+  "8a(ii)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-magnetic-force",
+   "note": "direction of current from force on wire (d.c.)"
+  },
+  "11c": {
+   "qtype": "9702-energy-levels",
+   "note": "band theory: photon absorption across forbidden band in semiconductor"
+  },
+  "12a(i)": {
+   "qtype": "9702-binding-energy",
+   "note": "name the reaction: fission"
+  },
+  "12a(ii)": {
+   "qtype": "9702-binding-energy",
+   "note": "complete fission equation"
+  }
+ },
+ "9702_m20_qp_42": {
+  "2c": {
+   "qtype": "9702-kinetic-theory",
+   "note": "pressure explained by molecular collisions (kinetic theory)"
+  },
+  "12b(i)": {
+   "qtype": "9702-binding-energy",
+   "note": "balance fission equation"
+  },
+  "12b(ii)": {
+   "qtype": "9702-binding-energy",
+   "note": "name the reaction: fission"
+  }
+ },
+ "9702_m21_qp_42": {
+  "1c(ii)": {
+   "qtype": "9702-orbits",
+   "note": "orbital KE = GMm/2r from gravitational force as centripetal force"
+  },
+  "3a": {
+   "primary_tag": "9702-14",
+   "qtype": "9702-heat-capacity",
+   "note": "kinetic model structure of solid in change-of-phase question (not ideal gases)"
+  },
+  "3c(i)": {
+   "primary_tag": "9702-14",
+   "qtype": "9702-heat-capacity",
+   "note": "melting point from heating curve"
+  },
+  "3c(iii)": {
+   "primary_tag": "9702-14",
+   "qtype": "9702-heat-capacity",
+   "note": "heating-curve gradients: specific heat capacities of phases"
+  },
+  "4b(i)": {
+   "qtype": "9702-shm",
+   "note": "restoring force from springs (resistive forces negligible)"
+  },
+  "4b(ii)": {
+   "qtype": "9702-shm",
+   "note": "maximum acceleration"
+  },
+  "4b(iii)": {
+   "qtype": "9702-shm",
+   "note": "period from a = -omega^2 x"
+  },
+  "4b(iv)": {
+   "qtype": "9702-shm",
+   "note": "period independent of amplitude"
+  },
+  "8a(i)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-magnetic-force",
+   "note": "field direction around current-carrying wire"
+  },
+  "8a(ii)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-magnetic-force",
+   "note": "force between parallel wires"
+  },
+  "8a(iii)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-magnetic-force",
+   "note": "forces between parallel wires equal (N3)"
+  },
+  "9c(i)": {
+   "primary_tag": "9702-17",
+   "qtype": "9702-damping",
+   "note": "name the phenomenon: (electromagnetic) damping"
+  }
+ },
+ "9702_s18_qp_41": {
+  "3a(ii)": {
+   "qtype": "9702-kinetic-theory",
+   "note": "internal energy of ideal gas = molecular KE proportional to T"
+  },
+  "5a(iii)": {
+   "primary_tag": "9702-LEGACY-communication",
+   "qtype": "9702-communication",
+   "note": "typical satellite communication frequency"
+  },
+  "7b(i)": {
+   "qtype": "9702-capacitors",
+   "note": "reed-switch charge Q=It, not exponential discharge"
+  },
+  "7b(ii)": {
+   "qtype": "9702-capacitors",
+   "note": "reed-switch charge per cycle"
+  },
+  "7b(iii)": {
+   "qtype": "9702-capacitors",
+   "note": "C = Q/V"
+  },
+  "11a(ii)": {
+   "qtype": "9702-photoelectric",
+   "note": "photoelectric evidence for particulate light"
+  }
+ },
+ "9702_s18_qp_42": {
+  "3a": {
+   "primary_tag": "9702-14",
+   "qtype": "9702-heat-capacity",
+   "note": "latent heat of melting explained by molecular PE (thermal properties of matter)"
+  },
+  "4b(ii)1": {
+   "qtype": "9702-shm",
+   "note": "angular frequency from a = -(2k/m)x"
+  },
+  "4b(ii)2": {
+   "qtype": "9702-shm",
+   "note": "period from omega"
+  },
+  "5b(i)": {
+   "primary_tag": "9702-LEGACY-communication",
+   "qtype": "9702-communication",
+   "note": "FM carrier wave: modulation, not damping"
+  },
+  "8c": {
+   "qtype": "9702-charged-particle",
+   "note": "path of ion of different mass in magnetic field"
+  }
+ },
+ "9702_s18_qp_43": {
+  "3a(ii)": {
+   "qtype": "9702-kinetic-theory",
+   "note": "internal energy of ideal gas = molecular KE proportional to T"
+  },
+  "5a(iii)": {
+   "primary_tag": "9702-LEGACY-communication",
+   "qtype": "9702-communication",
+   "note": "typical satellite communication frequency"
+  },
+  "7b(i)": {
+   "qtype": "9702-capacitors",
+   "note": "reed-switch charge Q=It, not exponential discharge"
+  },
+  "7b(ii)": {
+   "qtype": "9702-capacitors",
+   "note": "reed-switch charge per cycle"
+  },
+  "7b(iii)": {
+   "qtype": "9702-capacitors",
+   "note": "C = Q/V"
+  },
+  "11a(ii)": {
+   "qtype": "9702-photoelectric",
+   "note": "photoelectric evidence for particulate light"
+  }
+ },
+ "9702_s19_qp_41": {
+  "2a(ii)": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-ideal-gas",
+   "note": "final temperature at constant pressure from V/T"
+  },
+  "11a": {
+   "qtype": "9702-photoelectric",
+   "note": "photoelectric evidence for particulate nature of e.m. radiation"
+  },
+  "12b(i)": {
+   "qtype": "9702-binding-energy",
+   "note": "mass change and energy released in alpha decay (mass-energy)"
+  },
+  "12b(ii)": {
+   "qtype": "9702-binding-energy",
+   "note": "reasons alpha KE < energy released (recoil, gamma)"
+  }
+ },
+ "9702_s19_qp_42": {
+  "5b(i)": {
+   "primary_tag": "9702-LEGACY-communication",
+   "qtype": "9702-communication",
+   "note": "attenuation per unit length of transmission line in dB"
+  },
+  "7a": {
+   "primary_tag": "9702-22",
+   "qtype": "9702-energy-levels",
+   "note": "band theory: intrinsic semiconductor resistance vs temperature (quantum physics)"
+  },
+  "10c": {
+   "primary_tag": "9702-21",
+   "qtype": "9702-ac",
+   "note": "transformer turns ratio and r.m.s. e.m.f. (transformer in a.c. topic on 2019-21 syllabus)"
+  }
+ },
+ "9702_s19_qp_43": {
+  "2a(ii)": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-ideal-gas",
+   "note": "final temperature at constant pressure from V/T"
+  },
+  "11a": {
+   "qtype": "9702-photoelectric",
+   "note": "photoelectric evidence for particulate nature of e.m. radiation"
+  },
+  "12b(i)": {
+   "qtype": "9702-binding-energy",
+   "note": "mass change and energy released in alpha decay (mass-energy)"
+  },
+  "12b(ii)": {
+   "qtype": "9702-binding-energy",
+   "note": "reasons alpha KE < energy released (recoil, gamma)"
+  }
+ },
+ "9702_s20_qp_41": {
+  "1c(ii)": {
+   "primary_tag": "9702-13",
+   "qtype": "9702-orbits",
+   "note": "binary stars: equal gravitational force provides centripetal force, mass ratio"
+  },
+  "2b": {
+   "qtype": "9702-kinetic-theory",
+   "note": "ideal gas: no intermolecular forces so internal energy = molecular KE"
+  },
+  "4b(ii)": {
+   "qtype": "9702-ultrasound",
+   "note": "attenuation coefficient of ultrasound, not X-ray"
+  },
+  "10b": {
+   "primary_tag": "9702-22",
+   "qtype": "9702-energy-levels",
+   "note": "band theory: LDR resistance vs light intensity"
+  }
+ },
+ "9702_s20_qp_42": {
+  "9a(i)": {
+   "qtype": "9702-charged-particle",
+   "note": "electron circular path in magnetic field: field direction"
+  },
+  "9a(ii)": {
+   "qtype": "9702-charged-particle",
+   "note": "electron speed from radius in magnetic field"
+  },
+  "9b(i)": {
+   "primary_tag": "9702-20",
+   "note": "velocity selector (crossed E and B fields) is magnetic-fields topic"
+  },
+  "9b(ii)": {
+   "primary_tag": "9702-20",
+   "note": "velocity selector (crossed E and B fields)"
+  },
+  "9c": {
+   "primary_tag": "9702-20",
+   "note": "alpha particle in crossed E and B fields"
+  },
+  "10b(i)": {
+   "primary_tag": "9702-21",
+   "qtype": "9702-ac",
+   "note": "function of a transformer (a.c. topic on 2019-21 syllabus)"
+  },
+  "11a": {
+   "qtype": "9702-energy-levels",
+   "note": "band theory: copper resistance vs temperature"
+  },
+  "12b(i)": {
+   "qtype": "9702-binding-energy",
+   "note": "energy equivalence of 1 u (mass-energy)"
+  },
+  "12c": {
+   "qtype": "9702-binding-energy",
+   "note": "binding energy per nucleon argument for stability of He-4"
+  }
+ },
+ "9702_s20_qp_43": {
+  "1c(ii)": {
+   "primary_tag": "9702-13",
+   "qtype": "9702-orbits",
+   "note": "binary stars: equal gravitational force provides centripetal force, mass ratio"
+  },
+  "2b": {
+   "qtype": "9702-kinetic-theory",
+   "note": "ideal gas: no intermolecular forces so internal energy = molecular KE"
+  },
+  "4b(ii)": {
+   "qtype": "9702-ultrasound",
+   "note": "attenuation coefficient of ultrasound, not X-ray"
+  },
+  "10b": {
+   "primary_tag": "9702-22",
+   "qtype": "9702-energy-levels",
+   "note": "band theory: LDR resistance vs light intensity"
+  }
+ },
+ "9702_s21_qp_41": {
+  "7b(i)": {
+   "qtype": "9702-capacitors",
+   "note": "switched capacitor I = fCV, not exponential discharge"
+  },
+  "7b(ii)": {
+   "qtype": "9702-capacitors",
+   "note": "capacitance from I = fCV"
+  }
+ },
+ "9702_s21_qp_42": {
+  "6b(i)": {
+   "qtype": "9702-capacitors",
+   "note": "switched capacitor I = CVf, not exponential discharge"
+  },
+  "6b(ii)": {
+   "qtype": "9702-capacitors",
+   "note": "capacitance from I = CVf"
+  },
+  "8b": {
+   "primary_tag": "9702-18",
+   "qtype": "9702-charged-particle",
+   "note": "electron accelerated through p.d.: qV = mv^2/2"
+  }
+ },
+ "9702_s21_qp_43": {
+  "7b(i)": {
+   "qtype": "9702-capacitors",
+   "note": "switched capacitor I = fCV, not exponential discharge"
+  },
+  "7b(ii)": {
+   "qtype": "9702-capacitors",
+   "note": "capacitance from I = fCV"
+  }
+ },
+ "9702_w18_qp_41": {
+  "6b(i)": {
+   "qtype": "9702-charged-particle",
+   "note": "helium nucleus accelerated between plates: energy qV"
+  },
+  "6b(ii)": {
+   "qtype": "9702-charged-particle",
+   "note": "speed of helium nucleus accelerated between plates"
+  },
+  "8c": {
+   "qtype": "9702-charged-particle",
+   "note": "charged particle path in magnetic field r=mv/Bq"
+  },
+  "9b(i)": {
+   "qtype": "9702-induction",
+   "note": "e.m.f. induced in coil C when flux reversed"
+  },
+  "9b(ii)": {
+   "qtype": "9702-induction",
+   "note": "induced e.m.f. (and Hall voltage) before/during/after current reversal"
+  },
+  "10": {
+   "primary_tag": "9702-22",
+   "qtype": "9702-energy-levels",
+   "note": "band theory: semiconductor resistance vs temperature (not temperature topic)"
+  },
+  "11c(i)": {
+   "primary_tag": "9702-23",
+   "qtype": "9702-binding-energy",
+   "note": "mass change from photon energy E=mc^2"
+  }
+ },
+ "9702_w18_qp_42": {
+  "5c(ii)": {
+   "primary_tag": "9702-LEGACY-communication",
+   "qtype": "9702-communication",
+   "note": "GHz satellite frequencies and uplink/downlink difference"
+  },
+  "12b(i)": {
+   "qtype": "9702-binding-energy",
+   "note": "identify particle in fusion reaction"
+  }
+ },
+ "9702_w18_qp_43": {
+  "6b(i)": {
+   "qtype": "9702-charged-particle",
+   "note": "helium nucleus accelerated between plates: energy qV"
+  },
+  "6b(ii)": {
+   "qtype": "9702-charged-particle",
+   "note": "speed of helium nucleus accelerated between plates"
+  },
+  "8c": {
+   "qtype": "9702-charged-particle",
+   "note": "charged particle path in magnetic field r=mv/Bq"
+  },
+  "9b(i)": {
+   "qtype": "9702-induction",
+   "note": "e.m.f. induced in coil C when flux reversed"
+  },
+  "9b(ii)": {
+   "qtype": "9702-induction",
+   "note": "induced e.m.f. (and Hall voltage) before/during/after current reversal"
+  },
+  "10": {
+   "primary_tag": "9702-22",
+   "qtype": "9702-energy-levels",
+   "note": "band theory: semiconductor resistance vs temperature (not temperature topic)"
+  },
+  "11c(i)": {
+   "primary_tag": "9702-23",
+   "qtype": "9702-binding-energy",
+   "note": "mass change from photon energy E=mc^2"
+  }
+ },
+ "9702_w19_qp_42": {
+  "2a(i)": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-kinetic-theory",
+   "note": "Brownian motion observation (kinetic theory)"
+  },
+  "2a(ii)": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-kinetic-theory",
+   "note": "Brownian motion as evidence for random molecular motion"
+  },
+  "4c(i)": {
+   "qtype": "9702-damping",
+   "note": "resonance curve of forced oscillation"
+  },
+  "4c(ii)": {
+   "qtype": "9702-damping",
+   "note": "effect of increased damping on resonance curve"
+  },
+  "5c(ii)": {
+   "qtype": "9702-ultrasound",
+   "note": "ultrasound attenuation in fat and muscle, not X-ray"
+  },
+  "10a": {
+   "primary_tag": "9702-22",
+   "qtype": "9702-energy-levels",
+   "note": "band theory: intrinsic semiconductor resistance vs temperature"
+  },
+  "11c": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-induction",
+   "note": "average induced e.m.f. when d.c. in solenoid reversed (Faraday)"
+  }
+ },
+ "9702_w20_qp_41": {
+  "8a(i)": {
+   "qtype": "9702-magnetic-force",
+   "note": "Hall effect: force on moving electron"
+  },
+  "8a(ii)": {
+   "qtype": "9702-magnetic-force",
+   "note": "Hall effect: faces with Hall voltage"
+  },
+  "8b": {
+   "qtype": "9702-magnetic-force",
+   "note": "Hall voltage reaches maximum (electric force balances magnetic)"
+  },
+  "8c": {
+   "qtype": "9702-magnetic-force",
+   "note": "Hall voltage calculation"
+  },
+  "8d": {
+   "qtype": "9702-magnetic-force",
+   "note": "Hall probes made of semiconductors"
+  },
+  "9c": {
+   "qtype": "9702-induction",
+   "note": "laminated core reduces eddy currents"
+  }
+ },
+ "9702_w20_qp_42": {
+  "11a": {
+   "qtype": "9702-photoelectric",
+   "note": "threshold frequency as evidence for particulate nature (photoelectric)"
+  }
+ },
+ "9702_w20_qp_43": {
+  "8a(i)": {
+   "qtype": "9702-magnetic-force",
+   "note": "Hall effect: force on moving electron"
+  },
+  "8a(ii)": {
+   "qtype": "9702-magnetic-force",
+   "note": "Hall effect: faces with Hall voltage"
+  },
+  "8b": {
+   "qtype": "9702-magnetic-force",
+   "note": "Hall voltage reaches maximum (electric force balances magnetic)"
+  },
+  "8c": {
+   "qtype": "9702-magnetic-force",
+   "note": "Hall voltage calculation"
+  },
+  "8d": {
+   "qtype": "9702-magnetic-force",
+   "note": "Hall probes made of semiconductors"
+  },
+  "9c": {
+   "qtype": "9702-induction",
+   "note": "laminated core reduces eddy currents"
+  }
+ },
+ "9702_w21_qp_41": {
+  "3b(i)": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-ideal-gas",
+   "note": "T = pV/Nk (ideal gas equation)"
+  },
+  "6c": {
+   "qtype": "9702-capacitors",
+   "note": "change in energy stored as plates moved, not discharge"
+  },
+  "9b(i)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-induction",
+   "note": "effect of rotation speed on induced e.m.f. explained by Faraday's law"
+  },
+  "9c": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-induction",
+   "note": "load resistor: induced current opposes rotation (Lenz)"
+  },
+  "10a(i)": {
+   "qtype": "9702-photoelectric",
+   "note": "photoelectric effect as evidence for particulate nature of e.m. radiation"
+  },
+  "10c(i)": {
+   "primary_tag": "9702-18",
+   "qtype": "9702-charged-particle",
+   "note": "electron accelerated through p.d.: qV = mv^2/2"
+  }
+ },
+ "9702_w21_qp_42": {
+  "1c": {
+   "qtype": "9702-vertical-circle",
+   "note": "contact with track at top of vertical loop"
+  },
+  "1d": {
+   "qtype": "9702-vertical-circle",
+   "note": "vertical loop: mass independence"
+  },
+  "3a(i)": {
+   "qtype": "9702-kinetic-theory",
+   "note": "elastic collisions assumption of kinetic theory"
+  },
+  "3b(i)": {
+   "qtype": "9702-kinetic-theory",
+   "note": "kinetic-theory derivation: momentum change of molecule"
+  },
+  "3b(ii)": {
+   "qtype": "9702-kinetic-theory",
+   "note": "kinetic-theory derivation: time between collisions"
+  },
+  "3b(iii)": {
+   "qtype": "9702-kinetic-theory",
+   "note": "kinetic-theory derivation: force on face"
+  },
+  "3b(iv)": {
+   "qtype": "9702-kinetic-theory",
+   "note": "kinetic-theory derivation: pressure on face"
+  }
+ },
+ "9702_w21_qp_43": {
+  "3b(i)": {
+   "primary_tag": "9702-15",
+   "qtype": "9702-ideal-gas",
+   "note": "T = pV/Nk (ideal gas equation)"
+  },
+  "6c": {
+   "qtype": "9702-capacitors",
+   "note": "change in energy stored as plates moved, not discharge"
+  },
+  "9b(i)": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-induction",
+   "note": "effect of rotation speed on induced e.m.f. explained by Faraday's law"
+  },
+  "9c": {
+   "primary_tag": "9702-20",
+   "qtype": "9702-induction",
+   "note": "load resistor: induced current opposes rotation (Lenz)"
+  },
+  "10a(i)": {
+   "qtype": "9702-photoelectric",
+   "note": "photoelectric effect as evidence for particulate nature of e.m. radiation"
+  },
+  "10c(i)": {
+   "primary_tag": "9702-18",
+   "qtype": "9702-charged-particle",
+   "note": "electron accelerated through p.d.: qV = mv^2/2"
+  }
+ }
+}

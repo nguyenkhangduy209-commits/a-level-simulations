@@ -1,0 +1,1294 @@
+Cambridge International AS & A Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions May/June 2024
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen or correction fluid.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+This document has 24 pages. Any blank pages are indicated.
+[Turn over
+*7235643785*
+* 0019655342201 *
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:3)(cid:1)(cid:2)(cid:44)
+(cid:172)(cid:79)(cid:138)(cid:62)(cid:160)(cid:51)(cid:109)(cid:69)(cid:119)(cid:105)(cid:113)(cid:53)(cid:162)(cid:76)(cid:161)(cid:70)(cid:128)(cid:87)
+(cid:172)(cid:149)(cid:151)(cid:106)(cid:72)(cid:165)(cid:64)(cid:105)(cid:92)(cid:109)(cid:132)(cid:104)(cid:155)(cid:76)(cid:129)(cid:57)(cid:84)(cid:130)
+(cid:165)(cid:85)(cid:53)(cid:149)(cid:117)(cid:53)(cid:101)(cid:117)(cid:149)(cid:85)(cid:133)(cid:149)(cid:149)(cid:53)(cid:133)(cid:149)(cid:165)(cid:85)
+DC (SL/SW) 329808/2
+© UCLES 2024
+
+* 0019655342202 *
+2
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:3)(cid:1)(cid:3)(cid:44)
+Data
+acceleration of free fall g = 9.81 m s–2
+speed of light in free space c = 3.00 × 108 m s–1
+elementary charge e = 1.60 × 10–19 C
+unified atomic mass unit 1 u = 1.66 × 10–27 kg
+rest mass of proton m = 1.67 × 10–27 kg
+p
+rest mass of electron m = 9.11 × 10–31 kg
+e
+Avogadro constant N = 6.02 × 1023 mol–1
+A
+molar gas constant R = 8.31 J K–1 mol–1
+Boltzmann constant k = 1.38 × 10–23 J K–1
+gravitational constant G = 6.67 × 10–11 N m2 kg–2
+permittivity of free space ε = 8.85 × 10–12 F m–1
+0
+1
+( = 8.99 × 109 m F–1)
+4rf
+0
+Planck constant h = 6.63 × 10–34 J s
+Stefan–Boltzmann constant σ = 5.67 × 10–8 W m–2 K–4
+Formulae
+uniformly accelerated motion s = ut + 1at 2
+2
+v 2 = u 2 + 2as
+hydrostatic pressure ∆p = ρg∆h
+upthrust F = ρgV
+f v
+Doppler effect for sound waves f = s
+o v!v
+s
+electric current I = Anvq
+resistors in series R = R + R + ...
+1 2
+1 1 1
+resistors in parallel = + + ...
+R R R
+1 2
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:179)(cid:237)(cid:197)(cid:247)(cid:233)(cid:241)(cid:181)(cid:290)(cid:201)(cid:291)(cid:200)(cid:254)(cid:215)
+© UCLES 2024 (cid:300)(cid:277)(cid:277)(cid:233)(cid:197)(cid:289)(cid:204)(cid:191)(cid:227)(cid:260)(cid:246)(cid:203)(cid:227)(cid:178)(cid:177)(cid:257)(cid:220)(cid:258) 9702/42/M/J/24
+(cid:293)(cid:261)(cid:229)(cid:277)(cid:181)(cid:213)(cid:293)(cid:277)(cid:229)(cid:277)(cid:213)(cid:213)(cid:277)(cid:245)(cid:293)(cid:213)(cid:197)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342203 *
+32
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:3)(cid:1)(cid:4)(cid:44)
+GM
+gravitational potential ϕ = –
+r
+GMm
+gravitational potential energy E = –
+P r
+Nm
+pressure of an ideal gas p = 1 〈c2〉
+3 V
+simple harmonic motion a = – ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ! ω (x 2-x2)
+0
+Q
+electric potential V =
+4rf r
+0
+Qq
+electrical potential energy E =
+P 4rf r
+0
+1 1 1
+capacitors in series = + + ...
+C C C
+1 2
+capacitors in parallel C = C + C + ...
+1 2
+t
+discharge of a capacitor x = x e- RC
+0
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ωt
+0
+radioactive decay x = x e– λt
+0
+0.693
+decay constant λ =
+t
+1
+2
+I (Z -Z )2
+intensity reflection coefficient R = 1 2
+I (Z +Z )2 0 1 2
+Stefan–Boltzmann law L = 4πσr 2T 4
+∆λ Df v
+Doppler redshift á á
+λ f c
+© UCLES 2024 (cid:300) (cid:300) (cid:207) (cid:277) (cid:266) (cid:278) (cid:190) (cid:234) (cid:288) (cid:189) (cid:179) (cid:295) (cid:237) (cid:200) (cid:197) (cid:175) (cid:247) (cid:214) (cid:233) (cid:246) (cid:241) (cid:267) (cid:181) (cid:254) (cid:290) (cid:247) (cid:201) (cid:202) (cid:289) (cid:293) (cid:200) (cid:257) (cid:254) (cid:236) (cid:215) (cid:258) 9702/42/M/J/24 [Turn over
+(cid:293)(cid:261)(cid:213)(cid:213)(cid:245)(cid:181)(cid:261)(cid:245)(cid:181)(cid:293)(cid:261)(cid:213)(cid:277)(cid:277)(cid:261)(cid:277)(cid:213)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342204 *
+4
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:3)(cid:1)(cid:5)(cid:44)
+1 (a) Define the radian.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) A circular metal disc spins horizontally about a vertical axis, as shown in Fig. 1.1.
+rotation
+metal disc
+axis
+modelling clay
+9.3 cm
+1.2 cm
+Fig. 1.1 (not to scale)
+A piece of modelling clay is attached to the disc.
+For the instant when the piece of modelling clay is in the position shown, draw on Fig. 1.1:
+(i) an arrow, labelled V, showing the direction of the velocity of the modelling clay [1]
+(ii) an arrow, labelled A, showing the direction of the acceleration of the modelling clay. [1]
+(c) The metal disc in Fig. 1.1 has a radius of 9.3 cm.
+The centre of gravity of the modelling clay is 1.2 cm from the rim of the disc and moves with a
+speed of 0.68 m s–1.
+(i) Calculate the angular speed ω of the disc.
+ω = .............................................. rad s–1 [2]
+(cid:300)(cid:205)(cid:266)(cid:190)(cid:288)(cid:179)(cid:237)(cid:197)(cid:247)(cid:233)(cid:241)(cid:181)(cid:290)(cid:203)(cid:291)(cid:200)(cid:256)(cid:215)
+© UCLES 2024 (cid:300)(cid:277)(cid:278)(cid:235)(cid:189)(cid:285)(cid:182)(cid:186)(cid:225)(cid:252)(cid:260)(cid:261)(cid:213)(cid:294)(cid:199)(cid:273)(cid:212)(cid:258) 9702/42/M/J/24
+(cid:293)(cid:181)(cid:261)(cid:213)(cid:181)(cid:181)(cid:261)(cid:213)(cid:213)(cid:197)(cid:245)(cid:213)(cid:213)(cid:277)(cid:229)(cid:277)(cid:197)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342205 *
+5
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:3)(cid:1)(cid:6)(cid:44)
+(ii) Calculate the acceleration a of the centre of gravity of the modelling clay.
+a = ................................................ m s–2 [2]
+(d) A second piece of modelling clay is attached to the disc in the position shown in Fig. 1.2.
+second piece of
+modelling clay
+first piece of
+modelling clay
+Fig. 1.2
+The second piece of modelling clay has a larger mass than the first piece.
+By placing one tick (3) in each row , complete Table 1.1 to show how the quantities indicated
+compare for the two pieces of modelling clay.
+Table 1.1
+less for second piece greater for second piece
+quantity same for both pieces than first piece than first piece
+angular speed
+linear speed
+acceleration
+[3]
+[Total: 10]
+© UCLES 2024 (cid:300) (cid:300) (cid:207) (cid:277) (cid:266) (cid:277) (cid:190) (cid:236) (cid:288) (cid:197) (cid:179) (cid:299) (cid:237) (cid:186) (cid:197) (cid:202) (cid:247) (cid:216) (cid:233) (cid:254) (cid:241) (cid:237) (cid:181) (cid:196) (cid:290) (cid:257) (cid:203) (cid:270) (cid:289) (cid:275) (cid:200) (cid:273) (cid:256) (cid:228) (cid:215) (cid:258) 9702/42/M/J/24 [Turn over
+(cid:293)(cid:181)(cid:245)(cid:277)(cid:245)(cid:213)(cid:293)(cid:181)(cid:197)(cid:181)(cid:229)(cid:213)(cid:213)(cid:245)(cid:197)(cid:213)(cid:213)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342206 *
+6
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:3)(cid:1)(cid:7)(cid:44)
+2 (a) With reference to thermal energy , state what is meant by two objects being in thermal
+equilibrium.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) Two cylinders X and Y each contain a sample of an ideal gas. The samples are in thermal
+equilibrium with each other.
+X has a volume of 0.0260 m3 and contains 0.740 mol of gas at a pressure of 1.20 × 105 Pa. Y
+has a volume of 0.0430 m3 and contains gas at a pressure of 2.90 × 105 Pa. Data for the two
+cylinders are shown in Fig. 2.1.
+X Y
+0.740 mol
+1.20 × 105 Pa 2.90 × 105 Pa
+0.0260 m3 0.0430 m3
+Fig. 2.1
+(i) Show that the temperature of the gas in X is 234 °C.
+[3]
+(ii) Determine the number N of molecules of the gas in Y. Explain your reasoning.
+N = ......................................................... [3]
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:179)(cid:237)(cid:197)(cid:247)(cid:233)(cid:241)(cid:181)(cid:290)(cid:202)(cid:289)(cid:197)(cid:254)(cid:215)
+© UCLES 2024 (cid:300)(cid:277)(cid:278)(cid:236)(cid:202)(cid:289)(cid:210)(cid:196)(cid:208)(cid:265)(cid:256)(cid:185)(cid:289)(cid:294)(cid:242)(cid:185)(cid:212)(cid:258) 9702/42/M/J/24
+(cid:293)(cid:293)(cid:213)(cid:277)(cid:245)(cid:245)(cid:293)(cid:277)(cid:261)(cid:213)(cid:261)(cid:213)(cid:277)(cid:245)(cid:293)(cid:277)(cid:261)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342207 *
+7
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:3)(cid:1)(cid:8)(cid:44)
+(iii) The gas in X consists of molecules that each have a mass that is four times the mass of
+a molecule of the gas in Y.
+Explain how the root-mean-square (r.m.s.) speed of the molecules in X compares with
+the r.m.s. speed of the molecules in Y.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+[Total: 10]
+© UCLES 2024 (cid:300) (cid:300) (cid:211) (cid:277) (cid:266) (cid:277) (cid:190) (cid:235) (cid:288) (cid:194) (cid:179) (cid:295) (cid:237) (cid:206) (cid:197) (cid:180) (cid:247) (cid:233) (cid:233) (cid:239) (cid:241) (cid:241) (cid:181) (cid:240) (cid:290) (cid:181) (cid:202) (cid:270) (cid:291) (cid:230) (cid:197) (cid:185) (cid:254) (cid:228) (cid:215) (cid:258) 9702/42/M/J/24 [Turn over
+(cid:293)(cid:293)(cid:229)(cid:213)(cid:181)(cid:277)(cid:261)(cid:245)(cid:277)(cid:229)(cid:213)(cid:213)(cid:277)(cid:277)(cid:261)(cid:213)(cid:277)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342208 *
+8
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:3)(cid:1)(cid:9)(cid:44)
+BLANK PAGE
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:179)(cid:237)(cid:197)(cid:247)(cid:233)(cid:241)(cid:181)(cid:290)(cid:204)(cid:289)(cid:197)(cid:256)(cid:215)
+© UCLES 2024 (cid:300)(cid:277)(cid:277)(cid:234)(cid:194)(cid:285)(cid:224)(cid:181)(cid:206)(cid:241)(cid:250)(cid:247)(cid:279)(cid:178)(cid:264)(cid:233)(cid:220)(cid:258) 9702/42/M/J/24
+(cid:293)(cid:213)(cid:245)(cid:213)(cid:245)(cid:277)(cid:261)(cid:213)(cid:245)(cid:261)(cid:229)(cid:213)(cid:213)(cid:277)(cid:229)(cid:213)(cid:261)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342209 *
+9
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:3)(cid:1)(cid:10)(cid:44)
+3 (a) State what is meant by the internal energy of a system.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) With reference to molecular kinetic and potential energies, describe and ex plain how the
+internal energy of the system changes when:
+(i) a gas is heated at constant volume so that its temperature increases
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(ii) a wire is stretched within its elastic limit at constant temperature.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+[Total: 8]
+© UCLES 2024 (cid:300) (cid:300) (cid:211) (cid:277) (cid:266) (cid:278) (cid:190) (cid:233) (cid:288) (cid:202) (cid:179) (cid:299) (cid:237) (cid:228) (cid:197) (cid:197) (cid:247) (cid:235) (cid:233) (cid:263) (cid:241) (cid:263) (cid:181) (cid:178) (cid:290) (cid:195) (cid:204) (cid:202) (cid:291) (cid:212) (cid:197) (cid:233) (cid:256) (cid:236) (cid:215) (cid:258) 9702/42/M/J/24 [Turn over
+(cid:293)(cid:213)(cid:261)(cid:277)(cid:181)(cid:245)(cid:293)(cid:181)(cid:293)(cid:245)(cid:245)(cid:213)(cid:213)(cid:245)(cid:197)(cid:277)(cid:277)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342210 *
+10
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:3)(cid:2)(cid:1)(cid:44)
+4 A block of mass m oscillates vertically on a spring, as shown in Fig. 4.1.
+spring
+block
+oscillations
+equilibrium position
+Fig. 4.1
+The acceleration a of the block varies with displacement x from its equilibrium position, as shown
+in Fig. 4.2.
+2A
+a
+A
+0
+–3Y –2Y –Y 0 Y 2Y 3Y
+x
+–A
+–2A
+Fig. 4.2
+The amplitude of the oscillations is 3Y and the maximum acceleration is 2A.
+(a) Explain how Fig. 4.2 shows that the oscillations of the block are simple harmonic.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:179)(cid:237)(cid:197)(cid:247)(cid:233)(cid:241)(cid:181)(cid:290)(cid:201)(cid:289)(cid:199)(cid:254)(cid:215)
+© UCLES 2024 (cid:300)(cid:277)(cid:280)(cid:234)(cid:203)(cid:287)(cid:232)(cid:227)(cid:212)(cid:250)(cid:241)(cid:205)(cid:251)(cid:180)(cid:292)(cid:273)(cid:228)(cid:258) 9702/42/M/J/24
+(cid:293)(cid:261)(cid:277)(cid:277)(cid:245)(cid:277)(cid:229)(cid:213)(cid:213)(cid:181)(cid:229)(cid:277)(cid:213)(cid:181)(cid:229)(cid:213)(cid:181)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342211 *
+11
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:3)(cid:2)(cid:2)(cid:44)
+(b) Deduce expressions, in terms of some or all of m, A and Y, for:
+(i) the angular frequency ω of the oscillations
+ω = ......................................................... [1]
+(ii) the maximum speed v of the oscillations
+0
+v = ......................................................... [2]
+0
+(iii) the energy E of the oscillations.
+E = ......................................................... [2]
+(c) The period of the oscillations is 0.75 s and the value of 3Y is 1.8 cm.
+Determine an expression for x in terms of time t, where x is in cm and t is in seconds.
+x = ......................................................... [2]
+[Total: 9]
+© UCLES 2024 (cid:300) (cid:300) (cid:211) (cid:277) (cid:266) (cid:279) (cid:190) (cid:233) (cid:288) (cid:195) (cid:179) (cid:297) (cid:237) (cid:236) (cid:197) (cid:211) (cid:247) (cid:229) (cid:233) (cid:256) (cid:241) (cid:256) (cid:181) (cid:284) (cid:290) (cid:223) (cid:201) (cid:204) (cid:291) (cid:184) (cid:199) (cid:273) (cid:254) (cid:212) (cid:215) (cid:258) 9702/42/M/J/24 [Turn over
+(cid:293)(cid:261)(cid:293)(cid:213)(cid:181)(cid:245)(cid:197)(cid:181)(cid:197)(cid:197)(cid:245)(cid:277)(cid:213)(cid:213)(cid:197)(cid:277)(cid:229)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342212 *
+12
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:3)(cid:2)(cid:3)(cid:44)
+5 (a) Define electric potential at a point.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Two isolated charged metal spheres X and Y are near to each other in a vacuum. The centres
+of the spheres are 1.2 m apart, as shown in Fig. 5.1.
+X Y
+P
+x
+1.2 m
+Fig. 5.1 (not to scale)
+Point P is on the line joining the centres of spheres X and Y and is at a variable distance x
+from the centre of X.
+Fig. 5.2 shows the variation with x of the total electric potential V due to the two spheres.
+V
+0
+0 0.2 0.4 0.6 0.8 1.0 1.2
+x / m
+Fig. 5.2
+(cid:300)(cid:209)(cid:266)(cid:190)(cid:288)(cid:179)(cid:237)(cid:197)(cid:247)(cid:233)(cid:241)(cid:181)(cid:290)(cid:203)(cid:289)(cid:199)(cid:256)(cid:215)
+© UCLES 2024 (cid:300)(cid:277)(cid:279)(cid:236)(cid:195)(cid:291)(cid:218)(cid:214)(cid:210)(cid:258)(cid:263)(cid:275)(cid:253)(cid:296)(cid:278)(cid:257)(cid:236)(cid:258) 9702/42/M/J/24
+(cid:293)(cid:181)(cid:181)(cid:213)(cid:245)(cid:245)(cid:197)(cid:277)(cid:229)(cid:293)(cid:261)(cid:277)(cid:277)(cid:213)(cid:293)(cid:277)(cid:181)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342313 *
+13
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:4)(cid:2)(cid:4)(cid:44)
+State three conclusions that may be drawn about the spheres from Fig. 5.2. The conclusions
+may be qualitative or quantitative.
+1 ................................................................................................................................................
+...................................................................................................................................................
+2 ................................................................................................................................................
+...................................................................................................................................................
+3 ................................................................................................................................................
+...................................................................................................................................................
+[3]
+(c) A proton is held at rest on the line joining the centres of the spheres in (b) at the position
+where x = 0.60 m.
+The proton is released.
+Describe and explain, without calculation, the subseq uent motion of the proton.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 7]
+© UCLES 2024 (cid:300) (cid:300) (cid:211) (cid:277) (cid:265) (cid:279) (cid:191) (cid:234) (cid:288) (cid:192) (cid:179) (cid:288) (cid:237) (cid:233) (cid:197) (cid:180) (cid:247) (cid:225) (cid:233) (cid:259) (cid:241) (cid:251) (cid:181) (cid:232) (cid:290) (cid:182) (cid:204) (cid:232) (cid:289) (cid:278) (cid:199) (cid:177) (cid:256) (cid:212) (cid:215) (cid:258) 9702/42/M/J/24 [Turn over
+(cid:293)(cid:261)(cid:277)(cid:277)(cid:245)(cid:213)(cid:293)(cid:245)(cid:197)(cid:293)(cid:229)(cid:277)(cid:213)(cid:277)(cid:293)(cid:213)(cid:261)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342314 *
+14
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:4)(cid:2)(cid:5)(cid:44)
+6 (a) Two capacitors X and Y are connected in series to a power supply of voltage V, as shown in
+Fig. 6.1.
+V
+X Y
+Fig. 6.1
+The capacitance of X is C and the capacitance of Y is C .
+X Y
+Derive an expression, in terms of C and C , for the combined capacitance C of the
+X Y T
+capacitors in this circuit.
+Explain your reasoning.
+[3]
+(b) Two capacitors P and Q are connected in parallel to a power supply of voltage V.
+The capacitance of P is 200 μF. The capacitance C of Q can be varied between 0 and 400μ F.
+Q
+When C = 0, the total energy stored in the capacitors is 2.5 mJ.
+Q
+(i) Show that the supply voltage V is 5.0 V.
+[2]
+(cid:300)(cid:205)(cid:265)(cid:191)(cid:288)(cid:179)(cid:237)(cid:197)(cid:247)(cid:233)(cid:241)(cid:181)(cid:290)(cid:203)(cid:290)(cid:198)(cid:258)(cid:215)
+© UCLES 2024 (cid:300)(cid:277)(cid:280)(cid:236)(cid:189)(cid:290)(cid:214)(cid:204)(cid:211)(cid:261)(cid:240)(cid:267)(cid:282)(cid:237)(cid:274)(cid:257)(cid:220)(cid:258) 9702/42/M/J/24
+(cid:293)(cid:229)(cid:277)(cid:213)(cid:181)(cid:181)(cid:229)(cid:213)(cid:229)(cid:245)(cid:229)(cid:213)(cid:277)(cid:213)(cid:197)(cid:277)(cid:213)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342315 *
+15
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:4)(cid:2)(cid:6)(cid:44)
+(ii) Calculate the total energy , in mJ, stored in the capacitors when C has its maximum
+Q
+value.
+total energy = ................................................... mJ [3]
+(iii) On Fig. 6.2, sketch the variation of the total energy E stored in the capacitors with C , as
+Q
+C varies from 0 to 400 μF.
+Q
+10.0
+E / mJ
+7.5
+5.0
+2.5
+0
+0 100 200 300 400
+C / μF
+Q
+Fig. 6.2
+[2]
+[Total: 10]
+© UCLES 2024 (cid:300) (cid:300) (cid:207) (cid:277) (cid:265) (cid:279) (cid:191) (cid:235) (cid:288) (cid:197) (cid:179) (cid:296) (cid:237) (cid:218) (cid:197) (cid:188) (cid:247) (cid:230) (cid:233) (cid:243) (cid:241) (cid:257) (cid:181) (cid:190) (cid:290) (cid:190) (cid:203) (cid:261) (cid:292) (cid:198) (cid:198) (cid:257) (cid:258) (cid:236) (cid:215) (cid:258) 9702/42/M/J/24 [Turn over
+(cid:293)(cid:229)(cid:293)(cid:277)(cid:245)(cid:213)(cid:197)(cid:181)(cid:181)(cid:261)(cid:245)(cid:213)(cid:277)(cid:181)(cid:229)(cid:213)(cid:197)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342316 *
+16
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:4)(cid:2)(cid:7)(cid:44)
+7 (a) State Faraday’s law of electromagnetic induction.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Fig. 7.1 shows a coil at rest in a uniform magnetic field that is parallel to the axis of the coil.
+coil
+magnetic field
+V
+Fig. 7.1
+The coil is connected to a centre-zero voltmeter .
+The flux density B of the uniform magnetic field varies with time t as shown in Fig. 7.2.
+8
+B / mT
+4
+0
+0 1 2 3 4 5 6
+t / ms
+Fig. 7.2
+The coil consists of 340 turns, each of cross-sectional area 3.2 × 10 –4 m2.
+(i) Calculate the maximum magnetic flux through one turn of the coil.
+maximum magnetic flux = ................................................... Wb [2]
+(cid:300)(cid:205)(cid:265)(cid:191)(cid:288)(cid:179)(cid:237)(cid:197)(cid:247)(cid:233)(cid:241)(cid:181)(cid:290)(cid:201)(cid:290)(cid:198)(cid:260)(cid:215)
+© UCLES 2024 (cid:300)(cid:277)(cid:279)(cid:234)(cid:197)(cid:286)(cid:236)(cid:173)(cid:209)(cid:237)(cid:266)(cid:197)(cid:288)(cid:233)(cid:296)(cid:273)(cid:212)(cid:258) 9702/42/M/J/24
+(cid:293)(cid:277)(cid:181)(cid:277)(cid:181)(cid:213)(cid:197)(cid:277)(cid:213)(cid:229)(cid:261)(cid:213)(cid:213)(cid:181)(cid:261)(cid:213)(cid:213)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342317 *
+17
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:4)(cid:2)(cid:8)(cid:44)
+(ii) Determine the maximum rate of change of magnetic flux linkage in the coil.
+maximum rate of change of flux linkage = ............................................. Wb s–1 [3]
+(iii) State the maximum electromotive force (e.m.f.) V induced across the coil.
+0
+V = ...................................................... V [1]
+0
+(iv) On Fig. 7.3, sketch the variation of the e.m.f. V induced across the coil with t from t = 0 to
+t = 6.0 ms.
+V
+0
+V
+0
+0 1 2 3 4 5 6
+t / ms
+–V
+0
+Fig. 7.3
+[3]
+(v) The variation of V with t can be described by
+V = A sin Bt
+where A and B are constants.
+Determine the values of A and B. Give units with your answers.
+A = .......................................unit ................
+B = .......................................unit ................
+[3]
+[Total: 14]
+© UCLES 2024 (cid:300) (cid:300) (cid:207) (cid:277) (cid:265) (cid:280) (cid:191) (cid:233) (cid:288) (cid:189) (cid:179) (cid:300) (cid:237) (cid:232) (cid:197) (cid:189) (cid:247) (cid:232) (cid:233) (cid:267) (cid:241) (cid:247) (cid:181) (cid:260) (cid:290) (cid:188) (cid:201) (cid:209) (cid:292) (cid:180) (cid:198) (cid:273) (cid:260) (cid:228) (cid:215) (cid:258) 9702/42/M/J/24 [Turn over
+(cid:293)(cid:277)(cid:197)(cid:213)(cid:245)(cid:181)(cid:229)(cid:245)(cid:197)(cid:213)(cid:213)(cid:213)(cid:213)(cid:213)(cid:293)(cid:277)(cid:197)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342318 *
+18
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:4)(cid:2)(cid:9)(cid:44)
+8 Fig. 8.1 shows part of the emission spectrum of visible radiation emitted by hydrogen gas in a star
+in a distant galaxy.
+increasing frequency
+Fig. 8.1
+The galaxy is moving away from the Earth at a speed of 6.2 × 106 m s–1.
+(a) (i) Explain how the positions of the lines in the emission spectrum seen by an observer on
+the Earth differ from the positions shown in Fig. 8.1.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) On Fig. 8.1, draw the three lines in possible positions in the spectrum seen by the
+observer. [2]
+(b) The lines in Fig. 8.1 correspond to electron transitions down to the energy level –3.40 eV.
+One of the lines represents emitted radiation of wavelength 488 nm.
+(i) Calculate the energy of a photon of this radiation.
+photon energy = ...................................................... J [2]
+(ii) Determine the energy , in eV , of the energy level from which the electron transition
+originates to cause the emission of this radiation.
+energy level = .................................................... eV [2]
+(cid:300)(cid:205)(cid:265)(cid:191)(cid:288)(cid:179)(cid:237)(cid:197)(cid:247)(cid:233)(cid:241)(cid:181)(cid:290)(cid:204)(cid:290)(cid:200)(cid:258)(cid:215)
+© UCLES 2024 (cid:300)(cid:277)(cid:278)(cid:234)(cid:192)(cid:288)(cid:228)(cid:235)(cid:207)(cid:246)(cid:257)(cid:287)(cid:260)(cid:235)(cid:260)(cid:233)(cid:236)(cid:258) 9702/42/M/J/24
+(cid:293)(cid:197)(cid:213)(cid:213)(cid:181)(cid:213)(cid:293)(cid:277)(cid:245)(cid:277)(cid:261)(cid:277)(cid:213)(cid:277)(cid:261)(cid:213)(cid:293)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342319 *
+19
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:4)(cid:2)(cid:10)(cid:44)
+(iii) Determine the wavelength, in nm, of this radiation as detected by the observer on the
+Earth.
+wavelength = ................................................... nm [2]
+(c) A value for the Hubble constant is 2.3 × 10–18 s–1.
+Determine the distance of the galaxy from the Earth.
+distance = ..................................................... m [2]
+[Total: 12]
+© UCLES 2024 (cid:300) (cid:300) (cid:207) (cid:277) (cid:265) (cid:277) (cid:191) (cid:233) (cid:288) (cid:200) (cid:179) (cid:298) (cid:237) (cid:224) (cid:197) (cid:219) (cid:247) (cid:234) (cid:233) (cid:260) (cid:241) (cid:240) (cid:181) (cid:234) (cid:290) (cid:216) (cid:204) (cid:211) (cid:292) (cid:216) (cid:200) (cid:233) (cid:258) (cid:220) (cid:215) (cid:258) 9702/42/M/J/24 [Turn over
+(cid:293)(cid:197)(cid:229)(cid:277)(cid:245)(cid:181)(cid:261)(cid:245)(cid:293)(cid:293)(cid:213)(cid:277)(cid:213)(cid:245)(cid:293)(cid:277)(cid:245)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342320 *
+20
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:4)(cid:3)(cid:1)(cid:44)
+9 (a) State what is meant by the binding energy of a nucleus.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Table 9.1 shows the masses of two sub-atomic particles and a polonium-212 (212Po) nucleus.
+84
+Table 9.1
+mass / u
+proton 1.007 276
+neutron 1.008 665
+polonium-212 nucleus 211.942 749
+For the polonium-212 nucleus, determine:
+(i) the mass defect Δm, in kg
+Δm = .................................................... kg [3]
+(ii) the binding energy
+binding energy = ...................................................... J [2]
+(iii) the binding energy per nucleon.
+binding energy per nucleon = ...................................................... J [1]
+(cid:300)(cid:205)(cid:265)(cid:191)(cid:288)(cid:179)(cid:237)(cid:197)(cid:247)(cid:233)(cid:241)(cid:181)(cid:290)(cid:202)(cid:290)(cid:200)(cid:260)(cid:215)
+© UCLES 2024 (cid:300)(cid:277)(cid:277)(cid:236)(cid:200)(cid:292)(cid:206)(cid:206)(cid:205)(cid:254)(cid:247)(cid:225)(cid:246)(cid:239)(cid:246)(cid:185)(cid:228)(cid:258) 9702/42/M/J/24
+(cid:293)(cid:245)(cid:245)(cid:277)(cid:181)(cid:181)(cid:261)(cid:213)(cid:261)(cid:197)(cid:229)(cid:277)(cid:277)(cid:245)(cid:197)(cid:277)(cid:293)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342321 *
+21
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:4)(cid:3)(cid:2)(cid:44)
+(c) (i) On Fig. 9.1, sketch the variation with nucleon number A of binding energy per nucleon
+for values of A from 1 to 250.
+binding energy
+per nucleon
+0
+1 250
+A
+Fig. 9.1
+[2]
+(ii) On your line in Fig. 9.1, draw an X to show the approximate position of polonium-212.
+[1]
+(iii) Polonium-212 is radioactive and undergoes alpha-decay.
+Suggest and explain, with reference to Fig. 9.1, why the alpha-decay of polonium-212
+results in a release of energy.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 13]
+© UCLES 2024 (cid:300) (cid:300) (cid:207) (cid:277) (cid:265) (cid:278) (cid:191) (cid:235) (cid:288) (cid:192) (cid:179) (cid:294) (cid:237) (cid:210) (cid:197) (cid:222) (cid:247) (cid:236) (cid:233) (cid:252) (cid:241) (cid:266) (cid:181) (cid:296) (cid:290) (cid:226) (cid:202) (cid:263) (cid:292) (cid:226) (cid:200) (cid:185) (cid:260) (cid:212) (cid:215) (cid:258) 9702/42/M/J/24 [Turn over
+(cid:293)(cid:245)(cid:261)(cid:213)(cid:245)(cid:213)(cid:293)(cid:181)(cid:277)(cid:181)(cid:245)(cid:277)(cid:277)(cid:277)(cid:229)(cid:213)(cid:245)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342322 *
+22
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:4)(cid:3)(cid:3)(cid:44)
+BLANK PAGE
+(cid:300)(cid:209)(cid:265)(cid:191)(cid:288)(cid:179)(cid:237)(cid:197)(cid:247)(cid:233)(cid:241)(cid:181)(cid:290)(cid:203)(cid:292)(cid:197)(cid:258)(cid:215)
+© UCLES 2024 (cid:300)(cid:277)(cid:277)(cid:235)(cid:195)(cid:288)(cid:186)(cid:232)(cid:228)(cid:239)(cid:251)(cid:269)(cid:194)(cid:239)(cid:195)(cid:273)(cid:228)(cid:258) 9702/42/M/J/24
+(cid:293)(cid:229)(cid:229)(cid:213)(cid:245)(cid:245)(cid:293)(cid:277)(cid:213)(cid:213)(cid:213)(cid:277)(cid:213)(cid:277)(cid:261)(cid:277)(cid:229)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342323 *
+23
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:4)(cid:3)(cid:4)(cid:44)
+10 (a) Describe how reflected ultrasound pulses may be used to obtain diagnostic information about
+internal structures.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) (i) Define specific acoustic impedance of a medium.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) Table 10.1 shows some data for water and for glass.
+Table 10.1
+density / kg m–3 speed of sound / m s–1
+water 1000 1420
+glass 2500 4560
+Determine the intensity reflection coef ficient for ultrasound that is incident on a
+water–glass boundary.
+intensity reflection coefficient = ......................................................... [3]
+[Total: 7]
+(cid:300)(cid:211)(cid:265)(cid:191)(cid:288)(cid:179)(cid:237)(cid:197)(cid:247)(cid:233)(cid:241)(cid:181)(cid:290)(cid:203)(cid:290)(cid:197)(cid:258)(cid:215)
+© UCLES 2024 (cid:300)(cid:277)(cid:278)(cid:236)(cid:203)(cid:298)(cid:182)(cid:216)(cid:213)(cid:265)(cid:262)(cid:220)(cid:278)(cid:263)(cid:279)(cid:273)(cid:212)(cid:258) 9702/42/M/J/24
+(cid:293)(cid:229)(cid:213)(cid:277)(cid:181)(cid:277)(cid:261)(cid:245)(cid:197)(cid:229)(cid:261)(cid:277)(cid:213)(cid:245)(cid:293)(cid:213)(cid:181)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+
+* 0019655342324 *
+24
+(cid:44)(cid:1)(cid:1)(cid:2)(cid:10)(cid:7)(cid:6)(cid:6)(cid:4)(cid:5)(cid:3)(cid:4)(cid:3)(cid:5)(cid:44)
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of Cambridge Assessment. Cambridge Assessment is the brand name of the University of Cambridge
+Local Examinations Syndicate (UCLES), which is a department of the University of Cambridge.
+(cid:300)(cid:209)(cid:265)(cid:191)(cid:288)(cid:179)(cid:237)(cid:197)(cid:247)(cid:233)(cid:241)(cid:181)(cid:290)(cid:201)(cid:292)(cid:197)(cid:260)(cid:215)
+© UCLES 2024 (cid:300)(cid:277)(cid:278)(cid:233)(cid:203)(cid:292)(cid:200)(cid:209)(cid:226)(cid:263)(cid:253)(cid:211)(cid:184)(cid:235)(cid:181)(cid:257)(cid:236)(cid:258) 9702/42/M/J/24
+(cid:293)(cid:277)(cid:261)(cid:277)(cid:245)(cid:277)(cid:261)(cid:213)(cid:229)(cid:261)(cid:245)(cid:277)(cid:277)(cid:245)(cid:197)(cid:213)(cid:229)(cid:213)
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD
+NIGRAM
+SIHT
+NI
+ETIRW
+TON
+OD

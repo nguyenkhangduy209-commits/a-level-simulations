@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Doppler effect for sound</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-waves.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  // Cambridge rounding: exact halves round away from zero (49.05 → 49.1); toPrecision alone can round 49.05 down (binary floating point)
+  (function (sf, dp) { SIM.util.sf = function (x, n) { return typeof x === 'number' && isFinite(x) ? sf(x * (1 + 1e-12), n) : sf(x, n); };
+    SIM.util.dp = function (x, d) { return typeof x === 'number' && isFinite(x) ? dp(x * (1 + 1e-12), d) : dp(x, d); }; })(SIM.util.sf, SIM.util.dp);
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, WV = SIM.waves;
+  var course = ui.course('9702'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Doppler effect: moving source, stationary observer', tags: ['9702 7.3 Doppler effect for sound waves'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 14 });
+  var PER = 0.25;  // animation seconds per source period
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 10, loop: true, onFrame: function () { frame(); } });
+  ui.legend(sceneCard, [
+    { color: 'var(--c-s1)', label: 'wavefronts (crests), one per source period' }, { color: 'var(--c-applied)', label: 'source S (moving →)' },
+    { color: 'var(--c-s2)', label: 'observer A: source approaching' }, { color: 'var(--c-s3)', label: 'observer B: source receding' }, { color: 'var(--c-s4)', label: 'observer C: source passes' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pV = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'f_o / Hz', xLabel: 'v_s / m s⁻¹' });
+  var pT = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'f heard at C / Hz', xLabel: 't / s' });
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var mode = ui.select(paramCard, { label: 'Find', value: 'fo', options: [
+    { value: 'fo', label: 'observed frequency f_o from the source speed' }, { value: 'vs', label: 'source speed v_s from an observed frequency' }] }, function () { update('*'); });
+  var prm = ui.params(paramCard, [
+    { key: 'fs', label: 'Source frequency', sym: 'f<sub>s</sub>', unit: 'Hz', min: 20, max: 5000, step: 1, value: 500 },
+    { key: 'v', label: 'Speed of sound', sym: 'v', unit: 'm s<sup>−1</sup>', min: 100, max: 400, step: 1, value: 340 },
+    { key: 'vs', label: 'Speed of source (along the line)', sym: 'v<sub>s</sub>', unit: 'm s<sup>−1</sup>', min: 0, max: 306, step: 0.1, value: 20 },
+    { key: 'fo', label: 'Observed frequency', sym: 'f<sub>o</sub>', unit: 'Hz', min: 10, max: 10000, step: 0.1, value: 494 }
+  ], update);
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Source 500 Hz moving at 20 m/s (v = 340 m/s): heard ahead and behind', mode: 'fo', values: { fs: 500, v: 340, vs: 20 },
+      note: 'Approaching: 500 × 340 ÷ (340 − 20) = 531 Hz. Receding: 500 × 340 ÷ (340 + 20) = 472 Hz.' },
+    { name: 'Siren 440 Hz heard as 494 Hz (v = 340 m/s): speed and direction of the car', mode: 'vs', values: { fs: 440, v: 340, fo: 494 },
+      note: 'f_o > f_s ⇒ approaching. 494 = 440 × 340 ÷ (340 − v_s) ⇒ v_s = 37 m s⁻¹ towards the observer.' },
+    { name: 'Ambulance 700 Hz at 30 m/s passes an observer: change in pitch', mode: 'fo', values: { fs: 700, v: 340, vs: 30 },
+      note: 'Observer C hears 768 Hz while it approaches, then 643 Hz as it moves away. The change happens as it passes.' },
+    { name: 'Receding source heard at 450 Hz from 500 Hz: speed', mode: 'vs', values: { fs: 500, v: 340, fo: 450 },
+      note: 'f_o < f_s ⇒ receding. v_s = v(f_s/f_o − 1) = 340 × (500/450 − 1) = 37.8 m s⁻¹ away.' },
+    { name: 'Source at half the speed of sound', mode: 'fo', values: { fs: 500, v: 340, vs: 170 },
+      note: 'Approaching: f_o = 2f_s = 1000 Hz. Receding: f_o = 2f_s/3 = 333 Hz. The two shifts are not equal.' },
+    { name: 'Stationary source: no Doppler shift', mode: 'fo', values: { fs: 500, v: 340, vs: 0 },
+      note: 'Wavefronts are concentric; every observer hears 500 Hz.' }
+  ], function (p) { mode.set(p.mode, true); if (p.values.v) prm.range('vs', 0, 0.9 * p.values.v, 0.1); prm.set(p.values); clock.seek(0); });
+
+  ui.notes(noteCard, [
+    'Approaching: f<sub>o</sub> = f<sub>s</sub>v/(v <b>−</b> v<sub>s</sub>) (higher). Receding: f<sub>o</sub> = f<sub>s</sub>v/(v <b>+</b> v<sub>s</sub>) (lower). Check your answer is higher/lower as expected.',
+    'The <b>speed of sound</b> is not changed by the motion of the source; the <b>wavelength</b> is (shorter in front, longer behind).',
+    'The syllabus only covers a <b>moving source and stationary observer</b>, with the observer on the line of motion.',
+    'Use v<sub>s</sub> as the source speed relative to the air (still air), in m s<sup>−1</sup>.',
+    'The pitch you hear drops as the source passes you; it does not gradually fall while the source is still approaching along the line.'
+  ]);
+
+  /* ---------- model ---------- */
+  var W = 1, x0 = 0, fUp = 0, fDown = 0, lam0 = 1, solved = null;
+  function p() { var v = prm.values; return { fs: v.fs, v: v.v, vs: v.vs, x0: x0 }; }
+  function update(key) {
+    var v = prm.values;
+    if (key === 'v' || key === '*') prm.range('vs', 0, 0.9 * v.v, 0.1);
+    prm.show('fo', mode.get() === 'vs');
+    solved = null;
+    if (mode.get() === 'vs') {
+      solved = WV.dopplerSourceSpeed(v.fs, v.fo, v.v);
+      solved.ok = isFinite(solved.vs) && solved.vs <= 0.9 * v.v + 1e-9;
+      prm.lock('vs', true, solved.ok ? solved.vs : undefined);
+      if (solved.ok) prm.set({ vs: solved.vs }, true);
+    } else prm.lock('vs', false);
+    lam0 = v.v / v.fs; W = 12 * lam0; x0 = -0.6 * W;
+    fUp = WV.doppler(v.fs, v.v, v.vs, true); fDown = WV.doppler(v.fs, v.v, v.vs, false);
+    var Ts = 1 / v.fs, periods = v.vs > 0 ? Math.min(1.2 * W / v.vs / Ts, 160) : 40;
+    clock.setDuration(periods * PER);
+    frame();
+  }
+  function tPhys() { return clock.t / PER / prm.values.fs; }
+  function fmtT(t) { return t < 1 ? U.sf(t * 1000).replace(/<[^>]+>/g, '') + ' ms' : U.sf(t) + ' s'; }
+  function frame() {
+    clock.tLabel.textContent = 't = ' + fmtT(tPhys()) + ' (slow motion)';
+    draw(); plots(); readout();
+  }
+
+  /* ---------- drawing ---------- */
+  var XA = 0.85, XB = -0.85, XC = 0.25;   // observer positions as fractions of W
+  function draw() {
+    var col = ui.colors(), v = prm.values, t = tPhys(), P = p();
+    vp.fit(-W, W, -0.5 * W, 0.5 * W);
+    var c = vp.begin();
+    c.save(); c.beginPath(); c.rect(vp.X(-W), vp.Y(0.5 * W), vp.X(W) - vp.X(-W), vp.Y(-0.5 * W) - vp.Y(0.5 * W)); c.clip();
+    var fronts = WV.wavefronts(P, t, 2.4 * W);
+    fronts.forEach(function (fr) {
+      c.save(); c.strokeStyle = col.s1; c.lineWidth = 1.4; c.globalAlpha = Math.max(0.15, 1 - fr.r / (2.4 * W));
+      c.beginPath(); c.arc(vp.X(fr.cx), vp.Y(0), fr.r * vp.scale, 0, 2 * Math.PI); c.stroke(); c.restore();
+    });
+    c.restore();
+    D.line(c, [vp.P(-W, 0), vp.P(W, 0)], col.muted, { dash: [3, 5], width: 1 });
+    var xs = x0 + v.vs * t;
+    D.particle(c, vp.X(xs), vp.Y(0), 8, { fill: col.applied, label: 'S' });
+    if (v.vs > 0) D.arrow(c, vp.X(xs), vp.Y(0) - 18, vp.X(xs) + 40, vp.Y(0) - 18, col.applied, { width: 2, label: 'v_s' });
+    function obs(fx, color, name, f) {
+      var x = fx * W; c.save(); c.fillStyle = color; c.beginPath(); c.arc(vp.X(x), vp.Y(0), 7, 0, 2 * Math.PI); c.fill(); c.restore();
+      D.label(c, name, vp.X(x), vp.Y(0) + 18, color, { bold: true });
+      D.label(c, U.sf(f).replace(/<[^>]+>/g, '') + ' Hz', vp.X(x), vp.Y(0) + 34, color, { size: 11, bg: true });
+    }
+    obs(XA, col.s2, 'A', fUp); obs(XB, col.s3, 'B', fDown);
+    obs(XC, col.s4, 'C', WV.observedAt(P, XC * W, t));
+    D.label(c, 'λ ahead = ' + U.sf(WV.dopplerWavelength(v.fs, v.v, v.vs, true)).replace(/<[^>]+>/g, '') + ' m,  λ behind = ' + U.sf(WV.dopplerWavelength(v.fs, v.v, v.vs, false)).replace(/<[^>]+>/g, '') + ' m,  λ (at rest) = ' + U.sf(lam0).replace(/<[^>]+>/g, '') + ' m', vp.w / 2, 12, col.ink, { size: 11, bg: true });
+    if (mode.get() === 'vs' && solved && !solved.ok) D.label(c, 'No valid source speed for this observed frequency (needs v_s < 0.9v here)', vp.w / 2, vp.h - 12, col.warn, { bold: true, size: 12 });
+  }
+  function plots() {
+    var col = ui.colors(), v = prm.values, t = tPhys(), P = p();
+    pV.draw({ x: [0, 0.9 * v.v], series: [
+      { fn: function (s) { return WV.doppler(v.fs, v.v, s, true); }, color: col.s2 },
+      { fn: function (s) { return WV.doppler(v.fs, v.v, s, false); }, color: col.s3 }],
+      hlines: [{ y: v.fs, label: 'f_s' }], cursor: v.vs, xLabel: 'v_s / m s⁻¹', yLabel: 'f_o / Hz', title: 'A (approaching) and B (receding)' });
+    var Tend = clock.duration / PER / v.fs;
+    var tp = v.vs > 0 ? (XC * W - x0) / v.vs : NaN;
+    pT.draw({ x: [0, Tend], y: [0, Math.max(fUp, v.fs) * 1.2], series: [{ fn: function (tt) { return WV.observedAt(P, XC * W, tt); }, color: col.s4, breaks: isFinite(tp) ? [tp] : [] }],
+      cursor: t, vlines: isFinite(tp) && tp < Tend ? [{ x: tp, label: 'S passes C' }] : [], xLabel: 't / s', yLabel: 'f heard at C / Hz' });
+  }
+
+  /* ---------- working ---------- */
+  function readout() {
+    var v = prm.values, s3 = U.sf;
+    R.clear();
+    R.eq('λ at rest', 'v ÷ f<sub>s</sub> = ' + s3(v.v) + ' ÷ ' + s3(v.fs), lam0, 'm');
+    if (mode.get() === 'vs') {
+      R.head('Source speed from f<sub>o</sub> = ' + s3(v.fo) + ' Hz');
+      if (!solved || !isFinite(solved.vs)) R.badge('Invalid frequencies', 'warn');
+      else if (solved.approaching === null) R.badge('f<sub>o</sub> = f<sub>s</sub>: the source is not moving along the line (v<sub>s</sub> = 0)', 'info');
+      else if (solved.approaching) {
+        R.badge('f<sub>o</sub> > f<sub>s</sub> ⇒ source approaching (use v − v<sub>s</sub>)', 'info');
+        R.eq('v − v<sub>s</sub>', 'f<sub>s</sub>v ÷ f<sub>o</sub> = ' + s3(v.fs) + ' × ' + s3(v.v) + ' ÷ ' + s3(v.fo), v.fs * v.v / v.fo, 'm s<sup>−1</sup>');
+        R.eq('v<sub>s</sub>', 'v(1 − f<sub>s</sub>/f<sub>o</sub>) = ' + s3(v.v) + ' × (1 − ' + s3(v.fs) + '/' + s3(v.fo) + ')', solved.vs, 'm s<sup>−1</sup> towards the observer');
+      } else {
+        R.badge('f<sub>o</sub> &lt; f<sub>s</sub> ⇒ source receding (use v + v<sub>s</sub>)', 'info');
+        R.eq('v + v<sub>s</sub>', 'f<sub>s</sub>v ÷ f<sub>o</sub> = ' + s3(v.fs) + ' × ' + s3(v.v) + ' ÷ ' + s3(v.fo), v.fs * v.v / v.fo, 'm s<sup>−1</sup>');
+        R.eq('v<sub>s</sub>', 'v(f<sub>s</sub>/f<sub>o</sub> − 1) = ' + s3(v.v) + ' × (' + s3(v.fs) + '/' + s3(v.fo) + ' − 1)', solved.vs, 'm s<sup>−1</sup> away from the observer');
+      }
+      if (solved && isFinite(solved.vs) && !solved.ok) { R.badge('That speed is above 0.9v — outside this model’s range', 'warn'); R.render(); return; }
+      if (!solved || !isFinite(solved.vs)) { R.render(); return; }
+    }
+    R.head('Observer A — source approaching');
+    R.eq('f<sub>o</sub>', 'f<sub>s</sub>v ÷ (v − v<sub>s</sub>) = ' + s3(v.fs) + ' × ' + s3(v.v) + ' ÷ (' + s3(v.v) + ' − ' + s3(v.vs) + ')', fUp, 'Hz');
+    R.eq('λ in front', '(v − v<sub>s</sub>) ÷ f<sub>s</sub>', WV.dopplerWavelength(v.fs, v.v, v.vs, true), 'm');
+    R.head('Observer B — source receding');
+    R.eq('f<sub>o</sub>', 'f<sub>s</sub>v ÷ (v + v<sub>s</sub>) = ' + s3(v.fs) + ' × ' + s3(v.v) + ' ÷ (' + s3(v.v) + ' + ' + s3(v.vs) + ')', fDown, 'Hz');
+    R.eq('λ behind', '(v + v<sub>s</sub>) ÷ f<sub>s</sub>', WV.dopplerWavelength(v.fs, v.v, v.vs, false), 'm');
+    R.head('Observer C — the source passes');
+    R.eq('change in frequency heard', s3(fUp) + ' − ' + s3(fDown), fUp - fDown, 'Hz');
+    R.html('<div class="head">Why: each crest is emitted ' + s3(v.vs / v.fs) + ' m (= v<sub>s</sub>T) further forward, so crests ahead are closer together; the speed of each crest is still ' + s3(v.v) + ' m s<sup>−1</sup>.</div>');
+    R.render();
+  }
+
+  ui.onTheme(frame);
+  vp.onResize = frame;
+  update('*');
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

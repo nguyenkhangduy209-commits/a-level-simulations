@@ -1,0 +1,411 @@
+Cambridge International AS & A Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions February/March 2022
+MARK SCHEME
+Maximum Mark: 100
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the February/March 2022 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 17 printed pages.
+© UCLES 2022 [Turn over
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the
+specific content of the mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these
+marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the
+scope of the syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the
+question as indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently, e.g. in situations where candidates have not followed instructions or in the application of generic level
+descriptors.
+© UCLES 2022 Page 2 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may
+be limited according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or
+grade descriptors in mind.
+Science-Specific Marking Principles
+1 Examiners should consider the context and scientific use of any keywords when awarding marks. Although keywords may be present, marks
+should not be awarded if the keywords are used incorrectly.
+2 The examiner should not choose between contradictory statements given in the same question part, and credit should not be awarded for any
+correct statement that is contradicted within the same question part. Wrong science that is irrelevant to the question should be ignored.
+3 Although spellings do not have to be correct, spellings of syllabus terms must allow for clear and unambiguous separation from other syllabus
+terms with which they may be confused (e.g. ethane / ethene, glucagon / glycogen, refraction / reflection).
+4 The error carried forward (ecf) principle should be applied, where appropriate. If an incorrect answer is subsequently used in a scientifically
+correct way, the candidate should be awarded these subsequent marking points. Further guidance will be included in the mark scheme where
+necessary and any exceptions to this general principle will be noted.
+5 ‘List rule’ guidance
+For questions that require n responses (e.g. State two reasons …):
+• The response should be read as continuous prose, even when numbered answer spaces are provided.
+• Any response marked ignore in the mark scheme should not count towards n.
+• Incorrect responses should not be awarded credit but will still count towards n.
+• Read the entire response to check for any responses that contradict those that would otherwise be credited. Credit should not be
+awarded for any responses that are contradicted within the rest of the response. Where two responses contradict one another, this should
+be treated as a single incorrect response.
+• Non-contradictory responses after the first n responses may be ignored even if they include incorrect science.
+© UCLES 2022 Page 3 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+6 Calculation specific guidance
+Correct answers to calculations should be given full credit even if there is no working or incorrect working, unless the question states ‘show
+your working’.
+For questions in which the number of significant figures required is not stated, credit should be awarded for correct answers when rounded by
+the examiner to the number of significant figures given in the mark scheme. This may not apply to measured values.
+For answers given in standard form (e.g. a × 10n) in which the convention of restricting the value of the coefficient (a) to a value between 1
+and 10 is not followed, credit may still be awarded if the answer can be converted to the answer given in the mark scheme.
+Unless a separate mark is given for a unit, a missing or incorrect unit will normally mean that the final calculation mark is not awarded.
+Exceptions to this general principle will be noted in the mark scheme.
+7 Guidance for chemical equations
+Multiples / fractions of coefficients used in chemical equations are acceptable unless stated otherwise in the mark scheme.
+State symbols given in an equation should be ignored unless asked for in the question or stated otherwise in the mark scheme.
+© UCLES 2022 Page 4 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Examples of how to apply the list rule
+State three reasons…. [3]
+A 1. Correct  F 1. Correct 
+2. Correct  2 (4 responses) 2. Correct 
+2
+3. Wrong  3. Correct 
+CON (of 3.) (discount 3)
+B 1. Correct, Correct , 
+G 1. Correct 
+(4 responses) 2. Correct  3
+(5 responses) 2. Correct 
+3. Wrong ignore
+3
+3. Correct 
+Correct ignore
+CON (of 4.) ignore
+C 1. Correct 
+(4 responses) 2. Correct, Wrong ,  2
+3. Correct ignore H 1. Correct 
+(4 responses) 2. Correct 
+2
+3. CON (of 2.) (discount 2)
+D 1. Correct 
+Correct 
+(4 responses) 2. Correct, CON (of 2.) , (discount 2) 2
+3. Correct 
+I 1. Correct 
+(4 responses) 2. Correct 
+2
+E 1. Correct 
+3. Correct 
+(4 responses) 2. Correct  3 CON (of 2.) (discount 2)
+3. Correct, Wrong 
+© UCLES 2022 Page 5 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Question Answer Marks
+1(a) at least 4 straight radial lines to P B1
+all arrows pointing along the lines towards P B1
+1(b) Any 2 from: B2
+gravitational force provides the centripetal force
+(centripetal or gravitational) force has constant magnitude
+(centripetal or gravitational) force is perpendicular to velocity (of moon) / direction of motion (of moon)
+1(c)(i) GMm M1
+= mrω2
+r2
+r3ω2 gradient A1
+M= and gradient = r3ω2 hence M=
+G G
+or
+gradient
+r3 = GM × 1/ω2 so gradient = GM hence M=
+G
+1(c)(ii) M = 4.1 × 1023 / (6.0 × 107 × 6.67 × 10–11) = 1.0 × 1026 kg B1
+© UCLES 2022 Page 6 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Question Answer Marks
+1(c)(iii) GMm mv2 C1
+=
+r2 r
+GM
+= v2
+r
+6.67×10 −11×1.0×1026 C1
+v2=
+1.2×108
+v2 =5.6×107m s −1
+v =7500 m s −1 A1
+Question Answer Marks
+2(a) 0 B1
+2(b) pV = nRT C1
+(n =) 1.5 × 105 × 4.2 × 10–3 / 8.31 × 540
+= 0.14 mol A1
+2(c) missing pressure 1.5 (× 105) B1
+both missing volumes 1.8 (× 10–3) B1
+2(d)(i) (ΔU:) increase in internal energy (of the system) B1
+(q:) thermal energy supplied to the system B1
+(W:) work done on system B1
+© UCLES 2022 Page 7 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Question Answer Marks
+2(d)(ii) volume increases and work is done by the gas B1
+temperature decreases and internal energy decreases B1
+Question Answer Marks
+3(a) upthrust, weight B1
+3(b) upthrust greater than weight so (resultant force is) upwards B1
+3(c)(i) A, g and ρ all constant so F ∝ x B1
+minus sign means F and x are in opposite directions B1
+3(c)(ii) F Agρx M1
+(a = so) a = (−)
+m m
+Agρ Agρ A1
+so ω2 = hence ω =
+m m
+3(d)(i) damping due to viscous forces B1
+3(d)(ii) ( E = )1 mω2x 2 C1
+2 0
+ω2 = (–) gradient C1
+( E = )1 mω2(x 2 − x 2) A1
+2 1 2
+= 1 ×0.57 ×(2.3 )(0.0202 −0.0162)
+2 0.020
+= 4.7 ×10 −3 J
+© UCLES 2022 Page 8 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Question Answer Marks
+4(a) direction of force B1
+force on a positive charge B1
+4(b)(i) Q C1
+V =
+4πε r
+o
+4.0×10 −9 −7.2×10 −9
++ = 0
+4πε x 4πε (0.120 − x)
+o o
+( )
+4 0.120 − x = 7.2 x
+x = 0.043 m A1
+4(b)(ii) fields are in the same direction so no B1
+4(b)(iii) straight arrow drawn leftwards from X in direction between extended line joining Q and X and the horizontal B1
+© UCLES 2022 Page 9 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Question Answer Marks
+5(a) (energy stored =) area under line or ½ QV C1
+= ½ × 8.0 × 1.2 × 10-4
+= 4.8 × 10–4 J A1
+5(b)(i) (τ=) RC C1
+(τ=) 220 × 103 × (1.2 × 10-4/8.0) = 3.3 s A1
+5(b)(ii) E ∝ V2 C1
+(so time to) V / 3 C1
+o
+−t
+V = V e RC
+o
+V −t C1
+o = V e 3.3
+3 o
+1 −t
+= e 3.3
+3
+t = 3.6 s A1
+5(c) (total) capacitance is doubled M1
+time constant is doubled A1
+© UCLES 2022 Page 10 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Question Answer Marks
+6(a) less in smaller solenoid B1
+6(b) greater in smaller solenoid B1
+6(c)(i) direction of (induced) e.m.f. M1
+such as to (produce effects that) oppose the change that caused it A1
+6(c)(ii) change of flux (linkage) in smaller solenoid induces e.m.f. in smaller solenoid B1
+(induced) current in smaller solenoid causes field around it B1
+the two fields (interact to) create an attractive force B1
+Question Answer Marks
+7(a)(i) two diodes added in correct directions (Both diodes pointing inwards and upwards), correct symbols only B1
+7(a)(ii) ‘+’ anywhere on upper output wire B1
+7(b)(i) ω = 2π / T C1
+= 2π / 2.5
+= 0.80 π or 4π / 5 or 2.5
+(V =) 3.5 sin (0.8π t) or 3.5 sin (4π t / 5) or 3.5 sin (2.5 t) A1
+© UCLES 2022 Page 11 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Question Answer Marks
+7(b)(ii) V2 V 2 C1
+(P=) or (P=) r.m.s.
+2R R
+3.52 2.472
+= or
+2×12 12
+= 0.51 W A1
+Question Answer Marks
+8(a) h h M1
+λ = or λ =
+p mv
+where h is the Planck constant and A1
+p is the momentum (of particle) / mv is the momentum (of particle) / m is the mass (of particle) and v is the velocity (of
+particle)
+8(b)(i) (electron) diffraction B1
+8(b)(ii) moving electrons behave like waves B1
+8(b)(iii) spacing between atoms ≈ wavelength of electron B1
+or
+diameter of atom ≈ wavelength of electron
+8(b)(iv) Any one of: M1
+• wavelength has decreased
+• electron had greater momentum
+so (accelerating) p.d. was increased A1
+© UCLES 2022 Page 12 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Question Answer Marks
+9(a) 207, 82 for lead B1
+4, 2 for alpha B1
+9(b)(i) (half-life found as) 0.52 s or correctly read points substituted into C1
+N =N e −λt
+0
+0.693
+λ=
+t
+1
+2
+0.693
+λ=
+0.52
+λ = 1.3 s–1 A1
+9(b)(ii) A=λN A1
+= 1.3 × 24 ×1012
+= 3.1 ×1013 Bq
+9(b)(iii) upwards curve of decreasing gradient starting from (0,0) B1
+passes through (0.52, 12) and (1.2, 18.8) B1
+9(c)(i) 16 × 1012 and 7.2 × 1012 C1
+6900 × 103 × 1.6 × 10-19 C1
+(16 × 1012 – 7.2 × 1012) × 6900 × 103 × 1.6 × 10-19
+= 9.7 J A1
+© UCLES 2022 Page 13 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Question Answer Marks
+9(c)(ii) lead nuclei have kinetic energy B1
+or
+gamma photons are also emitted
+Question Answer Marks
+10(a) energy = mcΔT C1
+energy = ItV C1
+0.40×0.020×75 000 ×0.95
+(ΔT =)
+0.015×130
+=290 K A1
+10(b) I = I e −μt C1
+o
+0.20 = e
+−0.22t
+t = 7.3 cm A1
+© UCLES 2022 Page 14 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Question Answer Marks
+10(c) either M1
+(linear) attenuation coefficients / μ very different for bone and muscle
+(very) different amounts (of X-rays) absorbed so good contrast A1
+or (very) different intensities transmitted so good contrast
+or (M1)
+(linear) attenuation coefficients / μ similar for blood and muscle
+similar amounts (of X-rays) absorbed so poor contrast (A1)
+or similar intensities transmitted so poor contrast
+Question Answer Marks
+11(a) substance containing radioactive nuclei that is introduced into the body or B1
+substance containing radioactive nuclei that is absorbed by the tissue being studied
+11(b)(i) a particle interacting with its antiparticle so that mass is converted into energy B1
+11(b)(ii) electron(s) and positron(s) B1
+11(c)(i) E = 2mc2 A1
+= 2×9.11×10 −31×3.00×10 −82
+= 1.64×10 −13J
+© UCLES 2022 Page 15 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Question Answer Marks
+11(c)(ii) 2hc C1
+λ =
+E
+2×6.63×10 −34 ×3.00×108
+=
+1.64×10 −13
+= 2.43 × 10 −12 m A1
+11(d) Any 3 from: B3
+• the two gamma photons travel in opposite directions
+• gamma photons detected (outside body / by detectors)
+• gamma photons arrive (at detector) at different times
+• determine location of production (of gamma)
+• image of tracer concentration in tissue produced
+Question Answer Marks
+12(a) total power of radiation emitted (by the star) B1
+12(b) L C1
+F =
+4πd2
+3.83×1026
+=
+4×π×1.51×10112
+= 1340 W m −2 A1
+© UCLES 2022 Page 16 of 17
+
+9702/42 Cambridge International AS & A Level – Mark Scheme February/March 2022
+PUBLISHED
+Question Answer Marks
+12(c) E A1
+m=
+c2
+3.83×1026
+=
+3.00×1082
+= 4.26×109 kg
+12(d) L = 4πσr2T 4 B1
+3.83×1026 = 4×π×5.67×10 −8 ×6.96×1082×T4 leading to T = 5770 K
+12(e) 1 C1
+λ ∝
+(max) T
+5.00×10 −7 9940
+=
+λ 5770
+λ =2.90 × 10 −7m A1
+© UCLES 2022 Page 17 of 17

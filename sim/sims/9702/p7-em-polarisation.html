@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EM spectrum and polarisation</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-waves.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  // Cambridge rounding: exact halves round away from zero (49.05 → 49.1); toPrecision alone can round 49.05 down (binary floating point)
+  (function (sf, dp) { SIM.util.sf = function (x, n) { return typeof x === 'number' && isFinite(x) ? sf(x * (1 + 1e-12), n) : sf(x, n); };
+    SIM.util.dp = function (x, d) { return typeof x === 'number' && isFinite(x) ? dp(x * (1 + 1e-12), d) : dp(x, d); }; })(SIM.util.sf, SIM.util.dp);
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, WV = SIM.waves;
+  var course = ui.course('9702'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Electromagnetic spectrum and polarisation (Malus’s law)',
+    tags: ['9702 7.4 Electromagnetic spectrum', '9702 7.5 Polarisation'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 10 });
+  ui.legend(sceneCard, [{ color: 'var(--accent)', label: 'wavelength cursor' }, { color: 'var(--c-s1)', label: 'plane of polarisation (length ∝ amplitude ∝ √I)' }, { color: 'var(--c-s3)', label: 'transmission axis of filter' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pI = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'I transmitted / W m⁻²', xLabel: 'angle of last filter axis from vertical / °' });
+  var emBox = ui.h('div', { class: 'readout' }); plotWrap.appendChild(emBox);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var nF = ui.select(paramCard, { label: 'Number of polarising filters', value: '1', options: [
+    { value: '1', label: '1 filter' }, { value: '2', label: '2 filters' }, { value: '3', label: '3 filters' }] }, function () { update('*'); });
+  var prm = ui.params(paramCard, [
+    { key: 'logL', label: 'Wavelength: log<sub>10</sub>(λ / m)', sym: '', unit: '', min: -14, max: 4, step: 0.0001, value: -6.2596 },
+    { key: 'I0', label: 'Intensity of the plane-polarised beam', sym: 'I<sub>0</sub>', unit: 'W m<sup>−2</sup>', min: 0, max: 100, step: 0.01, value: 8 },
+    { key: 'pol', label: 'Plane of polarisation of the beam (from vertical)', sym: 'θ<sub>0</sub>', unit: '°', min: -90, max: 90, step: 0.5, value: 0 },
+    { key: 'a1', label: 'Filter 1 transmission axis (from vertical)', sym: 'α<sub>1</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: 60 },
+    { key: 'a2', label: 'Filter 2 transmission axis (from vertical)', sym: 'α<sub>2</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: 60 },
+    { key: 'a3', label: 'Filter 3 transmission axis (from vertical)', sym: 'α<sub>3</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: 90 },
+    { key: 'It', label: 'Find the last filter angle for transmitted intensity', sym: 'I<sub>t</sub>', unit: 'W m<sup>−2</sup>', min: 0, max: 100, step: 0.01, value: 2 }
+  ], update);
+  var findAng = ui.toggle(paramCard, { label: 'Find the angle of the last filter for a given transmitted intensity', value: false }, function () { update('*'); });
+  var region = ui.select(paramCard, { label: 'Jump to region', value: '', options: [{ value: '', label: '—' }].concat(WV.EM.map(function (r) {
+    return { value: String((Math.log10(r.lo) + Math.log10(r.hi)) / 2), label: r.name }; })) }, function (val) { if (val !== '') prm.set({ logL: Number(val) }); });
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Malus: 8.0 W m⁻² polarised beam through a filter at 60°', n: '1', find: false, values: { I0: 8, pol: 0, a1: 60 }, note: 'I = I₀cos²θ = 8.0 × cos²60° = 2.0 W m⁻².' },
+    { name: 'Two filters at 30° and 60°: 8.0 → 4.5 W m⁻²', n: '2', find: false, values: { I0: 8, pol: 0, a1: 30, a2: 60 }, note: '8.0 × cos²30° × cos²30° = 8.0 × 0.75 × 0.75 = 4.5 W m⁻². Each angle is measured from the plane of the light reaching that filter.' },
+    { name: '9702/22 M/J 23 Q5(c): 8.5 W m⁻², filter at 35°, then find α for 5.2 W m⁻²', n: '2', find: true, values: { I0: 8.5, pol: 0, a1: 35, a2: 52, It: 5.2 },
+      note: 'After filter 1: 8.5 cos²35° = 5.7 W m⁻². 5.2 = 5.7 cos²(α − 35°) ⇒ α − 35° = 17° ⇒ α = 52° (mark scheme).' },
+    { name: 'Filter at 90° blocks the beam; a 45° filter in between lets some through', n: '2', find: false, values: { I0: 8, pol: 0, a1: 45, a2: 90 },
+      note: 'With only the 90° filter: cos²90° = 0. With 45° first: 8 × 0.5 × 0.5 = 2.0 W m⁻².' },
+    { name: 'Rotate one filter through 360°: two maxima and two minima', n: '1', find: false, values: { I0: 8, pol: 0, a1: 0 },
+      note: 'Maximum when the axis is parallel to the plane of polarisation (0°, 180°), zero when perpendicular (90°, 270°). See the cos² graph.' },
+    { name: 'Visible light: 400–700 nm', n: '1', find: false, values: { logL: -6.2596 }, note: 'λ ≈ 550 nm ⇒ f = c/λ = 3.00×10⁸ ÷ 5.5×10⁻⁷ = 5.45×10¹⁴ Hz.' },
+    { name: 'Microwaves: λ = 3.0 cm', n: '1', find: false, values: { logL: -1.5229 }, note: 'f = 3.00×10⁸ ÷ 0.030 = 1.0×10¹⁰ Hz.' },
+    { name: 'X-rays: λ = 1.0 × 10⁻¹⁰ m', n: '1', find: false, values: { logL: -10 }, note: 'f = 3.0×10¹⁸ Hz. X-rays and γ-rays overlap in wavelength.' }
+  ], function (p) { nF.set(p.n, true); findAng.set(p.find, true); region.set('', true); prm.set(p.values); });
+
+  ui.notes(noteCard, [
+    'Malus’s law I = I₀cos²θ: θ is the angle between the <b>plane of polarisation of the light arriving</b> and the <b>transmission axis</b> — not necessarily the angle from vertical.',
+    'For a series of filters, apply cos² at each filter using the angle between neighbouring axes; the light leaving a filter is polarised along that filter’s axis.',
+    'cos² not cos: cos 60° = 0.5 but cos²60° = 0.25. Square the cosine, then multiply.',
+    'Only transverse waves can be polarised (sound cannot). All EM waves are transverse and travel at c = 3.00 × 10<sup>8</sup> m s<sup>−1</sup> in free space.',
+    'Calculations for an <b>unpolarised</b> beam passing through a filter are not required by the syllabus; this page starts with plane-polarised light.',
+    'Visible: 400–700 nm (4 × 10<sup>−7</sup> to 7 × 10<sup>−7</sup> m). Region boundaries are approximate; recall orders of magnitude.'
+  ]);
+
+  /* ---------- model ---------- */
+  var ch = null;
+  function axes() { var v = prm.values, n = Number(nF.get()); return [v.a1, v.a2, v.a3].slice(0, n); }
+  function update(key) {
+    var v = prm.values, n = Number(nF.get());
+    prm.show('a2', n >= 2); prm.show('a3', n >= 3); prm.show('It', findAng.get());
+    if (key === 'logL' && region.get() !== '') region.set('', true);
+    ch = WV.malusChain(v.I0, v.pol, axes());
+    draw(); readout();
+  }
+
+  /* ---------- drawing ---------- */
+  function draw() {
+    if (!ch) return;
+    var col = ui.colors(), v = prm.values, c, W, H;
+    vp.fit(0, 1, 0, 0.5625); c = vp.begin(); W = vp.w; H = vp.h;
+    // spectrum bar (log scale 1e-14 … 1e4 m)
+    var L0 = -14, L1 = 4, bx = 20, bw = W - 40, by = 30, bh = 26;
+    function BX(lg) { return bx + (lg - L0) / (L1 - L0) * bw; }
+    var colsR = [col.s4, col.s3, col.s2, col.ok, col.warn, col.s1, col.accent];
+    WV.EM.forEach(function (r, i) {
+      var a = Math.max(L0, Math.log10(r.lo)), b = Math.min(L1, Math.log10(r.hi));
+      c.save(); c.fillStyle = colsR[i % colsR.length]; c.globalAlpha = 0.35; c.fillRect(BX(a), by + (i % 2) * bh / 2, BX(b) - BX(a), bh / 2); c.restore();
+      D.label(c, r.name, (BX(a) + BX(b)) / 2, by + bh + 10 + (i % 2) * 12, col.ink, { size: 10 });
+    });
+    // visible rainbow strip
+    var va = BX(Math.log10(4e-7)), vb = BX(Math.log10(7e-7));
+    if (c.createLinearGradient) { var gr = c.createLinearGradient(va, 0, vb, 0); ['#7a00ff', '#0040ff', '#00c0ff', '#00d000', '#ffe000', '#ff8000', '#ff0000'].forEach(function (cc, i) { gr.addColorStop(i / 6, cc); }); c.save(); c.fillStyle = gr; c.fillRect(va, by - 6, Math.max(2, vb - va), 6); c.restore(); }
+    for (var e = L0; e <= L1; e += 2) { D.line(c, [[BX(e), by + bh], [BX(e), by + bh + 3]], col.muted, { width: 1 }); D.label(c, '10^' + e, BX(e), by - 14, col.muted, { size: 9 }); }
+    var cx = BX(v.logL);
+    D.line(c, [[cx, by - 8], [cx, by + bh + 4]], col.accent, { width: 2.5 });
+    D.label(c, 'λ / m (log scale)', W - 20, by + bh + 40, col.muted, { align: 'right', size: 10 });
+    // polarisation beam
+    var y0 = H * 0.68, n = ch.steps.length, segs = n + 1, sx = 40, sw = W - 80, seg = sw / segs, amp0 = Math.min(42, H * 0.15);
+    D.arrow(c, sx - 20, y0, sx + sw + 20, y0, col.muted, { width: 1, head: 8 });
+    function eVec(xc, angDeg, I, color) {
+      var a = Math.sqrt(Math.max(0, I) / Math.max(v.I0, 1e-12)) * amp0, r = U.rad(angDeg);
+      if (a < 0.5) { D.label(c, '0', xc, y0, color, { size: 11 }); return; }
+      var dx = Math.sin(r) * a, dy = -Math.cos(r) * a;
+      D.arrow(c, xc, y0, xc + dx, y0 + dy, color, { width: 2, head: 7 }); D.arrow(c, xc, y0, xc - dx, y0 - dy, color, { width: 2, head: 7 });
+    }
+    eVec(sx + seg / 2, v.pol, v.I0, col.s1);
+    D.label(c, 'I₀ = ' + U.sf(v.I0).replace(/<[^>]+>/g, ''), sx + seg / 2, y0 + amp0 + 14, col.ink, { size: 11 });
+    ch.steps.forEach(function (st, i) {
+      var fx = sx + seg * (i + 1);
+      c.save(); c.strokeStyle = col['object-line']; c.fillStyle = col.surface; c.globalAlpha = 0.9; c.lineWidth = 1.2;
+      c.beginPath(); c.rect(fx - 6, y0 - amp0 - 10, 12, 2 * amp0 + 20); c.fill(); c.stroke(); c.restore();
+      var r = U.rad(st.axis), L = amp0 + 6;
+      D.line(c, [[fx - Math.sin(r) * L * 0.5, y0 + Math.cos(r) * L], [fx + Math.sin(r) * L * 0.5, y0 - Math.cos(r) * L]], col.s3, { width: 2.4 });
+      D.label(c, 'filter ' + (i + 1) + ': ' + U.dp(st.axis, 1) + '°', fx, y0 - amp0 - 22, col.s3, { size: 11 });
+      eVec(fx + seg / 2, st.axis, st.Iout, col.s1);
+      D.label(c, 'I = ' + U.sf(st.Iout).replace(/<[^>]+>/g, ''), fx + seg / 2, y0 + amp0 + 14, col.ink, { size: 11 });
+    });
+  }
+
+  /* ---------- working ---------- */
+  function readout() {
+    if (!ch) return;
+    var v = prm.values, s3 = U.sf, lam = Math.pow(10, v.logL), regs = WV.emRegions(lam);
+    // EM box (under the plot)
+    var nm = lam >= 1e-10 && lam < 1e-5 ? ' = ' + s3(lam * 1e9) + ' nm' : '';
+    emBox.innerHTML = '<div class="head">Electromagnetic spectrum</div>' +
+      '<div class="eq"><span class="lhs">λ</span><span class="rhs"><span class="res">' + s3(lam) + '</span> m' + nm + '</span></div>' +
+      '<div class="eq"><span class="lhs">f</span><span class="rhs"><span class="res">' + s3(WV.freq(lam)) + '</span> Hz</span><span class="work">c ÷ λ = 3.00 × 10<sup>8</sup> ÷ ' + (lam >= 1e6 || lam < 1e-3 ? '(' + s3(lam) + ')' : s3(lam)) + '</span></div>' +
+      '<div class="eq"><span class="lhs">region</span><span class="rhs"><span class="res">' + (regs.length ? regs.join(' / ') : 'beyond the range shown') + '</span></span></div>' +
+      (regs.indexOf('visible') >= 0 ? '<span class="badge ok">visible to the human eye (400–700 nm)</span>' : '') +
+      '<div class="head">Approximate ranges (m): γ < 10<sup>−11</sup>; X-ray 10<sup>−13</sup>–10<sup>−8</sup>; UV 10<sup>−8</sup>–4×10<sup>−7</sup>; visible 4–7×10<sup>−7</sup>; IR 7×10<sup>−7</sup>–10<sup>−3</sup>; microwave 10<sup>−3</sup>–10<sup>−1</sup>; radio > 10<sup>−1</sup>.</div>';
+    emBox.innerHTML = emBox.innerHTML.replace('γ < 10', 'γ &lt; 10');
+    R.clear();
+    R.head('Malus’s law through ' + ch.steps.length + ' filter' + (ch.steps.length > 1 ? 's' : '') + ' (plane-polarised light in)');
+    ch.steps.forEach(function (st, i) {
+      R.eq('θ<sub>' + (i + 1) + '</sub>', 'α<sub>' + (i + 1) + '</sub> − (plane arriving) = ' + U.dp(st.axis, 1) + '° − ' + U.dp(st.from, 1) + '°', U.dp(st.rel, 1) + '°');
+      R.eq('I<sub>' + (i + 1) + '</sub>', 'I cos²θ = ' + s3(st.Iin) + ' × cos²(' + U.dp(st.rel, 1) + '°) = ' + s3(st.Iin) + ' × ' + s3(Math.pow(Math.cos(U.rad(st.rel)), 2)), st.Iout, 'W m<sup>−2</sup>');
+    });
+    R.eq('fraction transmitted', 'I ÷ I₀', v.I0 > 0 ? ch.I / v.I0 : 0);
+    if (v.I0 > 0 && ch.I < 1e-12 * v.I0) R.badge('No light: an axis is perpendicular to the plane of polarisation reaching it', 'warn');
+    if (findAng.get()) {
+      var last = ch.steps[ch.steps.length - 1], Iin = last.Iin, th = WV.malusAngle(Iin, v.It);
+      R.head('Angle of the last filter for I<sub>t</sub> = ' + s3(v.It) + ' W m<sup>−2</sup>');
+      if (!isFinite(th)) R.badge('Not possible: I<sub>t</sub> must be between 0 and the intensity reaching the last filter (' + s3(Iin) + ' W m<sup>−2</sup>)', 'warn');
+      else {
+        R.eq('cos²θ', 'I<sub>t</sub> ÷ I = ' + s3(v.It) + ' ÷ ' + s3(Iin), v.It / Iin);
+        R.eq('θ', 'cos⁻¹√(' + s3(v.It / Iin) + ')', U.dp(th, 1) + '°');
+        R.eq('axis of last filter', U.dp(last.from, 1) + '° ± ' + U.dp(th, 1) + '°', U.dp(last.from + th, 1) + '° or ' + U.dp(last.from - th, 1) + '°');
+      }
+    }
+    R.render();
+    // I vs last-filter angle
+    var col = ui.colors(), lastS = ch.steps[ch.steps.length - 1];
+    pI.draw({ x: [0, 360], y: [0, Math.max(v.I0, 1e-6) * 1.1], series: [{ fn: function (a) { return WV.malus(lastS.Iin, a - lastS.from); }, color: col.s1 }],
+      cursor: ((lastS.axis % 360) + 360) % 360, hlines: findAng.get() ? [{ y: v.It, label: 'I_t' }] : [], xLabel: 'angle of last filter axis from vertical / °', yLabel: 'I transmitted / W m⁻²' });
+  }
+
+  ui.onTheme(function () { draw(); readout(); });
+  vp.onResize = draw;
+  update('*');
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

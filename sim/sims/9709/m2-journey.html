@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multi-stage journeys</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/mech-kinematics.js"></script>
+<style>
+  .stage { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+  .stage .shead { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-weight: 600; font-size: 13.5px; }
+  .stage.bad { border-color: var(--warn); }
+  .subtle { color: var(--muted); font-size: 12.5px; }
+  .roots button { margin: 4px 6px 0 0; }
+  .tblwrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, K = SIM.kin;
+  var course = ui.course('9709'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Multi-stage journeys: v–t, s–t and a–t graphs', g: g,
+    tags: course === '9709' ? ['9709 4.2 Kinematics (constant acceleration)', 'v–t area = displacement'] : ['9702 2 Kinematics'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas'); cv.style.aspectRatio = '4 / 1';
+  var vp = new SIM.view.Viewport(cv, { pad: 14 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 10, onFrame: function () { drawScene(); drawPlots(); readout(); } });
+  ui.legend(sceneCard, [
+    { color: 'var(--c-s1)', label: 'body A' }, { color: 'var(--c-s2)', label: 'body B (two-body mode)' },
+    { color: 'var(--c-pos)', label: 'area above the t-axis (+ displacement)' }, { color: 'var(--c-neg)', label: 'area below (− displacement)' },
+    { color: 'var(--c-velocity)', label: 'velocity' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pV = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'v / m s⁻¹' });
+  var pS = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 's / m (displacement)' });
+  var pA = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'a / m s⁻²' });
+  var tableCard = pg.card('left', 'Stage table');
+  var tableDiv = ui.h('div', { class: 'tblwrap' }); tableCard.appendChild(tableDiv);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Journey of A (stages)');
+  var solveCard = pg.card('right', 'Solve for an unknown X');
+  var twoCard = pg.card('right', 'Second body B (two-body mode)');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  /* ---------- model ---------- */
+  var TYPES = K.STAGE_TYPES, MAXST = 8;
+  function newStage(type, o) { return Object.assign({ type: type || 'hold', t: 10, a: 1, v: 0, d: 100, T: 60, link: '', k: 1 }, o || {}); }
+  var A = { u0: 0, u0link: false, u0k: 1, stages: [newStage('ta', { t: 10, a: 2 }), newStage('hold', { t: 30 }), newStage('tv', { t: 20, v: 0 })] };
+  var B = { u0: 0, u0link: false, u0k: 1, stages: [newStage('ta', { t: 10, a: 1 })], delay: 0, s0: 0 };
+  var solveOn = false, twoOn = false, autoPick = false;
+
+  var FIELD = {
+    t: { label: 'Time', sym: 't', unit: 's', min: 0, max: 600, step: 0.1 },
+    a: { label: 'Acceleration', sym: 'a', unit: 'm s<sup>−2</sup>', min: -10, max: 10, step: 0.01 },
+    v: { label: 'Final velocity', sym: 'v', unit: 'm s<sup>−1</sup>', min: -50, max: 50, step: 0.1 },
+    d: { label: 'Displacement', sym: 'd', unit: 'm', min: -5000, max: 5000, step: 0.1 },
+    T: { label: 'Total time of the journey', sym: 'T', unit: 's', min: 0, max: 3000, step: 0.1 }
+  };
+  function fieldLabel(type, f) {
+    if (f === 'v' && type === 'vt') return 'Constant velocity';
+    if (f === 'v' && type === 'av') return 'Velocity reached';
+    if (f === 'd') return 'Displacement during the stage';
+    return FIELD[f].label;
+  }
+
+  /* ---------- stage editor (used for A and for B) ---------- */
+  function stageEditor(card, body, who) {
+    var box = ui.h('div'); card.appendChild(box);
+    var gen = 0;
+    function render() {
+      gen++; var my = gen;
+      box.innerHTML = '';
+      var u0spec = body.u0link && solveOn && who === 'A'
+        ? { key: 'u0', label: 'Initial velocity u₀ = k·X, k', sym: 'k', unit: '', min: -10, max: 10, step: 0.01, value: body.u0k }
+        : { key: 'u0', label: 'Initial velocity', sym: 'u₀', unit: 'm s<sup>−1</sup>', min: -50, max: 50, step: 0.1, value: body.u0 };
+      var top = ui.params(box, [u0spec], function (key) {
+        if (my !== gen || key === '*') return;
+        if (body.u0link && solveOn && who === 'A') body.u0k = top.values.u0; else body.u0 = top.values.u0;
+        autoPick = true; update();
+      });
+      if (solveOn && who === 'A') ui.toggle(box, { label: 'X appears in u₀ (u₀ = k·X)', value: body.u0link }, function (on) { if (my !== gen) return; body.u0link = on; autoPick = true; render(); update(); });
+      body.stages.forEach(function (st, i) {
+        var wrap = ui.h('div', { class: 'stage' }); box.appendChild(wrap);
+        var head = ui.h('div', { class: 'shead' }, [ui.h('span', { text: 'Stage ' + (i + 1) })]);
+        if (body.stages.length > 1) head.appendChild(ui.h('button', { class: 'btn', text: '✕ Remove stage ' + (i + 1), onclick: function () {
+          if (my !== gen) return; body.stages.splice(i, 1); autoPick = true; render(); update(); } }));
+        wrap.appendChild(head);
+        ui.select(wrap, { label: 'Type', value: st.type, options: Object.keys(TYPES).map(function (k) { return { value: k, label: TYPES[k].label }; }) }, function (v) {
+          if (my !== gen) return; st.type = v; if (st.link && TYPES[v].fields.indexOf(st.link) < 0) st.link = ''; autoPick = true; render(); update();
+        });
+        var fields = TYPES[st.type].fields;
+        var specs = fields.map(function (f) {
+          var F = FIELD[f];
+          if (solveOn && who === 'A' && st.link === f) return { key: f, label: fieldLabel(st.type, f) + ' = k·X, k', sym: 'k', unit: '', min: -10, max: 10, step: 0.01, value: st.k };
+          return { key: f, label: fieldLabel(st.type, f), sym: F.sym, unit: F.unit, min: F.min, max: F.max, step: F.step, value: st[f] };
+        });
+        var prm = ui.params(wrap, specs, function (key) {
+          if (my !== gen || key === '*') return;
+          if (solveOn && who === 'A' && st.link === key) st.k = prm.values[key]; else st[key] = prm.values[key];
+          autoPick = true; update();
+        });
+        if (solveOn && who === 'A') {
+          ui.select(wrap, { label: 'X appears in', value: st.link || '', options: [{ value: '', label: '— (no X in this stage)' }].concat(fields.map(function (f) { return { value: f, label: f + ' = k·X' }; })) }, function (v) {
+            if (my !== gen) return; st.link = v; autoPick = true; render(); update();
+          });
+        }
+        st._el = wrap;
+      });
+      var row = ui.h('div', { class: 'row' }); box.appendChild(row);
+      if (body.stages.length < MAXST) row.appendChild(ui.h('button', { class: 'btn', text: '＋ Add stage', onclick: function () {
+        if (my !== gen) return; body.stages.push(newStage('hold', { t: 10 })); autoPick = true; render(); update(); } }));
+      row.appendChild(ui.h('span', { class: 'subtle', text: body.stages.length + ' / ' + MAXST + ' stages' }));
+    }
+    return { render: render };
+  }
+  var edA = stageEditor(paramCard, A, 'A');
+  var tShow = ui.params(paramCard, [{ key: 'extra', label: 'Extra time shown after the journey', sym: '', unit: 's', min: 0, max: 100, step: 0.5, value: 0 }], function () { update(); });
+
+  /* ---------- solve-for controls ---------- */
+  var solveToggle = ui.toggle(solveCard, { label: 'Solve mode: link X into stage values, then find X from one condition' }, function (on) { solveOn = on; solveBox.style.display = on ? '' : 'none'; autoPick = true; edA.render(); update(); });
+  var solveBox = ui.h('div'); solveCard.appendChild(solveBox); solveBox.style.display = 'none';
+  var CONS = [
+    { value: 'T', label: 'total time =' }, { value: 'dist', label: 'total distance =' }, { value: 's', label: 'final displacement =' },
+    { value: 'v', label: 'final velocity =' }, { value: 'vmax', label: 'greatest speed =' }, { value: 'sk', label: 'displacement at the end of stage k =' },
+    { value: 'dk', label: 'distance at the end of stage k =' }, { value: 'tk', label: 'time at the end of stage k =' }, { value: 'vk', label: 'velocity at the end of stage k =' }];
+  var conSel = ui.select(solveBox, { label: 'Condition', value: 'dist', options: CONS }, function () { autoPick = true; update(); });
+  var kSel = ui.select(solveBox, { label: 'Stage k', value: '0', options: [0, 1, 2, 3, 4, 5, 6, 7].map(function (i) { return { value: String(i), label: 'stage ' + (i + 1) }; }) }, function () { autoPick = true; update(); });
+  var sp = ui.params(solveBox, [
+    { key: 'target', label: 'Value in the condition', sym: '', unit: '', min: -10000, max: 10000, step: 0.01, value: 0 },
+    { key: 'lo', label: 'Search for X from', sym: '', unit: '', min: -1000, max: 1000, step: 0.01, value: 0 },
+    { key: 'hi', label: 'Search for X up to', sym: '', unit: '', min: -1000, max: 5000, step: 0.01, value: 100 },
+    { key: 'X', label: 'X used in the graphs', sym: 'X', unit: '', min: -1000, max: 5000, step: 0.0001, value: 1 }
+  ], function (key) { if (key !== 'X') autoPick = true; update(); });
+  var rootsDiv = ui.h('div', { class: 'roots' }); solveBox.appendChild(rootsDiv);
+  ui.notes(solveBox, ['Example: “accelerates at <i>a</i> … then decelerates at 0.75<i>a</i>” → link X into both stages with k = 1 and k = −0.75.',
+    'Every root in the search range is listed. Apply the side conditions in the question (e.g. T &lt; 30) yourself.']);
+
+  /* ---------- two-body controls ---------- */
+  var twoToggle = ui.toggle(twoCard, { label: 'Show a second body B on the same line' }, function (on) { twoOn = on; twoBox.style.display = on ? '' : 'none'; update(); });
+  var twoBox = ui.h('div'); twoCard.appendChild(twoBox); twoBox.style.display = 'none';
+  var bp = ui.params(twoBox, [
+    { key: 'delay', label: 'B starts after a delay of', sym: 'τ', unit: 's', min: 0, max: 600, step: 0.1, value: 0 },
+    { key: 's0', label: 'B starts at displacement', sym: 's<sub>B</sub>(0)', unit: 'm', min: -5000, max: 5000, step: 0.1, value: 0 }
+  ], function () { B.delay = bp.values.delay; B.s0 = bp.values.s0; update(); });
+  var edB = stageEditor(twoBox, B, 'B');
+  ui.notes(twoBox, ['Before its delay B waits at rest. After its last stage each body keeps its final velocity.']);
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  /* ---------- presets ---------- */
+  function S(type, o) { return newStage(type, o); }
+  var PRESETS = [
+    { name: '9709/41 M/J 24 Q1: car 0 → 20 m s⁻¹, constant 30 s, rest in 20 s', A: { u0: 0, stages: [S('ta', { t: 10, a: 2 }), S('hold', { t: 30 }), S('tv', { t: 20, v: 0 })] },
+      note: 'Total distance = area of the trapezium = ½(30 + 60) × 20 = 900 m.' },
+    { name: '9709/41 O/N 24 Q4: bus, a then 0.75a, 16 m s⁻¹, 240 s, 3000 m ⇒ a', A: { u0: 0, stages: [S('av', { a: 1, v: 16, link: 'a', k: 1 }), S('fill', { T: 240 }), S('av', { a: -0.75, v: 0, link: 'a', k: -0.75 })] },
+      solve: { con: 'dist', target: 3000, lo: 0.05, hi: 2 }, note: 'Constant-speed time = 240 − 16/a − 64/(3a). Area: 3000 = ½(T_const + 240) × 16 ⇒ a = 16/45.' },
+    { name: '9709/42 M/J 25 Q4: 15 m s⁻¹, +0.4 for 30 s, 3T at constant speed, −0.2 for T; AB = 2750 m', A: { u0: 15, stages: [S('ta', { t: 30, a: 0.4 }), S('hold', { t: 60, link: 't', k: 3 }), S('ta', { t: 20, a: -0.2, link: 't', k: 1 }), S('av', { a: -0.5, v: 0 })] },
+      solve: { con: 'sk', k: 2, target: 2750, lo: 0, hi: 1200 }, note: '630 + 81T + 27T − 0.1T² = 2750 gives T = 20 or 1060. Reject 1060 because T < 30 (the car would also reverse). Then AC = 2750 + 23²/(2 × 0.5) = 3279 m.' },
+    { name: '9709/42 F/M 26 Q2: cyclist, 0.5 for 10 s, 1.5 over 13 m, v for 5 s, stops in 28 m', A: { u0: 0, stages: [S('ta', { t: 10, a: 0.5 }), S('da', { d: 13, a: 1.5 }), S('hold', { t: 5 }), S('dv', { d: 28, v: 0 })] },
+      note: 'v² = 5² + 2(1.5)(13) ⇒ v = 8. Distance 25 + 13 + 40 + 28 = 106 m; time 10 + 2 + 5 + 7 = 24 s; average speed 106 ÷ 24 = 4.42 m s⁻¹.' },
+    { name: '9709/42 F/M 21 Q4: elevator, 7 segments, returns to the ground floor ⇒ V', A: { u0: 0, stages: [S('tv', { t: 1.5, v: 2 }), S('hold', { t: 4.5 }), S('tv', { t: 1, v: 0 }), S('rest', { t: 6 }), S('tv', { t: 2, v: -1, link: 'v', k: -1 }), S('hold', { t: 5 }), S('tv', { t: 1.5, v: 0 })] },
+      solve: { con: 's', target: 0, lo: 0, hi: 10 }, note: 'Area above = area below: 11.5 = 6.75V ⇒ V = 46/27 = 1.70. First acceleration 2 ÷ 1.5 = 1.33 m s⁻².' },
+    { name: '9709/43 M/J 19 Q1: bus, 2.1 m s⁻² for 5 s, 24 s constant, stops in 6 s', A: { u0: 0, stages: [S('ta', { t: 5, a: 2.1 }), S('hold', { t: 24 }), S('tv', { t: 6, v: 0 })] },
+      note: 'Top speed 10.5 m s⁻¹; distance = ½(24 + 35) × 10.5 = 309.75 m.' },
+    { name: '9709/41 O/N 21 Q1: bus 12 s / 30 s / 6 s, total 585 m ⇒ speed', A: { u0: 0, stages: [S('tv', { t: 12, v: 10, link: 'v', k: 1 }), S('hold', { t: 30 }), S('tv', { t: 6, v: 0 })] },
+      solve: { con: 'dist', target: 585, lo: 0, hi: 50 }, note: '½(30 + 48)V = 585 ⇒ V = 15 m s⁻¹; deceleration 15 ÷ 6 = 2.5 m s⁻².' },
+    { name: '9709/41 O/N 23 Q3: bus, deceleration a then 2a, comes to rest at 70 s', A: { u0: 0, stages: [S('tv', { t: 8, v: 12.6 }), S('hold', { t: 40 }), S('ta', { t: 14, a: -0.4, link: 'a', k: -1 }), S('ta', { t: 8, a: -0.8, link: 'a', k: -2 })] },
+      solve: { con: 'v', target: 0, lo: 0, hi: 2 }, note: '12.6 − 14a − 16a = 0 ⇒ a = 0.42. Average speed = 716.52 ÷ 70 = 10.2 m s⁻¹.' },
+    { name: '9709/43 M/J 22 Q3: displacement–time graph (curves and straight lines)', A: { u0: 0, stages: [S('ta', { t: 5, a: 4 }), S('hold', { t: 5 }), S('ta', { t: 5, a: -4 }), S('vt', { v: -40, t: 5 })] },
+      note: 'Straight s–t segments = constant velocity. Returns to O at t = 20: displacement 0 but distance 400 m, so average speed = 20 m s⁻¹. The corner at D is a sudden velocity change (a model).' },
+    { name: '9709/43 M/J 23 Q6: elevator 0.4 m s⁻² for 5 s, 25 s constant, −0.2 to rest', A: { u0: 0, stages: [S('ta', { t: 5, a: 0.4 }), S('hold', { t: 25 }), S('av', { a: -0.2, v: 0 })] },
+      note: 'Greatest speed 2 m s⁻¹; distance ½(25 + 40) × 2 = 65 m.' },
+    { name: 'Distance vs displacement: projected at 12 m s⁻¹ with a = −3 for 10 s', A: { u0: 12, stages: [S('ta', { t: 10, a: -3 })] },
+      note: 'v = 0 at t = −u/a = 4 s. Displacement = −30 m but distance = 24 + 54 = 78 m. Split the stage at the turning point.' },
+    { name: 'Catching up: A at 20 m s⁻¹; B from rest at 2.5 m s⁻² up to 30 m s⁻¹', A: { u0: 20, stages: [S('hold', { t: 30 })] },
+      B: { u0: 0, stages: [S('av', { a: 2.5, v: 30 }), S('hold', { t: 30 })], delay: 0, s0: 0 },
+      note: 'B reaches 30 m s⁻¹ at t = 12 (180 m, A at 240 m), then 180 + 30(t − 12) = 20t ⇒ t = 18 s, 360 m from the start. (Textbook-style, not a past paper.)' },
+    { name: 'Distance in the n-th second (uniform acceleration from 2 m s⁻¹, a = 3)', A: { u0: 2, stages: [S('ta', { t: 6, a: 3 })] },
+      note: 'Scrub the clock: distance in the n-th second = s(n) − s(n − 1) = u + a(n − ½).' }
+  ];
+  function cloneBody(src) { return { u0: src.u0 || 0, u0link: !!src.u0link, u0k: src.u0k || 1, stages: src.stages.map(function (s) { return newStage(s.type, s); }), delay: src.delay || 0, s0: src.s0 || 0 }; }
+  var presetCtl = ui.presets(presetCard, PRESETS, function (p) {
+    clock.pause();
+    var a = cloneBody(p.A); A.u0 = a.u0; A.u0link = a.u0link; A.u0k = a.u0k; A.stages = a.stages;
+    solveOn = !!p.solve; solveToggle.set(solveOn, true); solveBox.style.display = solveOn ? '' : 'none';
+    if (p.solve) { conSel.set(p.solve.con, true); kSel.set(String(p.solve.k || 0), true); sp.set({ target: p.solve.target, lo: p.solve.lo, hi: p.solve.hi }, true); }
+    twoOn = !!p.B; twoToggle.set(twoOn, true); twoBox.style.display = twoOn ? '' : 'none';
+    if (p.B) { var b = cloneBody(p.B); B.u0 = b.u0; B.stages = b.stages; B.delay = b.delay; B.s0 = b.s0; bp.set({ delay: B.delay, s0: B.s0 }, true); edB.render(); }
+    tShow.set({ extra: 0 }, true);
+    autoPick = true; edA.render(); update(); clock.seek(0);
+  });
+
+  ui.notes(noteCard, [
+    'Area under the v–t graph = <b>displacement</b>. Area <b>below</b> the t-axis is negative. Distance adds the areas as positive numbers.',
+    'If v changes sign inside a stage, split it at t₀ = −u/a before finding the distance.',
+    'Gradient of v–t = acceleration; gradient of s–t = velocity. A straight s–t line means constant velocity.',
+    'Average speed = total <b>distance</b> ÷ total time (not the mean of the speeds).',
+    '“Decelerates at 0.2 m s⁻²” means a = −0.2 when the motion is in the positive direction.',
+    'A quadratic in T can give two roots: check them against the question (e.g. T &lt; 30, times must be positive).',
+    'Take g = ' + g + ' m s<sup>−2</sup> only if the motion is vertical under gravity alone.'
+  ]);
+
+  /* ---------- compute ---------- */
+  var jA = null, jB = null, solveRes = null, PA = null, PB = null, meet = null, tMax = 1, Xused = null;
+  function linksOf(body) {
+    var L = [];
+    if (solveOn) {
+      if (body.u0link) L.push({ stage: -1, field: 'u0', k: body.u0k });
+      body.stages.forEach(function (s, i) { if (s.link && TYPES[s.type].fields.indexOf(s.link) >= 0) L.push({ stage: i, field: s.link, k: s.k }); });
+    }
+    return L;
+  }
+  function constraint() { return { kind: conSel.get(), k: Number(kSel.get()) }; }
+  function update() {
+    var links = linksOf(A);
+    solveRes = null; Xused = null;
+    if (solveOn && links.length) {
+      var lo = sp.values.lo, hi = sp.values.hi;
+      if (hi > lo) solveRes = K.solveFor(A.u0, A.stages, links, constraint(), sp.values.target, lo, hi, 3000);
+      if (autoPick && solveRes && solveRes.roots.length) {
+        var best = solveRes.roots.filter(function (r) { return !r.warnings.length; })[0] || solveRes.roots[0];
+        sp.set({ X: best.X }, true);
+      }
+      Xused = sp.values.X;
+    }
+    autoPick = false;
+    var ap = K.applyLinks(A.u0, A.stages, links, Xused === null ? 0 : Xused);
+    jA = K.journey(ap.u0, ap.stages, { extend: true });
+    jA.resolved = ap;
+    tMax = Math.max(jA.total.T, 0);
+    if (twoOn) {
+      jB = K.journey(B.u0, B.stages, { extend: true });
+      tMax = Math.max(tMax, B.delay + jB.total.T);
+    } else jB = null;
+    tMax += tShow.values.extra;
+    if (!(tMax > 1e-6)) tMax = 1;
+    PA = K.track(jA, 0, 0, tMax);
+    if (jB) { PB = K.track(jB, B.delay, B.s0, tMax); meet = K.meetings(PA, PB, tMax); } else { PB = null; meet = null; }
+    clock.setDuration(tMax);
+    // highlight invalid stage
+    A.stages.forEach(function (s, i) { if (s._el) s._el.classList.toggle('bad', !!(jA.error && jA.error.stage === i)); });
+    try { ui.writeHash({ j: JSON.stringify({ A: { u0: A.u0, u0link: A.u0link, u0k: A.u0k, stages: A.stages.map(strip) }, solve: solveOn ? { con: conSel.get(), k: kSel.get(), target: sp.values.target, lo: sp.values.lo, hi: sp.values.hi, X: sp.values.X } : 0 }) }); } catch (e) { /* ignore */ }
+    drawScene(); drawPlots(); readout(); drawTable();
+  }
+  function strip(s) { return { type: s.type, t: s.t, a: s.a, v: s.v, d: s.d, T: s.T, link: s.link, k: s.k }; }
+
+  /* ---------- scene: particle(s) on a line ---------- */
+  function drawScene() {
+    if (!PA) return;
+    var col = ui.colors();
+    var lo = 0, hi = 0, n = 200;
+    for (var i = 0; i <= n; i++) {
+      var t = tMax * i / n, s = K.trackAt(PA, t).s; lo = Math.min(lo, s); hi = Math.max(hi, s);
+      if (PB) { var sb = K.trackAt(PB, t).s; lo = Math.min(lo, sb); hi = Math.max(hi, sb); }
+    }
+    if (hi - lo < 1e-9) { hi += 1; lo -= 1; }
+    var span = hi - lo;
+    vp.fit(lo - 0.06 * span, hi + 0.06 * span, -0.5 * span * 0.25, 0.5 * span * 0.25);
+    var c = vp.begin();
+    var W = vp.w, H = vp.h, x0 = 30, x1 = W - 30;
+    function X(s) { return x0 + (s - (lo - 0.04 * span)) / (span * 1.08) * (x1 - x0); }
+    var yA = H * 0.42, yB = H * 0.78;
+    // axis with ticks
+    var tk = U.niceTicks(lo, hi, Math.max(3, Math.floor((x1 - x0) / 80)));
+    c.strokeStyle = col.muted; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x0, yA); c.lineTo(x1, yA); c.stroke();
+    tk.ticks.forEach(function (v) {
+      if (v < lo - 0.04 * span || v > hi + 0.04 * span) return;
+      c.beginPath(); c.moveTo(X(v), yA - 4); c.lineTo(X(v), yA + 4); c.stroke();
+      D.label(c, U.num(v, 6), X(v), yA + 14, col.muted, { size: 11 });
+    });
+    D.label(c, 'O', X(0), yA - 14, col.ink, { bold: true, size: 12 });
+    D.label(c, 's / m  (positive →)', x1, 12, col.muted, { size: 11, align: 'right' });
+    // stage boundary marks for A
+    jA.segs.forEach(function (g2) { c.fillStyle = col.muted; c.beginPath(); c.arc(X(g2.s1), yA, 2.5, 0, 7); c.fill(); });
+    var st = K.trackAt(PA, clock.t);
+    D.particle(c, X(st.s), yA - 12, 9, { fill: col.s1, label: 'A' });
+    if (Math.abs(st.v) > 1e-9) D.arrow(c, X(st.s), yA - 30, X(st.s) + U.sgn(st.v) * (14 + Math.min(70, Math.abs(st.v) * 3)), yA - 30, col.velocity, { label: 'v = ' + U.sf(st.v) + ' m/s', width: 2 });
+    if (PB) {
+      c.strokeStyle = col.muted; c.beginPath(); c.moveTo(x0, yB); c.lineTo(x1, yB); c.stroke();
+      var sb2 = K.trackAt(PB, clock.t);
+      D.particle(c, X(sb2.s), yB - 10, 8, { fill: col.s2, label: 'B' });
+      if (Math.abs(sb2.v) > 1e-9) D.arrow(c, X(sb2.s), yB - 26, X(sb2.s) + U.sgn(sb2.v) * (14 + Math.min(70, Math.abs(sb2.v) * 3)), yB - 26, col.velocity, { width: 1.6 });
+    }
+  }
+
+  /* ---------- plots ---------- */
+  var vSpec = null;
+  pV.draw = function (spec) { SIM.plot.Plot.prototype.draw.call(this, spec); overlayAreas(this); };
+  function overlayAreas(P) {
+    if (!jA || !P.px) return;
+    var c = P.ctx, col = ui.colors(), box = P.box;
+    c.save(); c.beginPath(); c.rect(box.L, box.T, box.W, box.H); c.clip();
+    c.font = '600 11px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    jA.segs.forEach(function (g2) {
+      if (g2.T <= 0) return;
+      var parts = g2.tTurn !== null ? [[g2.t0, g2.tTurn], [g2.tTurn, g2.t1]] : [[g2.t0, g2.t1]];
+      parts.forEach(function (pp, k) {
+        var ta = pp[0], tb = pp[1], ua = g2.u + g2.a * (ta - g2.t0), vb = g2.u + g2.a * (tb - g2.t0);
+        var area = 0.5 * (ua + vb) * (tb - ta);
+        if (Math.abs(area) < 1e-9) return;
+        var xm = P.px(0.5 * (ta + tb)), ym = P.py(0.25 * (ua + vb));
+        var wpx = P.px(tb) - P.px(ta); if (wpx < 22) return;
+        var txt = (area > 0 ? '+' : '−') + U.sf(Math.abs(area)).replace(/<[^>]+>/g, '');
+        c.fillStyle = col.panel; c.globalAlpha = 0.8; var w = c.measureText(txt).width + 6; c.fillRect(xm - w / 2, ym - 8, w, 16); c.globalAlpha = 1;
+        c.fillStyle = col.ink; c.fillText(txt, xm, ym);
+      });
+    });
+    c.restore();
+  }
+  function drawPlots() {
+    if (!jA) return;
+    var col = ui.colors(), br = [], vl = [];
+    jA.segs.forEach(function (g2, i) { br.push(g2.t1); if (g2.t0 >= 0 && g2.T > 0) vl.push({ x: g2.t0, label: String(g2.i + 1) }); });
+    var brB = [];
+    if (PB) PB.forEach(function (p) { brB.push(p.ta); });
+    var sA = function (t) { return K.trackAt(PA, t).s; }, vA = function (t) { return K.trackAt(PA, t).v; }, aA = function (t) { return K.trackAt(PA, t).a; };
+    var mk = [];
+    jA.segs.forEach(function (g2) { if (g2.tTurn !== null) mk.push({ x: g2.tTurn, y: 0, label: 'v = 0', color: col.ink }); });
+    var serV = [{ fn: vA, color: col.s1, shade: true, breaks: br, steps: 600 }];
+    var serS = [{ fn: sA, color: col.s1, breaks: br, steps: 600 }];
+    var serA = [{ fn: aA, color: col.accel || col.s1, breaks: br, steps: 600 }];
+    var mS = [];
+    if (PB) {
+      serV.push({ fn: function (t) { return K.trackAt(PB, t).v; }, color: col.s2, breaks: brB, steps: 600, dash: [6, 4] });
+      serS.push({ fn: function (t) { return K.trackAt(PB, t).s; }, color: col.s2, breaks: brB, steps: 600, dash: [6, 4] });
+      serA.push({ fn: function (t) { return K.trackAt(PB, t).a; }, color: col.s2, breaks: brB, steps: 600, dash: [6, 4] });
+      meet.list.forEach(function (m) { mS.push({ x: m.t, y: m.s, label: 'meet t = ' + U.sf(m.t).replace(/<[^>]+>/g, ''), color: col.ink }); });
+    }
+    pV.draw({ x: [0, tMax], series: serV, cursor: clock.t, vlines: vl, markers: mk });
+    pS.draw({ x: [0, tMax], series: serS, cursor: clock.t, vlines: vl, markers: mS });
+    pA.draw({ x: [0, tMax], series: serA, cursor: clock.t, vlines: vl });
+  }
+
+  /* ---------- stage table ---------- */
+  function f3(x) { return U.sf(x); }
+  function drawTable() {
+    if (!jA) return;
+    var rows = jA.segs.map(function (g2) {
+      return '<tr><td>' + (g2.i + 1) + (g2.jump ? ' *' : '') + '</td><td>' + f3(g2.u) + '</td><td>' + f3(g2.v) + '</td><td>' + f3(g2.a) + '</td><td>' + f3(g2.T) + '</td><td>' +
+        f3(g2.t1) + '</td><td>' + f3(g2.ds) + '</td><td>' + f3(g2.dist) + '</td></tr>';
+    }).join('');
+    if (jA.error) rows += '<tr><td>' + (jA.error.stage + 1) + '</td><td colspan="7" style="text-align:left;color:var(--warn)">impossible: ' + ui.esc(jA.error.msg) + '</td></tr>';
+    tableDiv.innerHTML = '<table class="tbl"><tr><th>stage</th><th>u</th><th>v</th><th>a</th><th>t</th><th>ends at</th><th>s</th><th>distance</th></tr>' + rows +
+      '<tr><th>total</th><td></td><td>' + f3(jA.total.v) + '</td><td></td><td>' + f3(jA.total.T) + '</td><td></td><td>' + f3(jA.total.s) + '</td><td>' + f3(jA.total.dist) + '</td></tr></table>' +
+      '<div class="subtle">Units: m s⁻¹, m s⁻², s, m. Positive = forwards. * = velocity jumps at the start of the stage (corner on the s–t graph).</div>';
+  }
+
+  /* ---------- live working ---------- */
+  function stageWorking(g2, st) {
+    var u = g2.u, v = g2.v, a = g2.a, T = g2.T, s3 = function (x) { return x < 0 ? '(' + U.sf(x) + ')' : U.sf(x); }, lab = 'Stage ' + (g2.i + 1) + ': ' + TYPES[g2.type].label;
+    var E = function (l, w, val, un) { R.eq(l, w.replace(/\(\((−[^()]*)\)\)/g, '($1)'), val, un); };
+    R.head(lab);
+    if (g2.jump) R.badge('velocity jumps from ' + U.sf(g2.uPrev) + ' to ' + U.sf(u) + ' m s⁻¹ (instantaneous change — a model)', 'warn');
+    switch (g2.type) {
+      case 'ta':
+        E('v', 'u + at = ' + s3(u) + ' + (' + s3(a) + ')(' + s3(T) + ')', v, 'm s<sup>−1</sup>');
+        E('s', 'ut + ½at² = (' + s3(u) + ')(' + s3(T) + ') + ½(' + s3(a) + ')(' + s3(T) + ')²', g2.ds, 'm'); break;
+      case 'tv':
+        E('a', '(v − u) ÷ t = (' + s3(v) + ' − ' + s3(u) + ') ÷ ' + s3(T), a, 'm s<sup>−2</sup>');
+        E('s', '½(u + v)t = ½(' + s3(u) + ' + ' + s3(v) + ')(' + s3(T) + ')', g2.ds, 'm'); break;
+      case 'dv':
+        E('t', '2d ÷ (u + v) = 2(' + s3(g2.ds) + ') ÷ (' + s3(u) + ' + ' + s3(v) + ')', T, 's');
+        E('a', '(v² − u²) ÷ (2d) = (' + s3(v) + '² − ' + s3(u) + '²) ÷ (2 × ' + s3(g2.ds) + ')', a, 'm s<sup>−2</sup>'); break;
+      case 'da':
+        E('v²', 'u² + 2ad = ' + s3(u) + '² + 2(' + s3(a) + ')(' + s3(g2.ds) + ')', v * v, 'm² s<sup>−2</sup>');
+        E('v', g2.tTurn !== null ? 'u + at (passes through v = 0 first)' : '±√(v²), same direction as the motion', v, 'm s<sup>−1</sup>');
+        E('t', Math.abs(a) > 0 ? '(v − u) ÷ a = (' + s3(v) + ' − ' + s3(u) + ') ÷ ' + s3(a) : 'd ÷ u', T, 's'); break;
+      case 'av':
+        E('t', '(v − u) ÷ a = (' + s3(v) + ' − ' + s3(u) + ') ÷ ' + s3(a), T, 's');
+        E('s', '(v² − u²) ÷ (2a) = (' + s3(v) + '² − ' + s3(u) + '²) ÷ (2 × ' + s3(a) + ')', g2.ds, 'm'); break;
+      case 'fill':
+        E('t', 'T − (other stages) = ' + s3(st.T) + ' − ' + s3(st.T - T), T, 's');
+        E('s', 'ut = (' + s3(u) + ')(' + s3(T) + ')', g2.ds, 'm'); break;
+      case 'rest':
+        E('s', 'at rest for ' + s3(T) + ' s', 0, 'm'); break;
+      default:
+        E('s', 'vt = (' + s3(u) + ')(' + s3(T) + ')', g2.ds, 'm');
+    }
+    if (g2.tTurn !== null) {
+      var t0 = g2.tTurn - g2.t0, s1 = u * t0 + 0.5 * a * t0 * t0;
+      E('t₀', 'v = 0 when t = −u ÷ a = ' + s3(-u) + ' ÷ ' + s3(a), t0, 's after the stage starts');
+      E('distance', '|s(t₀)| + |s(t) − s(t₀)| = ' + s3(Math.abs(s1)) + ' + ' + s3(Math.abs(g2.ds - s1)), g2.dist, 'm');
+    }
+  }
+  /** 3 s.f., plus the exact value when it is a short exact decimal that 3 s.f. would round */
+  function pr(x) {
+    if (!isFinite(x)) return U.sf(x);
+    var t = U.sf(x);
+    for (var k = 0; k <= 3; k++) {
+      var m = x * Math.pow(10, k);
+      if (Math.abs(m - Math.round(m)) < 1e-7 * Math.max(1, Math.abs(m))) {
+        var ex = (Math.round(m) / Math.pow(10, k)).toFixed(k).replace('-', '−');
+        return Number(ex.replace('−', '-')) === Number(t.replace('−', '-')) ? t : t + ' (= ' + ex + ')';
+      }
+    }
+    return t;
+  }
+  function ordinal(n) { var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+  function polyFit(f) {
+    // is f(X) quadratic in X, or c0 + c1/X? (used to show the equation the solver is solving)
+    var lo = sp.values.lo, hi = sp.values.hi, pts = [0.2, 0.4, 0.6, 0.8, 0.5].map(function (r) { return lo + (hi - lo) * r; });
+    var ys = pts.map(f); if (ys.some(function (y) { return !isFinite(y); })) return null;
+    var Q = U.gauss(pts.slice(0, 3).map(function (x) { return [x * x, x, 1]; }), ys.slice(0, 3));
+    if (Q) {
+      var ok = [3, 4].every(function (i) { var x = pts[i]; return Math.abs(Q[0] * x * x + Q[1] * x + Q[2] - ys[i]) < 1e-7 * Math.max(1, Math.abs(ys[i])); });
+      if (ok) return { kind: 'poly', c: Q };
+    }
+    if (pts.every(function (x) { return Math.abs(x) > 1e-9; })) {
+      var Rr = U.gauss(pts.slice(0, 2).map(function (x) { return [1, 1 / x]; }), ys.slice(0, 2));
+      if (Rr && [2, 3, 4].every(function (i) { return Math.abs(Rr[0] + Rr[1] / pts[i] - ys[i]) < 1e-7 * Math.max(1, Math.abs(ys[i])); })) return { kind: 'inv', c: Rr };
+    }
+    return null;
+  }
+  function coefTxt(c, lead) { var s = String(Number(Math.abs(c).toPrecision(6))); return (c < 0 ? (lead ? '−' : ' − ') : (lead ? '' : ' + ')) + s; }
+  function readout() {
+    if (!jA) return;
+    var s3 = U.sf;
+    R.clear();
+    R.badge('Positive direction: forwards (to the right). Velocities and displacements carry signs.', 'info');
+    if (jA.error) R.badge('Stage ' + (jA.error.stage + 1) + ' is impossible: ' + jA.error.msg, 'warn');
+    if (!A.stages.length) R.badge('Add a stage to start.', 'info');
+    if (solveOn) {
+      var links = linksOf(A);
+      R.head('Solve for X');
+      if (!links.length) R.badge('Link X into at least one stage value (“X appears in”).', 'warn');
+      else if (!solveRes) R.badge('The search range is empty: make “up to” larger than “from”.', 'warn');
+      else {
+        var con = constraint(), cl = CONS.filter(function (c) { return c.value === con.kind; })[0].label.replace(' =', '').replace('stage k', 'stage ' + (con.k + 1));
+        var fit = polyFit(function (X) { var ap = K.applyLinks(A.u0, A.stages, links, X); return K.metric(K.journey(ap.u0, ap.stages), con); });
+        if (fit && fit.kind === 'poly') {
+          var q = fit.c, terms = '';
+          if (Math.abs(q[0]) > 1e-9) terms += coefTxt(q[0], true) + 'X²';
+          if (Math.abs(q[1]) > 1e-9) terms += coefTxt(q[1], !terms) + 'X';
+          if (Math.abs(q[2]) > 1e-9 || !terms) terms += coefTxt(q[2], !terms);
+          R.eq(cl, terms + ' = ' + s3(sp.values.target), '', '');
+        } else if (fit && fit.kind === 'inv') {
+          R.eq(cl, coefTxt(fit.c[0], true) + coefTxt(fit.c[1], false) + ' ÷ X = ' + s3(sp.values.target), '', '');
+        }
+        if (!solveRes.roots.length) R.badge('No value of X in [' + s3(sp.values.lo) + ', ' + s3(sp.values.hi) + '] satisfies ' + cl + ' = ' + s3(sp.values.target) + '. Widen the search range or check the set-up.', 'warn');
+        solveRes.roots.forEach(function (r, i) {
+          R.eq('X<sub>' + (i + 1) + '</sub>', r.warnings.length ? 'check: ' + r.warnings.join('; ') : 'all stages valid', pr(r.X));
+        });
+        var cur = K.metric(jA, con);
+        R.eq(cl + ' with X = ' + s3(Xused), 'current value', isFinite(cur) ? cur : '—');
+      }
+    }
+    jA.segs.forEach(function (g2) { stageWorking(g2, jA.resolved.stages[g2.i]); });
+    if (jA.segs.length) {
+      var tot = jA.total;
+      R.head('Whole journey of A');
+      R.eq('total time', jA.segs.map(function (g2) { return s3(g2.T); }).join(' + '), pr(tot.T), 's');
+      R.eq('displacement', 'sum of signed areas = ' + jA.segs.map(function (g2) { return '(' + s3(g2.ds) + ')'; }).join(' + '), pr(tot.s), 'm');
+      R.eq('distance', 'sum of |areas| = ' + jA.segs.map(function (g2) { return s3(g2.dist); }).join(' + '), pr(tot.dist), 'm');
+      R.eq('average speed', 'distance ÷ time = ' + s3(tot.dist) + ' ÷ ' + s3(tot.T), tot.T > 0 ? pr(tot.avgSpeed) : '—', tot.T > 0 ? 'm s<sup>−1</sup>' : '');
+      R.eq('average velocity', 'displacement ÷ time = ' + s3(tot.s) + ' ÷ ' + s3(tot.T), tot.T > 0 ? tot.avgVel : '—', tot.T > 0 ? 'm s<sup>−1</sup>' : '');
+      R.eq('greatest speed', 'largest |v| at a stage boundary', tot.vmax, 'm s<sup>−1</sup>');
+    }
+    var st = K.trackAt(PA, clock.t);
+    R.head('A at t = ' + clock.t.toFixed(2) + ' s');
+    R.eq('s', 'displacement from O', st.s, 'm');
+    R.eq('v', 'velocity', st.v, 'm s<sup>−1</sup>');
+    R.eq('a', 'acceleration', st.a, 'm s<sup>−2</sup>');
+    R.eq('distance', 'travelled so far', jA.distanceAt(clock.t), 'm');
+    var n = Math.floor(clock.t + 1e-9);
+    if (n >= 1) R.eq('in the ' + ordinal(n) + ' second', 'distance travelled between t = ' + (n - 1) + ' and t = ' + n, jA.distanceAt(n) - jA.distanceAt(n - 1), 'm');
+    if (PB && meet) {
+      R.head('Two bodies: when is s<sub>A</sub> = s<sub>B</sub>?');
+      if (jB.error) R.badge('B stage ' + (jB.error.stage + 1) + ' is impossible: ' + jB.error.msg, 'warn');
+      if (meet.together.length) R.badge('A and B move together for ' + meet.together.map(function (iv) { return s3(iv[0]) + ' ≤ t ≤ ' + s3(iv[1]); }).join(', '), 'info');
+      if (!meet.list.length && !meet.together.length) R.badge('A and B are never level for 0 ≤ t ≤ ' + s3(tMax), 'info');
+      meet.list.forEach(function (m) {
+        R.eq('level at t', 's = ' + s3(m.s) + ' m; v<sub>A</sub> = ' + s3(m.v1) + ', v<sub>B</sub> = ' + s3(m.v2) + (m.t < 1e-9 ? ' (start)' : ''), m.t, 's');
+      });
+      var sb = K.trackAt(PB, clock.t);
+      R.eq('s<sub>A</sub> − s<sub>B</sub>', 'gap at t = ' + clock.t.toFixed(2) + ' s', st.s - sb.s, 'm');
+    }
+    R.render();
+  }
+
+  ui.onTheme(function () { drawScene(); drawPlots(); });
+  vp.onResize = drawScene;
+  // restore from the URL hash
+  var hsh = ui.readHash();
+  if (typeof hsh.j === 'string') {
+    try {
+      var o = JSON.parse(hsh.j);
+      if (o && o.A && Array.isArray(o.A.stages) && o.A.stages.length) {
+        A.u0 = +o.A.u0 || 0; A.u0link = !!o.A.u0link; A.u0k = +o.A.u0k || 1;
+        A.stages = o.A.stages.slice(0, MAXST).filter(function (s) { return s && TYPES[s.type]; }).map(function (s) { return newStage(s.type, s); });
+        if (!A.stages.length) A.stages = [newStage('ta', { t: 10, a: 1 })];
+      }
+      if (o && o.solve) { solveOn = true; solveToggle.set(true, true); solveBox.style.display = ''; conSel.set(o.solve.con, true); kSel.set(String(o.solve.k), true); sp.set({ target: +o.solve.target || 0, lo: +o.solve.lo || 0, hi: +o.solve.hi || 100, X: +o.solve.X || 1 }, true); }
+    } catch (e) { /* ignore bad hash */ }
+  }
+  edA.render(); edB.render();
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

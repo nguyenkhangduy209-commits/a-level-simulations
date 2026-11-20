@@ -1,0 +1,638 @@
+Cambridge International AS & A Level
+MATHEMATICS 9709/41
+Paper 4 Mechanics May/June 2026
+MARK SCHEME
+Maximum Mark: 50
+Published
+This mark scheme contains the instructions and marking guidance that our examiners used to mark
+candidate responses for this component.
+Before they start marking, examiners complete a standardisation process. They review a range of candidate
+responses and discuss the mark scheme in detail to agree which answers can and cannot be accepted.
+Examiners award marks where it is clear that candidate responses have met the requirements of the mark
+scheme. These requirements may vary between different components or different versions of the same
+component, depending on the exact requirements of the question and the candidate responses seen during
+the standardisation process.
+Sometimes, our mark schemes may allow marks to be awarded to responses which contain elements that
+are factually incorrect or for content not covered by the syllabus. We do this in response to the demands of a
+specific question to support candidates and make sure that our assessments are fair. However, these
+allowances should not be used as a guide for teaching and learning.
+We cannot discuss the mark scheme with schools, and we recommend that schools read the mark scheme
+together with the assessment material and the Principal Examiner Report for Teachers.
+This document consists of 17 printed pages.
+© Cambridge University Press & Assessment 2026 [Turn over
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+General marking principles
+All examiners must apply these marking principles when marking candidate responses.
+1 Examiners must award marks for each response in line with:
+• the specific content defined in the mark scheme
+• the specific skills defined in the mark scheme or in the level descriptions
+• the standard of response required as exemplified by the standardisation scripts.
+2 Examiners must award whole marks (not half marks, or other fractions).
+3 Examiners must award marks positively. This means that:
+• marks are not deducted for errors or omissions
+• marks are awarded for correct/valid answers as defined in the mark scheme and also for other valid answers which go beyond the scope of the
+syllabus and mark scheme referring to your team leader as appropriate
+• the quality of spelling, punctuation and grammar are judged only when the mark scheme indicates that these features are specifically assessed in the
+question. However, the meaning of all responses must be unambiguous.
+4 Examiners must consistently apply the requirements of the mark scheme and any rules for what to do when candidates have not followed instructions
+correctly.
+5 Examiners must use the full range of marks defined in the mark scheme, unless limited by the quality of the candidate responses seen.
+6 Examiners must award marks according to the mark scheme and must not award marks with grade thresholds or grade descriptions in mind.
+© Cambridge University Press & Assessment 2026 Page 2 of 17
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Mathematics-Specific Marking Principles
+1 Unless a particular method has been specified in the question, full marks may be awarded for any correct method. However, if a calculation is required
+then no marks will be awarded for a scale drawing.
+2 Unless specified in the question, non-integer answers may be given as fractions, decimals or in standard form. Ignore superfluous zeros, provided that the
+degree of accuracy is not affected.
+3 Allow alternative conventions for notation if used consistently throughout the paper, e.g. commas being used as decimal points.
+4 Unless otherwise indicated, marks once gained cannot subsequently be lost, e.g. wrong working following a correct form of answer is ignored (isw).
+5 Where a candidate has misread a number or sign in the question and used that value consistently throughout, provided that number does not alter the
+difficulty or the method required, award all marks earned and deduct just 1 A or B mark for the misread.
+6 Recovery within working is allowed, e.g. a notation error in the working where the following line of working makes the candidate’s intent clear.
+© Cambridge University Press & Assessment 2026 Page 3 of 17
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Annotations guidance for centres
+Examiners use a system of annotations as a shorthand for communicating their marking decisions to one another. Examiners are trained during the standardisation
+process on how and when to use annotations. The purpose of annotations is to inform the standardisation and monitoring processes and guide the supervising
+examiners when they are checking the work of examiners within their team. The meaning of annotations and how they are used is specific to each component and
+is understood by all examiners who mark the component.
+We publish annotations in our mark schemes to help centres understand the annotations they may see on copies of scripts. Note that there may not be a direct
+correlation between the number of annotations on a script and the mark awarded. Similarly, the use of an annotation may not be an indication of the quality of the
+response.
+The annotations listed below were available to examiners marking this component in this series.
+Annotations
+Annotation Meaning
+More information required
+Accuracy mark awarded zero
+Accuracy mark awarded one
+Independent accuracy mark awarded zero
+Independent accuracy mark awarded one
+Independent accuracy mark awarded two
+Benefit of the doubt
+Blank Page
+Incorrect
+Dep Used to indicate DM0 or DM1
+© Cambridge University Press & Assessment 2026 Page 4 of 17
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Annotation Meaning
+DM1 Dependent on the previous M1 mark(s)
+Follow through
+Indicate working that is right or wrong
+Highlighter Highlight a key point in the working
+Ignore subsequent work
+Judgement
+Judgement
+Method mark awarded zero
+Method mark awarded one
+Method mark awarded two
+Misread
+Omission or Other solution
+Allows comments to be entered at the bottom of the RM marking window and then displayed when the associated question item is
+Off-page comment
+navigated to.
+On-page comment Allows comments to be entered in speech bubbles on the candidate response.
+Judgment made by the PE
+Premature approximation
+Special case
+Indicates that work/page has been seen
+© Cambridge University Press & Assessment 2026 Page 5 of 17
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Annotation Meaning
+Error in number of significant figures
+Correct
+Transcription error
+Correct answer from incorrect working
+© Cambridge University Press & Assessment 2026 Page 6 of 17
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Mark Scheme Notes
+The following notes are intended to aid interpretation of mark schemes in general, but individual mark schemes may include marks awarded for specific reasons
+outside the scope of these notes.
+Types of mark
+M Method mark, awarded for a valid method applied to the problem. Method marks are not lost for numerical errors, algebraic slips or errors in units.
+However, it is not usually sufficient for a candidate just to indicate an intention of using some method or just to quote a formula; the formula or idea
+must be applied to the specific problem in hand, e.g. by substituting the relevant quantities into the formula. Correct application of a formula
+without the formula being quoted obviously earns the M mark and in some cases an M mark can be implied from a correct answer.
+A Accuracy mark, awarded for a correct answer or intermediate step correctly obtained. Accuracy marks cannot be given unless the associated method
+mark is earned (or implied).
+B Mark for a correct result or statement independent of method marks.
+DM or DB When a part of a question has two or more ‘method’ steps, the M marks are generally independent unless the scheme specifically says otherwise;
+and similarly, when there are several B marks allocated. The notation DM or DB is used to indicate that a particular M or B mark is dependent on
+an earlier M or B (asterisked) mark in the scheme. When two or more steps are run together by the candidate, the earlier marks are implied and full
+credit is given.
+FT Implies that the A or B mark indicated is allowed for work correctly following on from previously incorrect results. Otherwise, A or B marks are
+given for correct work only.
+• A or B marks are given for correct work only (not for results obtained from incorrect working) unless follow through is allowed (see abbreviation FT above).
+• For a numerical answer, allow the A or B mark if the answer is correct to 3 significant figures or would be correct to 3 significant figures if rounded (1
+decimal place for angles in degrees).
+• The total number of marks available for each question is shown at the bottom of the Marks column.
+• Wrong or missing units in an answer should not result in loss of marks unless the guidance indicates otherwise.
+• Square brackets [ ] around text or numbers show extra information not needed for the mark to be awarded.
+© Cambridge University Press & Assessment 2026 Page 7 of 17
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Abbreviations
+AEF/OE Any Equivalent Form (of answer is equally acceptable) / Or Equivalent
+AG Answer Given on the question paper (so extra checking is needed to ensure that the detailed working leading to the result is valid)
+CAO Correct Answer Only (emphasising that no ‘follow through’ from a previous error is allowed)
+CWO Correct Working Only
+ISW Ignore Subsequent Working
+SOI Seen Or Implied
+SC Special Case (detailing the mark to be given for a specific wrong solution, or a case where some standard marking practice is to be varied in the
+light of a particular circumstance)
+WWW Without Wrong Working
+AWRT Answer Which Rounds To
+© Cambridge University Press & Assessment 2026 Page 8 of 17
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+1 Resolving either direction *M1 Correct number of relevant terms; allow sign
+errors; allow sin/cos mix.
+Y =(55cos60−23sin15−20sin40) =8.69140 A1 Resolving vertically.
+X =(55sin60+23cos15−20cos40−16) =38.5268 A1 Resolving horizontally.
+Attempt to find
+© Cambridge University Press & Assessment 2026 Page 9 of 17
+t a n 1
+8
+3
+.6 9
+8 .5
+1
+2
+4
+6
+0
+8
+ = −
+ 
+
+ DM1 From expressions/equations with correct number
+of relevant terms.
+Attempt to find ( 3 8 .5 2 6 8  ) 2 + ( 8 .6 9 1 4 0  ) 2
+DM1 From expressions/equations with correct number
+of relevant terms.
+Magnitude 39.5 N and a direction of 1 2 .7  above the positive x-axis
+Accept equivalent answers for direction
+e.g.
+77.3 to the upward vertical clockwise
+Or give the bearing as (0)77.3
+Or 1 2 .7  above the horizontal to the right.
+Or 1 2 .7 
+A1 39.495… and 12.712…
+Giving an angle only is insufficient.
+Direction may be seen on a diagram, with
+minimum of the angle marked and an arrow on
+resultant. Arrows on both components only is A0
+as it doesn’t show the direction of the resultant. If
+both words and diagram are contradictory mark
+the words.
+However, the direction is stated, it must be able to
+anticlockwise from the positive x-axis
+be drawn uniquely.
+6
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+2(a) 27000
+D=
+18
+© Cambridge University Press & Assessment 2026 Page 10 of 17
+ = 1 5 0 0 
+B1 Use of P = D  v with P = 27 000.
+27000 M1 Attempt at N2L – correct number of terms. Allow
+−600=1200a
+sign errors and 1200g for the mass. Allow D for
+18
+driving force.
+0.75 m s–2 A1
+OE, e.g.
+1
+9
+2
+0
+0
+0
+0
+.
+3
+2(b) [Component of weight parallel to plane =] 1 2 0 0 s i n  g B1
+22000 M1 Attempt at N2L, dimensionally correct – correct
+−650−1200gsin=0
+number of terms. Allow sign errors. Allow sin/cos
+12
+mix.
+=5.7º A1 5.65919… or in radians 0.09877…
+AWRT 5 .7 º.
+3
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+3(a) s=4t3−39t2+120t  v=12t2−78t+120 *M1 Attempt to differentiate s; of the form
+At2 +Bt+120 with a change in coefficient and A
+not zero, and B not zero.
+Allow un-simplified;
+© Cambridge University Press & Assessment 2026 Page 11 of 17
+a =
+v
+t
+is M0.
+12t2 −78t+120=0 DM1 Setting their three-term quadratic expression for v
+equal to zero.
+t=2.5 and t = 4 A1 Both correct answers.
+CWO.
+3
+3(b) s(1)=85, s(2.5)=118.75, s(4)=112 *B1 Calculating at least two of s(1), s(2.5), s(4).
+Total distance travelled is 40.5 m DB1
+2
+3(c) a=24t−78 *M1 Attempt to differentiate their v from 3(a) that has
+come from differentiation. Decrease power by 1
+and a change in coefficient in at least one term
+(which must be the same term); allow un-
+simplified.
+2 4  3 − 7 8 =  DM1 Dependent on previous M mark – substitute t = 3
+into their expression for a.
+[Magnitude of acceleration is] 6 m s–2 A1 Must be positive.
+3
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+4(a) Attempt at Newton’s 2nd Law *M1 For either A or combined BC or system; correct
+number of terms, dimensionally consistent, allow
+sign errors.
+© Cambridge University Press & Assessment 2026 Page 12 of 17
+3 7 .5 − 3 g = 3 a
+( m + 1 .5 ) g − 3 7 .5 = ( m + 1 .5 ) a
+A1 Any 2 correct – allow in terms of T or with 37.5
+substituted.
+(m+1.5)g−3g =(m+1.5+3)a
+a = 2 .5  ( m + 1 .5 ) g − 3 7 .5 = ( m + 1 .5 )  2 .5
+OR
+m +
+3
+1 .5
+=
+( m +
+3
+1
+7
+.5
+.5
+) g
+− 3
+−
+g
+3 7 .5
+DM1 Solve for a from equations with correct number of
+relevant terms and substitute to obtain an equation
+in m only.
+OR eliminate a to get an equation in m ONLY
+from equations with correct number or terms.
+m=3.5 A1 OE.
+4
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+4(b)
+© Cambridge University Press & Assessment 2026 Page 13 of 17
+v 2 = 0 2 + 2  2 .5  0 .8 *B1FT From v 2 = u 2 + 2 a s with their a from 4(a), or
+calculated a in this part.
+u = 0 and s = 0.8 to form an equation in v or v 2 (if
+correct then v = 2 ).
+1 B1 From
+2=0+2.5t or 0.8= 2.5t2
+1 2 1
+v = u + a t with u = 0, their v and a from
+4(a) or s = u t + 1
+2
+a t 2 with u = 0 and their a from
+4(a) to form an equation for the time until B falls
+away – if correct then t1 = 0 .8 .
+Attempt at Newton’s 2nd Law *M1 For both A and B or system; correct number of
+terms, dimensionally consistent; allow sign errors.
+T
+1
+− 3 g = 3 a and 1.5g−T =1.5a
+1
+or 1 .5 g − 3 g = ( 3 + 1 .5 ) a
+A1 Both correct (or correct system equation) – if
+solved correctly then a = −
+1 0
+3
+.
+ 10 DM1 Use of
+0=2+  − 3   t 2
+v = u + a t (or other complete method) to
+find an equation for the second time (until A
+comes to rest) that would lead to a positive t
+2
+– if
+correct then t
+2
+= 0 .6 .
+(dependent on first B and previous M mark).
+Total time  = 0 .6 + 0 .8  = 1 .4 s A1
+6
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+5(a) Resolving perpendicular or parallel to the plane *M1 Correct number of terms, dimensionally
+consistent, allow sin/cos mix.
+© Cambridge University Press & Assessment 2026 Page 14 of 17
+R = 3 .6 g c o s 3 0 + 2 4 3 s i n 3 0 A1 R=1.8g 3+12 3=30 3.
+F +3.6gsin30=24 3cos30 A1 F+1.8g=36  F =18.
+2 4 3 c o s 3 0 3 .6 s i n 3 0
+(
+3 .6 c o s 3 0 2 4 3 s i n 3 0
+)
+ − g = g +
+DM1 Use of  F = R or  F  R with their
+expressions/values for F and R, with correct
+number of relevant terms to get an equation in 
+only.
+2 4 3
+2
+3
+3 .6
+1
+2
+3 .6
+2
+3
+2 4 3
+1
+2
+  − g  =
+
+g  + 
+
+( )
+ 36−18=18 3+12 3 so
+3
+1
+0
+8
+3
+1
+5
+3  = =
+A1 AG any error/slip seen is A0.
+Must see minimum 1 8  = 30 3 OE for A1.
+5
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+5(b) EITHER:
+© Cambridge University Press & Assessment 2026 Page 15 of 17
+R = 3 .6 g c o s 3 0 [ = 1 8 3
+(*B1 Correct expression for the normal contact force.
+] Allow R = m g c o s 3 0 if m used consistently and
+never replaced with 3.6.
+3.6gsin30−F =3.6a *M1 Attempt at N2L; correct number of relevant terms,
+1
+allow sign errors and sin/cos mix, dimensionally
+consistent. Allow m g s i n 3 0 − F
+1
+= m a if m used
+consistently and never replaced with 3.6.
+3 .6 g s i n 3 0 −
+5
+3
+( 3 .6 g c o s 3 0 ) = 3 .6 a  a = 
+DM1 Use given value of to set up an equation in a
+only and attempt to solve – if correct then a = 2
+v2 =02 +221.5 DM1 Use of v 2 = u 2 + 2 a s with u = 0 and s = 1.5 and
+their positive acceleration (or any other complete
+method to get v or v 2 ) – dependent on all
+previous marks.
+2.45 m s–1 A1) 2.449489… or exact 6
+OR:
+Alternative using energy
+R = 3 .6 g c o s 3 0 [ = 1 8 3 ] (*B1 Correct expression for the normal contact force.
+Allow R=mgcos30 if m used consistently and
+never replaced with 3.6.
+3 *B1 Correct expression for the work done against
+ (3.6gcos30)(1.5) friction.
+5
+3.6gsin30(1.5) *B1 Correct expression for the potential energy.
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+5(b)
+© Cambridge University Press & Assessment 2026 Page 16 of 17
+3 .6 g s i n 3 0 ( 1 .5 ) −
+5
+3
+( 3 .6 g c o s 3 0 ) ( 1 .5 ) =
+1
+2
+( 3 .6 ) v 2
+DM1 Complete work-energy equation with correct
+number of relevant terms, dimensionally
+consistent, allow sign errors - dependent on all
+previous marks.
+2.45 m s–1 A1) 2.449489… or exact 6 .
+Available marks 5
+Question Answer Marks Guidance
+6(a) Attempt at CLM for the collision between A and B *M1 Correct number of terms, allow sign errors.
+m  2 m − ( m + 2 )  2 = m  2 + 2  3 .2 5 A1
+2m2 −4m−10.5=0 m= DM1 Arrange to quadratic equation in m and attempt to
+solve to find at least one value of m.
+m=3.5 only A1 OE.
+4
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/
+
+9709/41 Cambridge International AS & A Level – Mark Scheme May/June 2026
+PUBLISHED
+Question Answer Marks Guidance
+6(b) 23.25=2v +4v
+B C
+© Cambridge University Press & Assessment 2026 Page 17 of 17
+  v
+B
++ 2 v
+C
+= 3 .2 5  *M1 Attempt at CLM for the collision between B and
+C; correct number of terms, allow sign errors.
+Allow with their possibly incorrect v
+B
+or v
+C
+.
+Attempt at change in KE =  6 .8 7 5 *M1 Correct number of terms and difference attempted.
+Use correct masses with correct corresponding
+speeds.
+1 1 1 A1 Correct equation – allow un-simplified (for
+23.252 − 2v2 − 4v2 =6.875
+2 2 B 2 C reference: v 2B + 2 v 2C = 3 .6 8 7 5 ).
+( 3 .2 5 − 2 v
+C
+) 2 + 2 v 2C = 3 .6 8 7 5
+OR v 2B + 2
+ 3 .2 5
+2
+− v
+B
+
+2
+= 3 .6 8 7 5
+DM1 Eliminate one variable to obtain an equation in
+either v or
+B
+v
+C
+only.
+6v2 −13v +6.875=0 OR
+C C
+3 v 2B − 6 .5 v
+B
++ 3 .1 8 7 5 = 0
+ v
+C
+=
+5
+4
+,
+1
+1
+1
+2
+or v
+B
+=
+3
+4
+,
+1
+1
+7
+2
+A1 Either both correct values for v
+B
+or v
+C
+only or
+one pair of correct solutions.
+Allow A1 for v
+B
+= 0 .7 5 .
+17 11
+v = , v = is not possible.
+B 12 C 12
+So v
+B
+=
+3
+4
+ 0 .7 5 
+A1 Correct conclusion that there is another collision
+between A and B – WWW.
+5
+, v = and 2 > 0.75 so yes there is a further collision between A
+C 4
+and B
+6
+Trace ID: PC-289A519AAD
+Re-uploading, mirroring or re-hosting this file on any other website or domain is unauthorised and traceable.
+Licensed for hosting on papacambridge.com only.
+P97a09p/4a1 CMaarkm Scbhermide gJuene 2·0 2p6 a| Spoaurccea: mpapbarciadmgbreid.gceo.comm 9709/41 Mark Scheme June 2026
+Downloaded from PapaCambridge - https://papacambridge.com/

@@ -1,0 +1,298 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions May/June 2018
+MARK SCHEME
+Maximum Mark: 100
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the May/June 2018 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level and Cambridge Pre-U components, and
+some Cambridge O Level components.
+IGCSE™ is a registered trademark.
+This document consists of 16 printed pages.
+© UCLES 2018 [Turn over
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the
+specific content of the mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these
+marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the
+scope of the syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the
+question as indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently e.g. in situations where candidates have not followed instructions or in the application of generic level
+descriptors.
+© UCLES 2018 Page 2 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may
+be limited according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or
+grade descriptors in mind.
+© UCLES 2018 Page 3 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+1(a)(i) direction of force on a (small test) mass B1
+or
+path in which a (small test) mass will move
+1(a)(ii) (at surface,) lines (of force) are radial B1
+Earth has large radius/height above surface is small B1
+so lines are (approximately) parallel
+parallel lines → constant field strength B1
+1(b) (change in) KE of rock = (change in) PE C1
+or
+½mv2 = GMm/R
+(m)v2 = (m)(2 × 6.67 × 10–11 × 7.4 × 1022) / (1.7 × 103 × 103) C1
+v = 2.4 × 103ms–1 A1
+correct conclusion based on comparison of v with 2.8 km s–1 B1
+or
+(change in) KE of rock = (change in) PE (C1)
+(at infinity) E = (6.67 × 10–11 × 7.4 × 1022 × m) / (1.7 × 103 × 103) (C1)
+P
+= 2.9 × 106 m
+E of rock = ½ × m × (2.8 × 103)2 = 3.9 × 106 m (A1)
+K
+correct conclusion based on comparison of E and E values (B1)
+K P
+or
+© UCLES 2018 Page 4 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+(change in) KE of rock = (change in) PE (C1)
+or
+½mv2 = GMm/R
+(m) (2800)2 = (m) (2 × 6.67 × 10–11 × 7.4 × 1022) / R (C1)
+R = 1.3 × 103 km (A1)
+correct conclusion based on comparison of R with 1.7 × 103 km (B1)
+or
+(change in) KE of rock = (change in) PE (C1)
+or
+½mv 2 = GMm/R
+(m) (2800)2 = (m) (2 × 6.67 × 10–11 × M) / (1.7 × 106) (C1)
+M = 1.0 × 1023 kg (A1)
+correct conclusion based on comparison of M with 7.4 × 1022 kg (B1)
+© UCLES 2018 Page 5 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+2(a) no intermolecular forces (so no potential energy) B1
+2(b)(i) mean square speed (of molecule(s)) B1
+2(b)(ii) kelvin/thermodynamic/absolute temperature B1
+2(c)(i)1. pV = NkT C1
+4.7 × 10–2 × 2.6 × 105 = N × 1.38 × 10–23 × 446 C1
+or
+pV = nRT and N = nN (C1)
+A
+4.7 × 10–2 × 2.6 × 105 = n × 8.31 × 446
+n = 3.3 (mol)
+N = 3.3 × 6.02 × 1023 (C1)
+N = 2.0 × 1024 A1
+2(c)(i)2. average increase = 2900 / (2.0 × 1024) A1
+= 1.5 × 10–21 J
+2(c)(ii) ∆E = (3/2)k (∆)T C1
+K
+1.5 × 10–21 = (3/2) × 1.38 × 10–23 × (∆)T
+(∆)T in range 70–72 K C1
+T = 173 + 273 + 70 A1
+= 520 K
+© UCLES 2018 Page 6 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+3(a) (during melting,) bonds between atoms/molecules are broken B1
+potential energy of atoms/molecules is increased B1
+no/little work done so required input of energy is thermal B1
+3(b)(i) (∆Q =) mc∆θ C1
+loss = (160 × 0.910 × 15) + (330 × 4.18 × 15) A1
+= 2.3 × 104 J
+3(b)(ii) 2.3 × 104 = (48 × 2.10 × 18) + 48L + (48 × 4.18 × 23) C1
+48L = 1.66 × 104 A1
+L = 350 J g–1
+© UCLES 2018 Page 7 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+4(a) acceleration proportional to displacement B1
+acceleration directed towards fixed point B1
+or
+displacement and acceleration in opposite directions
+4(b)(i) 1. amplitude decreases gradually so light damping B1
+or
+oscillations continue so light damping
+2. loss of energy B1
+due to friction in wheels B1
+or
+due to friction between wheels and surface (during slipping)
+or
+due to air resistance (on trolley)
+4(b)(ii)1. ω2 = 2k/m C1
+= (2 × 230) / 0.950 C1
+ω = 22 rad s–1 A1
+4(b)(ii)2. T = 2π/ω C1
+T = (2π / 22) = 0.286 s A1
+time = 1.5T
+= 0.43 s
+© UCLES 2018 Page 8 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+5(a)(i) range of frequencies (of signal) B1
+5(a)(ii) advantage: e.g. better quality (of reproduction) B1
+greater rate of transfer of data
+less distortion
+disadvantage: e.g. fewer stations (in any frequency range) B1
+5(b)(i) 5.0V A1
+5(b)(ii) maximum: 674 kHz A1
+minimum: 626 kHz A1
+5(b)(iii) T = 1 / (10× 103) = 1.0 × 10–4s A1
+minimum time = T / 2
+= 5.0 × 10–5 s
+© UCLES 2018 Page 9 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+6(a) capacitance = charge / potential M1
+charge is (numerically equal to) charge on one plate A1
+potential is potential difference between plates A1
+6(b)(i) two in series, in parallel with the other (correct symbols) A1
+6(b)(ii) two in parallel connected to one in series (correct symbols) A1
+6(c)(i) capacitance = 1.2 µF A1
+6(c)(ii) 1. Q = CV C1
+= 1.2 × 8.0 A1
+= 9.6 µC
+2. E = ½QV and V = Q/C C1
+or
+E = ½CV2 and V = Q/C
+or
+E = ½Q2/C
+E = ½ (9.6 × 10–6)2 / (3.0 × 10–6) A1
+= 1.5 × 10–5 J
+© UCLES 2018 Page 10 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+7(a)(i) (fraction of) output is combined with the input M1
+output (fraction) subtracted/deducted from input A1
+7(a)(ii) Any two valid points e.g. B2
+• greater bandwidth/gain constant over a larger range of frequencies
+• smaller gain
+7(b)(i) gain = 1 + (6400 / 800) A1
+= 9.0
+7(b)(ii) 1. (+)5.4 V A1
+2. –9.0 V A1
+7(b)(iii) replace the 6400Ω resistor with a thermistor B1
+© UCLES 2018 Page 11 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+8(a) electric and magnetic fields at right-angles to one another (may be shown on a clearly labelled diagram) B1
+particle enters fields (with velocity) normal to the (two) fields (may be shown on a clearly labelled diagram) B1
+no deviation for particles with selected velocity B1
+8(b) magnetic force equals/is the centripetal force C1
+Bqv = mv2/r C1
+M = Bqr/v M1
+= (94 × 10–3 × 1.6 × 10–19 × 0.075) / (3.4 × 104)
+division by 1.66 × 10–27 shown, to give m = 20 u A1
+8(c) sketch: semicircle clear (in same direction) B1
+with larger radius B1
+© UCLES 2018 Page 12 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+9(a) (magnetic) flux density × area B1
+magnetic flux density normal to area B1
+or
+reference to cross-sectional area
+or
+× sin (angle between B and A)
+× number of turns on coil B1
+9(b) e.m.f. = BAN/ t C1
+or
+e.m.f = rate of change of flux linkage
+= (7.5 × 10–3 × π × {1.2 × 10–2}2 × 160) / 0.15 A1
+= 3.6 × 10–3 V
+9(c) sketch: zero for 0–0.10 s, 0.25–0.35 s, and 0.425–0.55 s, and non-zero outside these ranges B1
+two horizontal steps, with zero voltage either side B1
+with same polarity B1
+correct values (1st step 3.6 mV and 2nd step 7.2 mV) B1
+© UCLES 2018 Page 13 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+10(a) emission of electron B1
+when electromagnetic radiation incident (on surface) B1
+10(b)(i) packet/quantum/discrete amount of energy M1
+of electromagnetic radiation A1
+10(b)(ii) E = hc/λ C1
+= (6.63 × 10–34 × 3.00 × 108) / (420 × 10–9) A1
+= 4.7 × 10–19 J
+10(b)(iii) sodium: yes B1
+zinc: no
+© UCLES 2018 Page 14 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+11(a) X-ray image(s) taken of one slice M1
+(many images) taken from different angles A1
+(computer) produces 2D image of slice B1
+(this is) repeated for (many) slices M1
+to build up a 3D image (of structure) A1
+11(b)(i) combining of images involves (very) large number of calculations B1
+11(b)(ii) CT scan consists of (very) many (single X-ray) images B1
+© UCLES 2018 Page 15 of 16
+
+9702/42 Cambridge International AS/A Level – Mark Scheme May/June 2018
+PUBLISHED
+Question Answer Marks
+12(a) emission of particles/radiation by unstable nucleus B1
+spontaneous emission B1
+12(b)(i) P – the curve that starts with a high number B2
+D – the curve with the peak
+S – the curve that increases from zero throughout
+(one correct 1 mark, all three correct 2 marks)
+12(b)(ii) λt = 0.693 C1
+½
+λ = 0.693 / (60.0 × 60)
+= 1.93 × 10–4 s–1 A1
+12(c) half-life of F is much shorter than half-life of E B1
+nuclei of F decay (almost) as soon as they are produced B1
+© UCLES 2018 Page 16 of 16

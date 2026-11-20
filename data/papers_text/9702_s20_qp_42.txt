@@ -1,0 +1,482 @@
+Cambridge International AS & A Level
+*5995040741*
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions May/June 2020
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen or correction fluid.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+This document has 20 pages. Blank pages are indicated.
+DC (SC/TP) 180506/3
+© UCLES 2020 [Turn over
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2020 9702/42/M/J/20
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1 at2
+2
+v 2 = u 2+2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω (x 2-x2)
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2020 9702/42/M/J/20 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 (a) Define gravitational potential at a point.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) An isolated solid sphere of radius r may be assumed to have its mass M concentrated at its
+centre. The magnitude of the gravitational potential at the surface of the sphere is φ.
+On Fig. 1.1, show the variation of the gravitational potential with distance d from the centre of
+the sphere for values of d from d = r to d = 4r.
++1.0 φ
+gravitational
+potential
++0.5 φ
+0
+0 r 2r 3r 4r
+d
+–0.5φ
+–1.0φ
+Fig. 1.1
+[3]
+© UCLES 2020 9702/42/M/J/20
+
+5
+(c) The sphere in (b) is a planet with radius r of 6.4 × 106 m and mass M of 6.0 × 1024 kg. The
+planet has no atmosphere.
+A rock of mass 3.4 × 103 kg moves directly towards the planet. Its distance from the centre of
+the planet changes from 4r to 3r.
+(i) Calculate the change in gravitational potential energy of the rock.
+change = .......................................................J [3]
+(ii) Explain whether the rock’s speed increases, decreases or stays the same.
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 10]
+© UCLES 2020 9702/42/M/J/20 [Turn over
+
+6
+2 (a) A square box of volume V contains N molecules of an ideal gas. Each molecule has mass m.
+Using the kinetic theory of ideal gases, it can be shown that, if all the molecules are moving
+with speed v at right angles to one face of the box, the pressure p exerted on the face of the
+box is given by the expression
+pV = Nmv 2. (equation 1)
+This expression leads to the formula
+1
+p = ρ 〈c 2〉 (equation 2)
+3
+for the pressure p of an ideal gas, where ρ is the density of the gas and 〈c 2〉 is the mean‑square
+speed of the molecules.
+Explain how each of the following terms in equation 2 is derived from equation 1:
+ρ : ..............................................................................................................................................
+...................................................................................................................................................
+1
+: ..............................................................................................................................................
+3
+...................................................................................................................................................
+〈c 2〉: ...........................................................................................................................................
+...................................................................................................................................................
+[4]
+(b) An ideal gas has volume, pressure and temperature as shown in Fig. 2.1.
+volume 6.0 × 10–3 m3
+pressure 3.0 × 105 Pa
+temperature 17 °C
+Fig. 2.1
+The mass of the gas is 20.7 g.
+Calculate the mass of one molecule of the gas.
+mass = ...................................................... g [4]
+[Total: 8]
+© UCLES 2020 9702/42/M/J/20
+
+7
+3 By reference to the first law of thermodynamics, state and explain the change, if any, in the internal
+energy of:
+(a) a lump of solid lead as it melts at constant temperature
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+(b) some gas in a toy balloon when the balloon bursts and no thermal energy enters or leaves
+the gas.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+[Total: 6]
+© UCLES 2020 9702/42/M/J/20 [Turn over
+
+8
+4 A dish is made from a section of a hollow glass sphere.
+The dish, fixed to a horizontal table, contains a small solid ball of mass 45 g, as shown in Fig. 4.1.
+ball surface
+mass 45 g of dish
+x
+C
+Fig. 4.1
+The horizontal displacement of the ball from the centre C of the dish is x.
+Initially, the ball is held at rest with distance x = 3.0 cm.
+The ball is then released. The variation with time t of the horizontal displacement x of the ball from
+point C is shown in Fig. 4.2.
+4
+3
+x / cm
+2
+1
+0
+0 1 2 3 4 5 6 7
+t / s
+–1
+–2
+–3
+–4
+Fig. 4.2
+The motion of the ball in the dish is simple harmonic with its acceleration a given by the expression
+(g)
+a = – x
+R
+where g is the acceleration of free fall and R is a constant that depends on the dimensions of the
+dish and the ball.
+© UCLES 2020 9702/42/M/J/20
+
+9
+(a) Use Fig. 4.2 to show that the angular frequency ω of oscillation of the ball in the dish is
+2.9 rad s–1.
+[1]
+(b) Use the information in (a) to:
+(i) determine R
+R = ..................................................... m [2]
+(ii) calculate the speed of the ball as it passes over the centre C of the dish.
+speed = ................................................ m s–1 [2]
+(c) Some moisture collects on the surface of the dish so that the motion of the ball becomes
+lightly damped.
+On the axes of Fig. 4.2, draw a line to show the lightly damped motion of the ball for the first
+5.0 s after the release of the ball. [3]
+[Total: 8]
+© UCLES 2020 9702/42/M/J/20 [Turn over
+
+10
+5 (a) Explain the principles of the detection of ultrasound waves for medical diagnosis.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [4]
+(b) By reference to specific acoustic impedance, explain why there is very little transmission of
+ultrasound waves from air into skin.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+[Total: 7]
+© UCLES 2020 9702/42/M/J/20
+
+11
+6 (a) Telephone signals may be transmitted either by means of an optic fibre or by means of a wire
+pair.
+State three advantages of the use of an optic fibre rather than a wire pair.
+1. ...............................................................................................................................................
+...................................................................................................................................................
+2. ...............................................................................................................................................
+...................................................................................................................................................
+3. ...............................................................................................................................................
+...................................................................................................................................................
+[3]
+(b) It is proposed to transmit a signal over a distance of 4.5 × 103 km by means of an optic fibre.
+The input signal has a power of 9.8 mW.
+The minimum signal that can be detected at the output has a power of 6.3 × 10–17 W. For this
+signal power, the signal‑to‑noise ratio is 21 dB.
+Calculate:
+(i) the power of the background noise
+power = ..................................................... W [2]
+(ii) the maximum attenuation per unit length of the optic fibre that allows for uninterrupted
+transmission of the signal.
+attenuation per unit length = ........................................... dB km–1 [2]
+[Total: 7]
+© UCLES 2020 9702/42/M/J/20 [Turn over
+
+12
+7 A metal sphere of radius R is isolated in space.
+Point P is a distance x from the centre of the sphere, as illustrated in Fig. 7.1.
+R
+P
+x
+Fig. 7.1
+The variation with distance x of the electric field strength E due to the charge on the sphere is
+shown in Fig. 7.2.
+20
+15
+E / 105 V m–1
+10
+5
+0
+0 2 4 6 8 10 12
+x / cm
+Fig. 7.2
+(a) State what is meant by electric field strength.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+© UCLES 2020 9702/42/M/J/20
+
+13
+(b) (i) Use Fig. 7.2 to determine the radius R of the sphere. Explain your working.
+R = ................................................... cm [2]
+(ii) Use Fig. 7.2 to determine the charge Q on the sphere.
+Q = ..................................................... C [3]
+(c) An α‑particle is situated a distance 8.0 cm from the centre of the sphere.
+Calculate the acceleration of the α‑particle.
+acceleration = ................................................ m s–2 [3]
+[Total: 10]
+© UCLES 2020 9702/42/M/J/20 [Turn over
+
+14
+8 (a) An ideal operational amplifier (op‑amp) is connected to a load resistor.
+The op‑amp is assumed to have infinite bandwidth and zero output resistance.
+State:
+(i) what is meant by infinite bandwidth
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) the effect, if any, on the output voltage of increasing the load resistance.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(b) A student designs the circuit shown in Fig. 8.1 in order to indicate changes in temperature of
+the thermistor T.
+100 kΩ T
+110 Ω
+150 kΩ +
+Q P
+1.5 V –
++
+–
+40 Ω
+V
+Fig. 8.1
+(i) Explain why point P is known as a virtual earth.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+© UCLES 2020 9702/42/M/J/20
+
+15
+(ii) Calculate the potential at point Q.
+potential = ...................................................... V [2]
+(iii) At a temperature of 13 °C, the resistance of the thermistor T is 230 kΩ.
+Show that the potential difference measured with the voltmeter is 0.88 V.
+[2]
+(c) The resistance of the thermistor T in (b) decreases as its temperature rises.
+Explain the effect of this change in temperature on the potential difference measured with the
+voltmeter.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 11]
+© UCLES 2020 9702/42/M/J/20 [Turn over
+
+16
+9 (a) An electron is travelling at speed v in a straight line in a vacuum. It enters a uniform magnetic
+field of flux density 8.0 × 10–4 T. Initially, the electron is travelling at right angles to the magnetic
+field, as illustrated in Fig. 9.1.
+region of uniform
+magnetic field
+path of
+electron
+Fig. 9.1
+The path of the electron in the magnetic field is an arc of a circle of radius 6.4 cm.
+(i) State and explain the direction of the magnetic field.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) Show that the speed v of the electron is 9.0 × 106 m s–1.
+[3]
+© UCLES 2020 9702/42/M/J/20
+
+17
+(b) A uniform electric field is now applied in the same region as the magnetic field.
+The electron passes undeviated through the region of the two fields, as illustrated in Fig. 9.2.
+region of
+uniform electric
+and magnetic fields
+path of
+electron
+Fig. 9.2
+(i) On Fig. 9.2, mark with an arrow the direction of the uniform electric field. [1]
+(ii) Use data from (a) to calculate the magnitude of the electric field strength.
+field strength = ............................................... N C–1 [2]
+(c) The electron in (b) is now replaced by an α‑particle travelling at the same speed v along the
+same initial path as the electron.
+Describe and explain the shape of the path in the region of the magnetic and electric fields.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 10]
+© UCLES 2020 9702/42/M/J/20 [Turn over
+
+18
+10 (a) State Faraday’s law of electromagnetic induction.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A simple iron‑cored transformer is illustrated in Fig. 10.1.
+laminated
+soft-iron core
+input output
+primary coil
+secondary coil
+Fig. 10.1
+(i) State one function of a transformer.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) A sinusoidal alternating current in the primary coil gives rise to a varying magnetic flux
+linking the secondary coil.
+Use Faraday’s law to explain why the output from the transformer is an electromotive
+force (e.m.f.) that is alternating.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(iii) State why the soft‑iron core of the transformer is laminated.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+[Total: 7]
+© UCLES 2020 9702/42/M/J/20
+
+19
+11 (a) The uppermost energy bands in a solid are known as the valence band (VB), the forbidden
+band (FB) and the conduction band (CB).
+A copper wire is at room temperature.
+Use band theory to explain why the resistance of the copper wire increases as its temperature
+increases.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [4]
+(b) The structure of a copper crystal is to be examined using electron diffraction.
+Electrons, having been accelerated from rest through a potential difference V, are incident on
+the crystal.
+The de Broglie wavelength λ of the electrons is 2.6 × 10–11 m.
+Calculate the accelerating potential difference V.
+V = ...................................................... V [4]
+[Total: 8]
+12 (a) State what is meant by the mass defect of a nucleus.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+© UCLES 2020 9702/42/M/J/20 [Turn over
+
+20
+(b) Some masses are shown in Table 12.1.
+Table 12.1
+mass / u
+proton 1p 1.007 276
+1
+neutron 1n 1.008 665
+0
+helium‑4 (4He) nucleus 4.001 506
+2
+Show that:
+(i) the energy equivalence of 1.00 u is 934 MeV
+[2]
+(ii) the binding energy per nucleon of a helium-4 nucleus is 7.09 MeV.
+[2]
+(c) Isotopes of hydrogen have binding energies per nucleon of less than 3 MeV.
+Suggest why a nucleus of helium‑4 does not spontaneously break down to become nuclei of
+hydrogen.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 8]
+To avoid the issue of disclosure of answer‑related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+© UCLES 2020 9702/42/M/J/20

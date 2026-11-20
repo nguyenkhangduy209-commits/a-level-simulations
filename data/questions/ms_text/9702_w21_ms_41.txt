@@ -1,0 +1,335 @@
+Cambridge International AS & A Level
+PHYSICS 9702/41
+Paper 4 A Level Structured Questions October/November 2021
+MARK SCHEME
+Maximum Mark: 100
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the October/November 2021 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 15 printed pages.
+© UCLES 2021 [Turn over
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the
+specific content of the mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these
+marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond
+the scope of the syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the
+question as indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently, e.g. in situations where candidates have not followed instructions or in the application of generic level
+descriptors.
+© UCLES 2021 Page 2 of 15
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range
+may be limited according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or
+grade descriptors in mind.
+Science-Specific Marking Principles
+1 Examiners should consider the context and scientific use of any keywords when awarding marks. Although keywords may be present, marks
+should not be awarded if the keywords are used incorrectly.
+2 The examiner should not choose between contradictory statements given in the same question part, and credit should not be awarded for
+any correct statement that is contradicted within the same question part. Wrong science that is irrelevant to the question should be ignored.
+3 Although spellings do not have to be correct, spellings of syllabus terms must allow for clear and unambiguous separation from other
+syllabus terms with which they may be confused (e.g. ethane / ethene, glucagon / glycogen, refraction / reflection).
+4 The error carried forward (ecf) principle should be applied, where appropriate. If an incorrect answer is subsequently used in a scientifically
+correct way, the candidate should be awarded these subsequent marking points. Further guidance will be included in the mark scheme
+where necessary and any exceptions to this general principle will be noted.
+5 ‘List rule’ guidance
+For questions that require n responses (e.g. State two reasons …):
+• The response should be read as continuous prose, even when numbered answer spaces are provided.
+• Any response marked ignore in the mark scheme should not count towards n.
+• Incorrect responses should not be awarded credit but will still count towards n.
+• Read the entire response to check for any responses that contradict those that would otherwise be credited. Credit should not be
+awarded for any responses that are contradicted within the rest of the response. Where two responses contradict one another, this
+should be treated as a single incorrect response.
+• Non-contradictory responses after the first n responses may be ignored even if they include incorrect science.
+© UCLES 2021 Page 3 of 15
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+6 Calculation specific guidance
+Correct answers to calculations should be given full credit even if there is no working or incorrect working, unless the question states ‘show
+your working’.
+For questions in which the number of significant figures required is not stated, credit should be awarded for correct answers when rounded
+by the examiner to the number of significant figures given in the mark scheme. This may not apply to measured values.
+For answers given in standard form (e.g. a × 10n) in which the convention of restricting the value of the coefficient (a) to a value between 1
+and 10 is not followed, credit may still be awarded if the answer can be converted to the answer given in the mark scheme.
+Unless a separate mark is given for a unit, a missing or incorrect unit will normally mean that the final calculation mark is not awarded.
+Exceptions to this general principle will be noted in the mark scheme.
+7 Guidance for chemical equations
+Multiples / fractions of coefficients used in chemical equations are acceptable unless stated otherwise in the mark scheme.
+State symbols given in an equation should be ignored unless asked for in the question or stated otherwise in the mark scheme.
+© UCLES 2021 Page 4 of 15
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Abbreviations
+/ Alternative and acceptable answers for the same marking point.
+( ) Bracketed content indicates words which do not need to be explicitly seen to gain credit but which indicate the context for an answer.
+The context does not need to be seen but if a context is given that is incorrect then the mark should not be awarded.
+___ Underlined content must be present in answer to award the mark. This means either the exact word or another word that has the
+same technical meaning.
+Mark categories
+B marks These are independent marks, which do not depend on other marks. For a B mark to be awarded, the point to which it refers must be
+seen specifically in the candidate’s answer.
+M marks These are method marks upon which A marks later depend. For an M mark to be awarded, the point to which it refers must be seen
+specifically in the candidate’s answer. If a candidate is not awarded an M mark, then the later A mark cannot be awarded either.
+C marks These are compensatory marks which can be awarded even if the points to which they refer are not written down by the candidate,
+providing subsequent working gives evidence that they must have known them. For example, if an equation carries a C mark and the
+candidate does not write down the actual equation but does correct working which shows the candidate knew the equation, then the
+C mark is awarded.
+If a correct answer is given to a numerical question, all of the preceding C marks are awarded automatically. It is only necessary to
+consider each of the C marks in turn when the numerical answer is not correct.
+A marks These are answer marks. They may depend on an M mark or allow a C mark to be awarded by implication.
+Annotations
+ Indicates the point at which a mark has been awarded.
+X Indicates an incorrect answer or a point at which a decision is made not to award a mark.
+XP Indicates a physically incorrect equation (‘incorrect physics’). No credit is given for substitution, or subsequent arithmetic, in a
+physically incorrect equation.
+© UCLES 2021 Page 5 of 15
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+ECF Indicates ‘error carried forward’. Answers to later numerical questions can always be awarded up to full credit provided they are
+consistent with earlier incorrect answers. Within a section of a numerical question, ECF can be given after AE, TE and POT errors,
+but not after XP.
+AE Indicates an arithmetic error. Do not allow the mark where the error occurs. Then follow through the working/calculation giving full
+subsequent ECF if there are no further errors.
+POT Indicates a power of ten error. Do not allow the mark where the error occurs. Then follow through the working/calculation giving full
+subsequent ECF if there are no further errors.
+TE Indicates incorrect transcription of the correct data from the question, a graph, data sheet or a previous answer. For example, the
+value of 1.6 × 10–19 has been written down as 6.1 × 10–19 or 1.6 × 1019.
+Do not allow the mark where the error occurs. Then follow through the working/calculation giving full subsequent ECF if there are no
+further errors.
+SF Indicates that the correct answer is seen in the working but the final answer is incorrect as it is expressed to too few significant
+figures.
+BOD Indicates that a mark is awarded where the candidate provides an answer that is not totally satisfactory, but the examiner feels that
+sufficient work has been done (‘benefit of doubt’).
+CON Indicates that a response is contradictory.
+I Indicates parts of a response that have been seen but disregarded as irrelevant.
+M0 Indicates where an A category mark has not been awarded due to the M category mark upon which it depends not having previously
+been awarded.
+^ Indicates where more is needed for a mark to be awarded (what is written is not wrong, but not enough). May also be used to
+annotate a response space that has been left completely blank.
+SEEN Indicates that a page has been seen.
+© UCLES 2021 Page 6 of 15
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+1(a) constant speed or constant magnitude of velocity B1
+acceleration (always) perpendicular to velocity B1
+1(b)(i) F = mv2 / r C1
+or
+v = rω and F = mrω2
+F = 790 × 942 / 318 A1
+= 22000 N
+1(b)(ii) centripetal acceleration: same B1
+maximum speed: greater B1
+time taken for one lap of the track: greater B1
+© UCLES 2021 Page 7 of 15
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+2(a) work done per unit mass B1
+(work done in) moving mass from infinity B1
+2(b)(i) (gravitational) fields from the Earth and Moon are in opposite directions B1
+(resultant is zero where gravitational) fields are equal (in magnitude) B1
+2(b)(ii) g ∝ M / r2 C1
+5.98 × 1024 / x2 = 7.35 × 1022 / (3.84 × 108 – x)2 A1
+leading to x = 3.5 × 108 (m)
+2(b)(iii) φ (Earth) = (–)6.67 × 10–11 × (5.98 × 1024 / 3.5 × 108) C1
+and
+φ (Moon) = (–)6.67 × 10–11 × (7.35 × 1022 / 0.38 × 108)
+φ = (–)6.67 × 10–11 × [(5.98 × 1024 / 3.5 × 108) + (7.35 × 1022 / 0.38 × 108)] C1
+= – 1.3 × 106 J kg–1 A1
+© UCLES 2021 Page 8 of 15
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+3(a) (thermal) energy per unit mass (to cause temperature change) B1
+(thermal) energy per unit change in temperature B1
+3(b)(i) (T =) pV / Nk B1
+3(b)(ii) (pV =) NkT = ⅓Nm<c2> M1
+or
+pV = NkT and pV = ⅓Nm<c2>
+leading to ½m<c2> = (3/2)kT and ½m<c2> = E A1
+K
+3(b)(iii) internal energy = ΣE (of molecules) + ΣE (of molecules) B1
+K P
+or
+no forces between molecules
+potential energy of molecules is zero B1
+3(c)(i) increase in internal energy = Q + work done B1
+constant volume so no work done B1
+3(c)(ii) c = Q / NmΔT C1
+= [N × (3/2)kΔT] / (NmΔT) = 3k / 2m A1
+3(d) (as it expands) gas does work (against the atmosphere/external pressure) B1
+for same temperature rise) more (thermal) energy needed, so larger specific heat capacity B1
+© UCLES 2021 Page 9 of 15
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+4(a)(i) 5.0 cm A1
+4(a)(ii) ω = 2π / T C1
+or
+ω = 2πf and f = 1 / T
+ω = 2π / 4.0 A1
+= 1.6 rad s–1
+4(a)(iii) v = ωx C1
+0 0
+= 1.57 × 5.0 A1
+= 7.9 cm s–1
+4(b) • initial pull was to the right B3
+• distance from X to trolley (at equilibrium) is 20 cm
+• period is 4.0 s
+• initial motion undamped
+• motion becomes damped at/from 12 s
+• damping is light
+• maximum speed at 1s, 3s, etc. / stationary at 2s, 4s, etc.
+Any three points, 1 mark each
+4(c) sketch: closed loop encircling (20, 0) B1
+minimum L shown as 15 cm and maximum L shown as 25 cm B1
+minimum v shown as –7.9 cm s–1 and maximum v shown as +7.9 cm s–1 B1
+© UCLES 2021 Page 10 of 15
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+5(a) • noise can be removed/signal can be regenerated B2
+• extra bits can be added for error-checking
+• signal can be encrypted (for increased security)
+• data compression/multiplexing is possible
+Any two points, 1 mark each
+5(b)(i) 4ms: 0101 and 8ms: 0100 B1
+5(b)(ii) sketch: horizontal line continues to 8ms, then new horizontal line from 8ms to 12ms B1
+level of line after 8ms is 4 mV B1
+5(c) sketch: series of steps of width 2ms B1
+step heights at 0, 2, 4, 6, 4, 6 mV B2
+2 marks if all correct, 1 mark if only one incorrect
+Question Answer Marks
+6(a) Q = CV and E = ½CV2 B1
+6(b)(i) C = CL / (L – D) B1
+N
+6(b)(ii) (charge is unchanged by moving the plates so) Q = CV B1
+N
+6(b)(iii) V = Q / C B1
+N N N
+= (CV) / [CL / (L – D)]
+= V(L – D) / L
+6(c) oppositely charged plates attract, so energy stored decreases B1
+© UCLES 2021 Page 11 of 15
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+7(a) • infinite (open-loop) gain B2
+• infinite slew rate
+• infinite input impedance
+• zero output impedance
+• infinite bandwidth
+Any two points, 1 mark each
+7(b) X: thermistor and Y: relay B1
+7(c)(i) (any) difference in voltage at the inputs causes output to saturate (because gain is very large) B1
+saturates positively if V+ > V– and saturates negatively if V+ < V– B1
+7(c)(ii) comparator B1
+7(c)(iii) temperature M1
+above a particular value A1
+7(c)(iv) to adjust the temperature (at which the lamp illuminates/extinguishes) B1
+© UCLES 2021 Page 12 of 15
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+8(a) newton per ampere per metre M1
+where current/wire is perpendicular to magnetic field A1
+8(b)(i) F = BILsinθ C1
+B = 1.0 / (5.0 × 0.060 × sin 50°) A1
+= 4.4 mT
+8(b)(ii) (from Fleming’s left-hand rule) force on wire is upwards, so reading decreases B1
+8(b)(iii) frame will rotate (so that PQ becomes perpendicular to the field) B1
+Question Answer Marks
+9(a) constant voltage M1
+that produces/dissipates same power as (the mean power of) the alternating voltage A1
+9(b)(i) (maximum) rate of cutting of (magnetic) flux doubles B1
+(peak and hence) r.m.s. induced e.m.f. doubles B1
+9(b)(ii) sketch: (sinusoidal) wave of period 10 ms B1
+peak E shown as ± 34V B2
+(1 mark out of 2 awarded if peak E shown as ± 17V or ± 24V)
+9(c) current in the coil results in forces that oppose its rotation B1
+or
+current in the resistor dissipates the energy of rotation
+coil stops rotating B1
+© UCLES 2021 Page 13 of 15
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+10(a)(i) photoelectric effect B1
+10(a)(ii) electron diffraction B1
+10(b)(i) λ = h / p M1
+h is the Planck constant A1
+10(b)(ii) de Broglie (wavelength) B1
+10(c)(i) ½mv2 = eV C1
+½ × 9.11 × 10–31 × v2 = 1.60 × 10–19 × 4800 so v = 4.1 × 107 m s–1 A1
+10(c)(ii) λ = h / mv C1
+= 6.63 × 10–34 / (9.11 × 10–31 × 4.1 × 107)
+= 1.8 × 10–11 m A1
+© UCLES 2021 Page 14 of 15
+
+9702/41 Cambridge International AS & A Level – Mark Scheme October/November 2021
+PUBLISHED
+Question Answer Marks
+11(a)(i) ease with which edges can be distinguished B1
+11(a)(ii) difference in degrees of blackening B1
+11(b) I = I exp (–μx) C1
+0
+0.12 = exp (–μ × 2.3) C1
+ln 0.12 = –2.3 × μ
+μ = 0.92 cm–1 A1
+11(c) advantage: produces 3-dimensional image B1
+disadvantage: (much) greater exposure to radiation B1
+Question Answer Marks
+12(a) probability of decay (of a nucleus) M1
+per unit time A1
+12(b) A = λN C1
+N = mass / (nucleon number × u) C1
+2.92 × 109 = (λ × 5.87 × 10–10) / (131 × 1.66 × 10–27) A1
+λ = 1.08 × 10–6 s–1
+12(c) • sample emits radiation in all directions B2
+• some radiation is absorbed by air/detector window
+• self-absorption within the source
+• dead time/inefficiency of detector
+Any two points, 1 mark each
+© UCLES 2021 Page 15 of 15

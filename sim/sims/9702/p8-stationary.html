@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stationary waves</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-superposition.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, SP = SIM.superpos;
+  var pg = ui.page({ title: 'Stationary waves: strings, air columns and microwaves', g: 9.81,
+    tags: ['9702 8.1 Stationary waves', '9702 8.1.3 graphical method', '9702 8.1.4 λ from nodes'] });
+  (function hideG() { try { var t = document.querySelector('header').children[2], l = t.children[t.children.length - 1]; if (l && /g =/.test(l.innerHTML)) l.style.display = 'none'; } catch (e) { /* header layout changed */ } })();
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 10 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 4, loop: true, onFrame: function () {
+    clock.tLabel.textContent = 't = ' + (clock.t / PERIOD).toFixed(2) + ' T (slow motion)'; drawScene(); } });
+  var PERIOD = 2; // display seconds per period (slow motion)
+  ui.legend(sceneCard, [
+    { color: 'var(--c-s1)', label: 'stationary wave (displacement now)' }, { color: 'var(--muted)', label: 'envelope (maximum displacement)' },
+    { color: 'var(--c-s2)', label: 'wave travelling →' }, { color: 'var(--c-s3)', label: 'wave travelling ←' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pF = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'f / Hz', xLabel: 'harmonic number' });
+  var pA = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'amplitude ÷ antinode amplitude', xLabel: 'x / m' });
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var medium = ui.select(paramCard, { label: 'Set-up', value: 'string', options: [
+    { value: 'string', label: 'Stretched string (fixed at both ends)' }, { value: 'closed', label: 'Air column closed at one end' },
+    { value: 'open', label: 'Air column open at both ends' }, { value: 'microwave', label: 'Microwaves + metal reflector' }] }, update);
+  var prm = ui.params(paramCard, [
+    { key: 'L', label: 'Length', sym: 'L', unit: 'm', min: 0.02, max: 3, step: 0.005, value: 0.8 },
+    { key: 'vs', label: 'Wave speed on string', sym: 'v', unit: 'm s<sup>−1</sup>', min: 1, max: 2000, step: 1, value: 120 },
+    { key: 'va', label: 'Speed of sound in air', sym: 'v', unit: 'm s<sup>−1</sup>', min: 300, max: 360, step: 1, value: 340 },
+    { key: 'k', label: 'Mode (1st, 2nd, 3rd … possible pattern)', sym: 'k', unit: '', min: 1, max: 8, step: 1, value: 1 },
+    { key: 'fG', label: 'Microwave frequency', sym: 'f', unit: 'GHz', min: 3, max: 40, step: 0.1, value: 10 },
+    { key: 'Lc', label: 'Transmitter–reflector distance', sym: 'L', unit: 'cm', min: 5, max: 60, step: 0.5, value: 20 },
+    { key: 'm', label: 'Node spacings counted as detector moves', sym: 'm', unit: '', min: 1, max: 20, step: 1, value: 5 },
+    { key: 'pP', label: 'Probe P position (% of length)', sym: 'P', unit: '%', min: 0, max: 100, step: 0.5, value: 20 },
+    { key: 'pQ', label: 'Probe Q position (% of length)', sym: 'Q', unit: '%', min: 0, max: 100, step: 0.5, value: 70 }
+  ], update);
+  var showTrav = ui.toggle(paramCard, { label: 'Graphical method: show the two travelling waves that superpose' }, update);
+  var showEnv = ui.toggle(paramCard, { label: 'Show envelope and N / A labels', value: true }, update);
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'String fixed at both ends: fundamental (L 0.80 m, v 120 m s⁻¹)', medium: 'string', values: { L: 0.8, vs: 120, k: 1 }, note: 'One loop: L = λ/2, so f₁ = v/2L = 75 Hz.' },
+    { name: '9702/23 O/N 24 Q5: string 0.48 m, three loops, v = 1400 m s⁻¹', medium: 'string', values: { L: 0.48, vs: 1400, k: 3, pP: 16.7, pQ: 50 }, note: 'L = 1.5λ ⇒ λ = 0.32 m; f = v/λ = 4375 Hz (ms: 4400 Hz).' },
+    { name: 'Closed pipe 0.30 m: fundamental', medium: 'closed', values: { L: 0.3, va: 340, k: 1 }, note: 'Antinode at the open end, node at the closed end: L = λ/4, f = v/4L = 283 Hz.' },
+    { name: 'Closed pipe 0.30 m: next resonance', medium: 'closed', values: { L: 0.3, va: 340, k: 2 }, note: 'L = 3λ/4: the 3rd harmonic, 850 Hz. A closed pipe has no 2nd harmonic.' },
+    { name: 'Open pipe 0.30 m: fundamental', medium: 'open', values: { L: 0.3, va: 340, k: 1 }, note: 'Antinodes at both open ends: L = λ/2, f = v/2L = 567 Hz.' },
+    { name: '9702/22 O/N 24 Q4: closed pipe (piston) 4.5 cm from the open end', medium: 'closed', values: { L: 0.045, va: 340, k: 1 }, note: 'Antinode at the open end, node at the piston: L = λ/4 ⇒ λ = 0.18 m, f = 340/0.18 = 1890 Hz (ms 1900 Hz). A longer air column with the same pattern needs a longer λ, so a lower f.' },
+    { name: 'Microwaves (10 GHz) and a metal reflector: λ from the node spacing', medium: 'microwave', values: { fG: 10, Lc: 20, m: 5, pP: 50, pQ: 57.5 }, note: 'Detector minima (nodes) are λ/2 apart. Moving across 5 spacings = 7.5 cm ⇒ λ = 2 × 7.5/5 = 3.0 cm.' },
+    { name: 'String: 4th mode, probes in adjacent loops', medium: 'string', values: { L: 1.2, vs: 96, k: 4, pP: 10, pQ: 30 }, note: 'Points in adjacent loops are in antiphase (180°); points in the same loop are in phase.' }
+  ], function (p) { medium.set(p.medium, true); clock.pause(); prm.set(p.values); clock.seek(0); });
+
+  ui.notes(noteCard, [
+    'Adjacent <b>nodes</b> (or adjacent antinodes) are <b>λ/2</b> apart, not λ. Node to adjacent antinode is λ/4.',
+    'A tube <b>closed at one end</b> has a node at the closed end and an antinode at the open end: L = λ/4, 3λ/4, 5λ/4 … so only <b>odd harmonics</b> (f₁, 3f₁, 5f₁ …) occur.',
+    'Strings fixed at both ends and pipes open at both ends allow every harmonic: L = nλ/2, f = nv/2L.',
+    'End corrections are ignored (9702 assumes they are negligible).',
+    'All points between two adjacent nodes oscillate <b>in phase</b>; points either side of a node are in <b>antiphase</b>. Amplitude varies with position.',
+    'A stationary wave forms when two waves of the same frequency (and similar amplitude) travelling in <b>opposite directions</b> superpose — usually a wave and its reflection.',
+    'In an air column the drawn curve shows the <b>displacement</b> of the air (along the tube): the wave in the air is longitudinal.',
+    'Microwaves: measure the distance across <b>many</b> node spacings and divide, to reduce the percentage uncertainty in λ.'
+  ]);
+
+  /* ---------- model ---------- */
+  var st = null;
+  function geom() {
+    var med = medium.get(), v = prm.values;
+    if (med === 'microwave') return { medium: med, L: v.Lc / 100, lambda: SP.C / (v.fG * 1e9), v: SP.C, k: 1 };
+    return { medium: med, L: v.L, v: med === 'string' ? v.vs : v.va, k: v.k };
+  }
+  function update() {
+    var med = medium.get(), mw = med === 'microwave';
+    prm.show('L', !mw); prm.show('vs', med === 'string'); prm.show('va', med === 'closed' || med === 'open');
+    prm.show('k', !mw); prm.show('fG', mw); prm.show('Lc', mw); prm.show('m', mw);
+    st = SP.stationary(geom());
+    drawScene(); drawPlots(); readout();
+  }
+
+  /* ---------- scene ---------- */
+  function drawScene() {
+    if (!st) return;
+    var col = ui.colors(), g = geom(), med = g.medium;
+    vp.fit(-0.16, 1.12, -0.62, 0.62);
+    var c = vp.begin();
+    if (st.invalid) { D.label(c, st.invalid, vp.w / 2, vp.h / 2, col.warn, { bold: true }); return; }
+    var L = g.L, X = function (x) { return vp.X(x / L); }, amp = 0.36; // world units: x scaled to 0…1
+    var wt = 2 * Math.PI * clock.t / PERIOD, S = SP.shapeFn(med, st.lambda, L), tp = SP.travellingPair(med, st.lambda, L);
+    var y0 = vp.Y(0), sc = vp.scale * amp;
+    // apparatus
+    if (med === 'string') {
+      c.fillStyle = col.surface; c.strokeStyle = col['object-line'];
+      c.fillRect(X(0) - 34, y0 - 22, 28, 44); c.strokeRect(X(0) - 34, y0 - 22, 28, 44);
+      D.label(c, 'vibrator', X(0) - 20, y0 + 34, col.muted, { size: 11 });
+      c.fillRect(X(L) + 4, y0 - 40, 10, 80); D.label(c, 'fixed', X(L) + 9, y0 + 50, col.muted, { size: 11 });
+    } else if (med === 'microwave') {
+      c.fillStyle = col.surface; c.strokeStyle = col['object-line'];
+      c.beginPath(); c.moveTo(X(0) - 40, y0 - 14); c.lineTo(X(0) - 8, y0 - 14); c.lineTo(X(0), y0 - 26); c.lineTo(X(0), y0 + 26); c.lineTo(X(0) - 8, y0 + 14); c.lineTo(X(0) - 40, y0 + 14); c.closePath(); c.fill(); c.stroke();
+      D.label(c, 'transmitter', X(0) - 22, y0 + 40, col.muted, { size: 11 });
+      c.fillStyle = col['object-line']; c.fillRect(X(L) + 2, y0 - sc - 18, 7, 2 * sc + 36); D.label(c, 'metal plate', X(L) + 6, y0 + sc + 30, col.muted, { size: 11 });
+    } else {
+      var top = y0 - sc - 10, bot = y0 + sc + 10;
+      c.strokeStyle = col['object-line']; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(X(0), top); c.lineTo(X(L), top); c.moveTo(X(0), bot); c.lineTo(X(L), bot); c.stroke();
+      if (med === 'closed') { c.fillStyle = col['object-line']; c.fillRect(X(L), top - 4, 7, bot - top + 8); D.label(c, 'closed end', X(L) + 4, bot + 16, col.muted, { size: 11 }); }
+      else D.label(c, 'open end', X(L), bot + 16, col.muted, { size: 11 });
+      D.label(c, 'open end', X(0), bot + 16, col.muted, { size: 11 });
+      c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(X(0) - 12, y0 - 10); c.lineTo(X(0) - 30, y0 - 22); c.lineTo(X(0) - 30, y0 + 22); c.lineTo(X(0) - 12, y0 + 10); c.closePath(); c.fill(); c.stroke();
+      D.label(c, 'loudspeaker', X(0) - 26, y0 - 32, col.muted, { size: 11 });
+      // air particles (longitudinal): displaced along the tube
+      var nP = 46;
+      for (var j = 0; j <= nP; j++) {
+        var xr = L * j / nP, dx = 0.018 * L * S(xr) * Math.cos(wt) * 2;
+        for (var row = -1; row <= 1; row++) { c.fillStyle = col.muted; c.beginPath(); c.arc(X(U.clamp(xr + dx, 0, L)), y0 + row * (sc + 4) * 0.55 + (row === 0 ? 0 : 0), 1.8, 0, 7); c.fill(); }
+      }
+    }
+    // axis
+    D.line(c, [[X(0), y0], [X(L), y0]], col.grid, { width: 1 });
+    var N = 300;
+    function curve(fn, color, w, dash) {
+      var pts = []; for (var i = 0; i <= N; i++) { var x = L * i / N; pts.push([X(x), y0 - sc * fn(x) / 2]); }
+      D.line(c, pts, color, { width: w, dash: dash });
+    }
+    if (showEnv.get()) { curve(function (x) { return 2 * Math.abs(S(x)); }, col.muted, 1, [4, 4]); curve(function (x) { return -2 * Math.abs(S(x)); }, col.muted, 1, [4, 4]); }
+    if (showTrav.get()) { curve(function (x) { return tp.a(x, wt); }, col.s2, 1.4); curve(function (x) { return tp.b(x, wt); }, col.s3, 1.4); }
+    curve(function (x) { return tp.sum(x, wt); }, col.s1, 2.6);
+    // nodes / antinodes
+    if (showEnv.get()) {
+      st.nodes.forEach(function (x) { c.fillStyle = col.ink; c.beginPath(); c.arc(X(x), y0, 3.5, 0, 7); c.fill(); D.label(c, 'N', X(x), y0 + sc + 26 + (med === 'closed' || med === 'open' ? 12 : 0), col.ink, { size: 12, bold: true }); });
+      st.antinodes.forEach(function (x) { D.label(c, 'A', X(x), y0 - sc - 24 - (med === 'closed' || med === 'open' ? 12 : 0), col.accent, { size: 12, bold: true }); });
+      if (st.nodes.length >= 2) {
+        var n0 = st.nodes[st.nodes.length - 2], n1 = st.nodes[st.nodes.length - 1], yy = vp.Y(-0.5);
+        if (X(n1) - X(n0) > 16) {
+          D.arrow(c, (X(n0) + X(n1)) / 2, yy, X(n0), yy, col.accent, { head: 7, width: 1.4 }); D.arrow(c, (X(n0) + X(n1)) / 2, yy, X(n1), yy, col.accent, { head: 7, width: 1.4 });
+          D.label(c, 'λ/2 = ' + U.sf(st.spacing) + ' m', (X(n0) + X(n1)) / 2, yy - 11, col.accent, { size: 12, bg: true });
+        }
+      }
+    }
+    // probes
+    [['P', prm.values.pP], ['Q', prm.values.pQ]].forEach(function (pq) {
+      var x = L * pq[1] / 100, y = y0 - sc * tp.sum(x, wt) / 2;
+      c.fillStyle = col.s4; c.beginPath(); c.arc(X(x), y, 5, 0, 7); c.fill();
+      D.label(c, pq[0], X(x) + 9, y - 9, col.s4, { size: 12, bold: true });
+    });
+    if (med === 'microwave') D.label(c, 'detector reading is largest at A, smallest at N (reflector is a node)', vp.w / 2, 14, col.muted, { size: 11 });
+    D.label(c, 'transverse displacement drawn ' + (med === 'closed' || med === 'open' ? '(air displacement is along the tube; dots show it)' : ''), vp.w / 2, vp.h - 10, col.muted, { size: 11 });
+  }
+
+  /* ---------- plots ---------- */
+  function drawPlots() {
+    if (!st || st.invalid) return;
+    var col = ui.colors(), g = geom(), S = SP.shapeFn(g.medium, st.lambda, g.L);
+    if (g.medium === 'microwave') {
+      pF.draw({ x: [0, 1], y: [0, 1], series: [], title: 'no harmonic series: λ is set by the source' });
+    } else {
+      var fr = SP.allowedFrequencies(g.medium, g.L, g.v, 8);
+      var mk = fr.map(function (o) { return { x: o.harmonic, y: o.f, label: o.k === g.k ? 'now' : '', color: o.k === g.k ? col.accent : col.s1 }; });
+      pF.draw({ x: [0, g.medium === 'closed' ? 16 : 9], series: [], markers: mk, title: g.medium === 'closed' ? 'odd harmonics only' : 'all harmonics' });
+    }
+    pA.draw({ x: [0, g.L], y: [0, 1.05], series: [{ fn: function (x) { return Math.abs(S(x)); }, color: col.s1 }],
+      vlines: [{ x: g.L * prm.values.pP / 100, label: 'P', color: col.s4 }, { x: g.L * prm.values.pQ / 100, label: 'Q', color: col.s4 }], title: 'amplitude along the ' + (g.medium === 'string' ? 'string' : g.medium === 'microwave' ? 'path' : 'tube') });
+  }
+
+  /* ---------- live working ---------- */
+  function readout() {
+    if (!st) return;
+    var g = geom(), s3 = U.sf, med = g.medium;
+    R.clear();
+    if (st.invalid) { R.badge(st.invalid, 'warn').render(); return; }
+    if (med === 'microwave') {
+      R.head('Microwaves reflected by a metal plate');
+      R.eq('λ', 'c ÷ f = 3.00 × 10<sup>8</sup> ÷ (' + U.num(prm.values.fG, 3) + ' × 10<sup>9</sup>)', st.lambda, 'm');
+      R.eq('node spacing', 'λ ÷ 2', st.spacing, 'm');
+      R.eq('nodes between source and plate', 'counted from the plate (a node)', String(st.nodes.length));
+      var m = prm.values.m, d = m * st.lambda / 2;
+      R.head('Measuring λ (8.1.4)');
+      R.eq('d', 'distance moved across m = ' + m + ' node spacings = m × λ/2', d, 'm');
+      R.eq('λ', '2d ÷ m = 2 × ' + s3(d) + ' ÷ ' + m, SP.lambdaFromNodes(d, m), 'm');
+    } else {
+      var k = g.k, h = st.harmonic;
+      R.badge(med === 'closed' ? 'Closed at one end: node at the closed end, antinode at the open end' : med === 'open' ? 'Open at both ends: antinodes at both ends' : 'Fixed at both ends: nodes at both ends', 'info');
+      R.head('Pattern ' + k + (med === 'closed' ? ' → harmonic number 2k − 1 = ' + h : ' → harmonic number n = ' + h));
+      if (med === 'closed') R.eq('λ', 'L = (2k − 1)λ/4 ⇒ λ = 4L ÷ ' + h + ' = 4 × ' + U.num(g.L, 4) + ' ÷ ' + h, st.lambda, 'm');
+      else R.eq('λ', 'L = nλ/2 ⇒ λ = 2L ÷ ' + h + ' = 2 × ' + U.num(g.L, 4) + ' ÷ ' + h, st.lambda, 'm');
+      R.eq('f', 'v ÷ λ = ' + U.num(g.v, 4) + ' ÷ ' + s3(st.lambda), st.f, 'Hz');
+      R.eq('f₁', med === 'closed' ? 'v ÷ 4L (fundamental)' : 'v ÷ 2L (fundamental)', st.f1, 'Hz');
+      R.eq('f ÷ f₁', med === 'closed' ? 'odd whole number' : 'whole number', U.num(st.f / st.f1, 6));
+      R.eq('node spacing', 'λ ÷ 2', st.spacing, 'm');
+      R.eq('node → antinode', 'λ ÷ 4', st.lambda / 4, 'm');
+      R.eq('nodes / antinodes', 'counted along L (ends included)', st.nodes.length + ' N, ' + st.antinodes.length + ' A');
+      R.head('Allowed frequencies');
+      R.eq('f', 'first five', SP.allowedFrequencies(med, g.L, g.v, 5).map(function (o) { return s3(o.f); }).join(', '), 'Hz');
+    }
+    R.head('Probes P and Q');
+    var xP = g.L * prm.values.pP / 100, xQ = g.L * prm.values.pQ / 100, rel = SP.phaseRelation(med, st.lambda, g.L, xP, xQ);
+    var S = SP.shapeFn(med, st.lambda, g.L);
+    R.eq('x<sub>P</sub>, x<sub>Q</sub>', '', s3(xP) + ' m, ' + s3(xQ) + ' m');
+    R.eq('amplitude ratio', 'A<sub>P</sub> ÷ A<sub>Q</sub>', Math.abs(S(xQ)) > 1e-9 ? s3(Math.abs(S(xP)) / Math.abs(S(xQ))) : 'Q is at a node');
+    R.eq('phase', rel.rel === 'node' ? 'a probe is at a node (does not move)' : (rel.rel === 'in phase' ? 'same loop or an even number of nodes between' : 'an odd number of nodes between'),
+      rel.rel === 'node' ? '—' : rel.rel + ' (' + rel.deg + '°)');
+    R.render();
+  }
+
+  ui.onTheme(function () { drawScene(); drawPlots(); });
+  vp.onResize = drawScene;
+  update();
+  clock.seek(0);
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

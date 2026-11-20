@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connected particles</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/mech-dynamics.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, DY = SIM.dyn;
+  var course = ui.course('9709'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Connected particles: strings over smooth pulleys', g: g,
+    tags: ['9709 4.4 Newton’s laws (connected particles)', '9709 4.1 Friction', '9709 4.2 suvat follow-on'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 18 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 3, onFrame: function () { drawScene(); drawFBD(); drawPlots(); readout(); } });
+  ui.legend(sceneCard, [
+    { color: 'var(--c-weight)', label: 'weight' }, { color: 'var(--c-normal)', label: 'normal reaction' }, { color: 'var(--c-friction)', label: 'friction' },
+    { color: 'var(--c-tension)', label: 'tension' }, { color: 'var(--c-applied)', label: 'applied force' }, { color: 'var(--c-accel)', label: 'acceleration' }]);
+  var fbdCard = pg.card('left', 'Free-body diagram of EACH particle (one F = ma per particle, along its own line of motion)');
+  var fcv = ui.canvas(fbdCard, 'main-canvas');
+  var fvp = new SIM.view.Viewport(fcv, { pad: 6 });
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pV = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'v / m s⁻¹ (each along its own positive direction)' });
+  var pT = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'tension / N' });
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var cfgSel = ui.select(paramCard, { label: 'Set-up', value: 'atwood', options: [
+    { value: 'atwood', label: 'Two hanging particles (Atwood)' }, { value: 'table', label: 'Table + hanging particle' },
+    { value: 'incline', label: 'Incline (pulley at top) + hanging particle' }, { value: 'double', label: 'Two inclines, pulley at the apex' },
+    { value: 'step', label: 'Two inclines, pulley at the corner (both slopes fall away)' },
+    { value: 'ihh', label: 'Incline – horizontal – hanging (two strings)' }, { value: 'pair', label: 'Two particles on one slope, pulled by a force' }] }, function () { syncUI(); update(); });
+  var prm = ui.params(paramCard, [
+    { key: 'm1', label: 'Mass of A', sym: 'm<sub>A</sub>', unit: 'kg', min: 0.05, max: 50, step: 0.01, value: 1.2 },
+    { key: 'm2', label: 'Mass of B', sym: 'm<sub>B</sub>', unit: 'kg', min: 0.05, max: 50, step: 0.01, value: 1.8 },
+    { key: 'm3', label: 'Mass of C', sym: 'm<sub>C</sub>', unit: 'kg', min: 0.05, max: 50, step: 0.01, value: 5 },
+    { key: 'mC', label: 'Extra mass attached below the descending particle', sym: 'Δm', unit: 'kg', min: 0, max: 50, step: 0.01, value: 0 },
+    { key: 'th1', label: 'Angle of slope 1', sym: 'θ<sub>1</sub>', unit: '°', min: 0, max: 80, step: 0.5, value: 30 },
+    { key: 'th2', label: 'Angle of slope 2', sym: 'θ<sub>2</sub>', unit: '°', min: 0, max: 80, step: 0.5, value: 30 },
+    { key: 'mu1', label: 'Coefficient of friction for A', sym: 'μ<sub>A</sub>', unit: '', min: 0, max: 1.5, step: 0.001, value: 0 },
+    { key: 'mu2', label: 'Coefficient of friction for B', sym: 'μ<sub>B</sub>', unit: '', min: 0, max: 1.5, step: 0.001, value: 0 },
+    { key: 'P', label: 'Applied force along the line of motion', sym: 'P', unit: 'N', min: -100, max: 100, step: 0.1, value: 0 },
+    { key: 'u', label: 'Initial velocity of the system (positive direction)', sym: 'u', unit: 'm s<sup>−1</sup>', min: -10, max: 10, step: 0.1, value: 0 },
+    { key: 'h', label: 'Height of the descending particle above the floor (0 = no floor)', sym: 'h', unit: 'm', min: 0, max: 10, step: 0.01, value: 1 },
+    { key: 'dP', label: 'Distance of the leading particle from its pulley (0 = far)', sym: 'd', unit: 'm', min: 0, max: 10, step: 0.01, value: 0 },
+    { key: 'len', label: 'Gap between the particles = string length', sym: 'ℓ', unit: 'm', min: 0.1, max: 5, step: 0.01, value: 1 },
+    { key: 'ev', label: 'Event value', sym: '', unit: '', min: 0, max: 10, step: 0.01, value: 1 },
+    { key: 'T', label: 'Time shown', sym: 't<sub>max</sub>', unit: 's', min: 0.5, max: 20, step: 0.1, value: 3 }
+  ], update);
+  var evSel = ui.select(paramCard, { label: 'Event', value: 'none', options: [
+    { value: 'none', label: 'none' }, { value: 'bt', label: 'string breaks at time t' }, { value: 'bs', label: 'string breaks when the speed reaches v' },
+    { value: 'bd', label: 'string breaks after A has moved d' }, { value: 'dd', label: 'extra mass falls off after A has moved d' }] }, function () { syncUI(); update(); });
+  var strSel = ui.select(paramCard, { label: 'Which string breaks', value: '0', options: [{ value: '0', label: 'string 1 (A–B)' }, { value: '1', label: 'string 2 (B–C)' }] }, update);
+  var comps = ui.toggle(paramCard, { label: 'Show weight components on slopes', value: true }, function () { drawScene(); drawFBD(); });
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+  var eq0 = R.eq; R.eq = function (l, w, v, u) { return eq0(l, w, typeof v === 'number' ? fmtX(v) : v, u); };
+  /* exact values (e.g. 172.5) are shown in full; others to 3 s.f. */
+  function fmtX(x) {
+    if (typeof x !== 'number' || !isFinite(x)) return U.sf(x);
+    for (var d = 0; d <= 4; d++) {
+      var y = x * Math.pow(10, d);
+      if (Math.abs(y - Math.round(y)) < 1e-9 * Math.max(1, Math.abs(y))) {
+        var str = x.toFixed(d), dig = str.replace(/[-.]/g, '').replace(/^0+/, '').length;
+        return dig <= 6 && Math.abs(x) < 1e6 && (Math.abs(x) >= 1e-3 || x === 0) ? str.replace('-', '−') : U.sf(x);
+      }
+    }
+    return U.sf(x);
+  }
+  function pn(x) { return x < 0 ? '(' + U.sf(x) + ')' : U.sf(x); }
+
+  var base = { m1: 1, m2: 1, m3: 1, mC: 0, th1: 30, th2: 30, mu1: 0, mu2: 0, P: 0, u: 0, h: 0, dP: 0, len: 1, ev: 1 };
+  function pre(name, cfg, vals, note, ev, str) { return { name: name, cfg: cfg, values: Object.assign({}, base, vals), note: note, ev: ev || 'none', str: str || '0' }; }
+  var presetList = [
+    pre('9709/41 O/N 24 Q1: 1.8 kg and 1.2 kg over a pulley (+ floor 1 m below)', 'atwood', { m1: 1.2, m2: 1.8, h: 1, T: 1.6 },
+      'a = (1.8 − 1.2)g ÷ 3 = 2 m s⁻², T = 1.2(g + a) = 14.4 N. When B lands (v = 2) the string goes slack and A moves freely with a = −g: it rises a further 0.2 m.'),
+    pre('9709/41 M/J 26 Q4: A 3 kg; B 1.5 kg with C 3.5 kg attached; C falls off after A rises 0.8 m', 'atwood', { m1: 3, m2: 1.5, mC: 3.5, ev: 0.8, T: 1.8 },
+      'T = 37.5 N ⇒ a = 2.5 ⇒ m = 3.5. After C separates (v = 2 at t = 0.8 s) a = (15 − 30)/4.5 = −10/3, so A stops 0.6 s later: total 1.4 s.', 'dd'),
+    pre('Table: 2 kg (μ = 0.25) pulled by 3 kg hanging 1.5 m above the floor', 'table', { m1: 2, mu1: 0.25, m2: 3, h: 1.5, dP: 6, T: 2.5 },
+      'a = (30 − 0.25 × 20) ÷ 5 = 5 m s⁻², v = √15 when B lands; A then decelerates at μg = 2.5 m s⁻² and slides 3 m more.'),
+    pre('Incline + hanging at rest: does it move? (2 kg on 30°, μ = 0.4, 0.5 kg hanging)', 'incline', { m1: 2, th1: 30, mu1: 0.4, m2: 0.5, T: 2 },
+      '|D| = |0.5g − 2g sin 30°| = 5 N ≤ μR = 6.93 N ⇒ stays at rest. Friction is only 5 N (not μR); least μ = 5 ÷ 17.3 = 0.289.'),
+    pre('Two inclines, pulley at the apex: 0.2 kg on 30°, 0.3 kg on 60°, smooth', 'double', { m1: 0.2, th1: 30, m2: 0.3, th2: 60, T: 1 },
+      'a = (0.3g sin 60° − 0.2g sin 30°) ÷ 0.5 = 3√3 − 2 = 3.20 m s⁻², T = 0.2(a + g sin 30°) = 1.64 N.'),
+    pre('9709/43 M/J 22 Q6(a): 0.3 kg on smooth 60° plane, 0.2 kg on smooth 30° plane, pulley at B', 'step', { m1: 0.3, th1: 60, m2: 0.2, th2: 30, T: 0.6 },
+      'Both particles slide DOWN their planes: a = (0.3g sin 60° + 0.2g sin 30°) ÷ 0.5 = 7.20 m s⁻², T = 0.3(g sin 60° − a) = 0.439 N (mark scheme).'),
+    pre('9709/43 M/J 22 Q6(b): BC rough, 3 N on Q directly up BC — least μ for rest', 'step', { m1: 0.3, th1: 60, m2: 0.2, th2: 30, mu2: 0.3453, P: -3, T: 1 },
+      'P at rest: T = 0.3g sin 60° = 2.598. Q on the point of moving down: T + 0.2g sin 30° = F + 3 ⇒ F = 0.598 = μ(0.2g cos 30°) ⇒ μ = 0.345.'),
+    pre('9709/42 M/J 25 Q5: A 3 kg on rough 30°, B 4 kg smooth table, C 5 kg hanging; string AB breaks at 1.5 s', 'ihh', { m1: 3, th1: 30, mu1: 0.42339, m2: 4, m3: 5, ev: 1.5, T: 2.2 },
+      'a = 2 ⇒ T_BC = 40, T_AB = 32, F = 11 ⇒ μ = 0.423. After the break A decelerates at (15 + 11)/3: total distance up the plane 2.25 + 0.519 = 2.77 m.', 'bt', '0'),
+    pre('9709/42 F/M 26 Q5: P 0.3 kg and Q 0.2 kg on rough 30° (μ 0.4), 12 N on Q; string breaks at 2 m s⁻¹', 'pair', { m1: 0.3, m2: 0.2, th1: 30, mu1: 0.4, mu2: 0.4, P: 12, ev: 2, len: 1, T: 0.6 },
+      'a = (12 − 0.5g sin 30° − 0.4 × 0.5g cos 30°) ÷ 0.5 = 15.5, T = 7.2 N. After the break P decelerates at g sin 30° + 0.4g cos 30° = 8.46 ⇒ 0.236 s to rest.', 'bs'),
+    pre('Two rough contacts at rest: the tension is statically indeterminate', 'ihh', { m1: 3, th1: 30, mu1: 0.5, m2: 4, mu2: 0.5, m3: 2, T: 2 },
+      'D = 20 − 15 = 5 N is less than the total friction available, so nothing moves — but how the 5 N is shared between A and B is not fixed, so T_AB can be anything from 2.01 N to 28.0 N. Exam questions avoid this (or make one contact smooth / limiting).'),
+    pre('String goes slack: the upper particle slides faster than the lower one', 'pair', { m1: 1, m2: 1, th1: 30, mu1: 0.5, mu2: 0.1, len: 2, T: 1.5 },
+      'Treating them as one system would need T &lt; 0. A string cannot push: each particle moves on its own until they meet.')
+  ];
+  var presetCtl = ui.presets(presetCard, presetList, function (p) {
+    clock.pause(); cfgSel.set(p.cfg, true); evSel.set(p.ev, true); strSel.set(p.str, true); syncUI(); prm.set(p.values); clock.seek(0);
+  });
+
+  ui.notes(noteCard, [
+    'Write <b>one F = ma for each particle</b>, along that particle’s own line of motion. The tension acts on both particles in opposite senses along the string.',
+    'Do not use the whole system’s weight as the driving force: only the weight component along each particle’s own line of motion counts (mg for hanging, mg sin θ on a slope, 0 on a table).',
+    'Friction μR only when moving or on the point of moving. First ask: does the system move at all? Compare the net driving force with the total μR available.',
+    'When the hanging particle hits the floor the string goes slack: the other particle continues with its OWN acceleration (often −g, or friction only).',
+    'After a string breaks, a particle on a rough slope decelerates, stops, and must be re-tested: does it slide back?',
+    'Smooth pulley: the tension is the same on both sides of it.'
+  ]);
+
+  /* ---------- UI sync ---------- */
+  function syncUI() {
+    var c = cfgSel.get(), ev = evSel.get();
+    var lab = {
+      atwood: ['Mass of A (rising side)', 'Mass of B (descending side)'], table: ['Mass of A (on the table)', 'Mass of B (hanging)'],
+      incline: ['Mass of A (on the slope)', 'Mass of B (hanging)'], double: ['Mass of A (on slope 1)', 'Mass of B (on slope 2)'],
+      step: ['Mass of A (on the steeper plane AB, below the pulley)', 'Mass of B (on plane BC, above the pulley)'],
+      ihh: ['Mass of A (on the slope)', 'Mass of B (on the table)'], pair: ['Mass of A (lower particle)', 'Mass of B (upper particle)'] }[c];
+    prm.label('m1', lab[0] + ' <span class="sym">m<sub>A</sub></span>'); prm.label('m2', lab[1] + ' <span class="sym">m<sub>B</sub></span>');
+    prm.show('m3', c === 'ihh');
+    var hangLast = c === 'atwood' || c === 'table' || c === 'incline' || c === 'ihh';
+    prm.show('mC', hangLast); prm.show('h', hangLast);
+    prm.show('th1', c !== 'atwood' && c !== 'table'); prm.show('th2', c === 'double' || c === 'step');
+    prm.show('mu1', c !== 'atwood'); prm.show('mu2', c === 'double' || c === 'step' || c === 'ihh' || c === 'pair');
+    prm.show('P', c !== 'atwood' && c !== 'ihh');
+    var pl = { table: 'Applied force on A (+ towards the pulley)', incline: 'Applied force on A along the slope (+ up)', double: 'Applied force on B along slope 2 (+ down the slope)',
+      step: 'Applied force on B along BC (+ down BC, towards the pulley)', pair: 'Force on B along the slope (+ up the slope)' }[c];
+    if (pl) prm.label('P', pl + ' <span class="sym">P</span>');
+    prm.show('dP', c !== 'pair'); prm.show('len', c === 'pair');
+    prm.show('ev', ev !== 'none');
+    prm.label('ev', { bt: 'Time at which the string breaks <span class="sym">t</span>', bs: 'Speed at which the string breaks <span class="sym">v</span>',
+      bd: 'Distance moved by A when the string breaks <span class="sym">d</span>', dd: 'Distance moved by A when the extra mass falls off <span class="sym">d</span>', none: 'Event value' }[ev]);
+    strSel.row.style.display = (c === 'ihh' && ev !== 'none' && ev !== 'dd') ? '' : 'none';
+    if (c === 'atwood') prm.label('dP', 'Distance of A below the pulley (0 = far) <span class="sym">d</span>');
+    else prm.label('dP', 'Distance of the leading particle from its pulley (0 = far) <span class="sym">d</span>');
+  }
+
+  /* ---------- model ---------- */
+  var built = null, sim = null, first = null;
+  function cfgObj() {
+    var v = prm.values, c = cfgSel.get();
+    return { type: c, m1: v.m1, m2: v.m2, m3: v.m3, mC: (c === 'atwood' || c === 'table' || c === 'incline' || c === 'ihh') ? v.mC : 0, th1: v.th1, th2: v.th2,
+      mu1: v.mu1, mu2: v.mu2, P: v.P, h: v.h, dP: v.dP, len: v.len };
+  }
+  function update() {
+    var v = prm.values, c = cfgObj(), ev = evSel.get();
+    built = DY.build(c);
+    var spec = { g: g, particles: built.particles, strLen: built.strLen, u: v.u, tMax: v.T };
+    var lastIdx = built.particles.length - 1;
+    if (ev === 'bt' || ev === 'bs' || ev === 'bd') {
+      var k = c.type === 'ihh' ? Number(strSel.get()) : 0;
+      spec.brk = { string: Math.min(k, built.particles.length - 2), at: { bt: 'time', bs: 'speed', bd: 'distance' }[ev], value: v.ev, ref: 0 };
+    } else if (ev === 'dd') {
+      spec.detach = { particle: lastIdx, dm: c.mC, at: 'distance', value: v.ev, ref: 0 };
+    }
+    sim = DY.simulate(spec);
+    first = DY.analyse(built.particles, g, v.u);
+    clock.setDuration(v.T);
+    ui.writeHash(Object.assign({}, v, { cfg: c.type, ev: ev }));
+    drawScene(); drawFBD(); drawPlots(); readout();
+  }
+
+  /* ---------- scene geometry ---------- */
+  function idxOf(name) { for (var i = 0; i < built.particles.length; i++) if (built.particles[i].name === name) return i; return -1; }
+  function motionRange() {
+    var mx = 0, T = prm.values.T;
+    if (!sim || sim.invalid) return 1;
+    for (var i = 0; i <= 80; i++) { var s = sim.stateAt(T * i / 80); s.x.forEach(function (x) { mx = Math.max(mx, Math.abs(x)); }); }
+    return mx;
+  }
+  function geometry() {
+    var c = cfgSel.get(), v = prm.values, rad = U.rad, mr = motionRange();
+    var ks = mr > 3 ? 3 / mr : 1;
+    if (v.h > 0) ks = Math.min(ks, 3.2 / v.h);
+    if (v.dP > 0) ks = Math.min(ks, 4.5 / v.dP);
+    var G = { ks: ks, tracks: [], pulleys: [], strings: [], polys: [], floors: [], lines: [] };
+    var dirOf = function (alphaDeg) { return [Math.cos(rad(alphaDeg)), Math.sin(rad(alphaDeg))]; };
+    var hf = v.h > 0 ? v.h * ks : null, dp = v.dP > 0 ? v.dP * ks : null;
+    if (c === 'atwood') {
+      var top = 8.5, yB = hf !== null ? hf : 3.5, px = 0;
+      var yA = dp !== null ? top - 0.3 - dp : yB;
+      G.pulleys.push([px, top]);
+      G.tracks[idxOf('A')] = { p0: [px - 0.55, yA], e: [0, 1], hang: true };
+      G.tracks[idxOf('B')] = { p0: [px + 0.55, yB], e: [0, -1], hang: true };
+      G.strings.push([[px - 0.55, top], [px + 0.55, top]]);
+      G.floors.push([-3, 0, 3, 0]);
+      G.bounds = [-4, 4, -0.6, top + 1];
+    } else if (c === 'table' || c === 'incline') {
+      var th = c === 'table' ? 0 : v.th1, e = dirOf(th), L = 7, pulX = 0, pulY = 5;
+      var start = [pulX - e[0] * L, pulY - e[1] * L];
+      G.polys.push(c === 'table' ? [[pulX - L, pulY], [pulX, pulY], [pulX, 0], [pulX - L, 0]] : [start, [pulX, pulY], [pulX, start[1]]]);
+      var dA = dp !== null ? dp : L * 0.55;
+      G.tracks[idxOf('A')] = { p0: [pulX - e[0] * dA, pulY - e[1] * dA], e: e, angle: th };
+      var yB2 = pulY - 1.4, floorY = hf !== null ? yB2 - hf : Math.min(0, start[1]);
+      G.tracks[idxOf('B')] = { p0: [pulX + 0.45, yB2], e: [0, -1], hang: true };
+      G.pulleys.push([pulX + 0.1, pulY + 0.1]);
+      G.strings.push([[pulX + 0.1, pulY + 0.1]]);
+      G.floors.push([Math.min(start[0], pulX - L) - 0.5, Math.min(floorY, start[1], 0), pulX + 2.5, Math.min(floorY, start[1], 0)]);
+      if (hf !== null) G.floors.push([pulX - 0.2, floorY, pulX + 2.5, floorY]);
+      G.bounds = [Math.min(start[0], pulX - L) - 0.8, pulX + 3, Math.min(floorY, start[1], 0) - 0.6, pulY + 1.4];
+    } else if (c === 'double') {
+      var e1 = dirOf(v.th1), L1 = 6, apex = [0, 5];
+      var s1 = [apex[0] - e1[0] * L1, apex[1] - e1[1] * L1];
+      var e2 = dirOf(-v.th2), s2 = [apex[0] + e2[0] * L1, apex[1] + e2[1] * L1];
+      var baseY = Math.min(s1[1], s2[1]);
+      G.polys.push([[s1[0], baseY], s1, apex, s2, [s2[0], baseY]]);
+      var dA2 = dp !== null ? dp : L1 * 0.5;
+      G.tracks[idxOf('A')] = { p0: [apex[0] - e1[0] * dA2, apex[1] - e1[1] * dA2], e: e1, angle: v.th1 };
+      G.tracks[idxOf('B')] = { p0: [apex[0] + e2[0] * dA2, apex[1] + e2[1] * dA2], e: e2, angle: -v.th2 };
+      G.pulleys.push([apex[0], apex[1] + 0.15]); G.strings.push([[apex[0], apex[1] + 0.15]]);
+      G.floors.push([Math.min(s1[0], s2[0]) - 0.5, baseY, Math.max(s1[0], s2[0]) + 0.5, baseY]);
+      G.bounds = [Math.min(s1[0], s2[0]) - 0.8, Math.max(s1[0], s2[0]) + 0.8, baseY - 0.6, apex[1] + 1.5];
+    } else if (c === 'step') {
+      var corner = [0, 3.2], a1 = dirOf(v.th1), a2 = dirOf(v.th2), La = 4.2, Lb = 6;
+      var Apt = [corner[0] - a1[0] * La, corner[1] - a1[1] * La], Cpt = [corner[0] + a2[0] * Lb, corner[1] + a2[1] * Lb];
+      var bY = Math.min(Apt[1], 0);
+      G.polys.push([[Apt[0], bY], Apt, corner, Cpt, [Cpt[0], bY]]);
+      var dB = dp !== null ? dp : Lb * 0.5;
+      // B moves down BC towards the corner (e_B = −a2), A moves down AB away from the corner (e_A = −a1)
+      G.tracks[idxOf('B')] = { p0: [corner[0] + a2[0] * dB, corner[1] + a2[1] * dB], e: [-a2[0], -a2[1]], angle: v.th2 };
+      G.tracks[idxOf('A')] = { p0: [corner[0] - a1[0] * La * 0.3, corner[1] - a1[1] * La * 0.3], e: [-a1[0], -a1[1]], angle: v.th1 };
+      G.pulleys.push([corner[0], corner[1] + 0.15]); G.strings.push([[corner[0], corner[1] + 0.15]]);
+      G.floors.push([Apt[0] - 0.5, bY, Cpt[0] + 0.5, bY]);
+      G.lines.push({ t: 'A', p: Apt }, { t: 'B', p: corner }, { t: 'C', p: Cpt });
+      G.bounds = [Apt[0] - 0.8, Cpt[0] + 0.8, bY - 0.6, Math.max(Cpt[1], corner[1]) + 1.2];
+    } else if (c === 'ihh') {
+      var es = dirOf(v.th1), Ls = 5, p1 = [0, 5], p2 = [6, 5];
+      var ss = [p1[0] - es[0] * Ls, p1[1] - es[1] * Ls];
+      G.polys.push([ss, p1, p2, [p2[0], Math.min(ss[1], 0)], [ss[0], Math.min(ss[1], 0)]]);
+      G.tracks[idxOf('A')] = { p0: [p1[0] - es[0] * Ls * 0.5, p1[1] - es[1] * Ls * 0.5], e: es, angle: v.th1 };
+      var dBx = dp !== null ? dp : 3;
+      G.tracks[idxOf('B')] = { p0: [p2[0] - dBx, p2[1]], e: [1, 0], angle: 0 };
+      var yC = p2[1] - 1.4, fy = hf !== null ? yC - hf : Math.min(0, ss[1]);
+      G.tracks[idxOf('C')] = { p0: [p2[0] + 0.45, yC], e: [0, -1], hang: true };
+      G.pulleys.push([p1[0] - 0.05, p1[1] + 0.12], [p2[0] + 0.1, p2[1] + 0.1]);
+      G.strings.push([[p1[0] - 0.05, p1[1] + 0.12]], [[p2[0] + 0.1, p2[1] + 0.1]]);
+      var floorL = Math.min(fy, ss[1], 0);
+      G.floors.push([ss[0] - 0.5, floorL, p2[0] + 2.5, floorL]);
+      if (hf !== null) G.floors.push([p2[0] - 0.2, fy, p2[0] + 2.5, fy]);
+      G.bounds = [ss[0] - 0.8, p2[0] + 3, floorL - 0.6, p1[1] + 1.4];
+    } else if (c === 'pair') {
+      var ep = dirOf(v.th1), Lp = 10, o = [0, 0];
+      var top2 = [ep[0] * Lp, ep[1] * Lp];
+      G.polys.push(v.th1 > 0 ? [o, top2, [top2[0], 0]] : [[0, 0], [Lp, 0], [Lp, -0.4], [0, -0.4]]);
+      var gap = v.len * ks;
+      G.tracks[idxOf('A')] = { p0: [ep[0] * (Lp * 0.42 - gap / 2), ep[1] * (Lp * 0.42 - gap / 2)], e: ep, angle: v.th1 };
+      G.tracks[idxOf('B')] = { p0: [ep[0] * (Lp * 0.42 + gap / 2), ep[1] * (Lp * 0.42 + gap / 2)], e: ep, angle: v.th1 };
+      G.strings.push([]);
+      G.floors.push([-0.8, 0, top2[0] + 0.8, 0]);
+      G.bounds = [-1, Math.max(top2[0], Lp * Math.cos(rad(v.th1))) + 1, -0.8, Math.max(top2[1], 1) + 1.8];
+    }
+    return G;
+  }
+
+  /* ---------- scene ---------- */
+  var COLS = ['s1', 's2', 's3'];
+  function pos(G, i, x) { var tr = G.tracks[i]; return [tr.p0[0] + tr.e[0] * x * G.ks, tr.p0[1] + tr.e[1] * x * G.ks]; }
+  function drawScene() {
+    if (!built) return;
+    var col = ui.colors(), G = geometry(), c;
+    vp.fit(G.bounds[0], G.bounds[1], G.bounds[2], G.bounds[3]);
+    c = vp.begin();
+    G.polys.forEach(function (pl) {
+      c.save(); c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.6; c.beginPath();
+      pl.forEach(function (p, i) { if (i) c.lineTo(vp.X(p[0]), vp.Y(p[1])); else c.moveTo(vp.X(p[0]), vp.Y(p[1])); }); c.closePath(); c.fill(); c.stroke(); c.restore();
+    });
+    G.floors.forEach(function (f) { D.ground(c, vp.X(f[0]), vp.Y(f[1]), vp.X(f[2]), vp.Y(f[3])); });
+    G.lines.forEach(function (l) { D.label(c, l.t, vp.X(l.p[0]) - 10, vp.Y(l.p[1]) - 10, col.muted, { size: 12, bold: true }); });
+    if (sim.invalid) { D.label(c, sim.invalid, vp.w / 2, 18, col.warn, { bold: true }); return; }
+    var st = sim.stateAt(clock.t), P = built.particles, N = P.length;
+    var scr = [], attach = [];
+    for (var i = 0; i < N; i++) {
+      var w = pos(G, i, st.x[i]), tr = G.tracks[i];
+      scr[i] = [vp.X(w[0]), vp.Y(w[1])];
+      if (tr.hang) attach[i] = [scr[i][0], scr[i][1] - 12];
+      else { var an = U.rad(tr.angle || 0); attach[i] = [scr[i][0] - Math.sin(an) * 13, scr[i][1] - Math.cos(an) * 13]; }
+    }
+    // strings
+    for (var k = 0; k < N - 1; k++) {
+      var sState = st.strings[k] ? st.strings[k].state : 'taut';
+      if (sState === 'broken') { D.label(c, 'string ' + (k + 1) + ' broken', attach[k][0], attach[k][1] - 26, col.warn, { size: 11 }); continue; }
+      var pts = [attach[k]].concat((G.strings[k] || []).map(function (p) { return [vp.X(p[0]), vp.Y(p[1])]; })).concat([attach[k + 1]]);
+      D.line(c, pts, sState === 'slack' ? col.muted : col.tension, { width: 1.8, dash: sState === 'slack' ? [4, 4] : null });
+      if (sState === 'taut') {
+        var T = st.strings[k], mid = pts[Math.floor(pts.length / 2)], mid0 = pts[Math.floor(pts.length / 2) - 1] || pts[0];
+        var lbl = T.indeterminate ? 'T' + (k + 1) + ' ∈ [' + U.sf(T.Tlo) + ', ' + U.sf(T.Thi) + '] N' : 'T' + (k + 1) + ' = ' + U.sf(T.T) + ' N';
+        D.label(c, lbl, (mid[0] + mid0[0]) / 2, (mid[1] + mid0[1]) / 2 - 12, col.tension, { size: 11, bg: true });
+      } else D.label(c, 'slack', (attach[k][0] + attach[k + 1][0]) / 2, (attach[k][1] + attach[k + 1][1]) / 2 - 10, col.muted, { size: 11, bg: true });
+    }
+    G.pulleys.forEach(function (p) { D.pulley(c, vp.X(p[0]), vp.Y(p[1]), 9); });
+    // particles
+    for (var j = 0; j < N; j++) {
+      var tr2 = G.tracks[j], fill = col[COLS[j]];
+      if (tr2.hang) D.particle(c, scr[j][0], scr[j][1], 12, { fill: fill });
+      else D.block(c, scr[j][0], scr[j][1], 34, 24, U.rad(tr2.angle || 0), { fill: fill });
+      var lp = tr2.hang ? [scr[j][0] + 18, scr[j][1]] : [attach[j][0], attach[j][1] - 22];
+      D.label(c, P[j].name + ' ' + U.sf(st.m[j]) + ' kg', lp[0], lp[1], col.ink, { size: 12, bold: true, align: tr2.hang ? 'left' : 'center', bg: true });
+      if (Math.abs(st.v[j]) > 1e-6) {
+        var ang = Math.atan2(tr2.e[1], tr2.e[0]) + (st.v[j] < 0 ? Math.PI : 0);
+        var vx = tr2.hang ? scr[j][0] - 22 : attach[j][0], vy = tr2.hang ? scr[j][1] : attach[j][1] - 8;
+        D.arrowPolar(c, vx, vy, ang, 18 + Math.min(45, Math.abs(st.v[j]) * 8), col.velocity, { width: 2, label: U.sf(Math.abs(st.v[j])) + ' m/s' });
+      }
+    }
+    if (G.ks < 1) D.label(c, 'motion drawn at ' + U.sf(G.ks, 2) + '× scale', vp.w - 8, 12, col.muted, { align: 'right', size: 11 });
+    D.label(c, 'positive: ' + built.positive, 8, vp.h - 10, col.muted, { align: 'left', size: 11 });
+    if (st.stopped) D.label(c, 'model stopped', vp.w / 2, 14, col.warn, { bold: true });
+  }
+
+  /* ---------- free-body diagrams ---------- */
+  function drawFBD() {
+    if (!built || !sim || sim.invalid) { if (sim && sim.invalid) { fvp.fit(0, 1, 0, 1); var c0 = fvp.begin(); D.label(c0, sim.invalid, fvp.w / 2, fvp.h / 2, ui.colors().warn, { bold: true }); } return; }
+    var col = ui.colors(), st = sim.stateAt(clock.t), ph = st.phase, P = built.particles, N = P.length, G = geometry();
+    fvp.fit(0, 1, 0, 1); var c = fvp.begin();
+    var W = fvp.w / N, H = fvp.h;
+    // common force scale
+    var list = [];
+    for (var i = 0; i < N; i++) { var q = ph.fs[i]; list.push(q.W, q.R, Math.abs(q.P), q.F); }
+    (ph.strings || []).forEach(function (s) { list.push(s.Thi || s.T || 0); });
+    var kpx = SIM.view.forceScale(list, Math.min(W * 0.36, H * 0.32));
+    for (var j = 0; j < N; j++) {
+      var cx = W * (j + 0.5), cy = H * 0.5, tr = G.tracks[j], q2 = ph.fs[j], an = Math.atan2(tr.e[1], tr.e[0]);
+      if (j) { c.save(); c.strokeStyle = col.line; c.beginPath(); c.moveTo(W * j, 6); c.lineTo(W * j, H - 6); c.stroke(); c.restore(); }
+      D.label(c, P[j].name + ' (' + U.sf(st.m[j]) + ' kg)', cx, 12, col.ink, { bold: true, size: 12 });
+      // positive direction line
+      D.arrowPolar(c, cx - Math.cos(an) * W * 0.42, cy + Math.sin(an) * W * 0.42, an, W * 0.84, col.grid, { width: 1, dash: [3, 4], label: '+' });
+      if (tr.hang) D.particle(c, cx, cy, 10, { fill: col[COLS[j]] });
+      else D.block(c, cx, cy + 10, 30, 20, U.rad(tr.angle || 0), { fill: col[COLS[j]] });
+      D.arrowPolar(c, cx, cy, -Math.PI / 2, q2.W * kpx, col.weight, { label: 'mg = ' + U.sf(q2.W) });
+      if (!tr.hang) {
+        var nAng = an + (Math.cos(an) >= 0 ? Math.PI / 2 : -Math.PI / 2);
+        if (q2.R > 1e-9) D.arrowPolar(c, cx, cy, nAng, q2.R * kpx, col.normal, { label: 'R = ' + U.sf(q2.R) });
+        var fr = ph.contact && ph.contact[j] !== undefined ? ph.contact[j] : 0;
+        if (Math.abs(fr) > 1e-9) D.arrowPolar(c, cx, cy, an + (fr > 0 ? 0 : Math.PI), Math.abs(fr) * kpx, col.friction, { label: 'F = ' + U.sf(Math.abs(fr)) });
+        if (comps.get() && Math.abs(q2.G) > 1e-9 && Math.abs(Math.sin(an)) > 1e-6) D.arrowPolar(c, cx, cy, an + (q2.G > 0 ? 0 : Math.PI), Math.abs(q2.G) * kpx, col.component, { dash: [5, 4], width: 1.4, label: 'mg sin θ' });
+      } else if (ph.grounded && ph.grounded[j]) {
+        var fl = ph.contact[j] || 0; if (Math.abs(fl) > 1e-9) D.arrowPolar(c, cx, cy, an + (fl > 0 ? 0 : Math.PI), Math.abs(fl) * kpx, col.normal, { label: 'floor ' + U.sf(Math.abs(fl)) });
+      }
+      if (Math.abs(q2.P) > 1e-9) D.arrowPolar(c, cx, cy, an + (q2.P > 0 ? 0 : Math.PI), Math.abs(q2.P) * kpx, col.applied, { label: 'P = ' + U.sf(Math.abs(q2.P)) });
+      // tensions: string j pulls along +e_j, string j−1 pulls along −e_j
+      var sj = ph.strings[j], sm = ph.strings[j - 1];
+      if (j < N - 1 && sj && sj.state === 'taut') D.arrowPolar(c, cx, cy, an, Math.max(sj.T, 0) * kpx, col.tension, { label: 'T' + (j + 1) + (sj.indeterminate ? ' (range)' : ' = ' + U.sf(sj.T)) });
+      if (j > 0 && sm && sm.state === 'taut') D.arrowPolar(c, cx, cy, an + Math.PI, Math.max(sm.T, 0) * kpx, col.tension, { label: 'T' + j + (sm.indeterminate ? ' (range)' : ' = ' + U.sf(sm.T)) });
+      // acceleration and its equation
+      var a = st.a[j];
+      if (Math.abs(a) > 1e-9) D.arrowPolar(c, cx + 0, cy + H * 0.36, an + (a > 0 ? 0 : Math.PI), 14 + Math.min(40, Math.abs(a) * 3), col.accel, { width: 2, label: 'a = ' + U.sf(Math.abs(a)) });
+      var terms = [];
+      if (Math.abs(q2.G) > 1e-12) terms.push((q2.G >= 0 ? '+' : '−') + ' ' + U.sf(Math.abs(q2.G)));
+      if (Math.abs(q2.P) > 1e-12) terms.push((q2.P >= 0 ? '+' : '−') + ' ' + U.sf(Math.abs(q2.P)));
+      var frc = ph.contact && ph.contact[j] ? ph.contact[j] : 0;
+      if (Math.abs(frc) > 1e-12) terms.push((frc >= 0 ? '+' : '−') + ' ' + U.sf(Math.abs(frc)));
+      if (j < N - 1 && sj && sj.state === 'taut') terms.push('+ T' + (j + 1));
+      if (j > 0 && sm && sm.state === 'taut') terms.push('− T' + j);
+      var eq = (terms.join(' ').replace(/^\+ /, '') || '0') + ' = ' + U.sf(st.m[j]) + ' × ' + U.sf(a);
+      D.label(c, eq, cx, H - 12, col.ink, { size: 11, mono: true });
+    }
+  }
+
+  /* ---------- plots ---------- */
+  function drawPlots() {
+    if (!sim || sim.invalid) return;
+    var T = prm.values.T, col = ui.colors(), N = built.particles.length;
+    var brk = sim.phases.map(function (p) { return p.t0; }).filter(function (t) { return t > 1e-9 && t < T; });
+    var tEnd = sim.tStop !== null && sim.tStop !== undefined ? sim.tStop : Infinity;
+    var vl = sim.log.filter(function (l) { return l.t > 1e-9 && l.t <= T; }).map(function (l) { return { x: l.t }; });
+    var series = [];
+    for (var i = 0; i < N; i++) (function (i) {
+      series.push({ fn: function (t) { return t > tEnd + 1e-9 ? NaN : sim.stateAt(t).v[i]; }, color: col[COLS[i]], breaks: brk });
+    })(i);
+    pV.draw({ x: [0, T], series: series, cursor: clock.t, vlines: vl });
+    var ts = [];
+    for (var k = 0; k < N - 1; k++) (function (k) {
+      ts.push({ fn: function (t) { if (t > tEnd + 1e-9) return NaN; var s = sim.stateAt(t).strings[k]; return s ? (s.state === 'taut' ? s.T : 0) : NaN; }, color: col.tension, dash: k ? [6, 4] : null, breaks: brk });
+    })(k);
+    pT.draw({ x: [0, T], series: ts, cursor: clock.t, vlines: vl, title: N > 2 ? 'solid T₁, dashed T₂' : '' });
+  }
+
+  /* ---------- live working ---------- */
+  function readout() {
+    R.clear();
+    if (!sim) return;
+    if (sim.invalid) { R.badge(sim.invalid, 'warn').render(); return; }
+    var P = built.particles, N = P.length, f0 = first, fs = f0.fs, s3 = fmtX, v = prm.values;
+    R.html('<div style="font-size:12.5px;color:var(--muted)">Positive direction: ' + built.positive + '.</div>');
+    if (evSel.get() === 'dd' && !(cfgObj().mC > 0)) R.badge('“Extra mass falls off” needs an extra mass Δm attached below the descending hanging particle (set Δm > 0; not available for this set-up if there is no hanging particle).', 'info');
+    R.head('Forces along each particle’s own line of motion (at release)');
+    P.forEach(function (p, i) {
+      var q = fs[i], al = p.alpha;
+      var gTxt = p.track === 'hang' ? (al < 0 ? '+mg (hanging, moving down)' : '−mg (hanging, moving up)') :
+        (Math.abs(al) < 1e-9 ? '0 (horizontal)' : (al > 0 ? '−mg sin θ (moving up the slope)' : '+mg sin θ (moving down the slope)'));
+      R.eq(p.name + ': weight component', gTxt + ' = ' + (p.track === 'hang' ? s3(q.W) : s3(q.W) + ' × sin ' + U.num(Math.abs(al), 2) + '°'), q.G, 'N');
+      if (p.track !== 'hang') {
+        R.eq(p.name + ': R', 'mg cos θ = ' + s3(q.W) + ' × cos ' + U.num(Math.abs(al), 2) + '°', q.R, 'N');
+        if (q.mu > 0) R.eq(p.name + ': μR', U.num(q.mu, 4) + ' × ' + s3(q.R), q.F, 'N');
+      }
+      if (Math.abs(q.P) > 0) R.eq(p.name + ': applied', 'along its line of motion', q.P, 'N');
+    });
+    R.eq('D', 'net driving force without friction = Σ(weight components + applied)', f0.D, 'N');
+    R.eq('total μR', 'friction available', f0.Fmax, 'N');
+    R.eq('M', 'total mass', f0.M, 'kg');
+    R.head('At release' + (Math.abs(v.u) > 0 ? ' (moving at u = ' + s3(v.u) + ' m s⁻¹)' : ' (from rest)'));
+    if (f0.static) {
+      R.badge(f0.limiting ? 'Limiting equilibrium: on the point of moving (friction = μR)' : 'Does not move: |D| = ' + s3(Math.abs(f0.D)) + ' N ≤ total μR = ' + s3(f0.Fmax) + ' N', f0.limiting ? 'warn' : 'ok');
+      f0.T.forEach(function (T, k) {
+        if (f0.indeterminate && f0.Thi[k] - f0.Tlo[k] > 1e-9) R.eq('T' + (k + 1), 'statically indeterminate: friction can be shared between the rough contacts in many ways', s3(f0.Tlo[k]) + ' ≤ T ≤ ' + s3(f0.Thi[k]), 'N');
+        else R.eq('T' + (k + 1), 'from equilibrium of the particles on one side', T, 'N');
+      });
+      if (f0.indeterminate) R.badge('Statically indeterminate: tension not fixed by the equations (exam questions avoid this).', 'info');
+      f0.leastMu.forEach(function (m, i) { if (m !== null) R.eq('least μ for ' + P[i].name, '(|D| − μR of the others) ÷ R<sub>' + P[i].name + '</sub>', isFinite(m) ? m : '∞', ''); });
+    } else if (f0.ok) {
+      var sg = f0.sigma > 0 ? '−' : '+';
+      R.eq('a', '(D ' + sg + ' total μR) ÷ M = (' + s3(f0.D) + ' ' + sg + ' ' + s3(f0.Fmax) + ') ÷ ' + s3(f0.M), f0.a, 'm s<sup>−2</sup>');
+      f0.T.forEach(function (T, k) {
+        var q = fs[k];
+        R.eq('T' + (k + 1), 'from ' + P[k].name + ': T = m a − (weight comp.) − P ' + (q.F > 0 ? (f0.sigma > 0 ? '+ μR' : '− μR') : '') + (k ? ' + T' + k : ''), T, 'N');
+      });
+      R.eq('check (' + P[N - 1].name + ')', 'last particle’s equation, residual', Math.abs(f0.residual) < 1e-9 * (1 + f0.M * g) ? 0 : f0.residual, 'N ✓');
+    } else {
+      if (f0.T && f0.T.length) R.badge('Treating the particles as one system gives a NEGATIVE tension (T = ' + f0.T.map(function (t) { return s3(t); }).join(', ') + ' N): a string cannot push, so it is slack and the particles move independently.', 'warn');
+      else R.badge('The particles cannot stay together as one system: holding them would need a string to push. The string is slack and each particle moves (or rests) on its own — see below.', 'warn');
+    }
+    R.head('What happens');
+    var ph0 = sim.phases[0];
+    if (ph0) {
+      var desc = ph0.groups.map(function (gq) {
+        var nm = gq.idx.map(function (ii) { return P[ii].name; }).join('+');
+        return nm + (gq.static ? ' at rest' : ': a = ' + s3(gq.a) + ' m s⁻²');
+      }).join('; ');
+      R.html('<div class="eq">t = 0: ' + desc + '</div>');
+    }
+    sim.log.forEach(function (l) { R.html('<div class="eq"' + (l.kind === 'warn' ? ' style="color:var(--warn)"' : '') + '>t = ' + s3(l.t) + ' s: ' + l.text + '</div>'); });
+    sim.phases.slice(1).forEach(function (ph) {
+      if (ph.stopped) return;
+      var desc2 = ph.groups.map(function (gq) {
+        var nm = gq.idx.map(function (ii) { return P[ii].name; }).join('+');
+        return nm + (gq.static ? ' at rest' : ': a = ' + s3(gq.a) + ' m s⁻²' + (gq.idx.length > 1 ? ', T = ' + gq.T.map(function (t) { return s3(t); }).join(', ') + ' N' : ''));
+      }).join('; ');
+      R.html('<div class="eq" style="color:var(--muted)">from t = ' + s3(ph.t0) + ' s: ' + desc2 + '</div>');
+    });
+    var st = sim.stateAt(clock.t);
+    R.head('At t = ' + clock.t.toFixed(2) + ' s' + (st.stopped ? ' (model stopped at ' + s3(sim.tStop) + ' s)' : ''));
+    P.forEach(function (p, i) {
+      R.eq(p.name, 'displacement along its positive direction; velocity', s3(st.x[i]) + ' m, ' + s3(st.v[i]) + ' m s⁻¹', '');
+    });
+    var e = sim.energyAt(clock.t);
+    if (e) {
+      R.eq('energy check', 'ΔKE + ΔGPE + W<sub>friction</sub> + KE lost on landing − W<sub>applied</sub> = ' + s3(e.KE - e.KE0) + ' + ' + s3(e.GPE) + ' + ' + s3(e.Wfric) + ' + ' + s3(e.impact) + ' − ' + s3(e.Wapp) +
+        (e.carried ? ' + (energy carried off by the detached mass ' + s3(e.carried) + ')' : ''), Math.abs(e.balance) < 1e-9 * (1 + Math.abs(e.KE) + Math.abs(e.GPE)) ? 0 : e.balance, 'J');
+    }
+    R.render();
+  }
+
+  ui.onTheme(function () { drawScene(); drawFBD(); drawPlots(); });
+  vp.onResize = drawScene; fvp.onResize = drawFBD;
+  var hsh = ui.readHash();
+  if (typeof hsh.cfg === 'string') cfgSel.set(hsh.cfg, true);
+  if (typeof hsh.ev === 'string') evSel.set(hsh.ev, true);
+  syncUI();
+  var init = {}; Object.keys(prm.values).forEach(function (k) { if (typeof hsh[k] === 'number') init[k] = hsh[k]; });
+  prm.set(init, true);
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

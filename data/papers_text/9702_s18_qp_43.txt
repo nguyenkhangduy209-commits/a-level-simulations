@@ -1,0 +1,546 @@
+*0470437972*
+Cambridge International Examinations
+Cambridge International Advanced Subsidiary and Advanced Level
+PHYSICS 9702/43
+Paper 4 A Level Structured Questions May/June 2018
+2 hours
+Candidates answer on the Question Paper.
+No Additional Materials are required.
+READ THESE INSTRUCTIONS FIRST
+Write your Centre number, candidate number and name on all the work you hand in.
+Write in dark blue or black pen.
+You may use an HB pencil for any diagrams or graphs.
+Do not use staples, paper clips, glue or correction fluid.
+DO NOT WRITE IN ANY BARCODES.
+Answer all questions.
+Electronic calculators may be used.
+You may lose marks if you do not show your working or if you do not use appropriate units.
+At the end of the examination, fasten all your work securely together.
+The number of marks is given in brackets [ ] at the end of each question or part question.
+This document consists of 23 printed pages and 1 blank page.
+DC (RW) 163311
+© UCLES 2018 [Turn over
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2018 9702/43/M/J/18
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1
+2
+at2
+v 2 = u 2 + 2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω (x 2-x2)
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2018 9702/43/M/J/18 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 (a) State Newton’s law of gravitation.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) A distant star is orbited by several planets. Each planet has a circular orbit with a different
+radius.
+(i) Each planet orbits at constant speed.
+Explain whether the planets are in equilibrium.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[1]
+(ii) The radius of the orbit of a planet is R and the orbital period is T.
+Data for some of the planets are given in Fig. 1.1.
+planet R / m T 2 / s2
+c 9.6 × 1010 2.5 × 1011
+e 4.0 × 1011 1.8 × 1013
+g 2.1 × 1012 2.6 × 1015
+Fig. 1.1
+The relationship between R and T is given by the expression
+R 3 = kT 2.
+© UCLES 2018 9702/43/M/J/18
+
+5
+1. Show that the constant k is given by the expression
+GM
+k =
+4π2
+where G is the gravitational constant and M is the mass of the star.
+[3]
+2. Use data from Fig. 1.1 for the three planets and the expression for k to calculate the
+mass M of the star.
+M = ......................................................kg [3]
+[Total: 9]
+© UCLES 2018 9702/43/M/J/18 [Turn over
+
+6
+2 A metal plate is made to vibrate vertically by means of an oscillator, as shown in Fig. 2.1.
+sand
+plate
+direction of
+oscillations
+oscillator
+Fig. 2.1
+Some sand is sprinkled on to the plate.
+The variation with displacement y of the acceleration a of the sand on the plate is shown in
+Fig. 2.2.
+5
+4
+a / m s–2
+3
+2
+1
+0
+–10 –8 –6 –4 –2 0 2 4 6 8 10
+y / mm
+–1
+–2
+–3
+–4
+–5
+Fig. 2.2
+(a) (i) Use Fig. 2.2 to show how it can be deduced that the sand is undergoing simple harmonic
+motion.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+© UCLES 2018 9702/43/M/J/18
+
+7
+(ii) Calculate the frequency of oscillation of the sand.
+frequency = .....................................................Hz [2]
+(b) The amplitude of oscillation of the plate is gradually increased beyond 8 mm. The frequency
+is constant.
+At one amplitude, the sand is seen to lose contact with the plate.
+For the plate when the sand first loses contact with the plate,
+(i) state the position of the plate,
+.......................................................................................................................................[1]
+(ii) calculate the amplitude of oscillation.
+amplitude = ................................................... mm [3]
+[Total: 8]
+© UCLES 2018 9702/43/M/J/18 [Turn over
+
+8
+3 (a) (i) State what is meant by the internal energy of a system.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) Explain why, for an ideal gas, the change in internal energy is directly proportional to the
+change in thermodynamic temperature of the gas.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[3]
+(b) A cylinder of volume 1.8 × 104 cm3 contains helium gas at pressure 6.4 × 106 Pa and
+temperature 25 °C.
+Helium gas may be considered to be an ideal gas consisting of single atoms.
+Calculate the number of helium atoms in the cylinder.
+number = ...........................................................[3]
+[Total: 8]
+© UCLES 2018 9702/43/M/J/18
+
+9
+4 Piezo-electric transducers are used for the generation of ultrasonic waves.
+(a) State one other use, apart from in ultrasound, of piezo-electric transducers.
+...................................................................................................................................................
+...............................................................................................................................................[1]
+(b) Explain the main principles behind the use of ultrasound to obtain diagnostic information
+about internal body structures.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[6]
+[Total: 7]
+© UCLES 2018 9702/43/M/J/18 [Turn over
+
+10
+5 A geostationary satellite orbits the Earth with a period of 24 hours.
+(a) State
+(i) the direction of the orbit about the Earth,
+.......................................................................................................................................[1]
+(ii) the position of the satellite relative to the Earth’s surface,
+.......................................................................................................................................[1]
+(iii) a typical frequency for communication between the satellite and Earth.
+frequency = .....................................................Hz [1]
+(b) A signal transmitted from Earth to a satellite has an initial power of 3.0 kW.
+The signal power received by the satellite is attenuated by 195 dB.
+(i) Calculate the signal power received by the satellite.
+power = ......................................................W [3]
+(ii) By reference to your answer in (i), explain why different frequencies are used for the
+up-link and the down-link in communication with the satellite.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+[Total: 8]
+© UCLES 2018 9702/43/M/J/18
+
+11
+6 (a) State what is meant by electric field strength.
+...................................................................................................................................................
+...............................................................................................................................................[1]
+(b) An isolated metal sphere A of radius 26 cm is positively charged. Sphere A is shown in
+Fig. 6.1.
+charged
+sphere A
+26 cm
+Fig. 6.1
+Electrical breakdown (a spark) occurs when the electric field strength at the surface of the
+sphere exceeds 2.0 × 104 V m–1.
+Calculate the maximum charge Q that can be stored on the sphere.
+Q = .......................................................C [2]
+(c) A second isolated metal sphere B, also with charge +Q, has a radius of 52 cm.
+Calculate the additional charge, in terms of Q, that may be stored on this sphere before
+electrical breakdown occurs.
+additional charge = ...........................................................[2]
+[Total: 5]
+© UCLES 2018 9702/43/M/J/18 [Turn over
+
+12
+7 (a) Explain what is meant by the capacitance of a parallel plate capacitor.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[3]
+(b) A parallel plate capacitor C is connected into the circuit shown in Fig. 7.1.
+X Y
+S
+A
+120 V
+C
+Fig. 7.1
+When switch S is at position X, the battery of electromotive force 120 V and negligible internal
+resistance is connected to capacitor C.
+When switch S is at position Y, the capacitor C is discharged through the sensitive ammeter.
+The switch vibrates so that it is first in position X, then moves to position Y and then back to
+position X fifty times each second.
+The current recorded on the ammeter is 4.5 μA.
+Determine
+(i) the charge, in coulomb, passing through the ammeter in 1.0 s,
+charge = .......................................................C [1]
+© UCLES 2018 9702/43/M/J/18
+
+13
+(ii) the charge on one plate of the capacitor, each time that it is charged,
+charge = .......................................................C [1]
+(iii) the capacitance of capacitor C.
+capacitance = ....................................................... F [2]
+(c) A second capacitor, having a capacitance equal to that of capacitor C, is now placed in series
+with C.
+Suggest and explain the effect on the current recorded on the ammeter.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+[Total: 9]
+© UCLES 2018 9702/43/M/J/18 [Turn over
+
+14
+8 (a) Negative feedback is often used in amplifiers incorporating an operational amplifier (op-amp).
+State
+(i) what is meant by negative feedback,
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) two effects of negative feedback on the gain of an amplifier.
+1. .......................................................................................................................................
+...........................................................................................................................................
+2. .......................................................................................................................................
+...........................................................................................................................................
+[2]
+(b) An ideal op-amp is incorporated into the amplifier circuit shown in Fig. 8.1.
+9600 Ω
++6 V
+800 Ω
+–
++
+V
+IN –6 V
+V
+OUT
+Fig. 8.1
+(i) Calculate the gain G of the amplifier circuit.
+G = ...........................................................[2]
+© UCLES 2018 9702/43/M/J/18
+
+15
+(ii) Determine the output potential difference V for input potential differences V of
+OUT IN
+1. – 0.10 V,
+V = ............................................................V
+OUT
+2. +1.3 V.
+V = ............................................................V
+OUT
+[2]
+(iii) The gain of the amplifier shown in Fig. 8.1 is constant.
+State one change that can be made to the circuit of Fig. 8.1 so that the amplifier circuit
+monitors light intensity levels, with the magnitude of the gain decreasing as light intensity
+increases.
+...........................................................................................................................................
+.......................................................................................................................................[1]
+[Total: 9]
+© UCLES 2018 9702/43/M/J/18 [Turn over
+
+16
+9 A rigid copper wire is held horizontally between the pole pieces of two magnets, as shown in
+Fig. 9.1.
+8.5 cm
+8.5 cm
+copper
+wire
+S
+S
+direction
+of current
+θ
+N
+N
+side view top view
+Fig. 9.1
+The width of each pole piece is 8.5 cm.
+The uniform magnetic flux density B in the region between the poles of the magnets is 3.7 mT and
+is zero outside this region.
+The angle between the wire and the direction of the magnetic field is θ.
+The current in the wire is in the direction shown on Fig. 9.1.
+(a) By reference to the side view of Fig. 9.1, state and explain the direction of the force on the
+magnets.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) The constant current in the wire is 5.1 A.
+(i) For angle θ equal to 90°, calculate the force on the wire.
+force = .......................................................N [2]
+© UCLES 2018 9702/43/M/J/18
+
+17
+(ii) The angle θ is changed to 60°.
+8.5
+The length of wire in the magnetic field is cm.
+csin60°m
+Calculate the force on the wire.
+force = .......................................................N [1]
+(c) The constant current in the wire is now changed to an alternating current of frequency 20 Hz
+and root-mean-square (r.m.s.) value 5.1 A.
+The angle between the wire and the direction of the magnetic field is 90°.
+On Fig. 9.2, sketch a graph to show the variation with time t of the force F on the wire for two
+cycles of the alternating current.
+F / N
+0
+0
+t / s
+Fig. 9.2
+[3]
+[Total: 8]
+© UCLES 2018 9702/43/M/J/18 [Turn over
+
+18
+10 (a) State Faraday’s law of electromagnetic induction.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) A coil of insulated wire is wound on to one end of a ferrous core and connected to a battery,
+as shown in Fig. 10.1.
+ferrous core
+aluminium
+ring
+coil of
+insulated
+wire
+Fig. 10.1
+An aluminium ring is placed on the core. The ring can move freely along the length of the
+core.
+The switch is initially open.
+Use Faraday’s law and Lenz’s law to explain why the aluminium ring jumps upwards when
+the switch is closed.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[4]
+[Total: 6]
+© UCLES 2018 9702/43/M/J/18
+
+19
+11 (a) (i) Explain what is meant by a photon.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) By reference to intensity of light, state one piece of evidence provided by the photoelectric
+effect for a particulate nature of light.
+...........................................................................................................................................
+.......................................................................................................................................[1]
+(b) Some electron energy levels in a solid are illustrated in Fig. 11.1.
+conduction band
+forbidden band
+valence band
+Fig. 11.1
+A semiconductor material has a very high resistance in darkness.
+Light incident on the semiconductor material causes its resistance to decrease.
+Explain the resistance of the semiconductor material in different light conditions.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[5]
+[Total: 8]
+© UCLES 2018 9702/43/M/J/18 [Turn over
+
+20
+12 An X-ray beam is used to produce an image of a model of a thumb.
+A parallel beam of X-ray radiation of intensity I is incident on the model, as illustrated in Fig. 12.1.
+0
+soft tissue
+bone
+incident beam 1.3 cm emergent beam
+intensity I
+0
+2.8 cm
+Fig. 12.1
+Data for the attenuation (absorption) coefficient μ in bone and in soft tissue are shown in Fig. 12.2.
+μ / cm–1
+bone 3.0
+soft tissue 0.90
+Fig. 12.2
+(a) Calculate, in terms of the incident intensity I of the X-ray beam, the intensity of the beam
+0
+after passing through
+(i) a thickness of 2.8 cm of soft tissue,
+intensity = ...................................................... I [2]
+0
+© UCLES 2018 9702/43/M/J/18
+
+21
+(ii) the bone and soft tissue, as shown in Fig. 12.1.
+intensity = ...................................................... I [2]
+0
+(b) (i) State what is meant by the contrast of an X-ray image.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) By reference to your answers in (a), suggest whether the X-ray image of the model has
+good contrast.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[1]
+[Total: 7]
+© UCLES 2018 9702/43/M/J/18 [Turn over
+
+22
+13 (a) State what is meant by radioactive decay.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) The variation with time t of the number N of technetium-101 nuclei in a sample of radioactive
+material is shown in Fig. 13.1.
+10.0
+8.0
+N / 107
+6.0
+4.0
+2.0
+0
+0 10 20 30 40
+t / min
+Fig. 13.1
+© UCLES 2018 9702/43/M/J/18
+
+23
+(i) Use Fig. 13.1 to determine the activity, in Bq, of the sample of technetium-101 at time
+t = 14.0 minutes. Show your working.
+activity = .....................................................Bq [4]
+(ii) Without calculating the half-life of technetium-101, use your answer in (i) to determine
+the decay constant λ of technetium-101.
+λ = .................................................... s–1 [2]
+[Total: 8]
+© UCLES 2018 9702/43/M/J/18
+
+24
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge International
+Examinations Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download at www.cie.org.uk after
+the live examination series.
+Cambridge International Examinations is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of University of Cambridge Local
+Examinations Syndicate (UCLES), which is itself a department of the University of Cambridge.
+© UCLES 2018 9702/43/M/J/18

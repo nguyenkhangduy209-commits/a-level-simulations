@@ -1,0 +1,787 @@
+Cambridge International AS & A Level
+MATHEMATICS 9709/45
+Paper 4 Mechanics October/November 2025
+MARK SCHEME
+Maximum Mark: 50
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the October/November 2025 series for most
+Cambridge IGCSE, Cambridge International A and AS Level components, and some Cambridge O Level
+components.
+This document consists of 26 printed pages.
+© Cambridge University Press & Assessment 2025 [Turn over
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied along
+side the specific content of the mark scheme or generic level descriptions for a question. Each question paper and mark scheme will also comply with these
+marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the scope of the
+syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the question as
+indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently, e.g. in situations where candidates have not followed instructions or in the application of generic level descriptors.
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may be limited
+according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or grade descriptors in
+mind.
+© Cambridge University Press & Assessment 2025 Page 2 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Mathematics-Specific Marking Principles
+1 Unless a particular method has been specified in the question, full marks may be awarded for any correct method. However, if a calculation is required
+then no marks will be awarded for a scale drawing.
+2 Unless specified in the question, non-integer answers may be given as fractions, decimals or in standard form. Ignore superfluous zeros, provided that the
+degree of accuracy is not affected.
+3 Allow alternative conventions for notation if used consistently throughout the paper, e.g. commas being used as decimal points.
+4 Unless otherwise indicated, marks once gained cannot subsequently be lost, e.g. wrong working following a correct form of answer is ignored (isw).
+5 Where a candidate has misread a number or sign in the question and used that value consistently throughout, provided that number does not alter the
+difficulty or the method required, award all marks earned and deduct just 1 A or B mark for the misread.
+6 Recovery within working is allowed, e.g. a notation error in the working where the following line of working makes the candidate’s intent clear.
+© Cambridge University Press & Assessment 2025 Page 3 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Annotations guidance for centres
+Examiners use a system of annotations as a shorthand for communicating their marking decisions to one another. Examiners are trained during the standardisation
+process on how and when to use annotations. The purpose of annotations is to inform the standardisation and monitoring processes and guide the supervising
+examiners when they are checking the work of examiners within their team. The meaning of annotations and how they are used is specific to each component and
+is understood by all examiners who mark the component.
+We publish annotations in our mark schemes to help centres understand the annotations they may see on copies of scripts. Note that there may not be a direct
+correlation between the number of annotations on a script and the mark awarded. Similarly, the use of an annotation may not be an indication of the quality of the
+response.
+The annotations listed below were available to examiners marking this component in this series.
+Annotations
+Annotation Meaning
+More information required
+Accuracy mark awarded zero
+Accuracy mark awarded one
+Independent accuracy mark awarded zero
+Independent accuracy mark awarded one
+Independent accuracy mark awarded two
+Benefit of the doubt
+Blank Page
+Incorrect
+Dep Used to indicate DM0 or DM1
+© Cambridge University Press & Assessment 2025 Page 4 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Annotation Meaning
+DM1 Dependent on the previous M1 mark(s)
+Follow through
+Indicate working that is right or wrong
+Highlighter Highlight a key point in the working
+Ignore subsequent work
+Judgement
+Judgement
+Method mark awarded zero
+Method mark awarded one
+Method mark awarded two
+Misread
+Omission or Other solution
+Allows comments to be entered at the bottom of the RM marking window and then displayed when the associated question item is
+Off-page comment
+navigated to.
+On-page comment Allows comments to be entered in speech bubbles on the candidate response.
+Judgment made by the PE
+Premature approximation
+Special case
+Indicates that work/page has been seen
+© Cambridge University Press & Assessment 2025 Page 5 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Annotation Meaning
+Error in number of significant figures
+Correct
+Transcription error
+Correct answer from incorrect working
+© Cambridge University Press & Assessment 2025 Page 6 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Mark Scheme Notes
+The following notes are intended to aid interpretation of mark schemes in general, but individual mark schemes may include marks awarded for specific reasons
+outside the scope of these notes.
+Types of mark
+M Method mark, awarded for a valid method applied to the problem. Method marks are not lost for numerical errors, algebraic slips or errors in units.
+However, it is not usually sufficient for a candidate just to indicate an intention of using some method or just to quote a formula; the formula or idea
+must be applied to the specific problem in hand, e.g. by substituting the relevant quantities into the formula. Correct application of a formula
+without the formula being quoted obviously earns the M mark and in some cases an M mark can be implied from a correct answer.
+A Accuracy mark, awarded for a correct answer or intermediate step correctly obtained. Accuracy marks cannot be given unless the associated method
+mark is earned (or implied).
+B Mark for a correct result or statement independent of method marks.
+DM or DB When a part of a question has two or more ‘method’ steps, the M marks are generally independent unless the scheme specifically says otherwise;
+and similarly, when there are several B marks allocated. The notation DM or DB is used to indicate that a particular M or B mark is dependent on
+an earlier M or B (asterisked) mark in the scheme. When two or more steps are run together by the candidate, the earlier marks are implied and full
+credit is given.
+FT Implies that the A or B mark indicated is allowed for work correctly following on from previously incorrect results. Otherwise, A or B marks are
+given for correct work only.
+• A or B marks are given for correct work only (not for results obtained from incorrect working) unless follow through is allowed (see abbreviation FT above).
+• For a numerical answer, allow the A or B mark if the answer is correct to 3 significant figures or would be correct to 3 significant figures if rounded (1
+decimal place for angles in degrees).
+• The total number of marks available for each question is shown at the bottom of the Marks column.
+• Wrong or missing units in an answer should not result in loss of marks unless the guidance indicates otherwise.
+• Square brackets [ ] around text or numbers show extra information not needed for the mark to be awarded.
+© Cambridge University Press & Assessment 2025 Page 7 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Abbreviations
+AEF/OE Any Equivalent Form (of answer is equally acceptable) / Or Equivalent
+AG Answer Given on the question paper (so extra checking is needed to ensure that the detailed working leading to the result is valid)
+CAO Correct Answer Only (emphasising that no ‘follow through’ from a previous error is allowed)
+CWO Correct Working Only
+ISW Ignore Subsequent Working
+SOI Seen Or Implied
+SC Special Case (detailing the mark to be given for a specific wrong solution, or a case where some standard marking practice is to be varied in the
+light of a particular circumstance)
+WWW Without Wrong Working
+AWRT Answer Which Rounds To
+© Cambridge University Press & Assessment 2025 Page 8 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+1 Resolving in any direction to get an equation *M1 Correct number of relevant terms; allow sign errors;
+allow consistent or inconsistent sin/cos mix.
+P+21cos47−Qcos65−32cos35=0 A1 This could be with their Q.
+P+14.321−Qcos65−26.212=0
+21sin47+32sin35−Qsin65=0 A1
+15.358+18.354−Qsin65=0 33.712−Qsin65=0
+Attempt to solve for P=−21cos47+(37.198...)cos65+32cos35 DM1 From equation(s) with correct number of relevant
+terms. Using their Q.
+Must be a numerical expression for P.
+All forces resolved as appropriate but allow consistent
+or inconsistent sin/cos mix.
+If no intermediate working to solve their two original
+equations, can still earn DM1 if answers correct for
+their equations but DM0 if answers wrong for their
+equations.
+P = 27.6 AND Q = 37.2 A1 27.61147… and 37.19804…
+DM1 may be earned here.
+5
+Question Answer Marks Guidance
+2(a) Correct velocity-time graph B1 Trapezium starting and finishing on the horizontal
+axis. V and 246 labelled but ignore gradients. Ignore
+any other labelling. Condone label o6 rather than V.
+1
+© Cambridge University Press & Assessment 2025 Page 9 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+2(b) Method using total time first
+V V *B1 For one correct time in terms of V.
+Time accelerating is [= 2V] or time decelerating is =5V
+0.5 0.2
+V V B1 OE Allow correct un-simplified expression.
+T =246− − =246−7V
+0.5 0.2
+DM1 Set up an equation in V only with the correct number
+of relevant terms to find total distance.
+V V
+Dependent on and seen, possibly embedded.
+0.5 0.2
+1 V  1 V  e.g. triangle/rectangle/triangle to get first equation
+ V+V(246−7V)+  V=1350
+20.5  20.2 
+or trapezium to get second equation
+1
+or (246+246−7V)(V)=1350
+1
+2 or use s=ut+ at2 to get the third equation
+2
+1 1
+or 0+ 0.5(2V)2 +V(246−7V)+V5V − 0.2(5V)2 =1350
+or use v2 =u2 +2as to get the fourth equation
+2 2
+or use v=u+at to get the fifth equation
+V2 V2
+or +V(246−7V)+ =1350
+2(0.5) 2(0.2)
+or two expressions for T can be equated to form an
+equation for V to get the sixth equation OE.
+ V 
+or 0=V −0.2246−246+7V − 
+ 0.5
+2700−246V
+or e.g. 246−7V =
+V
+© Cambridge University Press & Assessment 2025 Page 10 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+2(b) 7V2 −492V +2700=0 A1 AG. No need to see intermediate steps after a correct
+equation seen but must check that any intermediate
+steps seen are correct. If any errors seen anywhere
+then A0.
+Alternative using total displacement first (trapezium OE)
+V2 *B1 For distance accelerating/decelerating.
+Distance accelerating is 
+
+=V2
+
+20.5
+V2
+or distance decelerating is = 2.5V2 or for trapezium area or could use 2 triangles and
+ 
+20.2 rectangle.
+1
+(246+T)V =1350
+2
+246−T
+or V +VT =1350
+2
+1 V  1 V 
+or alternatively  V+VT +  V=1350
+20.5  20.2 
+2700  2700−246V B1 OE. Allow correct un-simplified expression.
+T = −246 =
+ 
+V  V 
+7
+1350− V2
+or alternatively (from above alternative) T = 2
+V
+V 2700 V DM1 Set up an equation in V only with the correct number
+t +T +t =246  + −246+ =246
+1 2 0.5 V 0.2 of relevant terms but all terms present.
+Some candidates are getting to the correct equation for
+2700
+or 2V + −246+5V =246 oe T and then substituting this back into the trapezium
+V
+equation which simply gets 1350 = 1350, so does not
+7
+1350− V2 show the required equation and gets B1B1M0A0.
+2
+or alternatively (from above alternative) 7v+ =246
+V
+© Cambridge University Press & Assessment 2025 Page 11 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+2(b) 7V2 −492V +2700=0 A1 AG. No need to see intermediate steps after a correct
+equation seen but must check that any intermediate
+steps seen are correct. If any errors seen anywhere
+then A0.
+Alternative where T is not found
+V V *B1 For one correct time or distance in terms of V.
+Time accelerating is [= 2V] or time decelerating is =5V
+0.5 0.2
+V2 V2
+or Distance accelerating is =V2 or distance decelerating is
+ 
+20.5 20.2
+= 2.5V2
+ 
+V2 V2 B1 OE.
+Total distance = 246V − −
+20.5 20.2
+V2 V2 DM1 Set up an equation in V only with the correct number
+246V − − =1350
+of relevant terms but all terms present.
+20.5 20.2
+7V2 −492V +2700=0 A1 AG. No need to see intermediate steps after a correct
+equation seen, but must check that any intermediate
+steps seen are correct. If any errors seen anywhere
+then A0.
+4
+© Cambridge University Press & Assessment 2025 Page 12 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+2(c) V =6 ONLY *B1 450
+B0B0 if both solutions stated and do not discard
+7
+450 DB1 Any acceptable reason for rejecting greater root e.g.
+V  as e.g. this would lead to the athlete running at a constant speed for a
+not feasible for an athlete to be running at 64.3 metres
+7
+per second.
+ 450 
+ 2700−246   Other root must be seen, not e.g. just state T > 0
+ 7  450
+negative time = or 246−7   =−204 without mention of other root but if they state 450 ,
+ 450  7  
+7
+   
+  7   then say T 0, so not suitable then award B1.
+OR the athlete would take longer than 246 seconds to decelerate Calculations not necessary but if calculations are
+ 450 2250  shown they must be correct.
+t = 0.2= =321.4246
+  decelerate 7 7  
+ 450 
+OR t = 7=450246
+  acc+dec 7  
+2
+© Cambridge University Press & Assessment 2025 Page 13 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+3(a) P P *B1 OE. P=12F or P=20F but B0 if erroneous value
+Either driving force: or
+12 20 of F.
+P *B1 3
+−R=0 or 20F =12F OE. P=20R or F = F .
+20 1 2 1 5 2
+P *M1 Attempt at N2L on inclined section of the road;
+−R−800g0.15=0
+correct number of relevant terms, allow sign errors
+12
+and sin/cos mix with components only where needed.
+or F −R−800g0.15=0 where F is the larger of the two forces
+2 2 Must have more than simply sin or cos. g must
+P
+or −R−800gsin8.6=0 be present. Resistance term here must be same as that
+12 in second B1.
+or P=12(R+800g0.15)
+or P=12(R+800gsin8.6)
+P P DM1 Eliminate and solve for either P or R.
+− −800g0.15=0P=
+Correct number of relevant terms, allow sign errors
+12 20
+and sin/cos mix. Must have more than simply
+or F −F −800g0.15=0P=
+2 1 sin or cos.
+P P
+or − −800gsin8.6=0P= If no solving seen, answer must be correct for their
+12 20 equations to be awarded DM1.
+or 20R−12(R+800g0.15)=0R= Dependent on B1B1M1
+or 20R−12(R+800gsin8.6)=0R=
+P=36000 and R=1800 A1 Using angle of 8.63 gives P=36012 (36000) and
+R=1800.6 (1800) which scores A1.
+Using an angle of 8.6 does not give answers correct to
+3sf so gets A0.
+5
+© Cambridge University Press & Assessment 2025 Page 14 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+3(b) Attempt at N2L to form an equation on inclined section of the road M1 Correct number of relevant terms, allow sign errors
+and sin/cos mix with components only where needed.
+Must have more than simply sin or cos. Allow D
+for driving force. g must be present.
+32000 A1FT Correct equation following through their R.
+−800g0.15−1800=800a
+10
+32000
+or −800gsin8.6−1800=800a
+10
+0.25 [m s-2] A1 Condone answer of 0.249 from using an angle of 8.63.
+Using an angle of 8.6 does not give answer correct to
+3sf so gets A0.
+3
+© Cambridge University Press & Assessment 2025 Page 15 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+4(a) 1 *M1 Increase power by 1 and a change in coefficient in at
+a=kt−3v= kt2 −3t+c
+least one term (which must be the same term).
+2
+Use of v=at scores M0.
+1 A1 Correct expression for v.
+t=0,v=1v= kt2 −3t+1
+2 v= 1 kt2 −3t+c followed by c = 1 scores A1.
+2
+1 DM1 Set the discriminant of their 3-term quadratic in t to
+Discriminant 9−4 k 0
+less than zero (or other complete method).
+2
+NB: attempt at quadratic formula to find roots can
+or Discriminant 36−4(k)(2)0
+score M1 only if they find b2 −4ac and consider its
+sign OE.
+9−2k 0 or 36−8k 0 k 4.5 A1 AG. If any errors seen anywhere then A0.
+Alternative for final 2 marks using completing the square
+  3 2 9  9 DM1 Attempt to complete the square and then use fact that
+kt−  − +20 − +20 the last two terms > 0.
+  k k  k
+their 32
+Must get to − + 2their1 0. Must be from 3
+k
+term quadratic.
+k4.5 A1 AG If any errors seen anywhere then A0.
+© Cambridge University Press & Assessment 2025 Page 16 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+4(a) Alternative for final 2 marks using fact that a=0 gives minimum velocity
+ −b 3 1 3 2 3 9 DM1 Complete method to find minimum velocity and set
+[When a=0]  or t =  , t = ⇒ v= k   −3 +1=− +1 greater than zero.
+ 2a k 2 k k 2k
+If state maximum rather than minimum, then M1A0.
+9 9
+Allow their 3 and their 1.
+so minimum value of v is v=− +1 ⇒ − +10
+2k 2k
+k4.5 A1 AG. If any errors seen anywhere then A0.
+4
+© Cambridge University Press & Assessment 2025 Page 17 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+4(b) 1 *M1 Substitute k=2.5 and attempt to solve 3-term
+2.5t2 −3t+1=0 or 5t2 −12t+4=0 oet=...
+2 quadratic in t to get at least one t-value.
+If working shown must be using correct formula or if
+factorising two terms must be correct for their three-
+term quadratic when expanding brackets. If no
+working shown they must have at least one answer for
+their 3-term quadratic and if two answers, both must
+be correct.
+Dep on first M1 in 4(a).
+t=2 (and 0.4) A1 If 2 used below as the middle limit without any
+working allow M1A1.
+Attempt at integration of a 3-term quadratic for v *M1 Increase power of their v by 1 and a change in
+coefficient in at least one term (which must be the
+same term) Use of s=vt scores M0.
+Allow with value of k not substituted
+Dep on first M1 in 4(a).
+5 3 A1 Allow un-simplified. Must have k substituted.
+s= t3− t2 +t +c
+12 2
+2 DM1 Use both limits correctly between 1 and their 2 and
+  5 t3− 3 t2 +t   =   5 (2)3 − 3 (2)2 +2  −   5 (1)3 − 3 (1)2 +1   between their 2 and 3 provided 1 < their 2 < 3.
+12 2  12 2  12 2 
+1 No other phases should be included e.g. 0 to 0.4
+Dependent on M1M1.
+ 2  1  7 
+− − − =−
+   
+ 3  12 12
+3
+
+
+5 t3− 3 t2 +t 
+
+=  5 (3)3 − 3 (3)2 +3  −  5 (2)3 − 3 (2)2 +2 
+12 2  12 2  12 2 
+2
+3  2 17
+− − =
+   
+4  3 12
+© Cambridge University Press & Assessment 2025 Page 18 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+4(b) Total distance is 2 m A1 SCB1 for correct answer with no attempt at
+integration seen following on from first M1A1.
+5
+NB answer of from not finding t when v = 0
+6
+usually gets max M0A0M1A1M0A0. However if
+they find t when v = 0 and make an error in the sign
+7 7
+e.g. rather than − can score max
+12 12
+M1A1M1A1M1A0.
+Do not ISW. Accept AWRT 2.00 to 3sf.
+6
+© Cambridge University Press & Assessment 2025 Page 19 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+5(a) Attempt N2L for Q and R to form two equations *M1 Correct number of relevant terms in each, allow sign
+errors and T for both tensions. Masses must be correct.
+Condone different accelerations.
+Ignore anything relating to P.
+For first 4 marks condone substituted value of g.
+5g−T =5a or 5g−2T =5a A1 Must be using different T’s – possibly with the result
+PQ PR
+that T =2T .
+T −2g=2a or T −2g=2a PQ PR
+PR PR
+Condone use of 2T =T for this A1.
+5g−T T −2g PQ PR
+or PQ = PR =a Accelerations must be the same.
+5 2
+Allow T −5g =5a and 2g−T =2a.
+PQ PR
+5g−4g=5a+4a or 5g−2(2a+2g)=5a oe DM1 Use T =2T to obtain an equation in a only or in T
+PQ PR
+5g−2T T −2g only.
+Or PR = PR oe
+5 2 Can be implied by correct value of a or T or T if
+PQ PR
+no solving seen.
+1 10 9.8 9.81 20 40 A1 A1 for any one of the three answers. Second A1 for all
+a= g Condone or or or 1.11. T = g, T = g
+9 9 9 9 PR 9 PQ 9 three.
+A1 1
+Allow T =2.22g and T =4.44g You may see a=− g if equations ‘backwards’ but
+PR PQ
+9
+1
+must get to a= g OE for A1.
+9
+Tensions must be in terms of g but ISW.
+5
+Do not allow e.g. T =5g− g as final answer .
+PQ 9
+Allow A1 if tensions not labelled.
+5
+© Cambridge University Press & Assessment 2025 Page 20 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+5(b) R =6gcos30 B1 60 3
+P Seen or implied by or 30 3 or 3g 3 but
+2
+must be the normal reaction.
+Attempt N2L for P or whole system to form an equation *M1 Correct number of relevant terms (5) (or 4 terms if
+tensions combined), allow sign errors, allow F for
+friction but must be using two different expressions
+for tensions. Must be component of weight (and
+weights, not masses, if using whole system). Must
+substitute their tension and acceleration.
+Must use correct mass(es).
+You may see an equation such as 5g−F =4a, which
+comes from combining equations for P and N2L for Q
+or R, and this may be shown in 5(a) rather than 5(b),
+so in this case link the two parts.
+40 20 1 A1FT Correct equation following through their two different
+For P: 6gsin30+their g−their g−F =6their g
+values of T and their a. Do not need a value for F and
+9 9 9
+allow with wrong F.
+1
+For system: 5g+6gsin30−2g−F =13their g 40 20
+9 Note: their g−their g may be combined into
+9 9
+20
+their g
+9
+410
+Note: F = =45.5555
+9
+Check very carefully for FT of their a, T ,T .
+PR PQ
+40 20 1 DM1 Use of F =R to obtain an equation in  only
+6gsin30+their g−their g−6gcos30=6their g
+9 9 9 where R is a component of 6g.
+© Cambridge University Press & Assessment 2025 Page 21 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+5(b) =0.877 A1
+41 3
+0.876717…; .
+81
+5
+© Cambridge University Press & Assessment 2025 Page 22 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+5(c) 1 1 M1 OE.
+d =  g1.52 d =1.25
+2 9 Use of s=ut+ 1 at2with u = 0, t = 1.5 and their a
+2
+from part (a) or other complete method to get an
+equation in d only.
+1
+May use x rather than d.
+2
+Must not use a = 10 unless this is their a from 5(a).
+2.5 [m] A1FT FT 2.25a.
+Alternative using work-energy
+For 6kg particle M1 Use of work-energy with all dimensionally correct
+2 terms present.
+1  g  40g 20g
+6their 1.5 −6gsin30d =their d −their d −their  Terms should have components as required and allow
+2  9  9 9
+consistent sin/cos mix
+6gcos30d
+1
+May use x rather than d.
+d =1.25
+2
+for whole system
+2
+1  g 
+13 their 1.5 −6gsin30d =5gd−2gd−their 6gcos30d
+ 
+2  9 
+d =1.25
+2.5 [m] A1FT
+2
+© Cambridge University Press & Assessment 2025 Page 23 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+6 km2u−mu=kmu+mv *M1 Attempt at CLM; correct number of terms and correct
+B
+masses with relevant velocities but allow sign errors.
+v is the speed of B after impact.
+B
+If g included with the masses then M1A0.
+v +u v A1 Any correct equation linking v ,k and u but with m
+v =(k−1)u or ku=v +u or k = B or k = B +1 B
+B B u u eliminated.
+KE = 1 km(2u)2 + 1 m(u)2 =2kmu2 + 1 mu2  *B1 KE before impact.
+before 2 2   2  
+1 1 *B1FT KE after impact.
+KE = kmu2 + mv 2
+after 2 2 B Allow if their expression for v B is wrong.
+1 1
+Or KE = kmu2 + mu2(k−1)2
+after 2 2 Allow B1B1 for the change in KE =
+
+
+ 
+3
+2 kmu2 +
+1
+2 mu2 −
+1
+2 mv B 2
+
+ 
+0.65
+
+2kmu2 +
+1
+mu2
+
+=
+1
+mu2
+( k+(k−1)2) *DM1 Setting up the equation 0.65KE
+before
+=KE
+after
+OE
+ 2  2 with their expression for v in terms of k substituted.
+B
+Or
+
+2kmu2 +
+1
+mu2
+
+−
+1
+mu2
+( k+(k−1)2)
+=0.35
+
+2kmu2 +
+1
+mu2
+
+
+Must be correct way around and must use 0.65 OE.
+ 2  2  2  Dependent on M1B1B1.
+1
+Or 0.8ku2 +0.325u2 = (k−1)2 u2 May see 1.6ku2 +0.65u2 = v2 leading to
+2 B
+1.6ku2 +0.65u2 =(k−1)2 u2.
+2.6k+0.65=k+k2 −2k+1k2 −3.6k+0.35=0 DM1 Re-arrange to a 3-term quadratic in k only –
+Dependent on M1B1B1M1.
+or 20k2 −72k+7=0
+© Cambridge University Press & Assessment 2025 Page 24 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+6 k=3.5 only A1 If k=0.1 seen must be rejected. Reason not required
+but if a reason given it must be valid e.g. as k – 1 > 0
+or reject later e.g. if k =0.1  v =−0.9u but not
+B
+possible as v 0.
+B
+v =2.5u A1 Not dependent on previous A mark.
+B
+If g included in momentum equation then max
+M1A0B1B1M1M1A1A0.
+Ignore the other solution if shown (v =−0.9u)
+B
+ALTERNATIVE (eliminating k)
+km2u−mu=kmu+mv *M1 Attempt at CLM; correct number of terms and correct
+B
+masses with relevant velocities but allow sign errors -
+v is the speed of B after impact.
+B
+If g included with the masses then M1A0.
+v +u v A1 Any correct equation linking v ,k and u but with m
+v =(k−1)u or ku=v +u or k = B or k = B +1 B
+B B u u eliminated.
+KE = 1 km(2u)2 + 1 m(u)2 =2kmu2 + 1 mu2  *B1FT KE before impact.
+before 2 2   2   Allow if their expression for k is wrong.
+Or KE before = 1 2     v B u +u   m(2u)2 + 1 2 mu2
+1 1 *B1FT KE after impact.
+KE = kmu2 + mv 2
+after 2 2 B Allow if their expression for k is wrong.
+1 v +u 1
+or KE after = 2    B u   mu2 + 2 mv B 2 Allow B1B1 for the change in KE
+3 1 1 
+ 2 kmu2 + 2 mu2 − 2 mv B 2   .
+© Cambridge University Press & Assessment 2025 Page 25 of 26
+
+9709/45 Cambridge International AS & A Level – Mark Scheme October/November 2025
+PUBLISHED
+Question Answer Marks Guidance
+6 0.65    1 2     v B u +u   m(2u)2 + 1 2 mu2    = 1 2     v B u +u   mu2 + 1 2 mv B 2or *DM1 S O e E tt i w ng it h u p ex t p h r e e e ss q i u o a n t i f o o n r 0 k .6 i 5 n  te K r E m b s ef o o re f = v K E su af b te s r t . i t uted.
+B
+   1 2     v B u +u   m(2u)2 + 1 2 mu2    −    1 2     v B u +u   mu2 + 1 2 mv B 2    = M De u p s e t n b d e e c n o t r o r n ec M t w 1 a B y 1 B ar 1 o . u nd and must use 0.65 OE.
+0.35   1    v B +u  m(2u)2 + 1 mu2   May see 1.6ku2 +0.65u2 =v B 2 oe leading to
+2  u  2 
+v +u
+1.6 B u2 +0.65u2 =v 2.
+or 0.65    2mu(v B +u)+ 1 2 mu2    = 1 2 mu(v B +u)+ 1 2 mv B 2   u   B
+1.3uv +1.625u2 =0.5u2 +0.5uv +0.5v 2 DM1 Re-arrange to a 3-term quadratic in terms of v and u
+B B B B
+only.
+v 2 −1.6uv −2.25u2 =0
+B B Dependent on M1B1B1M1.
+20v 2 −32uv −45u2 =0
+B B
+v −0.9u A1 Explicitly seen and rejected.
+B
+v =2.5u A1 Not dependent on previous A mark.
+B
+If g included in momentum equation, then max
+Ignore the other solution if shown (v =−0.9u)
+B M1A0B1B1M1M1A1A0.
+8
+© Cambridge University Press & Assessment 2025 Page 26 of 26

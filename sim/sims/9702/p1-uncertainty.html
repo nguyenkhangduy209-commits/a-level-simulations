@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Errors and uncertainties</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-measure.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, M = SIM.measure;
+  var course = ui.course('9702'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Errors and uncertainties: accuracy, precision, combining uncertainties', g: g, tags: ['9702 1.3 Errors and uncertainties'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 10 });
+  var caption = ui.h('div', { class: 'notes', style: 'color:var(--muted);font-size:12.5px;margin-top:6px' }); sceneCard.appendChild(caption);
+  var dataCard = pg.card('left', 'Readings');
+  var dataEl = ui.h('div', { style: 'overflow-x:auto' }); dataCard.appendChild(dataEl);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var mode = ui.select(paramCard, { label: 'Topic', value: 'errors', options: [
+    { value: 'errors', label: 'Systematic, random and zero errors; accuracy vs precision' },
+    { value: 'combine', label: 'Uncertainty in a derived quantity' }] }, update);
+  var kind = ui.select(paramCard, { label: 'Derived quantity', value: 'product', options: [
+    { value: 'product', label: 'Q = k × A^a × B^b × C^c (product / quotient / power)' }, { value: 'sum', label: 'Q = A ± B ± C (sum / difference)' }] }, update);
+  var inMode = ui.select(paramCard, { label: 'Uncertainties entered as', value: 'abs', options: [
+    { value: 'abs', label: 'absolute (± same unit as the value)' }, { value: 'pct', label: 'percentage (± %)' }] }, function () { relabel(); update(); });
+  var sB = ui.select(paramCard, { label: 'Sign of B', value: '-1', options: [{ value: '1', label: '+ B' }, { value: '-1', label: '− B' }] }, update);
+  var sC = ui.select(paramCard, { label: 'Sign of C', value: '1', options: [{ value: '1', label: '+ C' }, { value: '-1', label: '− C' }] }, update);
+  var prm = ui.params(paramCard, [
+    { key: 'X0', label: 'True value', sym: 'X<sub>true</sub>', unit: '', min: 1, max: 100, step: 0.1, value: 25 },
+    { key: 'bias', label: 'Systematic error (other than zero error)', sym: 'b', unit: '', min: 0, max: 5, step: 0.01, value: 0 },
+    { key: 'zero', label: 'Zero error of the instrument', sym: 'z', unit: '', min: -3, max: 3, step: 0.01, value: 0 },
+    { key: 'sigma', label: 'Random error (spread)', sym: 'σ', unit: '', min: 0, max: 5, step: 0.01, value: 1 },
+    { key: 'n', label: 'Number of repeat readings', sym: 'n', unit: '', min: 3, max: 20, step: 1, value: 8 },
+    { key: 'k', label: 'Exact constant (no uncertainty)', sym: 'k', unit: '', min: 0.001, max: 100, step: 0.001, value: 1 },
+    { key: 'A', label: 'Measured value A', sym: 'A', unit: '', min: 0.001, max: 1000, step: 0.001, value: 5 },
+    { key: 'dA', label: 'Uncertainty in A', sym: 'ΔA', unit: '', min: 0, max: 50, step: 0.0001, value: 0.1 },
+    { key: 'a', label: 'Power of A', sym: 'a', unit: '', min: -3, max: 3, step: 0.5, value: 1 },
+    { key: 'B', label: 'Measured value B', sym: 'B', unit: '', min: 0.001, max: 1000, step: 0.001, value: 0.5 },
+    { key: 'dB', label: 'Uncertainty in B', sym: 'ΔB', unit: '', min: 0, max: 50, step: 0.0001, value: 0.02 },
+    { key: 'b', label: 'Power of B', sym: 'b', unit: '', min: -3, max: 3, step: 0.5, value: -1 },
+    { key: 'C', label: 'Measured value C', sym: 'C', unit: '', min: 0.001, max: 1000, step: 0.001, value: 1 },
+    { key: 'dC', label: 'Uncertainty in C', sym: 'ΔC', unit: '', min: 0, max: 50, step: 0.0001, value: 0.01 },
+    { key: 'c', label: 'Power of C', sym: 'c', unit: '', min: -3, max: 3, step: 0.5, value: 1 }
+  ], update);
+  var useC = ui.toggle(paramCard, { label: 'Include a third quantity C' }, update);
+  var corr = ui.toggle(paramCard, { label: 'Correct each reading for the zero error (subtract z)' }, update);
+  var btnRow = ui.h('div', { class: 'row' }); paramCard.appendChild(btnRow);
+  var seed = 7;
+  var newBtn = ui.h('button', { class: 'btn', text: 'New random readings', onclick: function () { seed = (seed * 48271) % 2147483647; update(); } });
+  btnRow.appendChild(newBtn);
+
+  ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  function E(v) { return Object.assign({ mode: 'errors', X0: 25, bias: 0, zero: 0, sigma: 1, n: 8, corr: false }, v); }
+  function Cb(v) { return Object.assign({ mode: 'combine', kind: 'product', inMode: 'abs', k: 1, a: 1, b: -1, c: 1, useC: false, sB: '-1', sC: '1' }, v); }
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Precise but not accurate (large systematic error)', v: E({ bias: 4, sigma: 0.2 }), note: 'Readings are close together but their mean is far from the true value. Repeating does not help. Compare 9702/23 M/J 23 Q1(c): depths 54.4, 53.9, 54.1 m for a 36.0 m well.' },
+    { name: 'Accurate but not precise (large random error)', v: E({ bias: 0, sigma: 3 }), note: 'Mean close to the true value, large scatter. Averaging more repeats reduces the effect of random error.' },
+    { name: 'Accurate and precise', v: E({ bias: 0, sigma: 0.2 }), note: 'Small systematic and small random error.' },
+    { name: 'Zero error on a micrometer (reads +0.03 mm when closed)', v: E({ X0: 2.5, zero: 0.03, sigma: 0.01, n: 6, bias: 0 }), note: 'Zero error is a systematic error. Every reading is 0.03 mm too large: subtract it (tick the correction).' },
+    { name: 'Negative zero error corrected', v: E({ X0: 10, zero: -0.5, sigma: 0.2, n: 6, bias: 0, corr: true }), note: 'Corrected reading = reading − zero error = reading + 0.5.' },
+    { name: 'R = V/I: V = 5.0 ± 0.1 V, I = 0.50 ± 0.02 A', v: Cb({ A: 5, dA: 0.1, a: 1, B: 0.5, dB: 0.02, b: -1 }), note: '%R = 2% + 4% = 6%, so R = 10.0 ± 0.6 Ω. Percentages add for a quotient too.' },
+    { name: 'Steel cube density ρ = m/L³ (9702/12 M/J 25 Q3)', v: Cb({ A: 975, dA: 10, a: 1, B: 5.0, dB: 0.1, b: -3 }), note: 'm = 975 ± 10 g, L = 50 ± 1 mm = 5.0 ± 0.1 cm. %ρ = 1.0% + 3 × 2% = 7.0%, ρ = 7.8 g cm<sup>−3</sup>.' },
+    { name: 'a = v²/(2s): v ± 0.8%, s ± 0.5% (9702/22 F/M 23 Q1)', v: Cb({ inMode: 'pct', k: 0.5, A: 2.75, dA: 0.8, a: 2, B: 3.89, dB: 0.5, b: -1 }), note: 's = 3.89 m ± 0.5%, v = 2.75 m s<sup>−1</sup> ± 0.8%. %a = 2 × 0.8 + 0.5 = 2.1%, a = 0.97 ± 0.02 m s<sup>−2</sup>. The ½ is exact.' },
+    { name: 'Cube A density (9702/22 F/M 25 Q1)', v: Cb({ A: 31.3, dA: 0.5, a: 1, B: 1.53, dB: 0.01, b: -3 }), note: 'm = 31.3 ± 0.5 g, side 1.53 ± 0.01 cm. ρ = 8.74 g cm<sup>−3</sup> = 8.7 × 10<sup>3</sup> kg m<sup>−3</sup>, %ρ ≈ 3.6% (mark scheme: 4%).' },
+    { name: 'Pendulum g = 4π²L/T²', v: Cb({ k: 39.478, A: 0.8, dA: 0.002, a: 1, B: 1.8, dB: 0.02, b: -2 }), note: 'L = 0.800 ± 0.002 m, T = 1.80 ± 0.02 s. %g = 0.25% + 2 × 1.11% = 2.5%. 4π² is exact.' },
+    { name: 'Difference of two lengths: 45.0 ± 0.5 cm − 20.0 ± 0.5 cm', v: Cb({ kind: 'sum', A: 45, dA: 0.5, B: 20, dB: 0.5, sB: '-1' }), note: 'For a difference the absolute uncertainties ADD: 25.0 ± 1.0 cm (4%).' },
+    { name: 'Difference of close values: large % uncertainty', v: Cb({ kind: 'sum', A: 10.4, dA: 0.2, B: 9.8, dB: 0.2, sB: '-1' }), note: 'Q = 0.6 ± 0.4: a 67% uncertainty from two 2% readings.' }
+  ], function (p) {
+    var v = p.v;
+    mode.set(v.mode, true);
+    if (v.mode === 'errors') { corr.set(!!v.corr, true); prm.set({ X0: v.X0, bias: v.bias, zero: v.zero, sigma: v.sigma, n: v.n }, true); }
+    else {
+      kind.set(v.kind, true); inMode.set(v.inMode, true); relabel(); sB.set(v.sB, true); sC.set(v.sC, true); useC.set(!!v.useC, true);
+      prm.set({ k: v.k, A: v.A, dA: v.dA, a: v.a, B: v.B, dB: v.dB, b: v.b }, true);
+    }
+    update();
+  });
+
+  ui.notes(noteCard, [
+    '<b>Accuracy</b>: how close a measurement (or the mean) is to the <b>true value</b>. <b>Precision</b>: how close repeated readings are to <b>each other</b>.',
+    '<b>Systematic</b> errors shift every reading the same way (zero error, wrong calibration, parallax from the same side). Repeating and averaging does <b>not</b> remove them.',
+    '<b>Random</b> errors scatter readings either side of the mean. Repeating and averaging reduces their effect.',
+    'A <b>zero error</b> is corrected by subtracting it: corrected = reading − zero error (a negative zero error is added).',
+    'Sum or difference: add <b>absolute</b> uncertainties. Product or quotient: add <b>fractional (percentage)</b> uncertainties. A power n multiplies the percentage by |n|.',
+    'Exact constants (½, 2, π, 4π²) carry no uncertainty.',
+    'Quote the absolute uncertainty to 1 (or 2) significant figures and the value to the same decimal place.'
+  ]);
+
+  /* ---------- model ---------- */
+  function relabel() {
+    var pct = inMode.get() === 'pct';
+    ['A', 'B', 'C'].forEach(function (k) {
+      prm.label('d' + k, (pct ? 'Percentage uncertainty in ' : 'Absolute uncertainty in ') + k + ' <span class="sym">' + (pct ? '%' : 'Δ') + k + '</span>');
+    });
+  }
+  var shots = [], rd = null, res = null, absU = null;
+  function absOf(x, d) { return inMode.get() === 'pct' ? Math.abs(x) * d / 100 : d; }
+  function update() {
+    var md = mode.get(), v = prm.values, err = md === 'errors', prod = kind.get() === 'product';
+    ['X0', 'bias', 'zero', 'sigma', 'n'].forEach(function (k) { prm.show(k, err); });
+    corr.el.style.display = err ? '' : 'none'; btnRow.style.display = err ? '' : 'none';
+    [kind, inMode].forEach(function (s) { s.row.style.display = err ? 'none' : ''; });
+    useC.el.style.display = err ? 'none' : '';
+    sB.row.style.display = !err && !prod ? '' : 'none'; sC.row.style.display = !err && !prod && useC.get() ? '' : 'none';
+    prm.show('k', !err && prod);
+    ['A', 'dA', 'B', 'dB'].forEach(function (k) { prm.show(k, !err); });
+    prm.show('a', !err && prod); prm.show('b', !err && prod);
+    ['C', 'dC'].forEach(function (k) { prm.show(k, !err && useC.get()); }); prm.show('c', !err && prod && useC.get());
+    R.clear();
+    if (err) errorsReadout(); else combineReadout();
+    R.render(); draw();
+  }
+
+  function errorsReadout() {
+    var v = prm.values, n = Math.round(v.n), zc = corr.get() ? v.zero : 0;
+    rd = M.readings({ trueValue: v.X0, zero: v.zero, bias: v.bias, sigma: v.sigma, n: n, seed: seed });
+    var xs = rd.xs.map(function (x) { return x - zc; }), st = M.stats(xs);
+    shots = M.targetShots(v.bias + v.zero - zc, v.sigma, n, seed);
+    var sysLeft = v.bias + v.zero - zc, offset = st.mean - v.X0;
+    R.head('Model of each reading');
+    R.eq('reading', 'X<sub>true</sub> + z + b + random', '', '');
+    if (corr.get()) R.eq('corrected', 'reading − z = reading − (' + U.num(v.zero, 3) + ')', '', '');
+    R.head('Results of ' + n + ' readings');
+    R.eq('mean', 'Σx ÷ n', st.mean);
+    R.eq('half range', '(max − min) ÷ 2 = (' + U.sf(st.max, 4) + ' − ' + U.sf(st.min, 4) + ') ÷ 2', st.halfRange);
+    R.eq('result', 'mean ± half range', U.sf(st.mean, 4) + ' ± ' + U.sf(st.halfRange, 2), '');
+    R.eq('mean − true', U.sf(st.mean, 4) + ' − ' + U.num(v.X0, 3), offset);
+    R.eq('systematic error left', (corr.get() ? 'b (zero error removed)' : 'b + z = ' + U.num(v.bias, 3) + ' + ' + U.num(v.zero, 3)), sysLeft);
+    var precise = st.halfRange <= 0.03 * v.X0, accurate = Math.abs(offset) <= Math.max(st.halfRange, 0.005 * v.X0);
+    R.head('Verdict (criteria used here: precise if half range ≤ 3% of the value; accurate if the true value lies within mean ± half range)');
+    R.badge(precise ? 'Precise: readings agree closely' : 'Not precise: readings are scattered (random error)', precise ? 'ok' : 'warn');
+    R.badge(accurate ? 'Accurate: mean is close to the true value' : 'Not accurate: mean is off the true value (systematic error)', accurate ? 'ok' : 'warn');
+    if (Math.abs(v.zero) > 1e-9 && !corr.get()) R.badge('Uncorrected zero error of ' + U.num(v.zero, 3) + ' in every reading', 'warn');
+    var rows = xs.map(function (x, i) { return '<td>' + (i + 1) + '</td><td>' + U.sf(rd.xs[i], 4) + '</td>' + (corr.get() ? '<td>' + U.sf(x, 4) + '</td>' : ''); });
+    dataEl.innerHTML = '<table class="tbl"><tr><th>#</th><th>reading</th>' + (corr.get() ? '<th>corrected</th>' : '') + '</tr>' + rows.map(function (r) { return '<tr>' + r + '</tr>'; }).join('') + '</table>';
+    caption.innerHTML = 'Left: shots at a target (centre = true value). Right: the same readings on a number line. Systematic error moves the cluster; random error spreads it.';
+    rd.cx = xs; rd.cst = st;
+  }
+
+  function combineReadout() {
+    var v = prm.values, prod = kind.get() === 'product', pct = inMode.get() === 'pct';
+    var ins = [{ k: 'A', x: v.A, d: absOf(v.A, v.dA), n: v.a, s: 1 }, { k: 'B', x: v.B, d: absOf(v.B, v.dB), n: v.b, s: Number(sB.get()) }];
+    if (useC.get()) ins.push({ k: 'C', x: v.C, d: absOf(v.C, v.dC), n: v.c, s: Number(sC.get()) });
+    ins.forEach(function (i) { i.dx = i.d; });
+    absU = ins;
+    if (prod) {
+      res = M.uncProduct(v.k, ins);
+      if (res.invalid) { R.badge(res.invalid, 'warn'); res = null; dataEl.innerHTML = ''; return; }
+      var form = 'Q = ' + (Math.abs(v.k - 1) > 1e-12 ? U.num(v.k, 4) + ' × ' : '') + ins.map(function (i) { return i.k + (i.n === 1 ? '' : '<sup>' + M.fracStr(i.n) + '</sup>'); }).join(' × ');
+      R.head(form);
+      R.eq('Q', (Math.abs(v.k - 1) > 1e-12 ? U.num(v.k, 4) + ' × ' : '') + ins.map(function (i) { return U.num(i.x, 4) + (i.n === 1 ? '' : '<sup>' + M.fracStr(i.n) + '</sup>'); }).join(' × '), res.Q, '');
+      R.head('Percentage uncertainties (powers multiply them)');
+      ins.forEach(function (i, j) {
+        R.eq('%' + i.k, pct ? 'given' : 'Δ' + i.k + ' ÷ ' + i.k + ' × 100 = ' + U.sf(i.d, 3) + ' ÷ ' + U.num(i.x, 4) + ' × 100', U.sf(100 * res.terms[j].frac, 3), '%');
+        if (Math.abs(i.n) !== 1) R.eq('|' + M.fracStr(i.n) + '| × %' + i.k, M.fracStr(Math.abs(i.n)) + ' × ' + U.sf(100 * res.terms[j].frac, 3), U.sf(100 * res.terms[j].contrib, 3), '%');
+      });
+      R.eq('%Q', ins.map(function (i, j) { return U.sf(100 * res.terms[j].contrib, 3); }).join(' + '), U.sf(res.pct, 3), '%');
+      R.eq('ΔQ', U.sf(res.pct, 3) + '% × ' + U.sf(res.Q, 4), res.dQ, '');
+    } else {
+      res = M.uncSum(ins);
+      R.head('Q = ' + ins.map(function (i, j) { return (j ? (i.s < 0 ? ' − ' : ' + ') : '') + i.k; }).join(''));
+      R.eq('Q', ins.map(function (i, j) { return (j ? (i.s < 0 ? ' − ' : ' + ') : '') + U.num(i.x, 4); }).join(''), res.Q, '');
+      R.head('Absolute uncertainties add (even for a difference)');
+      R.eq('ΔQ', ins.map(function (i) { return U.sf(i.d, 3); }).join(' + '), res.dQ, '');
+      if (Math.abs(res.Q) > 1e-12) R.eq('%Q', 'ΔQ ÷ |Q| × 100 = ' + U.sf(res.dQ, 3) + ' ÷ ' + U.sf(Math.abs(res.Q), 4) + ' × 100', U.sf(res.pct, 3), '%');
+      else R.badge('Q = 0: a percentage uncertainty cannot be calculated', 'warn');
+    }
+    var r1 = M.roundWithUnc(res.Q, res.dQ, 1), r2 = M.roundWithUnc(res.Q, res.dQ, 2);
+    R.head('Final answer');
+    if (r1) { R.eq('Q (1 s.f. uncertainty)', '', r1.value + ' ± ' + r1.unc, ''); R.eq('Q (2 s.f. uncertainty)', '', r2.value + ' ± ' + r2.unc, ''); }
+    else R.eq('Q', 'no uncertainty (all uncertainties zero)', res.Q, '');
+    if (!prod && res.pct > 20 && isFinite(res.pct)) R.badge('Subtracting nearly equal values makes the percentage uncertainty large', 'warn');
+    dataEl.innerHTML = '<table class="tbl"><tr><th>quantity</th><th>value</th><th>absolute unc.</th><th>% unc.</th>' + (prod ? '<th>power</th><th>% contribution</th>' : '') + '</tr>' +
+      ins.map(function (i, j) { return '<tr><td>' + i.k + '</td><td>' + U.sf(i.x, 4) + '</td><td>' + U.sf(i.d, 3) + '</td><td>' + U.sf(100 * i.d / i.x, 3) + '</td>' + (prod ? '<td>' + M.fracStr(i.n) + '</td><td>' + U.sf(100 * res.terms[j].contrib, 3) + '</td>' : '') + '</tr>'; }).join('') + '</table>';
+    caption.innerHTML = prod ? 'Bars: contribution of each measurement to the total percentage uncertainty in Q.' : 'Bars: contribution of each measurement to the absolute uncertainty in Q.';
+  }
+
+  /* ---------- drawing ---------- */
+  function draw() {
+    var c = vp.begin(), col = ui.colors(), W = vp.w, H = vp.h;
+    if (mode.get() === 'errors') {
+      if (!rd) return;
+      var v = prm.values, size = Math.min(H - 30, W * 0.45), cx = 15 + size / 2, cy = H / 2;
+      var span = Math.max(4, Math.abs(v.bias + v.zero) + 3 * v.sigma), k = (size / 2 - 6) / span;
+      for (var r = 5; r >= 1; r--) { c.beginPath(); c.arc(cx, cy, (size / 2 - 6) * r / 5, 0, 2 * Math.PI); c.fillStyle = r % 2 ? col.surface : col.panel; c.fill(); c.strokeStyle = col.line; c.lineWidth = 1; c.stroke(); }
+      c.strokeStyle = col.ok; c.lineWidth = 2; c.beginPath(); c.moveTo(cx - 8, cy); c.lineTo(cx + 8, cy); c.moveTo(cx, cy - 8); c.lineTo(cx, cy + 8); c.stroke();
+      shots.forEach(function (s) { var x = cx + s[0] * k, y = cy - s[1] * k; if (Math.abs(x - cx) < size / 2 + 4 && Math.abs(y - cy) < size / 2 + 4) { c.fillStyle = col.s2; c.beginPath(); c.arc(x, y, 4, 0, 2 * Math.PI); c.fill(); } });
+      D.label(c, 'target: centre = true value', cx, 10, col.muted, { size: 11 });
+      // number line
+      var x0 = cx + size / 2 + 30, x1 = W - 20, yl = H * 0.55, st = rd.cst, lo = Math.min(st.min, v.X0), hi = Math.max(st.max, v.X0), pad = Math.max((hi - lo) * 0.15, 0.05 * v.X0, 1e-3);
+      lo -= pad; hi += pad;
+      var X = function (x) { return x0 + (x - lo) / (hi - lo) * (x1 - x0); };
+      c.strokeStyle = col.muted; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x0, yl); c.lineTo(x1, yl); c.stroke();
+      U.niceTicks(lo, hi, 5).ticks.forEach(function (t) { if (t < lo || t > hi) return; c.beginPath(); c.moveTo(X(t), yl); c.lineTo(X(t), yl + 5); c.stroke(); D.label(c, U.num(t, 4), X(t), yl + 16, col.muted, { size: 10 }); });
+      rd.cx.forEach(function (x, i) { c.fillStyle = col.s2; c.beginPath(); c.arc(X(x), yl - 12 - (i % 4) * 9, 3.5, 0, 2 * Math.PI); c.fill(); });
+      c.strokeStyle = col.ok; c.lineWidth = 2; c.beginPath(); c.moveTo(X(v.X0), yl - 60); c.lineTo(X(v.X0), yl + 4); c.stroke();
+      D.label(c, 'true', X(v.X0), yl - 68, col.ok, { size: 11 });
+      c.strokeStyle = col.accent; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(X(st.mean), yl - 54); c.lineTo(X(st.mean), yl + 4); c.stroke(); c.setLineDash([]);
+      D.label(c, 'mean', X(st.mean), yl + 32, col.accent, { size: 11 });
+      c.fillStyle = col.accent; c.globalAlpha = 0.15; c.fillRect(X(st.min), yl - 50, Math.max(2, X(st.max) - X(st.min)), 46); c.globalAlpha = 1;
+      D.label(c, 'readings (shaded = range)', (x0 + x1) / 2, 10, col.muted, { size: 11 });
+    } else {
+      if (!res || !absU) return;
+      var prod = kind.get() === 'product', vals = absU.map(function (i, j) { return prod ? 100 * res.terms[j].contrib : i.d; });
+      var tot = vals.reduce(function (a, b) { return a + b; }, 0), cols = [col.s1, col.s2, col.s3];
+      var L = 60, Rr = 20, y = H * 0.42, bh = 40, w = W - L - Rr;
+      D.label(c, prod ? 'total % uncertainty in Q = ' + U.sf(tot, 3) + '%' : 'total absolute uncertainty ΔQ = ' + U.sf(tot, 3), W / 2, 22, col.ink, { bold: true });
+      if (!(tot > 0)) { D.label(c, 'all uncertainties are zero', W / 2, y + bh / 2, col.muted); return; }
+      var x = L;
+      absU.forEach(function (i, j) {
+        var bw = w * vals[j] / tot; c.fillStyle = cols[j]; c.globalAlpha = 0.8; c.fillRect(x, y, bw, bh); c.globalAlpha = 1;
+        if (bw > 30) D.label(c, i.k, x + bw / 2, y + bh / 2, col.panel, { bold: true });
+        D.label(c, i.k + ': ' + U.sf(vals[j], 3) + (prod ? '%' : '') + (prod && Math.abs(i.n) !== 1 ? ' (× ' + M.fracStr(Math.abs(i.n)) + ')' : ''), L + j * (w / 3), y + bh + 22, cols[j], { align: 'left', size: 12 });
+        x += bw;
+      });
+      D.label(c, prod ? '%Q' : 'ΔQ', L - 8, y + bh / 2, col.ink, { align: 'right' });
+    }
+  }
+
+  ui.onTheme(draw);
+  vp.onResize = draw;
+  relabel();
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Particle on a plane</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/mech-plane.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, PL = SIM.plane;
+  var course = ui.course('9709'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Particle on a plane: friction, equilibrium and motion', g: g,
+    tags: course === '9709' ? ['9709 4.1 Forces & equilibrium', '9709 4.4 Newton’s laws', '9709 4.2 suvat'] : ['9702 3 Dynamics', '9702 4 Forces'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 24 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 4, onFrame: function () { drawScene(); drawPlots(); readout(); } });
+  ui.legend(sceneCard, [
+    { color: 'var(--c-weight)', label: 'weight mg' }, { color: 'var(--c-normal)', label: 'normal reaction R' },
+    { color: 'var(--c-friction)', label: 'friction F (dashed ghost = μR max)' }, { color: 'var(--c-applied)', label: 'applied force P' },
+    { color: 'var(--c-velocity)', label: 'velocity' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pS = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 's / m (up slope +)' });
+  var pV = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'v / m s⁻¹ (up slope +)' });
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var prm = ui.params(paramCard, [
+    { key: 'm', label: 'Mass', sym: 'm', unit: 'kg', min: 0.1, max: 200, step: 0.1, value: 5 },
+    { key: 'theta', label: 'Slope angle', sym: 'θ', unit: '°', min: 0, max: 80, step: 0.5, value: 30 },
+    { key: 'mu', label: 'Coefficient of friction', sym: 'μ', unit: '', min: 0, max: 1.5, step: 0.001, value: 0.3 },
+    { key: 'P', label: 'Applied force', sym: 'P', unit: 'N', min: 0, max: 500, step: 0.1, value: 0 },
+    { key: 'phi', label: 'Angle of P above the up-slope line', sym: 'φ', unit: '°', min: -180, max: 180, step: 0.5, value: 0 },
+    { key: 'u', label: 'Initial velocity (up slope +)', sym: 'u', unit: 'm s<sup>−1</sup>', min: -30, max: 30, step: 0.1, value: 0 },
+    { key: 'T', label: 'Time shown', sym: 't<sub>max</sub>', unit: 's', min: 0.5, max: 30, step: 0.5, value: 4 }
+  ], update);
+  var smooth = ui.toggle(paramCard, { label: 'Smooth surface (μ = 0)' }, update);
+  var comps = ui.toggle(paramCard, { label: 'Show components of mg (and P)', value: true }, update);
+  var contact = ui.select(paramCard, { label: 'Contact', value: 'surface', options: [
+    { value: 'surface', label: 'Block on surface (R ≥ 0)' }, { value: 'ring', label: 'Ring threaded on rod (R either side)' }] }, update);
+  var btnRow = ui.h('div', { class: 'row' }); paramCard.appendChild(btnRow);
+  function btn(text, fn) { btnRow.appendChild(ui.h('button', { class: 'btn', text: text, onclick: fn })); }
+  btn('Set P: about to move up', function () { var r = PL.equilibriumRange(params()); if (isFinite(r.Pup) && r.Pup >= 0) { prm.set({ P: r.Pup, u: 0 }); } });
+  btn('Set P: about to move down', function () { var r = PL.equilibriumRange(params()); if (isFinite(r.Pdown) && r.Pdown >= 0) prm.set({ P: r.Pdown, u: 0 }); });
+  btn('Set μ: limiting', function () { var m = PL.leastMu(params()); if (isFinite(m)) { smooth.set(false, true); prm.set({ mu: Math.min(1.5, m), u: 0 }); } });
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Block resting on a rough slope: is it in equilibrium?', values: { m: 5, theta: 30, mu: 0.8, P: 0, phi: 0, u: 0, T: 4 }, note: 'Static: friction is only as large as needed (25 N), not μR.' },
+    { name: 'On the point of sliding down: find μ', values: { m: 5, theta: 30, mu: 0.577, P: 0, phi: 0, u: 0, T: 4 }, note: 'Limiting equilibrium ⇒ F = μR ⇒ μ = tan θ.' },
+    { name: 'Force parallel to slope: on the point of moving up', values: { m: 5, theta: 30, mu: 0.2, P: 33.66, phi: 0, u: 0, T: 4 }, note: 'Friction acts DOWN the slope when the block is about to move up.' },
+    { name: 'Horizontal force on block on slope', values: { m: 5, theta: 30, mu: 0.2, P: 43.94, phi: -30, u: 0, T: 4 }, note: 'A horizontal push towards the slope has φ = −θ: it increases R.' },
+    { name: 'Projected up a rough slope: does it slide back?', values: { m: 3, theta: 30, mu: 0.2, P: 0, phi: 0, u: 8, T: 4 }, note: 'Up: a = −(g sin θ + μg cos θ). At rest, compare mg sin θ with μR. Down: a = g sin θ − μg cos θ.' },
+    { name: 'Particle projected up, stays at rest at the top', values: { m: 2, theta: 20, mu: 0.5, P: 0, phi: 0, u: 4, T: 3 }, note: 'tan 20° < 0.5, so friction can hold it once it stops.' },
+    { name: '9709/41 M/J 24 Q5: bobsled, smooth 12° slope, 5 m s⁻¹', values: { m: 1, theta: 12, mu: 0, P: 0, phi: 0, u: -5, T: 4 }, note: 'Moving down the slope ⇒ u is negative here. Speed after 60 m: v² = 5² + 2(g sin 12°)(60).' },
+    { name: 'Rough horizontal floor, pulled at 30° above horizontal', values: { m: 10, theta: 0, mu: 0.4, P: 40, phi: 30, u: 0, T: 4 }, note: 'R = mg − P sin 30° (not mg).' },
+    { name: 'Limiting on a horizontal table: 0.2 kg, 1.2 N ⇒ μ', values: { m: 0.2, theta: 0, mu: 0.6, P: 1.2, phi: 0, u: 0, T: 3 }, note: 'Then try μ = 0.3: a = 3 m s⁻² and distance in the 3rd second = 7.5 m.' },
+    { name: 'Ring on rough horizontal rod, force 20 N at 60°', values: { m: 1, theta: 0, mu: 0.5, P: 20, phi: 60, u: 0, T: 3 }, contact: 'ring', note: 'P sin 60° > mg, so the rod pushes DOWN on the ring: R = P sin 60° − mg.' }
+  ], function (p) { contact.set(p.contact || 'surface', true); smooth.set(false, true); clock.pause(); prm.set(p.values); clock.seek(0); });
+
+  ui.notes(noteCard, [
+    'Friction is <b>F ≤ μR</b>. Only use F = μR when the particle is <b>moving</b> or <b>on the point of moving</b> (limiting).',
+    'R is <b>not</b> always mg cos θ: a force with a component perpendicular to the plane changes R.',
+    'Resolve along and perpendicular to the slope: mg sin θ acts <b>down</b> the slope, mg cos θ <b>into</b> the plane. The angle between mg and the normal is θ.',
+    'Friction opposes the motion (or the tendency to move). It reverses when the particle reverses.',
+    'When a particle projected up a slope stops, test it again: it slides back only if mg sin θ > μR.',
+    'Take g = ' + g + ' m s<sup>−2</sup>' + (course === '9709' ? ' (9709 papers say “use 10”).' : '.')
+  ]);
+
+  /* ---------- model ---------- */
+  function params() {
+    var v = prm.values;
+    return { m: v.m, g: g, theta: v.theta, mu: v.mu, smooth: smooth.get(), P: v.P, phi: v.phi, u: v.u, contact: contact.get() };
+  }
+  var sim = null, srange = [0, 0];
+  function update() {
+    var p = params();
+    prm.show('phi', p.P > 0);
+    sim = PL.simulate(p);
+    clock.setDuration(prm.values.T);
+    // displacement range over the time window (for scene scaling)
+    srange = [0, 0];
+    for (var i = 0; i <= 200; i++) { var s = sim.stateAt(prm.values.T * i / 200).s; srange[0] = Math.min(srange[0], s); srange[1] = Math.max(srange[1], s); }
+    ui.writeHash(Object.assign({}, prm.values, { smooth: +smooth.get(), contact: contact.get() }));
+    drawScene(); drawPlots(); readout();
+  }
+
+  /* ---------- scene ---------- */
+  var SL = 10; // drawn slope length (scene units)
+  function drawScene() {
+    if (!sim) return;
+    var col = ui.colors(), p = params(), th = U.rad(p.theta), ct = Math.cos(th), st = Math.sin(th);
+    var top = Math.max(SL * st, 0);
+    vp.fit(-1.2, SL * ct + 1.2, -1.2, Math.max(top + 3.2, 4.5));
+    var c = vp.begin();
+    // ground and slope
+    D.ground(c, vp.X(-1.2), vp.Y(0), vp.X(SL * ct + 1.2), vp.Y(0));
+    if (p.theta > 0) {
+      c.save(); c.fillStyle = col.surface; c.beginPath(); c.moveTo(vp.X(0), vp.Y(0)); c.lineTo(vp.X(SL * ct), vp.Y(SL * st)); c.lineTo(vp.X(SL * ct), vp.Y(0)); c.closePath(); c.fill();
+      c.strokeStyle = col['object-line']; c.lineWidth = 1.6; c.stroke(); c.restore();
+      D.arc(c, vp.X(0), vp.Y(0), 34, 0, th, col.muted, 'θ = ' + U.num(p.theta, 1) + '°');
+    }
+    if (p.contact === 'ring') { D.line(c, [vp.P(-1.2 * ct, -1.2 * st), vp.P((SL + 1) * ct, (SL + 1) * st)], col['object-line'], { width: 4 }); }
+    // block position: map displacement s into the drawn slope
+    var st0 = sim.stateAt(clock.t);
+    var span = Math.max(Math.abs(srange[0]), Math.abs(srange[1]), 1e-9), ks = Math.min(1, SL * 0.4 / span);
+    var mid = (srange[0] + srange[1]) / 2;
+    var d = SL / 2 + (st0.s - mid) * ks;
+    var bx = vp.X(d * ct), by = vp.Y(d * st);
+    var bw = 54, bh = 34;
+    if (p.contact === 'ring') { D.particle(c, bx, by, 11, {}); bh = 0; }
+    else D.block(c, bx, by, bw, bh, th, { label: U.num(p.m, 2) + ' kg' });
+    var cx = bx - st * bh / 2, cy = by - ct * bh / 2;
+    if (ks < 1) D.label(c, 'motion drawn at ' + U.sf(ks, 2) + '× scale', vp.w - 10, 14, col.muted, { align: 'right', size: 11 });
+    if (sim.invalid) { D.label(c, sim.invalid, vp.w / 2, 20, col.warn, { bold: true }); return; }
+    // forces
+    var f = sim.f, F = st0.F;
+    var list = [f.W, f.R, p.P, f.Fmax, Math.abs(F)];
+    var k = SIM.view.forceScale(list, Math.min(130, vp.h * 0.33));
+    var lab = function (n, v) { return n + ' = ' + U.sf(v) + ' N'; };
+    if (comps.get()) {
+      D.arrowPolar(c, cx, cy, th + Math.PI, f.Wpar * k, col.component, { dash: [5, 4], width: 1.6, label: 'mg sin θ' });
+      D.arrowPolar(c, cx, cy, th - Math.PI / 2, f.Wperp * k, col.component, { dash: [5, 4], width: 1.6, label: 'mg cos θ' });
+      if (p.P > 0 && Math.abs(Math.sin(U.rad(p.phi))) > 1e-6 && Math.abs(Math.cos(U.rad(p.phi))) > 1e-6) {
+        D.arrowPolar(c, cx, cy, th + (f.Ppar >= 0 ? 0 : Math.PI), Math.abs(f.Ppar) * k, col.applied, { dash: [5, 4], width: 1.4, label: 'P cos φ' });
+        D.arrowPolar(c, cx, cy, th + (f.Pperp >= 0 ? Math.PI / 2 : -Math.PI / 2), Math.abs(f.Pperp) * k, col.applied, { dash: [5, 4], width: 1.4, label: 'P sin φ' });
+      }
+      if (p.theta > 0) D.arc(c, cx, cy, 26, -Math.PI / 2, th - Math.PI / 2, col.component, 'θ');
+    }
+    D.arrowPolar(c, cx, cy, -Math.PI / 2, f.W * k, col.weight, { label: lab('mg', f.W) });
+    if (f.R > 1e-9) {
+      var rAng = (p.contact === 'ring' && f.Nraw < 0) ? th - Math.PI / 2 : th + Math.PI / 2;
+      D.arrowPolar(c, cx, cy, rAng, f.R * k, col.normal, { label: lab('R', f.R) });
+    }
+    if (f.Fmax > 1e-9 && st0.kind !== 'sliding') {
+      var gdir = Math.abs(F) > 1e-12 ? (F > 0 ? th : th + Math.PI) : th;
+      D.arrowPolar(c, cx, cy, gdir, f.Fmax * k, col.friction, { dash: [2, 5], width: 1.2, hollow: true });
+    }
+    if (Math.abs(F) > 1e-9) D.arrowPolar(c, cx, cy, F > 0 ? th : th + Math.PI, Math.abs(F) * k, col.friction, { label: lab('F', Math.abs(F)) });
+    if (p.P > 0) D.arrowPolar(c, cx, cy, th + U.rad(p.phi), p.P * k, col.applied, { label: lab('P', p.P) });
+    // velocity
+    if (Math.abs(st0.v) > 1e-6) {
+      var vy = cy - ct * (bh / 2 + 26), vx = cx - st * (bh / 2 + 26);
+      D.arrowPolar(c, vx, vy, st0.v > 0 ? th : th + Math.PI, 26 + Math.min(60, Math.abs(st0.v) * 6), col.velocity, { label: 'v = ' + U.sf(Math.abs(st0.v)) + ' m/s', width: 2 });
+    }
+  }
+
+  /* ---------- plots ---------- */
+  function drawPlots() {
+    if (!sim || sim.invalid) return;
+    var T = prm.values.T, vl = [];
+    sim.phases.forEach(function (ph) { if (ph.t0 > 1e-9 && ph.t0 < T) vl.push({ x: ph.t0, label: 'v = 0' }); });
+    pS.draw({ x: [0, T], series: [{ fn: function (t) { return sim.stateAt(t).s; }, color: ui.colors().s1, breaks: vl.map(function (v) { return v.x; }) }], cursor: clock.t, vlines: vl });
+    pV.draw({ x: [0, T], series: [{ fn: function (t) { return sim.stateAt(t).v; }, color: ui.colors().velocity, shade: true, breaks: vl.map(function (v) { return v.x; }) }], cursor: clock.t, vlines: vl });
+  }
+
+  /* ---------- live working ---------- */
+  function readout() {
+    if (!sim) return;
+    var p = params(), f = sim.f, s3 = U.sf, th = p.theta, mu = smooth.get() ? 0 : p.mu;
+    R.clear();
+    if (sim.invalid) { R.badge(sim.invalid + '. Use “Ring on rod” or reduce P.', 'warn').render(); return; }
+    var st0 = sim.stateAt(clock.t), kind = st0.kind;
+    var dir = function (x) { return x > 0 ? 'up the slope' : 'down the slope'; };
+    if (kind === 'static') R.badge('In equilibrium: friction ' + s3(Math.abs(st0.F)) + ' N < μR = ' + s3(f.Fmax) + ' N', 'ok');
+    else if (kind === 'limiting') R.badge('Limiting equilibrium: F = μR (on the point of moving ' + dir(f.D) + ')', 'warn');
+    else R.badge('Moving ' + dir(st0.v || f.D) + ': friction = μR = ' + s3(f.Fmax) + ' N, opposing motion', 'info');
+
+    R.head('Resolve perpendicular to the plane');
+    R.eq('mg', U.num(p.m, 4) + ' × ' + g, f.W, 'N');
+    if (th > 0) { R.eq('mg cos θ', s3(f.W) + ' × cos ' + U.num(th, 2) + '°', f.Wperp, 'N'); }
+    if (p.P > 0) R.eq('P sin φ', U.num(p.P, 4) + ' × sin ' + U.num(p.phi, 2) + '°', f.Pperp, 'N');
+    R.eq('R', (p.contact === 'ring' ? '|' : '') + (th > 0 ? 'mg cos θ' : 'mg') + (p.P > 0 ? ' − P sin φ' : '') + (p.contact === 'ring' ? '|' : ''), f.R, 'N');
+    R.eq('μR', U.num(mu, 4) + ' × ' + s3(f.R), f.Fmax, 'N');
+
+    R.head('Resolve along the plane (up slope +)');
+    if (th > 0) R.eq('mg sin θ', s3(f.W) + ' × sin ' + U.num(th, 2) + '°', f.Wpar, 'N');
+    if (p.P > 0) R.eq('P cos φ', U.num(p.P, 4) + ' × cos ' + U.num(p.phi, 2) + '°', f.Ppar, 'N');
+    R.eq('D', 'net force without friction = ' + (p.P > 0 ? 'P cos φ' : '0') + (th > 0 ? ' − mg sin θ' : ''), f.D, 'N');
+    if (f.Fmax > 0) {
+      var ratio = Math.abs(f.D) / f.Fmax;
+      R.html('<div class="head">Friction needed ÷ friction available: |D| ÷ μR = ' + s3(ratio) + '</div><div class="meter"><div style="width:' + Math.min(100, ratio * 100) + '%;background:' + (ratio > 1 + 1e-9 ? 'var(--warn)' : 'var(--c-friction)') + '"></div></div>');
+    }
+    sim.phases.forEach(function (ph, i) {
+      if (ph.kind !== 'sliding') return;
+      var sgnTxt = ph.F < 0 ? ' − μR' : ' + μR';
+      R.eq('a' + (sim.phases.length > 1 ? '<sub>' + (i + 1) + '</sub>' : ''), '(D' + sgnTxt + ') ÷ m = (' + s3(f.D) + sgnTxt.replace('μR', s3(f.Fmax)) + ') ÷ ' + U.num(p.m, 4), ph.a, 'm s<sup>−2</sup>');
+    });
+
+    R.head('Equilibrium conditions');
+    var rng = PL.equilibriumRange(p);
+    R.eq('least μ', '|D| ÷ R = ' + s3(Math.abs(f.D)) + ' ÷ ' + s3(f.R), PL.leastMu(p));
+    if (rng.intervals.length) {
+      rng.intervals.forEach(function (iv) { R.eq('P range', 'equilibrium for this φ', s3(iv[0]) + ' ≤ P ≤ ' + (isFinite(iv[1]) ? s3(iv[1]) : '∞'), 'N'); });
+    } else R.eq('P range', 'no value of P (at this φ) gives equilibrium', '—');
+    if (isFinite(rng.Pup)) R.eq('P (about to move up)', 'mg(sin θ + μ cos θ) ÷ (cos φ + μ sin φ)', rng.Pup, 'N');
+    if (isFinite(rng.Pdown)) R.eq('P (about to move down)', 'mg(sin θ − μ cos θ) ÷ (cos φ − μ sin φ)' + (rng.Pdown <= 0 ? ' ≤ 0 ⇒ rests with no P' : ''), rng.Pdown, 'N');
+
+    R.head('Motion at t = ' + clock.t.toFixed(2) + ' s');
+    R.eq('s', 'displacement (up slope +)', st0.s, 'm');
+    R.eq('v', 'velocity (up slope +)', st0.v, 'm s<sup>−1</sup>');
+    R.eq('distance', 'total path length so far', PL.distanceAt(sim, clock.t), 'm');
+    sim.phases.forEach(function (ph, i) {
+      if (isFinite(ph.t1)) {
+        var dd = ph.v0 * (ph.t1 - ph.t0) / 2;
+        R.eq('stops at', 't = −u ÷ a = ' + s3(-ph.v0) + ' ÷ ' + s3(ph.a), ph.t1, 's');
+        R.eq('distance to stop', 'u² ÷ (2|a|) = ' + s3(ph.v0) + '² ÷ ' + s3(2 * Math.abs(ph.a)), Math.abs(dd), 'm');
+      }
+    });
+    var n = Math.floor(clock.t);
+    if (n >= 1) R.eq('in the ' + ordinal(n) + ' second', 's(' + n + ') − s(' + (n - 1) + ')', sim.stateAt(n).s - sim.stateAt(n - 1).s, 'm');
+    R.render();
+  }
+  function ordinal(n) { var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+
+  ui.onTheme(function () { drawScene(); drawPlots(); });
+  vp.onResize = drawScene;
+  // restore from URL hash
+  var hsh = ui.readHash();
+  if (hsh.contact) contact.set(hsh.contact, true);
+  if (hsh.smooth) smooth.set(true, true);
+  var init = {}; ['m', 'theta', 'mu', 'P', 'phi', 'u', 'T'].forEach(function (k) { if (typeof hsh[k] === 'number') init[k] = hsh[k]; });
+  prm.set(init, true);
+  update();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

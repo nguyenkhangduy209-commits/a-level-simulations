@@ -1,0 +1,592 @@
+Cambridge International AS & A Level
+This document has 28 pages. Any blank pages are indicated.
+DC (MS/JG) 197911/5
+© UCLES 2021 [Turn over
+*9063666085*
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions May/June 2021
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen or correction fluid.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2021 9702/42/M/J/21
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1 at2
+2
+v 2 = u 2+2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p =
+1Nm
+〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω (x 2-x2)
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2021 9702/42/M/J/21 [Turn over
+
+4
+BLANK PAGE
+© UCLES 2021 9702/42/M/J/21
+
+5
+Answer all the questions in the spaces provided.
+1 (a) Define gravitational field strength.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) An isolated planet is a uniform sphere of radius 3.39 × 106 m. Its mass of 6.42 × 1023 kg may
+be considered to be a point mass concentrated at its centre. The planet rotates about its axis
+with a period of 24.6 hours.
+For an object resting on the surface of the planet at the equator, calculate, to three significant
+figures:
+(i) the gravitational field strength
+field strength = .............................................. N kg−1 [2]
+(ii) the centripetal acceleration
+acceleration = ................................................ m s−2 [2]
+(iii) the force per unit mass exerted on the object by the surface of the planet.
+force per unit mass = .............................................. N kg−1 [1]
+[Total: 6]
+© UCLES 2021 9702/42/M/J/21 [Turn over
+
+6
+2 An ideal gas has a volume of 3.1 × 10−3 m3 at a pressure of 8.5 × 105 Pa and a temperature of
+290 K, as shown in Fig. 2.1.
+volume 3.1 × 10−3 m3 volume 6.3 × 10−3 m3
+pressure 8.5 × 105 Pa pressure 2.7 × 105 Pa
+temperature 290 K temperature T
+F
+Fig. 2.1
+The gas suddenly expands to a volume of 6.3 × 10−3 m3. During the expansion, no thermal energy
+is transferred. The final pressure of the gas is 2.7 × 105 Pa at temperature T , as shown in Fig. 2.1.
+F
+(a) Show that the number of gas molecules is 6.6 × 1023.
+[3]
+(b) (i) Show that the final temperature T of the gas is 190 K.
+F
+[1]
+© UCLES 2021 9702/42/M/J/21
+
+7
+(ii) The average translational kinetic energy E of a molecule of an ideal gas is given by
+K
+3
+E = kT
+K 2
+where T is the thermodynamic temperature and k is the Boltzmann constant.
+Calculate the increase in internal energy ΔU of the gas.
+ΔU = ...................................................... J [3]
+(c) Use the first law of thermodynamics to explain why the external work w done on the gas
+during the expansion is equal to the increase in internal energy in (b)(ii).
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 9]
+© UCLES 2021 9702/42/M/J/21 [Turn over
+
+8
+3 A U-shaped tube contains some liquid. The liquid column in each half of the tube has length L, as
+shown in Fig. 3.1.
+x
+x
+L L
+Fig. 3.1 Fig. 3.2
+The liquid columns are displaced vertically. The liquid then oscillates in the tube. The liquid levels
+are displaced from the equilibrium positions as shown in Fig. 3.2.
+The acceleration a of the liquid in the tube is related to the displacement x by the expression
+⎛ g⎞
+a = − x
+⎝ L⎠
+where g is the acceleration of free fall.
+(a) Explain how the expression shows that the liquid in the tube is undergoing simple harmonic
+motion.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+(b) The length L of each liquid column is 18 cm.
+Determine the period T of the oscillations.
+T = ...................................................... s [3]
+© UCLES 2021 9702/42/M/J/21
+
+9
+(c) The oscillations of the liquid in the tube are damped.
+In any one complete cycle of the oscillations, the amplitude decreases by 6.0% of its value at
+the beginning of the oscillation.
+Determine the ratio
+energy of oscillations after 3 cycles
+.
+initial energy of oscillations
+ratio = ......................................................... [3]
+[Total: 9]
+© UCLES 2021 9702/42/M/J/21 [Turn over
+
+10
+4 (a) A sinusoidal carrier wave has a constant amplitude and a frequency of 1.2 MHz. The carrier
+wave is modulated by a signal wave such that a 1.0 V displacement of the signal wave causes
+a change in frequency of 25 kHz.
+The signal wave has frequency 8.0 kHz and amplitude 2.0 V.
+(i) State the name of this type of modulation of the carrier wave.
+..................................................................................................................................... [1]
+(ii) For this modulated carrier wave, determine the variation, if any, in:
+1. its amplitude
+...........................................................................................................................................
+...........................................................................................................................................
+2. its frequency.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+[3]
+© UCLES 2021 9702/42/M/J/21
+
+11
+(b) An audio signal is transmitted by means of a modulated radio wave.
+The variation with frequency of the amplitude of the radio wave is shown in Fig. 4.1.
+amplitude
+0
+225 240 255
+frequency / kHz
+Fig. 4.1
+For this transmission, determine:
+(i) the wavelength, in km, of the carrier wave
+wavelength = ................................................... km [2]
+(ii) the bandwidth
+bandwidth = .................................................. kHz [1]
+(iii) the frequency of the audio signal.
+frequency = .................................................. kHz [1]
+[Total: 8]
+© UCLES 2021 9702/42/M/J/21 [Turn over
+
+12
+5 (a) An isolated metal sphere of radius r is charged so that the electric potential at its surface is
+V .
+0
+On Fig. 5.1, sketch the variation with distance x from the centre of the sphere of the electric
+potential. Your graph should extend from x = 0 to x = 3r.
+1.0 V
+0
+electric
+potential
+0.5 V
+0
+0
+0 r 2r 3r
+x
+Fig. 5.1
+[3]
+(b) Photons having wavelength λ are incident on a metal surface.
+The maximum wavelength for which there is emission of electrons is λ .
+0
+λ
+For photons of wavelength 0, the maximum kinetic energy of the emitted electrons is E .
+2 MAX
+On Fig. 5.2, sketch the variation with wavelength λ of the maximum kinetic energy for values
+λ
+of wavelength between λ = 0 and λ = λ .
+3 0
+3 E
+MAX
+energy
+2 E
+MAX
+E
+MAX
+0
+0 λ λ λ
+0 0 0
+3 2 λ
+Fig. 5.2
+[3]
+© UCLES 2021 9702/42/M/J/21
+
+13
+(c) A pure sample of a radioactive isotope contains N nuclei. The half-life of the isotope is T1.
+0 2
+The product of the radioactive decay is stable.
+The variation with time t of the number N of nuclei of the radioactive isotope is shown in
+Fig. 5.3.
+N
+0
+number
+N
+0
+2
+N
+0
+0 T
+time t
+Fig. 5.3
+On Fig. 5.3:
+● label, on the time axis, the time t = 1.0T1 and the time t = 2.0T1
+2 2
+● sketch the variation with time t of the number of nuclei of the decay product for time t = 0
+to time t = T.
+[3]
+[Total: 9]
+© UCLES 2021 9702/42/M/J/21 [Turn over
+
+14
+6 (a) Two flat metal plates are held a small distance apart by means of insulating pads, as shown
+in Fig. 6.1.
+metal plate
+insulating
+metal plate pad
+Fig. 6.1
+Explain how the plates could act as a capacitor.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The arrangement in Fig. 6.1 has capacitance C.
+The arrangement is connected into the circuit of Fig. 6.2.
+A B
+sensitive
+ammeter
+V A
+C
+Fig. 6.2
+When the two-way switch is moved to position A, the capacitor is charged so that the potential
+difference across it is V. When the switch moves to position B, the capacitor fully discharges
+through the sensitive ammeter.
+The switch moves repeatedly between A and B so that the capacitor charges and then
+discharges with frequency f.
+© UCLES 2021 9702/42/M/J/21
+
+15
+(i) Show that the average current I in the ammeter is given by
+I = CVf.
+[2]
+(ii) For a potential difference V of 180 V and a frequency f of switching of 50 Hz, the average
+current I in the ammeter is 2.5 μA.
+Calculate the capacitance, in pF, of the parallel plates.
+capacitance = .................................................... pF [2]
+(c) A second capacitor is connected into the circuit of Fig. 6.2.
+The two capacitors are connected in parallel.
+State and explain the change, if any, in the average current in the ammeter.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 8]
+© UCLES 2021 9702/42/M/J/21 [Turn over
+
+16
+7 (a) Two properties of an ideal operational amplifier (op-amp) are infinite input impedance and
+infinite bandwidth.
+State what is meant by:
+(i) infinite input impedance
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) infinite bandwidth.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(b) A student uses a negative temperature coefficient thermistor in the circuit of Fig. 7.1 to
+indicate changes in temperature.
+100 kΩ
+1100 Ω
++5.0 V
+96 kΩ
+1.5 V X
+–
++
+400 Ω –5.0 V
+V
+Fig. 7.1
+(i) Show that the potential at point X is 0.40 V.
+[1]
+© UCLES 2021 9702/42/M/J/21
+
+17
+(ii) The thermistor has a resistance of 360 kΩ at a particular temperature.
+For this temperature of the thermistor, calculate the magnitude of the reading on the
+voltmeter.
+voltmeter reading = ...................................................... V [3]
+(iii) The temperature of the thermistor increases.
+State and explain the effect of this change on the magnitude of the reading on the
+voltmeter.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(iv) Explain why the amplifier circuit will no longer indicate temperature changes when the
+magnitude of the gain of the circuit is greater than 12.5.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+[Total: 9]
+© UCLES 2021 9702/42/M/J/21 [Turn over
+
+18
+8 (a) Define magnetic flux density.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Electrons, each of mass m and charge q, are accelerated from rest in a vacuum through a
+potential difference V.
+Derive an expression, in terms of m, q and V, for the final speed v of the electrons. Explain
+your working.
+[2]
+(c) The accelerated electrons in (b) are injected at point S into a region of uniform magnetic field
+of flux density B, as illustrated in Fig. 8.1.
+region of uniform
+magnetic field,
+flux density B
+S
+path of electrons,
+radius r
+Fig. 8.1
+The electrons move at right angles to the direction of the magnetic field. The path of the
+electrons is a circle of radius r.
+© UCLES 2021 9702/42/M/J/21
+
+19
+q
+(i) Show that the specific charge of the electrons is given by the expression
+m
+q 2V
+= .
+m B 2 r 2
+Explain your working.
+[2]
+(ii) Electrons are accelerated through a potential difference V of 230 V. The electrons are
+injected normally into the magnetic field of flux density 0.38 mT.
+The radius r of the circular orbit of the electrons is 14 cm.
+Use this information to calculate a value for the specific charge of an electron.
+specific charge = .............................................. C kg−1 [2]
+(iii) Suggest why the arrangement outlined in (ii), using the same values of B and V, is not
+practical for the determination of the specific charge of α-particles.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 10]
+© UCLES 2021 9702/42/M/J/21 [Turn over
+
+20
+9 (a) State two situations in which a charged particle in a magnetic field does not experience a
+force.
+1. ...............................................................................................................................................
+...................................................................................................................................................
+2. ...............................................................................................................................................
+...................................................................................................................................................
+[2]
+(b) A loosely coiled metal spring is suspended from a fixed point, as shown in Fig. 9.1.
+fixed
+point
+spring
+small
+mass
+flexible
+lead
+Fig. 9.1
+Electrical connections are made to the ends of the spring by means of a flexible lead.
+The length of the spring is measured before the switch is closed and then again after the
+switch is closed.
+© UCLES 2021 9702/42/M/J/21
+
+21
+When the switch is closed, a magnetic field is set up around each coil of the spring.
+By reference to these magnetic fields, explain why there is a change in length of the spring.
+State whether the spring extends or contracts.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [4]
+(c) With the switch in (b) closed, the small mass on the free end of the spring is now made to
+oscillate vertically.
+Use the principles of electromagnetic induction to explain why small fluctuations in the current
+in the spring are found to occur.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+[Total: 9]
+© UCLES 2021 9702/42/M/J/21 [Turn over
+
+22
+10 (a) By reference to heating effect, explain what is meant by the root-mean-square (r.m.s.) value
+of an alternating current.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The variations with time t of two currents I and I are shown in Fig. 10.1 and Fig. 10.2.
+1 2
+3
+I / A
+1
+2
+1
+0
+0 t
+–1
+–2
+–3
+Fig. 10.1
+3
+I / A
+2
+2
+1
+0
+0 t
+–1
+–2
+–3
+Fig. 10.2
+© UCLES 2021 9702/42/M/J/21
+
+23
+(i) Use Fig. 10.1 to determine the peak value and the r.m.s. value of the current I .
+1
+peak value = ............................................................ A
+r.m.s. value = ............................................................ A
+[1]
+(ii) Use Fig. 10.2 to determine the peak value and the r.m.s. value of the current I .
+2
+peak value = ............................................................ A
+r.m.s. value = ............................................................ A
+[1]
+(c) The variation with time t of the supply voltage V to a house is given by the expression
+V = 240 sin kt
+where V is in volts, t is in seconds and k is a constant with unit rad s−1.
+(i) The frequency of the supply voltage is 50 Hz.
+Determine k to two significant figures.
+k = ............................................. rad s−1 [2]
+(ii) The supply voltage is applied to a heater. The mean power of the heater is 3.2 kW.
+Calculate the resistance of the heater.
+resistance = ..................................................... Ω [2]
+[Total: 8]
+© UCLES 2021 9702/42/M/J/21 [Turn over
+
+24
+BLANK PAGE
+© UCLES 2021 9702/42/M/J/21
+
+25
+11 (a) State the purpose of computed tomography (CT scanning).
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) Outline the principles of CT scanning.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [5]
+[Total: 6]
+© UCLES 2021 9702/42/M/J/21 [Turn over
+
+26
+12 (a) State what is meant by a photon.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A stationary nucleus of samarium-157 (157 Sm) emits a gamma-ray (γ-ray) photon of energy
+62
+0.57 MeV.
+Determine, for one γ-ray photon:
+(i) its wavelength
+wavelength = ..................................................... m [2]
+(ii) its momentum.
+momentum = ................................................... N s [2]
+© UCLES 2021 9702/42/M/J/21
+
+27
+(c) (i) Using your answer to (b)(ii), determine the speed of the samarium-157 nucleus after
+emission of the photon.
+speed = ................................................ m s−1 [2]
+(ii) By reference to your answer in (c)(i), explain quantitatively why the speed of the
+samarium-157 nucleus may be assumed to be negligible compared with the speed of the
+photon.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+[Total: 9]
+© UCLES 2021 9702/42/M/J/21
+
+28
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of the University of
+Cambridge Local Examinations Syndicate (UCLES), which itself is a department of the University of Cambridge.
+© UCLES 2021 9702/42/M/J/21

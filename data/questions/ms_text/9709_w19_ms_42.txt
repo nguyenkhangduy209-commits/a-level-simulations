@@ -1,0 +1,293 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+MATHEMATICS 9709/42
+Paper 4 October/November 2019
+MARK SCHEME
+Maximum Mark: 50
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the October/November 2019 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 13 printed pages.
+© UCLES 2019 [Turn over
+
+9709/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the
+specific content of the mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these
+marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the
+scope of the syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the
+question as indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently e.g. in situations where candidates have not followed instructions or in the application of generic level
+descriptors.
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may
+be limited according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or
+grade descriptors in mind.
+© UCLES 2019 Page 2 of 13
+
+9709/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Mark Scheme Notes
+The following notes are intended to aid interpretation of mark schemes in general, but individual mark schemes may include marks awarded for
+specific reasons outside the scope of these notes.
+Types of mark
+M Method mark, awarded for a valid method applied to the problem. Method marks are not lost for numerical errors, algebraic slips or
+errors in units. However, it is not usually sufficient for a candidate just to indicate an intention of using some method or just to quote a
+formula; the formula or idea must be applied to the specific problem in hand, e.g. by substituting the relevant quantities into the
+formula. Correct application of a formula without the formula being quoted obviously earns the M mark and in some cases an M mark
+can be implied from a correct answer.
+A Accuracy mark, awarded for a correct answer or intermediate step correctly obtained. Accuracy marks cannot be given unless the
+associated method mark is earned (or implied).
+B Mark for a correct result or statement independent of method marks.
+DM or DB When a part of a question has two or more “method” steps, the M marks are generally independent unless the scheme specifically
+says otherwise; and similarly, when there are several B marks allocated. The notation DM or DB is used to indicate that a particular M
+or B mark is dependent on an earlier M or B (asterisked) mark in the scheme. When two or more steps are run together by the
+candidate, the earlier marks are implied and full credit is given.
+FT Implies that the A or B mark indicated is allowed for work correctly following on from previously incorrect results. Otherwise, A or B
+marks are given for correct work only.
+© UCLES 2019 Page 3 of 13
+
+9709/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Abbreviations
+AEF/OE Any Equivalent Form (of answer is equally acceptable) / Or Equivalent
+AG Answer Given on the question paper (so extra checking is needed to ensure that the detailed working leading to the result is valid)
+CAO Correct Answer Only (emphasising that no “follow through” from a previous error is allowed)
+CWO Correct Working Only
+ISW Ignore Subsequent Working
+SOI Seen Or Implied
+SC Special Case (detailing the mark to be given for a specific wrong solution, or a case where some standard marking practice is to be
+varied in the light of a particular circumstance)
+WWW Without Wrong Working
+AWRT Answer Which Rounds To
+© UCLES 2019 Page 4 of 13
+
+9709/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Mark Guidance
+1 (v=)3t2– 12t + 4 *M1 Attempt at differentiation of s to find v
+(a=)6t– 12 *M1 Attempt at differentiation of v to find a
+[When a= 0, t = 2] DM1 Solve to find t when a=0 and find v at this time
+v=–8ms–1 A1
+Alternative method for question 1
+(v=)3t2– 12t + 4 M1 Attempt at differentiation of s to find v
+(v=)3(t– 2)2 – 8 M1 For using the method of completing the square or using the value
+or t= −b = 12 =2 of‘ ' −b ' to find the t value of the minimum velocity
+2a 6 2a
+M1 Use of the t value at minimum velocity to find v
+v=–8ms–1 A1
+4
+© UCLES 2019 Page 5 of 13
+
+9709/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Mark Guidance
+2(i) (12−V) M1 Use gradient of graph or constant acceleration formulae to set up
+(35−30) =0.8 or 12 = V + 0.8 × 5 an equation in V
+V=8 A1
+2
+2(ii)    25×8+5×10+15×6+ 1 2 ×(U+8)×5=375    M1 A se t t t e u m p p a t n t o eq f u in a d ti o to n t a fo l r d U ist a u n si c n e g t r E a I v T e H lle E d R b a y r e th a e s tractor in 50s to
+OR suvat equations OR a combination of areas and suvat
+In either case total distance must be attempted
+A1FT Correct equation FT on their V from (i)
+U=6 A1
+3
+© UCLES 2019 Page 6 of 13
+
+9709/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Mark Guidance
+3 4 3 M1 Resolving vertically
+T × +T × +0.3g=5
+A 5 B 5
+3 4 M1 Resolving horizontally
+T × =T ×
+A 5 B 5
+A1 Both correct
+M1 Solve for TA or TB
+TA=1.6N and TB = 1.2 N A1
+Alternative method for question 3
+5−3 T T  M1 Attempt one pair of Lami’s equations
+ sin90 = sin12 A 6.9 = sin1 B 43.1 
+M1 Attempt a second pair of Lami equations
+A1 Equations all correct
+M1 Evaluate TA or TB
+TA=1.6N and TB = 1.2 N A1
+© UCLES 2019 Page 7 of 13
+
+9709/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Mark Guidance
+3 Alternative method for question 3
+4 4 M1 Resolve along PA
+T =5cos36.9−3cos36.9=5× −3×
+A 5 5
+3 3 M1 Resolve along PB
+TB=5cos53.1−3cos53.1=5× −3×
+5 5
+A1 Both correct
+M1 Evaluate TA or TB
+TA=1.6N and TB = 1.2 N A1
+Alternative method for question 3
+Forces 2N, TA and TB with angles 36.9 and 53.1 M1 Attempt to illustrate a triangle of forces
+[TA=2cos36.9, TB = 2cos53.1] M1 Use trigonometry in the triangle to find TA and TB
+A1 Both correct
+M1 Solve for TA or TB
+TA=1.6N and TB = 1.2 N A1
+5
+© UCLES 2019 Page 8 of 13
+
+9709/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Mark Guidance
+4(i) P=3000 × 30 M1 Use of P=Fv with F=resistance
+P=90000 W = 90kW A1
+2
+4(ii) PE gained = 25000gh B1 Correct expression for PE Allow PE=25000gdsin2
+1 B1 For either correct
+Initial KE= ×25000×302 [= 11 250 000]
+2 [KE loss = 3 437 500]
+1
+Final KE= ×25000×252 [= 7 812 500]
+2
+3000h M1 For a 4 term work-energy equation, correct dimensions
+Initial KE = Final KE + 25000gh +
+sin2
+OR
+Initial KE = Final KE + 25000gdsin2 + 3000d
+A1 Correct work-energy equation involving h or d
+h=10.2m (10.2318…) A1
+5
+© UCLES 2019 Page 9 of 13
+
+9709/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Mark Guidance
+5(i) h =20t− 1 ×10t2 or h =± 1 ×10(t−1)2 B1 OE
+A 2 B 2 h =20(T+1)− 1 ×10(T+1)2 or h =± 1 ×10T2
+A 2 B 2
+[Meet when 20t− 1 ×10t2+ 1 ×10(t−1)2=40] *M1 Set up an equation using their hA, their hB and 40
+2 2
+10t–35= 0 DM1 Solve for t and attempt to find the height at collision.
+t=3.5 so height at collision=8.75m A1 T =2.5 and height at collision=8.75m
+Alternative method for question 5(i)
+1 B1 Finding distance travelled by A and its speed after 1 second
+h =20×1− ×10×12=15,v=20−10×1=10
+A 2
+HA +HB = 25 *M1 T is the time beyond 1s until the particles reach same level HA
+  10T− 1 ×10×T2   + 1 ×10×T2=25 and HB are distances travelled by A and B in T seconds.
+ 2  2
+[10T=25 → T = 2.5] DM1 Solve for T and attempt to find the height at collision
+t=3.5 so height = 8.75 m A1
+4
+© UCLES 2019 Page 10 of 13
+
+9709/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Mark Guidance
+5(ii) vA =20–gt = –15 or vA 2=202+2(–g)(8.75) M1 Use of their t or their h ⩽ 20 from 5(i) in a constant acceleration
+formula which would lead to finding vA
+vB =–g(t – 1) = –25 or vB 2=2(g)(40–8.75) M1 Use of their t ± 1 or their 40 – h from 5(i) in a constant
+acceleration formula which would lead to finding vB
+Difference = 10 ms–1 A1 CWO
+3
+Question Answer Mark Guidance
+6(i) 1 M1 1
+4.5=0+ ×a×52 For use of s=ut+ at2 to find a
+2 2
+a=0.36 A1
+24 M1 Resolving horizontally. Allow use of θ=16.3
+6× −F=3×0.36
+25
+F=4.68N A1
+4
+6(ii) 7 B1
+R=3g−6sin16.3=3g−6× [=28.32]
+25
+4.68=µ× 28.32 M1 Use of F=µR
+µ=0.165 (0.165254…) A1 39
+AG. Allow µ=
+236
+3
+© UCLES 2019 Page 11 of 13
+
+9709/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Mark Guidance
+6(iii) v=5×0.36 [= 1.8] B1FT For velocity at t=5 ft on their a from 6(i)
+or v= (2×0.36×4.5)[=1.8]
+3a=–0.165 × 3g M1 Using Newton’s second law with new frictional force
+0=1.8–0.165gt (t = 1.09) M1 Using constant acceleration equations which would lead to a
+positive value of t
+Total time = 5 + 1.09 = 6.09s A1
+4
+Question Answer Mark Guidance
+7(i) M1 Use of Newton’s second law for P or Q or the system
+3 A1 Two correct equations
+For P: T−0.3g× =T−0.3gsin36.9=0.3a
+5 Allow use of θ = 36.9
+For Q: 0.2g – T = 0.2a
+3
+System: 0.2g−0.3g× =(0.2+0.3)a
+5
+or 0.2g – 0.3g sin 36.9 = (0.2 + 0.3)a
+[0.2g–0.18g = 0.5a] M1 For solving either the system for a or for solving a pair of
+simultaneous equations for a or T
+a=0.4ms–2 A1
+T=1.92N A1
+5
+© UCLES 2019 Page 12 of 13
+
+9709/42 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Mark Guidance
+7(ii) 1 M1 For use of the constant acceleration equations with their a from
+0.8=0+ ×0.4×t2a
+2 7(i) and a ≠ ± g for a complete method to find t
+t = 2 s A1
+2
+7(iii) Speed when Q hits the floor=2×0.4(=0.8) B1FT Using v=u+at with u=0
+or v= (2×0.4×0.8)[=0.8] Allow FT for their unsimplified v = at or v2 = 2as with
+a from (i), t from (ii) and s = 0.8
+3 M1 Using Newton’s second law for P to find a ≠ ± g
+−0.3g× =−0.3gsin36.9=0.3a [a = –6]
+5
+1 M1 Use of the constant acceleration equation(s) to find the time
+0=0.8t+ ×(−6)t2(t=0.2666...)
+2 taken for P to return to the position where the string first became
+or slack.
+0 = 0.8 – 6T
+2 4
+(T = 0.13333 = and t = 2T = 0.26666 = )
+15 15
+4 34 A1
+Total time = 2 + 0.266... = 2 + = 2.27 = s
+15 15
+4
+© UCLES 2019 Page 13 of 13

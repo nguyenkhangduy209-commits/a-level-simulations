@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deformation of solids</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-materials.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  // Cambridge rounding: exact halves round away from zero (49.05 → 49.1); toPrecision alone can round 49.05 down (binary floating point)
+  (function (sf, dp) { SIM.util.sf = function (x, n) { return typeof x === 'number' && isFinite(x) ? sf(x * (1 + 1e-12), n) : sf(x, n); };
+    SIM.util.dp = function (x, d) { return typeof x === 'number' && isFinite(x) ? dp(x * (1 + 1e-12), d) : dp(x, d); }; })(SIM.util.sf, SIM.util.dp);
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, MT = SIM.materials;
+  var course = ui.course('9702'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Deformation of solids: Hooke’s law, elastic energy, Young modulus', g: g,
+    tags: ['9702 6.1 Stress and strain', '9702 6.2 Elastic and plastic behaviour'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 20 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 2, onFrame: function () { draw(); readout(); } });
+  ui.legend(sceneCard, [
+    { color: 'var(--c-s1)', label: 'loading curve' }, { color: 'var(--c-s3)', label: 'unloading' },
+    { color: 'var(--c-pos)', label: 'area = work done' }, { color: 'var(--c-applied)', label: 'load F' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pF = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'F / N', xLabel: 'x / m' });
+  var pS = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'stress / MPa', xLabel: 'strain' });
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var mode = ui.select(paramCard, { label: 'Situation', value: 'spring', options: [
+    { value: 'spring', label: 'Spring / sample: force–extension, loading and unloading' },
+    { value: 'wire', label: 'Wire: stress, strain and the Young modulus' }] }, function () { clock.pause(); update('*'); clock.seek(0); });
+  var sense = ui.select(paramCard, { label: 'Force', value: 'tension', options: [
+    { value: 'tension', label: 'tensile (stretching): extension' }, { value: 'compression', label: 'compressive (squashing): compression' }] }, function () { update('*'); });
+  var solve = ui.select(paramCard, { label: 'Find', value: 'E', options: [
+    { value: 'E', label: 'Young modulus E from the measured extension' }, { value: 'x', label: 'extension x from a known E' }] }, function () { update('*'); });
+  var prm = ui.params(paramCard, [
+    { key: 'k', label: 'Spring constant (initial gradient)', sym: 'k', unit: 'N m<sup>−1</sup>', min: 1, max: 5000, step: 0.01, value: 50 },
+    { key: 'FP', label: 'Load at the limit of proportionality', sym: 'F<sub>P</sub>', unit: 'N', min: 0.1, max: 500, step: 0.1, value: 10 },
+    { key: 'FE', label: 'Load at the elastic limit (≥ F<sub>P</sub>)', sym: 'F<sub>E</sub>', unit: 'N', min: 0.1, max: 500, step: 0.1, value: 11 },
+    { key: 'r', label: 'Gradient beyond the limit ÷ k (model)', sym: 'r', unit: '', min: 0.05, max: 1, step: 0.01, value: 0.3 },
+    { key: 'F', label: 'Load applied', sym: 'F', unit: 'N', min: 0, max: 1000, step: 0.01, value: 4 },
+    { key: 'L', label: 'Original length of wire', sym: 'L', unit: 'm', min: 0.1, max: 5, step: 0.001, value: 2 },
+    { key: 'd', label: 'Diameter of wire', sym: 'd', unit: 'mm', min: 0.05, max: 3, step: 0.001, value: 0.5 },
+    { key: 'Fw', label: 'Load on wire', sym: 'F', unit: 'N', min: 0, max: 1000, step: 0.1, value: 50 },
+    { key: 'x', label: 'Extension of wire', sym: 'x', unit: 'mm', min: 0.001, max: 30, step: 0.001, value: 2.5 },
+    { key: 'E', label: 'Young modulus', sym: 'E', unit: 'GPa', min: 1, max: 450, step: 0.1, value: 200 },
+    { key: 'dF', label: 'Uncertainty in F', sym: 'ΔF', unit: 'N', min: 0, max: 10, step: 0.01, value: 0.5 },
+    { key: 'dL', label: 'Uncertainty in L', sym: 'ΔL', unit: 'mm', min: 0, max: 20, step: 0.1, value: 2 },
+    { key: 'dd', label: 'Uncertainty in d (micrometer)', sym: 'Δd', unit: 'mm', min: 0, max: 0.1, step: 0.001, value: 0.01 },
+    { key: 'dx', label: 'Uncertainty in x', sym: 'Δx', unit: 'mm', min: 0, max: 2, step: 0.01, value: 0.1 }
+  ], function (k) { update(k); });
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Spring k = 50 N/m with a 4.0 N load', mode: 'spring', sense: 'tension', values: { k: 50, FP: 10, FE: 11, r: 0.3, F: 4 },
+      note: 'x = F/k = 4.0 ÷ 50 = 0.080 m; E_P = ½Fx = ½ × 4.0 × 0.080 = 0.16 J.' },
+    { name: 'Spring extends 2.4 cm under 6.0 N: k and energy stored', mode: 'spring', sense: 'tension', values: { k: 250, FP: 15, FE: 16, r: 0.3, F: 6 },
+      note: 'k = F/x = 6.0 ÷ 0.024 = 250 N m⁻¹ (convert cm → m). E_P = ½ × 6.0 × 0.024 = 0.072 J.' },
+    { name: '9702/21 M/J 23 Q2(b): spring compressed by 8.2 N stores 0.32 J', mode: 'spring', sense: 'compression', values: { k: 105.06, FP: 20, FE: 22, r: 0.3, F: 8.2 },
+      note: 'E = ½Fx ⇒ x = 2 × 0.32 ÷ 8.2 = 0.078 m (mark scheme). Here k is set so that 8.2 N gives that compression.' },
+    { name: 'Beyond the limit of proportionality, within the elastic limit', mode: 'spring', sense: 'tension', values: { k: 100, FP: 10, FE: 12, r: 0.25, F: 11 },
+      note: 'No longer proportional, but still elastic: on unloading it returns to its original length.' },
+    { name: 'Beyond the elastic limit: plastic deformation', mode: 'spring', sense: 'tension', values: { k: 100, FP: 10, FE: 12, r: 0.25, F: 15 },
+      note: 'Unloads along a line parallel to the initial line ⇒ permanent extension 0.15 m. Work done = area under the loading curve = 3.0 J.' },
+    { name: 'Wire: L = 2.0 m, d = 0.50 mm, 50 N gives 2.5 mm ⇒ Young modulus', mode: 'wire', solve: 'E', values: { L: 2, d: 0.5, Fw: 50, x: 2.5, dF: 0.5, dL: 2, dd: 0.01, dx: 0.1 },
+      note: 'A = πd²/4 = 1.96×10⁻⁷ m²; stress = 2.55×10⁸ Pa; strain = 1.25×10⁻³; E = 2.04×10¹¹ Pa.' },
+    { name: 'Extension of a steel wire (E = 200 GPa): 1.5 m, 0.40 mm, 80 N', mode: 'wire', solve: 'x', values: { L: 1.5, d: 0.4, Fw: 80, E: 200, dF: 0.5, dL: 2, dd: 0.01, dx: 0.1 },
+      note: 'x = FL/(AE) = 80 × 1.5 ÷ (1.26×10⁻⁷ × 2.00×10¹¹) = 4.77×10⁻³ m.' },
+    { name: 'Experiment: percentage uncertainty in E (d counts twice)', mode: 'wire', solve: 'E', values: { L: 2, d: 0.5, Fw: 50, x: 2.5, dF: 0.5, dL: 2, dd: 0.01, dx: 0.1 },
+      note: '%E = %F + %L + 2 × %d + %x = 1.0 + 0.1 + 4.0 + 4.0 = 9.1%. Measure d in several places with a micrometer and average.' }
+  ], function (p) { mode.set(p.mode, true); if (p.sense) sense.set(p.sense, true); if (p.solve) solve.set(p.solve, true); clock.pause(); prm.set(p.values); clock.seek(p.mode === 'spring' ? 1 : 0); });
+
+  ui.notes(noteCard, [
+    'Hooke’s law (F = kx) only holds up to the <b>limit of proportionality</b>. E<sub>P</sub> = ½Fx = ½kx² only applies there too; beyond it use the area under the graph.',
+    'Extension x is the <b>change</b> in length, not the new length. Convert mm and cm to m.',
+    '<b>Strain has no unit</b> (it is a ratio of lengths). Stress and Young modulus are in Pa (N m<sup>−2</sup>).',
+    'Cross-sectional area A = πd²/4 = πr². Using d instead of r gives an answer 4× too big. Convert mm² carefully (1 mm² = 10<sup>−6</sup> m²).',
+    'Elastic: returns to its original shape when the load is removed. Plastic: permanent deformation (beyond the elastic limit). The elastic limit is not the same as the limit of proportionality.',
+    'The area under a force–extension graph is the work done, whatever its shape.',
+    'Beyond the limit of proportionality this page uses a straight line of smaller gradient as a <b>model</b>: real curves differ, so read values from the graph you are given.'
+  ]);
+
+  /* ---------- model ---------- */
+  var lu = null, wr = null;
+  function spring() { var v = prm.values; return { k: v.k, FP: v.FP, FE: Math.max(v.FE, v.FP), r: v.r }; }
+  function update(key) {
+    var md = mode.get(), v = prm.values;
+    ['k', 'FP', 'FE', 'r', 'F'].forEach(function (k) { prm.show(k, md === 'spring'); });
+    ['L', 'd', 'Fw', 'x', 'dF', 'dL', 'dd', 'dx'].forEach(function (k) { prm.show(k, md === 'wire'); });
+    prm.show('E', md === 'wire' && solve.get() === 'x');
+    sense.row.style.display = md === 'spring' ? '' : 'none';
+    solve.row.style.display = md === 'wire' ? '' : 'none';
+    if (md === 'spring') {
+      if (key === 'FP' && v.FE < v.FP) prm.set({ FE: v.FP }, true);
+      if (key === 'FE' && v.FE < v.FP) prm.set({ FP: v.FE }, true);
+      lu = MT.loadUnload(spring(), v.F);
+      prm.lock('x', false);
+    } else {
+      var dm = v.d * 1e-3;
+      if (solve.get() === 'x') {
+        var xm = MT.wireX(v.L, dm, v.Fw, v.E * 1e9);
+        if (isFinite(xm) && xm * 1000 <= 30) prm.set({ x: xm * 1000 }, true);
+        prm.lock('x', true, xm * 1000);
+      } else prm.lock('x', false);
+      wr = MT.wire(v.L, dm, v.Fw, solve.get() === 'x' ? MT.wireX(v.L, dm, v.Fw, v.E * 1e9) : v.x * 1e-3);
+    }
+    draw(); readout();
+  }
+
+  /* ---------- state during the load/unload animation (t in [0,2]: load 0→1, unload 1→2) ---------- */
+  function animState() {
+    var t = clock.t, c = lu.curve, F;
+    if (t <= 1) { F = lu.F * t; return { F: F, x: c.X(F), loading: true }; }
+    F = lu.F * (2 - t);
+    if (!lu.plastic) return { F: F, x: c.X(F), loading: false };
+    return { F: F, x: lu.xPerm + F / prm.values.k, loading: false };
+  }
+
+  /* ---------- drawing ---------- */
+  function draw() {
+    if (mode.get() === 'spring') drawSpring(); else drawWire();
+  }
+  function drawSpring() {
+    if (!lu) return;
+    var col = ui.colors(), v = prm.values, st = animState(), comp = sense.get() === 'compression';
+    var c0 = lu.curve, xMaxPlot = Math.max(lu.x, c0.xE, c0.xP) * 1.25 || 1;
+    vp.fit(-1, 9, -0.5, 6.2);
+    var c = vp.begin();
+    // support
+    var topY = comp ? 0.4 : 5.8;
+    D.ground(c, vp.X(0.6), vp.Y(topY), vp.X(3.4), vp.Y(topY), { flip: !comp });
+    var L0 = 2.4;   // natural length drawn
+    var xs = xMaxPlot > 0 ? st.x / xMaxPlot * 1.8 : 0;   // drawn extension (scaled)
+    var endY = comp ? topY + (L0 - xs) : topY - (L0 + xs);
+    D.spring(c, vp.X(2), vp.Y(topY), vp.X(2), vp.Y(endY), 12, 10);
+    // natural length marker
+    var natY = comp ? topY + L0 : topY - L0;
+    D.line(c, [vp.P(1.1, natY), vp.P(2.9, natY)], col.muted, { dash: [4, 4], width: 1 });
+    D.label(c, 'natural length', vp.X(1.05), vp.Y(natY), col.muted, { align: 'right', size: 10 });
+    c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
+    var bh = 0.5, by0 = comp ? endY : endY - bh;
+    c.beginPath(); c.rect(vp.X(1.5), vp.Y(by0 + bh), vp.X(2.5) - vp.X(1.5), vp.Y(by0) - vp.Y(by0 + bh)); c.fill(); c.stroke(); c.restore();
+    if (st.F > 1e-9) {
+      var ax = vp.X(2), ay = comp ? vp.Y(endY + bh) : vp.Y(endY - bh);
+      D.arrow(c, ax, comp ? ay - 46 : ay, ax, comp ? ay : ay + 46, col.applied, { label: 'F = ' + U.sf(st.F) + ' N' });
+    }
+    D.label(c, (comp ? 'compression' : 'extension') + ' x = ' + U.sf(st.x) + ' m (drawing scaled)', vp.X(4), vp.Y(3.4), col.ink, { align: 'left', size: 11 });
+    D.label(c, st.loading ? 'loading' : 'unloading', vp.X(4), vp.Y(2.8), col.muted, { align: 'left', size: 11 });
+    var stateTxt = lu.withinLoP ? 'within the limit of proportionality (Hooke’s law)' : lu.plastic ? 'beyond the elastic limit: plastic' : 'beyond the limit of proportionality but elastic';
+    D.label(c, stateTxt, vp.X(4), vp.Y(2.2), lu.plastic ? col.warn : lu.withinLoP ? col.ok : col.ink, { align: 'left', size: 11, bold: true });
+    // F–x graph
+    var Fmax = Math.max(lu.F, v.FE, v.FP) * 1.2 || 1;
+    var areaPts = [], xa = st.loading ? st.x : lu.x;
+    for (var i = 0; i <= 80; i++) { var xx = xa * i / 80; areaPts.push([xx, c0.F(xx)]); }
+    var series = [{ fn: function (x) { return c0.F(x); }, color: col.s1 }, { pts: areaPts, color: col.s1, shade: true, width: 1 }];
+    if (!st.loading) {
+      if (lu.plastic) series.push({ pts: [[lu.x, lu.F], [lu.xPerm, 0]], color: col.s3, width: 2.5 });
+      else series.push({ pts: [[0, 0]], color: col.s3, width: 1 });
+    }
+    var mk = [{ x: st.x, y: st.F, label: '(' + U.sf(st.x) + ' m, ' + U.sf(st.F) + ' N)', color: col.applied }];
+    var hl = [{ y: v.FP, label: 'limit of proportionality', color: col.muted }];
+    if (v.FE > v.FP + 1e-9) hl.push({ y: Math.max(v.FE, v.FP), label: 'elastic limit', color: col.warn });
+    pF.draw({ x: [0, xMaxPlot], y: [0, Fmax], series: series, markers: mk, hlines: hl, xLabel: (comp ? 'compression' : 'extension') + ' x / m', yLabel: 'F / N' });
+    pS.draw({ x: [0, 1], y: [0, 1], series: [], title: 'stress–strain: switch to “Wire”' });
+  }
+  function drawWire() {
+    if (!wr) return;
+    var col = ui.colors(), v = prm.values;
+    vp.fit(-1, 9, -0.5, 6.2);
+    var c = vp.begin();
+    D.ground(c, vp.X(0.8), vp.Y(5.8), vp.X(3.2), vp.Y(5.8), { flip: true });
+    var xs = Math.min(1.2, 0.6 + 0.6 * Math.min(1, wr.strain / 0.005));
+    D.line(c, [vp.P(2, 5.8), vp.P(2, 1.6 - (xs - 0.6))], col['object-line'], { width: Math.max(1, Math.min(6, v.d * 3)) });
+    c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5; var yb = 1.6 - (xs - 0.6);
+    c.beginPath(); c.rect(vp.X(1.5), vp.Y(yb), vp.X(2.5) - vp.X(1.5), vp.Y(yb - 0.6) - vp.Y(yb)); c.fill(); c.stroke(); c.restore();
+    D.label(c, 'L = ' + U.sf(v.L) + ' m', vp.X(2.3), vp.Y(4), col.ink, { align: 'left', size: 12 });
+    D.label(c, 'd = ' + U.sf(v.d) + ' mm (micrometer)', vp.X(2.3), vp.Y(3.5), col.ink, { align: 'left', size: 12 });
+    D.arrow(c, vp.X(2), vp.Y(yb - 0.6), vp.X(2), vp.Y(yb - 0.6) + 40, col.applied, { label: 'F = ' + U.sf(v.Fw) + ' N' });
+    D.label(c, 'x = ' + U.sf(wr.strain * v.L * 1000) + ' mm (exaggerated)', vp.X(4.2), vp.Y(2.4), col.ink, { align: 'left', size: 12 });
+    D.label(c, 'strain = x/L = ' + U.sf(wr.strain) + ' (no unit)', vp.X(4.2), vp.Y(1.9), col.ink, { align: 'left', size: 12 });
+    D.label(c, 'stress = F/A = ' + U.sf(wr.stress) + ' Pa', vp.X(4.2), vp.Y(1.4), col.ink, { align: 'left', size: 12 });
+    // stress–strain line through the origin with gradient E
+    var e = wr.strain, smax = Math.max(e * 1.4, 1e-6), Ep = wr.E;
+    pS.draw({ x: [0, smax], series: [{ fn: function (s) { return Ep * s / 1e6; }, color: col.s1 }], markers: [{ x: e, y: wr.stress / 1e6, label: 'gradient = E', color: col.applied }], xLabel: 'strain', yLabel: 'stress / MPa' });
+    var xm = wr.strain * v.L;
+    pF.draw({ x: [0, Math.max(xm * 1.4, 1e-9)], series: [{ fn: function (x) { return xm > 0 ? v.Fw * x / xm : 0; }, color: col.s1 }], markers: [{ x: xm, y: v.Fw, label: 'gradient = EA/L', color: col.applied }], xLabel: 'x / m', yLabel: 'F / N' });
+  }
+
+  /* ---------- working ---------- */
+  function readout() {
+    var md = mode.get(), v = prm.values, s3 = U.sf;
+    if ((md === 'spring' && !lu) || (md === 'wire' && !wr)) return;
+    R.clear();
+    if (md === 'spring') {
+      var comp = sense.get() === 'compression', xw = comp ? 'compression' : 'extension';
+      R.head('Loaded with F = ' + s3(v.F) + ' N (' + (comp ? 'compressive' : 'tensile') + ')');
+      if (lu.withinLoP) {
+        R.badge('F ≤ F<sub>P</sub>: Hooke’s law applies', 'ok');
+        R.eq(xw + ' x', 'F ÷ k = ' + s3(v.F) + ' ÷ ' + s3(v.k), lu.x, 'm');
+        R.eq('E<sub>P</sub>', '½Fx = ½ × ' + s3(v.F) + ' × ' + s3(lu.x), lu.epe, 'J');
+        R.eq('check', '½kx² = ½ × ' + s3(v.k) + ' × ' + s3(lu.x) + '²', MT.epeK(v.k, lu.x), 'J');
+      } else {
+        R.badge('F > F<sub>P</sub>: beyond the limit of proportionality — F = kx and ½Fx no longer apply', 'warn');
+        R.eq('x at the limit', 'x<sub>P</sub> = F<sub>P</sub> ÷ k = ' + s3(v.FP) + ' ÷ ' + s3(v.k), lu.curve.xP, 'm');
+        R.eq(xw + ' x', 'x<sub>P</sub> + (F − F<sub>P</sub>) ÷ (rk) (model) = ' + s3(lu.curve.xP) + ' + ' + s3(v.F - v.FP) + ' ÷ ' + s3(v.r * v.k), lu.x, 'm');
+      }
+      R.eq('work done (area)', lu.withinLoP ? 'triangle ½Fx' : 'triangle + trapezium = ½F<sub>P</sub>x<sub>P</sub> + ½(F<sub>P</sub> + F)(x − x<sub>P</sub>)', lu.work, 'J');
+      R.head('After the load is removed');
+      if (lu.plastic) {
+        R.badge('F > elastic limit: plastic deformation', 'warn');
+        R.eq('permanent ' + xw, 'x − F ÷ k = ' + s3(lu.x) + ' − ' + s3(v.F) + ' ÷ ' + s3(v.k) + ' (unloads parallel to the initial line)', lu.xPerm, 'm');
+        R.eq('energy released on unloading', 'area under unloading line = ½ × ' + s3(v.F) + ' × ' + s3(lu.x - lu.xPerm), lu.recovered, 'J');
+        R.eq('energy not recovered', 'work done − released', lu.notRecovered, 'J');
+      } else {
+        R.badge('Elastic: returns to its original length (permanent ' + xw + ' = 0)', 'ok');
+        R.eq('energy released on unloading', 'equals the work done (same curve back)', lu.recovered, 'J');
+      }
+      var st = animState();
+      R.head('Animation: ' + (st.loading ? 'loading' : 'unloading'));
+      R.eq('F', '', st.F, 'N'); R.eq('x', '', st.x, 'm');
+    } else {
+      var dm = v.d * 1e-3, sp = function (x) { var a = Math.abs(x); return a !== 0 && (a >= 1e6 || a < 1e-3) ? '(' + s3(x) + ')' : s3(x); };
+      R.head('Wire');
+      R.eq('A', 'πd²/4 = π × ' + sp(dm) + '² ÷ 4', wr.A, 'm<sup>2</sup>');
+      R.eq('stress', 'F ÷ A = ' + s3(v.Fw) + ' ÷ ' + sp(wr.A), wr.stress, 'Pa');
+      if (solve.get() === 'E') {
+        R.eq('strain', 'x ÷ L = ' + sp(v.x * 1e-3) + ' ÷ ' + s3(v.L), wr.strain, '(no unit)');
+        R.eq('E', 'stress ÷ strain = ' + sp(wr.stress) + ' ÷ ' + sp(wr.strain), wr.E, 'Pa');
+        R.eq('E', 'in GPa', wr.E / 1e9, 'GPa');
+      } else {
+        R.eq('strain', 'stress ÷ E = ' + sp(wr.stress) + ' ÷ ' + sp(v.E * 1e9), wr.strain, '(no unit)');
+        R.eq('x', 'strain × L = FL/(AE) = ' + sp(wr.strain) + ' × ' + s3(v.L), wr.strain * v.L, 'm');
+        if (wr.strain * v.L * 1000 > 30) R.badge('Extension is beyond the slider range (30 mm)', 'warn');
+      }
+      var xm = solve.get() === 'E' ? v.x * 1e-3 : wr.strain * v.L;
+      R.eq('energy stored', '½Fx = ½ × ' + s3(v.Fw) + ' × ' + s3(xm) + ' (if within the limit of proportionality)', 0.5 * v.Fw * xm, 'J');
+      if (solve.get() === 'E') {
+        var un = MT.youngUncertainty(v.Fw, v.dF, v.L, v.dL * 1e-3, dm, v.dd * 1e-3, v.x * 1e-3, v.dx * 1e-3);
+        R.head('Experiment: uncertainty in E = FL/(Ax) = 4FL/(πd²x)');
+        if (v.Fw > 0) {
+          R.eq('%F', '100 × ' + s3(v.dF) + ' ÷ ' + s3(v.Fw), un.pF, '%');
+          R.eq('%L', '100 × ' + s3(v.dL * 1e-3) + ' ÷ ' + s3(v.L), un.pL, '%');
+          R.eq('%d', '100 × ' + s3(v.dd) + ' ÷ ' + s3(v.d), un.pd, '%');
+          R.eq('%x', '100 × ' + s3(v.dx) + ' ÷ ' + s3(v.x), un.px, '%');
+          R.eq('%E', '%F + %L + 2 × %d + %x', un.pE, '%');
+          R.eq('ΔE', s3(un.pE) + '% of ' + s3(wr.E), wr.E * un.pE / 100, 'Pa');
+        } else R.badge('Apply a load to estimate uncertainties', 'info');
+        R.html('<div class="head">Method: long wire fixed at one end over a pulley (or vertical, with a reference wire), measure L with a metre rule, d with a micrometer in several places, add loads and read x from a scale/vernier; E = gradient of stress–strain (or FL/(Ax) from the F–x gradient).</div>');
+      }
+      if (v.Fw === 0) R.badge('No load: no stress or strain (E cannot be found)', 'info');
+    }
+    R.render();
+  }
+
+  ui.onTheme(draw);
+  vp.onResize = draw;
+  update('*');
+  clock.seek(1);
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

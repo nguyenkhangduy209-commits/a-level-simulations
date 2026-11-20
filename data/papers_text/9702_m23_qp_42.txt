@@ -1,0 +1,603 @@
+Cambridge International AS & A Level
+PHYSICS 9702/42
+Paper 4 A Level Structured Questions February/March 2023
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen or correction fluid.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+This document has 32 pages. Any blank pages are indicated.
+[Turn over
+*0862578481*
+DC (CJ/JG) 333162/4
+© UCLES 2023
+
+2
+Data
+acceleration of free fall g = 9.81 m s–2
+speed of light in free space c = 3.00 × 108 m s–1
+elementary charge e = 1.60 × 10–19 C
+unified atomic mass unit 1 u = 1.66 × 10–27 kg
+rest mass of proton m = 1.67 × 10–27 kg
+p
+rest mass of electron m = 9.11 × 10–31 kg
+e
+Avogadro constant N = 6.02 × 1023 mol–1
+A
+molar gas constant R = 8.31 J K–1 mol–1
+Boltzmann constant k = 1.38 × 10–23 J K–1
+gravitational constant G = 6.67 × 10–11 N m2 kg–2
+permittivity of free space ε = 8.85 × 10–12 F m–1
+0
+1
+( = 8.99 × 109 m F–1)
+4rf
+0
+Planck constant h = 6.63 × 10–34 J s
+Stefan–Boltzmann constant σ = 5.67 × 10–8 W m–2 K–4
+Formulae
+uniformly accelerated motion s = ut + 1at 2
+2
+v 2 = u 2 + 2as
+hydrostatic pressure ∆p = ρg∆h
+upthrust F = ρgV
+f v
+s
+Doppler effect for sound waves f =
+o v!v
+s
+electric current I = Anvq
+resistors in series R = R + R + ...
+1 2
+1 1 1
+resistors in parallel = + + ...
+R R R
+1 2
+© UCLES 2023 9702/42/F/M/23
+
+32
+GM
+gravitational potential ϕ = –
+r
+GMm
+gravitational potential energy E = –
+P r
+pressure of an ideal gas p =
+1Nm
+〈c2〉
+3 V
+simple harmonic motion a = – ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ! ω (x 2-x2)
+0
+Q
+electric potential V =
+4rf r
+0
+Qq
+electrical potential energy E =
+P 4rf r
+0
+1 1 1
+capacitors in series = + + ...
+C C C
+1 2
+capacitors in parallel C = C + C + ...
+1 2
+t
+-
+discharge of a capacitor x = x e RC
+0
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ωt
+0
+radioactive decay x = x e–λ t
+0
+0.693
+decay constant λ =
+t
+1
+2
+I (Z -Z )2
+intensity reflection coefficient R = 1 2
+I (Z +Z )2
+0 1 2
+Stefan–Boltzmann law L = 4πσr 2T 4
+∆λ Df v
+Doppler redshift á á
+λ f c
+© UCLES 2023 9702/42/F/M/23 [Turn over
+
+4
+1 (a) Define gravitational potential at a point.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Artemis is a spherical planet that may be assumed to be isolated in space. The variation with
+distance x from the centre of Artemis of the gravitational potential φ is shown in Fig. 1.1.
+x /107 m
+0 1 2 3
+0
+–0.5
+–1.0
+–1.5
+–2.0
+–2.5
+–3.0
+φ/107 J kg–1
+–3.5
+–4.0
+Fig. 1.1
+© UCLES 2023 9702/42/F/M/23
+
+5
+(i) The radius of Artemis is 4800 km.
+Determine the value of φ on the surface of Artemis.
+φ = ............................................... J kg–1 [1]
+(ii) Show that the mass of Artemis is 2.55 × 1024 kg.
+[1]
+(iii) Calculate the gravitational field strength g on the surface of Artemis.
+g = .............................................. N kg–1 [2]
+(iv) A satellite is in an orbit at a fixed position above a point on the surface of Artemis. The
+satellite is located above the equator of Artemis at a height above the surface where the
+gravitational potential is – 0.65 × 107 J kg–1.
+Calculate the period, in hours, of rotation of Artemis.
+period = ............................................... hours [4]
+© UCLES 2023 9702/42/F/M/23 [Turn over
+
+6
+(c) State one similarity and one difference between gravitational potential due to a point mass
+and electric potential due to a point charge.
+similarity ....................................................................................................................................
+...................................................................................................................................................
+difference ..................................................................................................................................
+...................................................................................................................................................
+[2]
+[Total: 12]
+© UCLES 2023 9702/42/F/M/23
+
+7
+BLANK PAGE
+© UCLES 2023 9702/42/F/M/23 [Turn over
+
+8
+2 (a) State what is meant by an ideal gas.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A fixed amount of helium gas is sealed in a container. The helium gas has a pressure of
+1.10 × 105 Pa, and a volume of 540 cm3 at a temperature of 27 °C.
+The volume of the container is rapidly decreased to 30.0 cm3. The pressure of the helium gas
+increases to 6.70 × 106 Pa and its temperature increases to 742 °C, as illustrated in Fig. 2.1.
+initial state final state
+1.10 × 105 Pa 6.70 × 106 Pa
+540 cm3 30.0 cm3
+27 °C 742 °C
+Fig. 2.1
+No thermal energy enters or leaves the helium gas during this process.
+(i) Show that the helium gas behaves as an ideal gas.
+[2]
+(ii) The first law of thermodynamics may be expressed as
+ΔU = q + W.
+Use the first law of thermodynamics to explain why the temperature of the helium gas
+increases.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+© UCLES 2023 9702/42/F/M/23
+
+9
+(iii) The average translational kinetic energy E of a molecule of an ideal gas is given by
+K
+3
+E = kT
+K 2
+where k is the Boltzmann constant and T is the thermodynamic temperature.
+Calculate the change in the total kinetic energy of the molecules of the helium gas.
+change in kinetic energy = ...................................................... J [3]
+(c) The mass of nitrogen gas in another container is 24.0 g at a temperature of 27 °C. The gas is
+cooled to its boiling point of –196 °C. Assume all the gas condenses to a liquid.
+For this change the specific heat capacity of nitrogen gas is 1.04 kJ kg–1 K–1.
+The specific latent heat of vaporisation of nitrogen is 199 kJ kg–1.
+Determine the thermal energy, in kJ, removed from the nitrogen gas.
+energy = .................................................... kJ [3]
+[Total: 12]
+© UCLES 2023 9702/42/F/M/23 [Turn over
+
+10
+3 An object is suspended from a vertical spring as shown in Fig. 3.1.
+spring
+object
+oscillation
+Fig. 3.1
+The object is displaced vertically and then released so that it oscillates, undergoing simple
+harmonic motion.
+Fig. 3.2 shows the variation with displacement x of the energy E of the oscillations.
+7.0
+P
+6.0
+5.0
+4.0
+Q
+E / mJ
+3.0
+R
+2.0
+1.0
+0
+–1.6 –1.2 –0.8 –0.4 0 0.4 0.8 1.2 1.6
+x / cm
+Fig. 3.2
+© UCLES 2023 9702/42/F/M/23
+
+11
+The kinetic energy, the potential energy and the total energy of the oscillations are each
+represented by one of the lines P, Q and R.
+(a) State the energy that is represented by each of the lines P, Q and R.
+P ...............................................................................................................................................
+Q ...............................................................................................................................................
+R ...............................................................................................................................................
+[2]
+(b) The object has a mass of 130 g.
+Determine the period of the oscillations.
+period = ...................................................... s [4]
+(c) (i) State the cause of damping.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) A light card is attached to the object. The object is displaced with the same initial
+amplitude and then released. During each complete oscillation the total energy of the
+system decreases by 8.0% of the total energy at the start of that oscillation.
+Determine the decrease in total energy, in mJ, of the system by the end of the first 6
+complete oscillations.
+energy lost = ................................................... mJ [2]
+© UCLES 2023 9702/42/F/M/23 [Turn over
+
+12
+(iii) State, with a reason, the type of damping that the card introduces into the system.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [1]
+[Total: 10]
+© UCLES 2023 9702/42/F/M/23
+
+13
+BLANK PAGE
+© UCLES 2023 9702/42/F/M/23 [Turn over
+
+14
+4 (a) State Coulomb’s law.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A charged sphere X is supported on an insulating stand. A second charged sphere Y is
+suspended by an insulating thread so that sphere Y is in equilibrium at the position shown in
+Fig. 4.1.
+vertical
+line
+1.2 m
+thread
+sphere X sphere Y
+charge +96 nC charge +64 nC
+0.080 m
+stand
+Fig. 4.1
+The charge on sphere X is +96 nC and the charge on sphere Y is +64 nC.
+Assume that the spheres behave as point charges.
+The length of the thread is 1.2 m and the centres of sphere X and sphere Y are separated
+horizontally by a distance of 0.080 m.
+© UCLES 2023 9702/42/F/M/23
+
+15
+(i) On Fig. 4.2, draw and label all the forces acting on sphere Y.
+Fig. 4.2
+[1]
+(ii) Determine the mass of sphere Y.
+mass = .................................................... kg [4]
+(iii) Calculate the total electric potential energy stored between X and Y.
+energy = ...................................................... J [1]
+© UCLES 2023 9702/42/F/M/23 [Turn over
+
+16
+(c) An electron enters the region between two parallel plates P and Q, that are separated by a
+distance of 18 mm, as shown in Fig. 4.3.
+plate P
++250 V
+path of
+electron
+18 mm
+plate Q
+Fig. 4.3
+The space between the plates is a vacuum.
+The potential difference between the plates is 250 V. The electric field may be assumed to be
+uniform in the region between the plates and zero outside this region.
+(i) State the direction of the electric force on the electron when between the plates.
+..................................................................................................................................... [1]
+(ii) Determine the magnitude of the force acting on the electron due to the electric field.
+force = ..................................................... N [2]
+(iii) Explain why the electron does not follow a circular path.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+[Total: 12]
+© UCLES 2023 9702/42/F/M/23
+
+17
+BLANK PAGE
+© UCLES 2023 9702/42/F/M/23 [Turn over
+
+18
+5 A capacitor, a battery of electromotive force (e.m.f.) 12 V, a resistor R and a two-way switch are
+connected in the circuit shown in Fig. 5.1.
+R
+T
+S
+12 V
+Fig. 5.1
+The switch is initially in position S. When the capacitor is fully charged, the switch is moved to
+position T so that the capacitor discharges. At time t after the switch is moved the charge on the
+capacitor is Q.
+The variation with t of ln (Q / μC) is shown in Fig. 5.2.
+3
+ln (Q /μC)
+2
+1
+0
+0 1 2 3 4 5
+t / s
+Fig. 5.2
+(a) Show that the capacitance of the capacitor is 1.5 μF.
+[3]
+© UCLES 2023 9702/42/F/M/23
+
+19
+(b) Determine the resistance of R.
+resistance = ..................................................... Ω [3]
+(c) Calculate the energy stored in the capacitor at time t = 0.
+energy = ...................................................... J [2]
+(d) A second identical resistor is now connected in parallel with R.
+The switch is initially in position S. When the capacitor is fully charged, the switch is moved to
+position T so that the capacitor discharges. At time t after the switch is moved the charge on
+the capacitor is Q.
+On Fig. 5.2, sketch a line to show the variation of ln (Q / μC) with t between time t = 0 and
+time t = 5.0 s. [2]
+[Total: 10]
+© UCLES 2023 9702/42/F/M/23 [Turn over
+
+20
+6 (a) A Hall probe is placed in a magnetic field. The Hall voltage is zero. The Hall probe is rotated
+to a new position in the magnetic field. The Hall voltage is now maximum.
+Explain these observations.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The formula for calculating the Hall voltage V as measured by a Hall probe is
+H
+BI
+V = .
+H ntq
+Table 6.1 shows the value of n for two materials.
+Table 6.1
+material n / m–3
+silicon 9.65 × 1015
+copper 8.49 × 1028
+(i) State the meaning of n.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) Explain why a Hall probe is made from silicon rather than copper.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+© UCLES 2023 9702/42/F/M/23
+
+21
+(c) A Hall probe gives a maximum reading of 24 mV when placed in a uniform magnetic field of
+flux density 32 mT.
+The same Hall probe is then placed in a magnetic field of fixed direction and varying flux
+density. The Hall probe is in a fixed position so that the angle between the Hall probe and the
+magnetic field is the same as when the Hall voltage was 24 mV.
+The variation of the reading V on the Hall probe with time t from time t = 0 to time t = 8.6 s is
+H
+shown in Fig. 6.1.
+40
+30
+V / mV
+H
+20
+10
+0
+0 1 2 3 4 5 6 7 8 9
+t / s
+Fig. 6.1
+A coil with 780 turns and a diameter of 3.6 cm is placed in this varying magnetic field. The
+plane of the coil is perpendicular to the field lines.
+Calculate the magnitude of the maximum electromotive force (e.m.f.) induced in the coil in the
+time between t = 0 and t = 8.6 s.
+e.m.f. = ...................................................... V [4]
+[Total: 8]
+© UCLES 2023 9702/42/F/M/23 [Turn over
+
+22
+7 (a) A beam of white light passes through a cloud of cool gas. The spectrum of the transmitted
+light is viewed and contains a number of dark lines.
+Explain why these dark lines occur.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [4]
+(b) Some energy levels for the electron in an isolated hydrogen atom are illustrated in Fig. 7.1.
+n = 6
+n = 5
+n = 4
+n = 3
+energy
+n = 2
+Fig. 7.1
+Table 7.1 shows the wavelengths of photons that are emitted in the transitions to n = 2 from
+the other energy levels shown in Fig. 7.1.
+Table 7.1
+wavelength / nm
+412
+435
+488
+658
+The energy associated with the energy level n = 2 is – 3.40 eV.
+© UCLES 2023 9702/42/F/M/23
+
+23
+Calculate the energy, in J, of energy level n = 3.
+energy = ...................................................... J [3]
+[Total: 7]
+© UCLES 2023 9702/42/F/M/23 [Turn over
+
+24
+8 Plutonium-238 (238Pu) is unstable and undergoes alpha decay.
+94
+(a) Complete the equation to show the decay of plutonium-238.
+........ ........
+238Pu U + α
+94 ........ ........
+[2]
+(b) The power source in a space probe contains 0.874 kg of plutonium-238. Each nucleus of
+plutonium-238 that decays emits 5.59 MeV of energy. The half-life of plutonium-238 is
+87.7 years.
+(i) Calculate the initial number N of nuclei of plutonium-238 in the power source.
+o
+N = ......................................................... [1]
+o
+(ii) Determine the initial activity of the source. Give a unit with your answer.
+activity = .................................. unit .................. [2]
+(iii) Use your answer in (b)(ii) to determine the initial power output from the source due to
+the decay of plutonium-238.
+power output = ..................................................... W [2]
+© UCLES 2023 9702/42/F/M/23
+
+25
+(iv) The space probe will continue to function until the power output from the plutonium in the
+source decreases to 65.3% of its initial value.
+Calculate the time, in years, for which the space probe will function.
+time = ............................................... years [2]
+(c) An alternative power source uses energy generated from the radioactive decay of
+polonium-210. This isotope has a half-life of 0.378 years. The mass of the isotope needed for
+the same initial power output as in (b) is 3.37 g.
+Suggest one advantage and one disadvantage of using polonium-210 as the source of
+energy.
+advantage .................................................................................................................................
+...................................................................................................................................................
+disadvantage ............................................................................................................................
+...................................................................................................................................................
+[2]
+[Total: 11]
+© UCLES 2023 9702/42/F/M/23 [Turn over
+
+26
+9 Ultrasound is used to produce diagnostic information about internal body structures.
+(a) Explain how ultrasound waves are detected.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+(b) An alternating voltage V varies with time t according to
+V = V sin ω t.
+o
+The voltage is applied to an ultrasound probe.
+The root-mean-square (r.m.s.) voltage is 66 V. The frequency of the ultrasound generated by
+the probe is 4.3 MHz.
+Determine the values of
+(i) V
+o
+V = ...................................................... V [1]
+o
+(ii) ω.
+ω = ...............................................rad s–1 [1]
+(c) Table 9.1 contains information about air and soft tissue.
+Table 9.1
+density / kg m–3 speed of ultrasound specific acoustic
+/ m s–1 impedance /
+...............................
+air 1.30 330 4.3 × 102
+soft tissue 1600 1.7 × 106
+(i) Determine the unit for the specific acoustic impedance values shown in Table 9.1. [1]
+© UCLES 2023 9702/42/F/M/23
+
+27
+(ii) Calculate the density of soft tissue.
+density = .............................................. kg m–3 [1]
+(iii) Use data from Table 9.1 to explain why ultrasound cannot be used to produce an image
+inside an air-filled cavity such as the lungs.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+[Total: 9]
+© UCLES 2023 9702/42/F/M/23 [Turn over
+
+28
+10 (a) A student observes different stars from the Earth.
+Give two reasons why some stars appear brighter than others.
+1 ................................................................................................................................................
+...................................................................................................................................................
+2 ................................................................................................................................................
+...................................................................................................................................................
+[2]
+(b) State what is meant by a standard candle.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(c) A spectral line from a star within a galaxy is observed to have a wavelength of 660.9 nm. The
+same spectral line measured in the laboratory is observed to have a wavelength of 656.3 nm.
+(i) Show that the speed of the star relative to the Earth is 2.1 × 106 m s–1.
+[1]
+(ii) Calculate the distance to the star.
+The Hubble constant is 2.3 × 10–18 s–1.
+distance = ..................................................... m [2]
+(iii) State and explain what can be concluded about the Universe based on this change in
+observed wavelength.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+[Total: 9]
+© UCLES 2023 9702/42/F/M/23
+
+29
+BLANK PAGE
+© UCLES 2023 9702/42/F/M/23
+
+30
+BLANK PAGE
+© UCLES 2023 9702/42/F/M/23
+
+31
+BLANK PAGE
+© UCLES 2023 9702/42/F/M/23
+
+32
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of Cambridge Assessment. Cambridge Assessment is the brand name of the University of Cambridge
+Local Examinations Syndicate (UCLES), which is a department of the University of Cambridge.
+© UCLES 2023 9702/42/F/M/23

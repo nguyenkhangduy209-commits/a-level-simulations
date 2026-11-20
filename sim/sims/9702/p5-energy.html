@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Work, energy, efficiency and power</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../core/plot.js"></script>
+<script src="../../core/anim.js"></script>
+<script src="../../engine/phys-energy.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  // Cambridge rounding: exact halves round away from zero (49.05 → 49.1); toPrecision alone can round 49.05 down (binary floating point)
+  (function (sf, dp) { SIM.util.sf = function (x, n) { return typeof x === 'number' && isFinite(x) ? sf(x * (1 + 1e-12), n) : sf(x, n); };
+    SIM.util.dp = function (x, d) { return typeof x === 'number' && isFinite(x) ? dp(x * (1 + 1e-12), d) : dp(x, d); }; })(SIM.util.sf, SIM.util.dp);
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, EN = SIM.energy;
+  var course = ui.course('9702'), g = ui.gFor(course);
+  var pg = ui.page({ title: 'Work, energy conservation, efficiency and power', g: g,
+    tags: ['9702 5.1 Energy conservation', '9702 5.2 GPE and KE'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var cv = ui.canvas(sceneCard, 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 22 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 2, onFrame: function () { draw(); readout(); } });
+  var animEl = sceneCard.children[sceneCard.children.length - 1];
+  ui.legend(sceneCard, [
+    { color: 'var(--c-s1)', label: 'kinetic energy' }, { color: 'var(--c-s2)', label: 'gravitational PE gained' },
+    { color: 'var(--c-friction)', label: 'work done against resistance (thermal)' }, { color: 'var(--c-applied)', label: 'work done by driving force / energy input' }]);
+  var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
+  var pE = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'energy / J', xLabel: 'distance moved / m' });
+  var deriv = ui.h('div', { class: 'readout' }); plotWrap.appendChild(deriv);
+
+  var presetCard = pg.card('right', 'Exam setups');
+  var paramCard = pg.card('right', 'Parameters');
+  var outCard = pg.card('right', 'Live working');
+  var noteCard = pg.card('right', 'Common traps');
+
+  var mode = ui.select(paramCard, { label: 'Situation', value: 'slope', options: [
+    { value: 'slope', label: 'Object moving along a slope (energy conservation)' },
+    { value: 'motor', label: 'Motor lifting a load (efficiency, P = W/t)' },
+    { value: 'vehicle', label: 'Vehicle: P = Fv' }] }, function () { clock.pause(); update('*'); clock.seek(0); });
+  var dir = ui.select(paramCard, { label: 'Direction of motion', value: 'down', options: [
+    { value: 'down', label: 'down the slope' }, { value: 'up', label: 'up the slope' }] }, function () { clock.pause(); update('*'); clock.seek(0); });
+  var prm = ui.params(paramCard, [
+    { key: 'm', label: 'Mass', sym: 'm', unit: 'kg', min: 0.01, max: 2000, step: 0.01, value: 2 },
+    { key: 'theta', label: 'Angle of slope (90° = vertical)', sym: 'θ', unit: '°', min: 0, max: 90, step: 0.5, value: 30 },
+    { key: 's', label: 'Distance along the slope', sym: 's', unit: 'm', min: 0.1, max: 500, step: 0.1, value: 5 },
+    { key: 'u', label: 'Initial speed', sym: 'u', unit: 'm s<sup>−1</sup>', min: 0, max: 50, step: 0.1, value: 0 },
+    { key: 'Fr', label: 'Resistive force (friction / air resistance)', sym: 'F<sub>r</sub>', unit: 'N', min: 0, max: 5000, step: 0.1, value: 3 },
+    { key: 'Fd', label: 'Driving force along the motion', sym: 'F<sub>d</sub>', unit: 'N', min: 0, max: 20000, step: 0.1, value: 0 },
+    { key: 'v', label: 'Lifting speed (constant)', sym: 'v', unit: 'm s<sup>−1</sup>', min: 0.01, max: 10, step: 0.01, value: 0.4 },
+    { key: 'h', label: 'Height lifted', sym: 'h', unit: 'm', min: 0.1, max: 100, step: 0.1, value: 10 },
+    { key: 'Pin', label: 'Input power to the motor', sym: 'P<sub>in</sub>', unit: 'W', min: 1, max: 100000, step: 1, value: 400 },
+    { key: 'P', label: 'Output power of the engine', sym: 'P', unit: 'W', min: 0, max: 200000, step: 10, value: 30000 },
+    { key: 'vc', label: 'Speed of the vehicle', sym: 'v', unit: 'm s<sup>−1</sup>', min: 0.1, max: 80, step: 0.1, value: 20 }
+  ], function (k) { update(k); if (k !== 'vc' && k !== 'P') { clock.pause(); clock.seek(0); } });
+
+  var exam = ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+
+  var presetCtl = ui.presets(presetCard, [
+    { name: 'Block slides 5.0 m down a 30° slope from rest, 3.0 N resistance', mode: 'slope', dir: 'down', values: { m: 2, theta: 30, s: 5, u: 0, Fr: 3, Fd: 0 },
+      note: 'GPE lost = mgΔh = 2 × 9.81 × 2.5 = 49.1 J; work against resistance = 3.0 × 5.0 = 15 J; KE gained = 34.1 J.' },
+    { name: 'Ball dropped from 10 m, no air resistance', mode: 'slope', dir: 'down', values: { m: 0.5, theta: 90, s: 10, u: 0, Fr: 0, Fd: 0 },
+      note: 'mgh = ½mv² ⇒ v = √(2gh) = √(2 × 9.81 × 10) = 14.0 m s⁻¹ (independent of mass).' },
+    { name: 'Projected up a rough 30° slope at 10 m/s: distance before it stops', mode: 'slope', dir: 'up', values: { m: 1, theta: 30, s: 20, u: 10, Fr: 2, Fd: 0 },
+      note: '½mu² = mg(d sin 30°) + F_r d ⇒ d = 50 ÷ (4.905 + 2) = 7.24 m.' },
+    { name: 'Cyclist freewheels 200 m down a 5° hill against 40 N', mode: 'slope', dir: 'down', values: { m: 80, theta: 5, s: 200, u: 2, Fr: 40, Fd: 0 },
+      note: 'GPE lost = 80 × 9.81 × 200 sin 5° = 13 700 J; work against resistance = 8000 J.' },
+    { name: 'Crate pulled 4.0 m up a 20° ramp by a 250 N rope', mode: 'slope', dir: 'up', values: { m: 50, theta: 20, s: 4, u: 0, Fr: 60, Fd: 250 },
+      note: 'Work done by the pull = 250 × 4.0 = 1000 J = ΔGPE + work against friction + ΔKE.' },
+    { name: 'Motor lifts 50 kg at 0.40 m/s with 400 W input: efficiency', mode: 'motor', values: { m: 50, v: 0.4, h: 10, Pin: 400 },
+      note: 'Useful output power = mgv = 196 W ⇒ efficiency = 196 ÷ 400 = 0.49 (49%).' },
+    { name: 'Crane lifts 200 kg through 12 m at 0.50 m/s, 25% efficient', mode: 'motor', values: { m: 200, v: 0.5, h: 12, Pin: 3924 },
+      note: 'P_out = 200 × 9.81 × 0.50 = 981 W; P_in = P_out ÷ 0.25 = 3920 W. Time = 12 ÷ 0.50 = 24 s.' },
+    { name: 'Car at constant 20 m/s on a level road: P = Fv', mode: 'vehicle', values: { m: 1200, theta: 0, Fr: 600, P: 12000, vc: 20 },
+      note: 'Constant speed ⇒ driving force = resistance = 600 N ⇒ P = Fv = 600 × 20 = 12 kW.' },
+    { name: 'Car (1200 kg, 30 kW) accelerating at 20 m/s against 600 N', mode: 'vehicle', values: { m: 1200, theta: 0, Fr: 600, P: 30000, vc: 20 },
+      note: 'F = P/v = 1500 N ⇒ a = (1500 − 600) ÷ 1200 = 0.75 m s⁻². Maximum speed = 30 000 ÷ 600 = 50 m s⁻¹.' },
+    { name: 'Same car up a 5° hill: maximum speed', mode: 'vehicle', values: { m: 1200, theta: 5, Fr: 600, P: 30000, vc: 18 },
+      note: 'At maximum speed P/v = F_r + mg sin θ ⇒ v = 30 000 ÷ 1626 = 18.5 m s⁻¹.' }
+  ], function (p) { mode.set(p.mode, true); if (p.dir) dir.set(p.dir, true); clock.pause(); prm.set(p.values); });
+
+  ui.notes(noteCard, [
+    'Work done = force × displacement <b>in the direction of the force</b> (W = Fs cos θ). A force perpendicular to the motion (e.g. normal reaction) does no work.',
+    'ΔE<sub>P</sub> = mgΔh uses the <b>vertical</b> height change, not the distance along the slope: Δh = s sin θ.',
+    'Energy is conserved: energy at start + energy input = energy at end + energy dissipated (work done against resistance).',
+    'Efficiency = useful energy (or power) output ÷ total energy (or power) input. It is a ratio (≤ 1), often written as a percentage.',
+    'Power = work done ÷ time. For a force moving at speed v in its own direction, P = Fv. At constant speed the driving force equals the total resistive force.',
+    'Speed is squared in ½mv²: doubling the speed quadruples the kinetic energy.'
+  ]);
+
+  /* ---------- model ---------- */
+  var sl = null, mo = null, ve = null;
+  function update(key) {
+    var md = mode.get(), v = prm.values;
+    ['theta', 'Fr'].forEach(function (k) { prm.show(k, md !== 'motor'); });
+    ['s', 'u', 'Fd'].forEach(function (k) { prm.show(k, md === 'slope'); });
+    ['v', 'h', 'Pin'].forEach(function (k) { prm.show(k, md === 'motor'); });
+    ['P', 'vc'].forEach(function (k) { prm.show(k, md === 'vehicle'); });
+    dir.row.style.display = md === 'slope' ? '' : 'none';
+    animEl.style.display = md === 'vehicle' ? 'none' : '';
+    prm.label('Fr', md === 'vehicle' ? 'Resistive force (constant)' : 'Resistive force (friction / air resistance)');
+    if (md === 'slope') {
+      sl = EN.slope({ m: v.m, g: g, theta: v.theta, s: v.s, u: v.u, dir: dir.get(), Fr: v.Fr, Fd: v.Fd });
+      clock.setDuration(sl.tEnd > 0 && isFinite(sl.tEnd) ? sl.tEnd : 1);
+    } else if (md === 'motor') {
+      mo = EN.motor({ m: v.m, g: g, v: v.v, h: v.h, Pin: v.Pin });
+      clock.setDuration(mo.t);
+    } else ve = EN.vehicle({ m: v.m, g: g, theta: v.theta, Fr: v.Fr, P: v.P, v: v.vc });
+    draw(); readout();
+  }
+
+  /* ---------- drawing ---------- */
+  function bars(c, x0, y0, w, h, items, maxE, title) {
+    var col = ui.colors();
+    D.label(c, title, x0 + w / 2, y0 - h - 12, col.muted, { size: 11 });
+    var n = items.length, bw = w / n * 0.62;
+    D.line(c, [[x0, y0], [x0 + w, y0]], col.muted, { width: 1 });
+    items.forEach(function (it, i) {
+      var bx = x0 + (i + 0.19) * w / n, bh = maxE > 0 ? Math.max(0, it.v) / maxE * h : 0;
+      c.save(); c.fillStyle = it.color; c.fillRect(bx, y0 - bh, bw, bh); c.restore();
+      D.label(c, it.label, bx + bw / 2, y0 + 10, col.ink, { size: 10 });
+      D.label(c, U.sf(it.v) + ' J', bx + bw / 2, y0 - bh - 8, col.ink, { size: 10 });
+    });
+  }
+  function draw() {
+    var md = mode.get();
+    if (md === 'slope') drawSlope(); else if (md === 'motor') drawMotor(); else drawVehicle();
+  }
+  function drawSlope() {
+    if (!sl) return;
+    var col = ui.colors(), v = prm.values, th = U.rad(v.theta), ct = Math.cos(th), st = Math.sin(th);
+    var Ls = 10, W = Ls * ct, Hh = Ls * st;
+    vp.fit(-1, Math.max(W, 3) + 1 + 9, -1.2, Math.max(Hh, 3) + 2.5);
+    var c = vp.begin();
+    D.ground(c, vp.X(-1), vp.Y(0), vp.X(Math.max(W, 3) + 1), vp.Y(0));
+    c.save(); c.fillStyle = col.surface; c.beginPath(); c.moveTo(vp.X(0), vp.Y(0)); c.lineTo(vp.X(W), vp.Y(Hh)); c.lineTo(vp.X(W), vp.Y(0)); c.closePath(); c.fill();
+    c.strokeStyle = col['object-line']; c.lineWidth = 1.5; c.stroke(); c.restore();
+    if (v.theta > 0 && v.theta < 90) D.arc(c, vp.X(0), vp.Y(0), 30, 0, th, col.muted, 'θ');
+    var stt = sl.stateAt(clock.t), frac = sl.dEnd > 0 ? stt.d / Math.max(v.s, 1e-9) : 0;
+    // map position along the slope: going down starts at the top
+    var startF = dir.get() === 'down' ? 0.92 : 0.08, sgn = dir.get() === 'down' ? -1 : 1;
+    var pos = U.clamp(startF + sgn * 0.84 * frac, 0, 1) * Ls;
+    var bx = vp.X(pos * ct), by = vp.Y(pos * st);
+    var endPos = U.clamp(startF + sgn * 0.84, 0, 1) * Ls;
+    D.line(c, [[vp.X(startF * Ls * ct), vp.Y(startF * Ls * st)], [vp.X(endPos * ct), vp.Y(endPos * st)]], col.accent, { dash: [4, 4], width: 1.2 });
+    D.block(c, bx, by, 38, 24, th, { label: U.num(v.m, 2) + ' kg' });
+    var cx = bx - st * 12, cy = by - ct * 12;
+    var k = SIM.view.forceScale([v.m * g, v.Fr, v.Fd], 70);
+    D.arrowPolar(c, cx, cy, -Math.PI / 2, v.m * g * k, col.weight, { label: 'mg' });
+    var mdir = dir.get() === 'down' ? th + Math.PI : th;
+    if (v.Fr > 0 && !sl.noStart) D.arrowPolar(c, cx, cy, mdir + Math.PI, v.Fr * k, col.friction, { label: 'F_r' });
+    if (v.Fd > 0) D.arrowPolar(c, cx, cy, mdir, v.Fd * k, col.applied, { label: 'F_d' });
+    if (stt.v > 1e-6) D.arrowPolar(c, cx - st * 30, cy - ct * 30, mdir, 20 + Math.min(50, stt.v * 4), col.velocity, { label: 'v = ' + U.sf(stt.v) + ' m/s', width: 2 });
+    // energy bars (screen space on the right)
+    var e0 = sl.KE0 + Math.max(0, -sl.dGPE) + sl.Wd;
+    var items = [
+      { label: 'KE₀', v: sl.KE0, color: col.s1 }, { label: 'W_d', v: stt.Wd, color: col.applied },
+      { label: 'GPE lost', v: Math.max(0, -stt.dGPE), color: col.s2 },
+      { label: 'KE', v: stt.KE, color: col.s1 }, { label: 'GPE gained', v: Math.max(0, stt.dGPE), color: col.s2 }, { label: 'W_r', v: stt.Wr, color: col.friction }];
+    var maxE = Math.max(e0, sl.KE0 + sl.Wd, 1e-9);
+    items.forEach(function (it) { maxE = Math.max(maxE, it.v); });
+    var bw = Math.min(vp.w * 0.42, 300), x0 = vp.w - bw - 12, y0 = vp.h - 40;
+    bars(c, x0, y0, bw, vp.h * 0.55, items, maxE, 'energy in (left 3) = energy out (right 3)');
+    if (sl.noStart) D.label(c, 'Does not move: nothing overcomes the resistive force', vp.w / 2, 14, col.warn, { bold: true, size: 12 });
+    else if (sl.stops) D.label(c, 'Stops after ' + U.sf(sl.dEnd) + ' m (before covering s)', vp.w / 2, 14, col.warn, { bold: true, size: 12 });
+    // plot energies against distance
+    var dmax = Math.max(sl.dEnd, 1e-6), sgnH = sl.sign * sl.sinT;
+    pE.draw({ x: [0, Math.max(dmax, 1e-3)], xLabel: 'distance moved / m', yLabel: 'energy / J', series: [
+      { fn: function (d) { return EN.ke(v.m, 0) + sl.KE0 + v.Fd * d - v.Fr * d - v.m * g * sgnH * d; }, color: col.s1 },
+      { fn: function (d) { return v.m * g * sgnH * d; }, color: col.s2 },
+      { fn: function (d) { return v.Fr * d; }, color: col.friction },
+      { fn: function (d) { return v.Fd * d; }, color: col.applied, dash: [5, 4] }], cursor: stt.d });
+  }
+  function drawMotor() {
+    if (!mo) return;
+    var col = ui.colors(), v = prm.values, t = clock.t, y = Math.min(v.h, v.v * t);
+    vp.fit(-3, 12, -0.8, 7);
+    var c = vp.begin();
+    D.ground(c, vp.X(-3), vp.Y(0), vp.X(4), vp.Y(0));
+    c.save(); c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.5; c.beginPath(); c.rect(vp.X(-1), vp.Y(6.6), vp.X(1) - vp.X(-1), vp.Y(5.8) - vp.Y(6.6)); c.fill(); c.stroke(); c.restore();
+    D.label(c, 'motor', vp.X(0), vp.Y(6.2), col.ink, { size: 11, bold: true });
+    var yy = 0.6 + 4.6 * (v.h > 0 ? y / v.h : 0);
+    D.line(c, [vp.P(0, 5.8), vp.P(0, yy + 0.6)], col['object-line'], { width: 1.5 });
+    D.block(c, vp.X(0), vp.Y(yy - 0.0), 44, 30, 0, { label: U.num(v.m, 2) + ' kg' });
+    D.label(c, 'h = ' + U.sf(y) + ' m of ' + U.sf(v.h) + ' m', vp.X(1.6), vp.Y(yy), col.muted, { align: 'left', size: 11 });
+    var Ein = v.Pin * t, Eu = v.m * g * y;
+    var items = [{ label: 'E_in', v: Ein, color: col.applied }, { label: 'useful mgh', v: Eu, color: col.s2 }, { label: 'wasted', v: Math.max(0, Ein - Eu), color: col.friction }];
+    var maxE = Math.max(mo.Ein, mo.Euseful, 1e-9);
+    var bw = Math.min(vp.w * 0.45, 280);
+    bars(c, vp.w - bw - 12, vp.h - 40, bw, vp.h * 0.55, items, maxE, 'energy after t = ' + t.toFixed(2) + ' s');
+    if (mo.impossible) D.label(c, 'Impossible: useful output power mgv exceeds the input power', vp.w / 2, 14, col.warn, { bold: true, size: 12 });
+    pE.draw({ x: [0, Math.max(mo.t, 1e-3)], xLabel: 't / s', yLabel: 'energy / J', series: [
+      { fn: function (tt) { return v.Pin * tt; }, color: col.applied }, { fn: function (tt) { return v.m * g * v.v * tt; }, color: col.s2 }], cursor: t });
+  }
+  function drawVehicle() {
+    if (!ve) return;
+    var col = ui.colors(), v = prm.values, th = U.rad(v.theta), ct = Math.cos(th), st = Math.sin(th);
+    vp.fit(-1, 11, -1, Math.max(10 * st, 2) + 2.5);
+    var c = vp.begin();
+    D.ground(c, vp.X(-1), vp.Y(0), vp.X(11), vp.Y(0));
+    c.save(); c.fillStyle = col.surface; c.beginPath(); c.moveTo(vp.X(0), vp.Y(0)); c.lineTo(vp.X(10 * ct), vp.Y(10 * st)); c.lineTo(vp.X(10 * ct), vp.Y(0)); c.closePath(); c.fill(); c.restore();
+    var bx = vp.X(5 * ct), by = vp.Y(5 * st);
+    D.block(c, bx, by, 70, 30, th, { label: 'car' });
+    var cx = bx - st * 15, cy = by - ct * 15;
+    var Fd = isFinite(ve.Fdrive) ? ve.Fdrive : 0;
+    var k = SIM.view.forceScale([Fd, v.Fr, ve.Wpar, v.m * g], 110);
+    if (Fd > 0) D.arrowPolar(c, cx, cy, th, Fd * k, col.applied, { label: 'F = P/v = ' + U.sf(Fd) + ' N' });
+    if (v.Fr > 0) D.arrowPolar(c, cx, cy - 10, th + Math.PI, v.Fr * k, col.friction, { label: 'F_r' });
+    if (ve.Wpar > 0) D.arrowPolar(c, cx, cy + 10, th + Math.PI, ve.Wpar * k, col.component, { dash: [5, 4], label: 'mg sin θ' });
+    D.arrowPolar(c, cx, cy - st * 40 - 20, th, 30 + Math.min(60, v.vc * 1.5), col.velocity, { label: 'v = ' + U.sf(v.vc) + ' m/s', width: 2 });
+    // driving force against speed, resistance line
+    var vmaxPlot = Math.min(80, Math.max(v.vc * 1.6, isFinite(ve.vmax) ? ve.vmax * 1.3 : 0, 5));
+    var Fcap = Math.max(ve.resist * 3, isFinite(Fd) ? Fd * 1.5 : 0, 10);
+    pE.draw({ x: [0, vmaxPlot], y: [0, Fcap], xLabel: 'v / m s⁻¹', yLabel: 'force / N', series: [
+      { fn: function (s) { return s > 0 ? Math.min(v.P / s, Fcap * 2) : NaN; }, color: col.applied },
+      { fn: function () { return ve.resist; }, color: col.friction, dash: [5, 4] }],
+      cursor: v.vc, vlines: isFinite(ve.vmax) && ve.vmax <= vmaxPlot ? [{ x: ve.vmax, label: 'v_max' }] : [] });
+  }
+
+  /* ---------- working ---------- */
+  function readout() {
+    var md = mode.get(), v = prm.values, s3 = U.sf;
+    if ((md === 'slope' && !sl) || (md === 'motor' && !mo) || (md === 'vehicle' && !ve)) return;
+    R.clear(); deriv.innerHTML = '';
+    if (md === 'slope') {
+      var up = dir.get() === 'up';
+      R.html('<div class="head">Energies in J. Motion ' + (up ? 'up' : 'down') + ' the slope; Δh = vertical height gained.</div>');
+      R.head('Work done by each force over the whole motion (d = ' + s3(sl.dEnd) + ' m)');
+      R.eq('Δh', (up ? '+' : '−') + 'd sin θ = ' + (up ? '' : '−') + s3(sl.dEnd) + ' × sin ' + U.dp(v.theta, 1) + '°', sl.dh, 'm');
+      R.eq('by weight', '−mgΔh = −' + s3(v.m) + ' × ' + g + ' × ' + (sl.dh < 0 ? '(' + s3(sl.dh) + ')' : s3(sl.dh)), -sl.dGPE, 'J');
+      R.eq('by normal reaction', 'perpendicular to the motion', 0, 'J');
+      R.eq('by resistive force', '−F<sub>r</sub>d = −' + s3(v.Fr) + ' × ' + s3(sl.dEnd), -sl.Wr, 'J');
+      if (v.Fd > 0) R.eq('by driving force', 'F<sub>d</sub>d = ' + s3(v.Fd) + ' × ' + s3(sl.dEnd), sl.Wd, 'J');
+      R.head('Conservation of energy');
+      R.html('<div class="head">½mu² + F<sub>d</sub>d = ½mv² + mgΔh + F<sub>r</sub>d</div>');
+      R.eq('½mu²', '½ × ' + s3(v.m) + ' × ' + s3(v.u) + '²', sl.KE0, 'J');
+      R.eq('½mv²', s3(sl.KE0) + ' + ' + s3(sl.Wd) + ' − ' + (sl.dGPE < 0 ? '(' + s3(sl.dGPE) + ')' : s3(sl.dGPE)) + ' − ' + s3(sl.Wr), sl.KE1, 'J');
+      if (sl.noStart) R.badge('From rest the forces along the slope cannot overcome the resistance: no motion', 'warn');
+      else if (sl.stops) {
+        R.badge('KE runs out first: stops after ' + s3(sl.dEnd) + ' m', 'warn');
+        R.eq('d<sub>stop</sub>', '½mu² ÷ (F<sub>r</sub> + mg sin θ' + (v.Fd > 0 ? ' − F<sub>d</sub>' : '') + ') = ' + s3(sl.KE0) + ' ÷ ' + s3(-sl.Fnet), sl.dEnd, 'm');
+      } else R.eq('v', '√(2 × ½mv² ÷ m) = √(2 × ' + s3(sl.KE1) + ' ÷ ' + s3(v.m) + ')', sl.v, 'm s<sup>−1</sup>');
+      var st0 = sl.stateAt(clock.t);
+      R.head('At t = ' + clock.t.toFixed(2) + ' s');
+      R.eq('distance', '', st0.d, 'm'); R.eq('v', '', st0.v, 'm s<sup>−1</sup>'); R.eq('KE', '½mv²', st0.KE, 'J');
+      R.eq('ΔGPE', 'mgΔh', st0.dGPE, 'J'); R.eq('work against resistance', 'F<sub>r</sub> × distance', st0.Wr, 'J');
+      if (v.Fd > 0) {
+        R.eq('power of driving force', 'P = F<sub>d</sub>v = ' + s3(v.Fd) + ' × ' + s3(st0.v), v.Fd * st0.v, 'W');
+        if (sl.tEnd > 0 && isFinite(sl.tEnd)) R.eq('average power of F<sub>d</sub>', 'W ÷ t = ' + s3(sl.Wd) + ' ÷ ' + s3(sl.tEnd), sl.Wd / sl.tEnd, 'W');
+      }
+      R.render();
+      var h1 = Math.abs(sl.dh), vv = sl.v;
+      deriv.innerHTML = '<div class="head">Derivations (5.2) with these numbers</div>' +
+        '<div class="eq"><span class="lhs">ΔE<sub>P</sub></span><span class="rhs">W = Fs with F = mg and s = Δh ⇒ ΔE<sub>P</sub> = mgΔh = ' + s3(v.m) + ' × ' + g + ' × ' + s3(h1) + ' = ' + s3(v.m * g * h1) + ' J</span></div>' +
+        '<div class="eq"><span class="lhs">E<sub>K</sub></span><span class="rhs">From rest, constant F: v² = 2as and F = ma ⇒ W = Fs = ma × v²/(2a) = ½mv² = ½ × ' + s3(v.m) + ' × ' + s3(vv) + '² = ' + s3(0.5 * v.m * vv * vv) + ' J</span></div>';
+    } else if (md === 'motor') {
+      R.head('Power and efficiency');
+      R.eq('useful output power', 'mgv = ' + s3(v.m) + ' × ' + g + ' × ' + s3(v.v), mo.Pout, 'W');
+      R.eq('efficiency', 'useful output ÷ total input = ' + s3(mo.Pout) + ' ÷ ' + s3(v.Pin), mo.eta);
+      R.eq('efficiency (%)', '× 100', 100 * mo.eta, '%');
+      if (mo.impossible) R.badge('Efficiency cannot exceed 1: increase P<sub>in</sub> or reduce mgv', 'warn');
+      R.head('Energy over the whole lift');
+      R.eq('time', 't = h ÷ v = ' + s3(v.h) + ' ÷ ' + s3(v.v), mo.t, 's');
+      R.eq('energy input', 'P<sub>in</sub> t = ' + s3(v.Pin) + ' × ' + s3(mo.t), mo.Ein, 'J');
+      R.eq('useful energy (ΔE<sub>P</sub>)', 'mgh = ' + s3(v.m) + ' × ' + g + ' × ' + s3(v.h), mo.Euseful, 'J');
+      R.eq('energy wasted', 'E<sub>in</sub> − mgh', mo.Ewasted, 'J');
+      R.eq('check: P = W ÷ t', s3(mo.Euseful) + ' ÷ ' + s3(mo.t), mo.Euseful / mo.t, 'W');
+      R.render();
+      deriv.innerHTML = '<div class="head">Why the output power is mgv</div><div class="eq"><span class="rhs">At constant speed the tension = mg. P = W/t = (mg × Δh)/t = mg × (Δh/t) = mgv.</span></div>';
+    } else {
+      R.head('Driving force from power');
+      R.eq('F', 'P ÷ v = ' + s3(v.P) + ' ÷ ' + s3(v.vc), ve.Fdrive, 'N');
+      R.eq('total resistance', 'F<sub>r</sub> + mg sin θ = ' + s3(v.Fr) + ' + ' + s3(ve.Wpar), ve.resist, 'N');
+      R.eq('a', '(F − total resistance) ÷ m = (' + s3(ve.Fdrive) + ' − ' + s3(ve.resist) + ') ÷ ' + s3(v.m), ve.a, 'm s<sup>−2</sup>');
+      if (Math.abs(ve.a) < 1e-9) R.badge('Constant speed: driving force = resistance', 'ok');
+      else if (ve.a < 0) R.badge('Decelerating: the power is too small to maintain this speed', 'warn');
+      R.head('Constant speed');
+      R.eq('power needed at this v', 'P = (F<sub>r</sub> + mg sin θ) v = ' + s3(ve.resist) + ' × ' + s3(v.vc), ve.Pconst, 'W');
+      if (isFinite(ve.vmax)) R.eq('maximum speed', 'P ÷ (F<sub>r</sub> + mg sin θ) = ' + s3(v.P) + ' ÷ ' + s3(ve.resist), ve.vmax, 'm s<sup>−1</sup>');
+      else R.badge('No resistance: no maximum speed in this model', 'info');
+      R.render();
+      deriv.innerHTML = '<div class="head">Derivation of P = Fv</div><div class="eq"><span class="rhs">P = W/t = F × s/t = Fv (force constant, along the motion). Here ' + s3(ve.Fdrive) + ' N × ' + s3(v.vc) + ' m s⁻¹ = ' + s3(v.P) + ' W.</span></div>';
+    }
+  }
+
+  ui.onTheme(draw);
+  vp.onResize = draw;
+  update('*');
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

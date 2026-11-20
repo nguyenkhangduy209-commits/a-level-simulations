@@ -1,0 +1,7 @@
+# Cambridge past-paper and syllabus PDFs: large (~420 MB) and Cambridge's copyright.
+# Everything derived from them (text, tagged questions) is committed; see README to rebuild.
+data/papers/
+*.pdf
+.DS_Store
+__pycache__/
+*.pyc

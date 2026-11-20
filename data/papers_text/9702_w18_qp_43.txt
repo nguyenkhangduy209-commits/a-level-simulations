@@ -1,0 +1,548 @@
+This document consists of 25 printed pages and 3 blank pages.
+DC (NH/SG) 146700/3
+© UCLES 2018 [Turn over
+*9832786353*
+Cambridge International Examinations
+Cambridge International Advanced Subsidiary and Advanced Level
+PHYSICS 9702/43
+Paper 4 A Level Structured Questions October/November 2018
+2 hours
+Candidates answer on the Question Paper.
+No Additional Materials are required.
+READ THESE INSTRUCTIONS FIRST
+Write your Centre number, candidate number and name on all the work you hand in.
+Write in dark blue or black pen.
+You may use an HB pencil for any diagrams or graphs.
+Do not use staples, paper clips, glue or correction fluid.
+DO NOT WRITE IN ANY BARCODES.
+Answer all questions.
+Electronic calculators may be used.
+You may lose marks if you do not show your working or if you do not use appropriate units.
+At the end of the examination, fasten all your work securely together.
+The number of marks is given in brackets [ ] at the end of each question or part question.
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2018 9702/43/O/N/18
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1
+2
+at2
+v2 = u2 + 2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω √  ( x  2  –   x 2 )
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2018 9702/43/O/N/18 [Turn over
+
+4
+BLANK PAGE
+© UCLES 2018 9702/43/O/N/18
+
+5
+Answer all the questions in the spaces provided.
+1 (a) (i) State what is meant by gravitational potential at a point.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) Suggest why, for small changes in height near the Earth’s surface, gravitational potential
+is approximately constant.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(b) The Moon may be considered to be a uniform sphere with a diameter of 3.5 × 103 km and a
+mass of 7.4 × 1022 kg.
+A meteor strikes the Moon and, during the collision, a rock is sent off from the surface of the
+Moon with an initial speed v.
+Assuming that the Moon is isolated in space, determine the minimum speed of the rock such
+that it does not return to the Moon’s surface. Explain your working.
+minimum speed = ................................................. m s–1 [3]
+[Total: 7]
+© UCLES 2018 9702/43/O/N/18 [Turn over
+
+6
+2 (a) State what is meant by the internal energy of a system.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) An ideal gas undergoes a cycle of changes as shown in Fig. 2.1.
+3.00
+2.80
+Q 372 K
+pressure
+/ 105 Pa
+2.60
+97.0 J
+2.40
+2.20
+280 K
+P R
+332 K
+2.00
+900 950 1000 1050 1100 1150
+volume / cm3
+Fig. 2.1
+At point P, the gas has volume 950 cm3, pressure 2.10 × 105 Pa and temperature 280 K.
+The gas is heated at constant volume and 97.0 J of thermal energy is transferred to the gas.
+Its pressure and temperature change so that the gas is at point Q on Fig. 2.1.
+The gas then undergoes the change from point Q to point R and then from point R back to
+point P, as shown on Fig. 2.1.
+© UCLES 2018 9702/43/O/N/18
+
+7
+Some energy changes that take place during the cycle PQRP are shown in Fig. 2.2.
+change P → Q change Q → R change R → P
+thermal energy transferred to gas / J +97.0 0 ........................
+work done on gas / J ........................ –42.5 +37.0
+increase in internal energy of gas / J ........................ ........................ ........................
+Fig. 2.2
+(i) State the total change in internal energy of the gas during the complete cycle PQRP.
+Explain your answer.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) On Fig. 2.2, complete the energy changes for the gas during
+1. the change P → Q,
+2. the change Q → R,
+3. the change R → P.
+[5]
+[Total: 9]
+© UCLES 2018 9702/43/O/N/18 [Turn over
+
+8
+3 A U-tube contains liquid, as shown in Fig. 3.1.
+x
+liquid x
+liquid
+L
+Fig. 3.1 Fig. 3.2
+The total length of the column of liquid in the tube is L.
+The column of liquid is displaced so that the change in height of the liquid in each arm of the
+U-tube is x, as shown in Fig. 3.2.
+The liquid in the U-tube then oscillates with simple harmonic motion such that the acceleration a of
+the column is given by the expression
+2g
+a = – x
+e L o
+where g is the acceleration of free fall.
+(a) Calculate the period T of oscillation of the liquid column for a column length L of 19.0 cm.
+T = ....................................................... s [3]
+© UCLES 2018 9702/43/O/N/18
+
+9
+(b) The variation with time t of the displacement x is shown in Fig. 3.3.
++2.0
+x / cm
++1.0
+0
+0 T 2T 3T
+t
+–1.0
+–2.0
+Fig. 3.3
+The period of oscillation of the liquid column of mass 18.0 g is T.
+The oscillations are damped.
+(i) Suggest one cause of the damping.
+...........................................................................................................................................
+.......................................................................................................................................[1]
+(ii) Calculate the loss in total energy of the oscillations during the first 2.5 periods of the
+oscillations.
+energy loss = ....................................................... J [3]
+[Total: 7]
+© UCLES 2018 9702/43/O/N/18 [Turn over
+
+10
+4 (a) Explain the main principles behind the use of ultrasound to obtain diagnostic information
+about internal body structures.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[6]
+© UCLES 2018 9702/43/O/N/18
+
+11
+(b) (i) Define specific acoustic impedance.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) The fraction of the incident intensity of an ultrasound beam that is reflected at a boundary
+between two media depends on the specific acoustic impedances Z and Z of the
+1 2
+media.
+Discuss qualitatively how the relative magnitudes of the two specific acoustic impedances
+affect the reflected intensity.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+[Total: 10]
+© UCLES 2018 9702/43/O/N/18 [Turn over
+
+12
+5 (a) State two advantages of the transmission of data in digital form, compared with the
+transmission in analogue form.
+1. . ..............................................................................................................................................
+...................................................................................................................................................
+2. ...............................................................................................................................................
+...................................................................................................................................................
+[2]
+(b) The digital numbers shown in Fig. 5.1 are transmitted at a sampling rate of 500 Hz.
+0111 1011 1001 0100 1110 0101 0010
+end of start of
+transmission transmission
+Fig. 5.1
+The digital numbers are received, after transmission, by a digital-to-analogue converter
+(DAC).
+On Fig. 5.2, complete the graph to show the variation with time t of the signal level from the
+DAC.
+16
+14
+12
+signal
+10
+level
+8
+6
+4
+2
+0
+0
+t / ms
+Fig. 5.2
+[4]
+© UCLES 2018 9702/43/O/N/18
+
+13
+(c) State the effect on the transmitted analogue signal when
+(i) the sampling rate of the analogue-to-digital converter (ADC) and of the DAC is increased,
+...........................................................................................................................................
+.......................................................................................................................................[1]
+(ii) the number of bits in each sample is increased.
+...........................................................................................................................................
+.......................................................................................................................................[1]
+[Total: 8]
+© UCLES 2018 9702/43/O/N/18 [Turn over
+
+14
+6 (a) (i) Define electric potential at a point.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) State the relationship between electric potential and electric field strength at a point.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(b) Two parallel metal plates A and B are situated a distance 1.2 cm apart in a vacuum, as shown
+in Fig. 6.1.
+–75 V
+plate B
+helium nucleus
+1.2 cm
+x
+0 V
+plate A
+Fig. 6.1
+Plate A is earthed and plate B is at a potential of –75 V.
+A helium nucleus is situated between the plates, a distance x from plate A.
+Initially, the helium nucleus is at rest on plate A where x = 0.
+(i) The helium nucleus is free to move between the plates. By considering energy changes
+of the helium nucleus, explain why the speed at which it reaches plate B is independent
+of the separation of the plates.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+© UCLES 2018 9702/43/O/N/18
+
+15
+(ii) As the helium nucleus (4He) moves from plate A towards plate B, its distance x from
+2
+plate A increases.
+Calculate the speed of the nucleus after it has moved a distance x = 0.40 cm from plate A.
+speed = ................................................. m s–1 [3]
+[Total: 9]
+© UCLES 2018 9702/43/O/N/18 [Turn over
+
+16
+7 (a) An ideal operational amplifier (op-amp) has infinite bandwidth and infinite slew rate.
+State what is meant by
+(i) infinite bandwidth,
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(ii) infinite slew rate.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[2]
+(b) An incomplete circuit for a non-inverting amplifier incorporating an ideal operational amplifier
+is shown in Fig. 7.1.
++5.0 V
+–
++
+R
+1
+–5.0 V
+V V
+IN OUT
+R
+2
+Fig. 7.1
+On Fig. 7.1, draw lines to show the connections between the components to complete the
+circuit. [2]
+© UCLES 2018 9702/43/O/N/18
+
+17
+(c) The completed amplifier of Fig. 7.1 has a voltage gain of 10.
+State the output voltage V for an input voltage V of
+OUT IN
+(i) –0.36 V,
+V = .......................................................V [1]
+OUT
+(ii) 0.56 V.
+V = .......................................................V [1]
+OUT
+[Total: 8]
+© UCLES 2018 9702/43/O/N/18 [Turn over
+
+18
+8 (a) Explain what is meant by a magnetic field.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) A particle has mass m, charge +q and speed v.
+The particle enters a uniform magnetic field of flux density B such that, on entry, it is moving
+normal to the magnetic field, as shown in Fig. 8.1.
+path of particle
+mass m
+charge +q
+speed v
+region of
+magnetic field
+Fig. 8.1
+The direction of the magnetic field is perpendicular to, and into, the plane of the paper.
+(i) On Fig. 8.1, draw the path of the particle through, and beyond, the region of the magnetic
+field. [3]
+(ii) There is a force acting on the particle, causing it to accelerate.
+Explain why the speed of the particle on leaving the magnetic field is v.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[1]
+© UCLES 2018 9702/43/O/N/18
+
+19
+(c) The particle in (b) loses an electron so that its charge becomes +2q. Its change in mass is
+negligible.
+Determine, in terms of v, the initial speed of the particle such that its path through the magnetic
+field is unchanged. Explain your working.
+speed = .......................................................... [3]
+[Total: 9]
+© UCLES 2018 9702/43/O/N/18 [Turn over
+
+20
+9 (a) State Faraday’s law of electromagnetic induction.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) A solenoid S is wound on a soft-iron core, as shown in Fig. 9.1.
+coil C
+V
+solenoid S
+soft-iron core
+V
+Hall probe
+Fig. 9.1
+A coil C having 120 turns of wire is wound on to one end of the core. The area of cross-
+section of coil C is 1.5 cm2.
+A Hall probe is close to the other end of the core.
+When there is a constant current in solenoid S, the flux density in the core is 0.19 T. The
+reading on the voltmeter connected to the Hall probe is 0.20 V.
+The current in solenoid S is now reversed in a time of 0.13 s at a constant rate.
+(i) Calculate the reading on the voltmeter connected to coil C during the time that the current
+is changing.
+reading = .......................................................V [2]
+© UCLES 2018 9702/43/O/N/18
+
+21
+(ii) Complete Fig. 9.2 for the voltmeter readings for the times before, during and after the
+direction of the current is reversed.
+before current during current after current
+changes change when changes
+current is zero
+reading on voltmeter
+connected to coil C / V .......................... .......................... ..........................
+reading on voltmeter
+connected to Hall probe / V 0.20 .......................... ..........................
+Fig. 9.2
+[4]
+[Total: 8]
+© UCLES 2018 9702/43/O/N/18 [Turn over
+
+22
+BLANK PAGE
+© UCLES 2018 9702/43/O/N/18
+
+23
+10 Some of the electron energy bands in a semiconductor material at the absolute zero of temperature
+are shown in Fig. 10.1.
+conduction band (empty)
+forbidden band
+valence band (filled)
+Fig. 10.1
+Use band theory to explain why, as the temperature of the semiconductor material rises, the
+electrical resistance of the sample of material decreases.
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+..........................................................................................................................................................
+......................................................................................................................................................[5]
+© UCLES 2018 9702/43/O/N/18 [Turn over
+
+24
+11 A stationary isolated nucleus emits a γ-ray photon of energy 0.51MeV.
+(a) State what is meant by a photon.
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[2]
+(b) For the γ-ray photon, calculate
+(i) its wavelength,
+wavelength = ...................................................... m [2]
+(ii) its momentum.
+momentum = .....................................................N s [2]
+© UCLES 2018 9702/43/O/N/18
+
+25
+(c) (i) For this nucleus, determine the change in mass Δm during the decay that gives rise to
+the energy of the γ-ray photon.
+Δm = ..................................................... kg [2]
+(ii) Explain why, after the decay, the nucleus is no longer stationary.
+...........................................................................................................................................
+...........................................................................................................................................
+.......................................................................................................................................[1]
+[Total: 9]
+© UCLES 2018 9702/43/O/N/18 [Turn over
+
+26
+12 (a) State what is meant by radioactive decay.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...............................................................................................................................................[3]
+(b) The variation with time t of the number N of undecayed nuclei in a sample of a radioactive
+isotope is shown in Fig. 12.1.
+6.0
+5.0
+N / 1010
+4.0
+3.0
+2.0
+1.0
+0
+0 2 4 6 8 10 12 14
+t / hours
+Fig. 12.1
+© UCLES 2018 9702/43/O/N/18
+
+27
+(i) Use the gradient of the line in Fig. 12.1 to determine the activity, in Bq, of the sample at
+time t = 4.0 hours. Show your working.
+activity = .....................................................Bq [3]
+(ii) Use your answer in (i) to show that the decay constant λ of the isotope is approximately
+4 × 10–5 s–1.
+[2]
+(c) A sample of a different radioactive isotope has an initial activity of 4.6 × 103 Bq. The sample
+must be stored safely until its activity is reduced to 1.0 × 103 Bq.
+The decay constant of the isotope is 5.5 × 10–7 s–1. The decay products are not radioactive.
+Calculate the minimum time, in days, for which the sample must be stored.
+time = ................................................. days [3]
+[Total: 11]
+© UCLES 2018 9702/43/O/N/18
+
+28
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge International
+Examinations Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download at www.cie.org.uk after
+the live examination series.
+Cambridge International Examinations is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of University of Cambridge Local
+Examinations Syndicate (UCLES), which is itself a department of the University of Cambridge.
+© UCLES 2018 9702/43/O/N/18

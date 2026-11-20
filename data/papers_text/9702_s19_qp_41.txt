@@ -1,0 +1,577 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+This document consists of 26 printed pages and 2 blank pages.
+DC (KS/CB) 162211/4
+© UCLES 2019 [Turn over
+*3042921314*
+PHYSICS 9702/41
+Paper 4 A Level Structured Questions May/June 2019
+2 hours
+Candidates answer on the Question Paper.
+No Additional Materials are required.
+READ THESE INSTRUCTIONS FIRST
+Write your centre number, candidate number and name on all the work you hand in.
+Write in dark blue or black pen.
+You may use an HB pencil for any diagrams or graphs.
+Do not use staples, paper clips, glue or correction fluid.
+DO NOT WRITE IN ANY BARCODES.
+Answer all questions.
+Electronic calculators may be used.
+You may lose marks if you do not show your working or if you do not use appropriate units.
+At the end of the examination, fasten all your work securely together.
+The number of marks is given in brackets [ ] at the end of each question or part question.
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2019 9702/41/M/J/19
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1
+2
+at2
+v 2 = u 2 + 2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω (x 2-x2)
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ωt
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2019 9702/41/M/J/19 [Turn over
+
+4
+Answer all the questions in the spaces provided.
+1 (a) Two point masses are isolated in space and are separated by a distance x.
+State an expression relating the gravitational force F between the two masses to the
+magnitudes M and m of the masses. State the name of any other symbol used.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(b) A spacecraft is to be put into a circular orbit about a spherical planet.
+The planet may be considered to be isolated in space. The mass of the planet, assumed to
+be concentrated at its centre, is 7.5 × 1023 kg. The radius of the planet is 3.4 × 106 m.
+(i) The spacecraft is to orbit the planet at a height of 2.4 × 105 m above the surface of the
+planet. At this altitude, there is no atmosphere.
+Show that the speed of the spacecraft in its orbit is 3.7 × 103 m s –1.
+[2]
+© UCLES 2019 9702/41/M/J/19
+
+5
+(ii) One possible path of the spacecraft as it approaches the planet is shown in Fig. 1.1.
+A
+3.64 × 106 m
+B
+5.00 × 107 m
+planet
+mass 7.5 × 1023 kg
+Fig. 1.1 (not to scale)
+The spacecraft enters the orbit at point A with speed 3.7 × 103 m s–1.
+At point B, a distance of 5.00 × 107 m from the centre of the planet, the spacecraft has a
+speed of 4.1 × 103 m s–1. The mass of the spacecraft is 650 kg.
+For the spacecraft moving from point B to point A, show that the change in gravitational
+potential energy of the spacecraft is 8.3 × 109 J.
+[3]
+(c) By considering changes in gravitational potential energy and in kinetic energy of the
+spacecraft, determine whether the total energy of the spacecraft increases or decreases in
+moving from point B to point A. A numerical answer is not required.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 8]
+© UCLES 2019 9702/41/M/J/19 [Turn over
+
+6
+2 A fixed mass of an ideal gas has volume 210 cm3 at pressure 3.0 × 105 Pa and temperature 270 K.
+The volume of the gas is reduced at constant pressure to 140 cm3, as shown in Fig. 2.1.
+210 cm3 140 cm3
+3.0 × 105 Pa 3.0 × 105 Pa
+270 K T
+Fig. 2.1
+The final temperature of the gas is T.
+(a) Determine:
+(i) the amount of gas
+amount = ...................................................mol [3]
+(ii) the final temperature T of the gas
+T = .......................................................K [2]
+(iii) the external work done on the gas.
+work done = .......................................................J [2]
+© UCLES 2019 9702/41/M/J/19
+
+7
+(b) For this change in volume and temperature of the gas, the thermal energy transferred is 53 J.
+Determine ΔU, the change in internal energy of the gas.
+ΔU = .......................................................J [3]
+[Total: 10]
+© UCLES 2019 9702/41/M/J/19 [Turn over
+
+8
+3 A hollow tube, sealed at one end, has a cross-sectional area A of 24 cm2.
+The tube contains sand so that the total mass M of the tube and sand is 0.23 kg.
+The tube floats upright in a liquid of density t, as illustrated in Fig. 3.1.
+tube, area
+of cross-section A
+liquid, density t
+h
+sand
+Fig. 3.1
+The depth of the bottom of the tube below the liquid surface is h.
+The tube is displaced vertically and then released. The variation with time t of the depth h is shown
+in Fig. 3.2.
+8
+h / cm
+6
+4
+2
+0
+0 0.2 0.4 0.6 0.8 1.0 1.2 1.4
+t / s
+Fig. 3.2
+(a) Determine:
+(i) the amplitude, in metres, of the oscillations
+amplitude = ......................................................m [1]
+© UCLES 2019 9702/41/M/J/19
+
+9
+(ii) the frequency of oscillation of the tube in the liquid
+frequency = .....................................................Hz [2]
+(iii) the acceleration of the tube when h is a maximum.
+acceleration = .................................................m s–2 [2]
+(b) The frequency f of oscillation of the tube is given by the expression
+1
+Atg
+f =
+2π c M m
+where g is the acceleration of free fall.
+Calculate the density t of the liquid in which the tube is floating.
+t = ...............................................kg m–3 [2]
+(c) The oscillations illustrated in Fig. 3.2 are undamped. In practice, the liquid does cause light
+damping.
+On Fig. 3.2, draw a line to show light damping of the oscillations for time t = 0 to time t = 1.4 s.
+[3]
+[Total: 10]
+© UCLES 2019 9702/41/M/J/19 [Turn over
+
+10
+4 (a) During the transmission of a signal, attenuation occurs and noise is picked up.
+State what is meant by:
+(i) attenuation
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) noise.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(b) By reference to (a)(ii), explain the advantage of the transmission of the signal in digital form
+rather than in analogue form.
+...................................................................................................................................................
+............................................................................................................................................. [1]
+(c) Part of an analogue signal is shown in Fig. 4.1.
+10
+signal
+voltage
+/ mV
+8
+6
+4
+2
+0
+0 1 2 3 4 5 6 7
+time t / ms
+Fig. 4.1
+© UCLES 2019 9702/41/M/J/19
+
+11
+The signal is to be transmitted in digital form.
+The analogue signal is sampled at a frequency of 1.0 × 103 Hz using an analogue-to-digital
+converter (ADC). The ADC produces 4-bit numbers.
+The times t at which the analogue signal is sampled are shown in Fig. 4.2.
+time
+t / ms 0 1.0 2.0 3.0 4.0 5.0 6.0
+digital
+number 0010 0110 0100 0101 ……… ……… ………
+Fig. 4.2
+On Fig. 4.2:
+(i) for the digital number at time t = 3.0 ms, underline the least significant bit (LSB) [1]
+(ii) state the digital numbers corresponding to the sampling times between time t = 4.0 ms
+and time t = 6.0 ms. [2]
+(d) The transmitted digital signal is converted back to an analogue signal using a digital-to-
+analogue converter (DAC).
+On Fig. 4.3, show the variation with time t of the output levels of the DAC for time t = 0 to
+time t = 4.0 ms. Assume that there is negligible time delay in the transmission line.
+8
+output
+level
+6
+4
+2
+0
+0 1 2 3 4
+time t / ms
+Fig. 4.3
+[3]
+[Total: 10]
+© UCLES 2019 9702/41/M/J/19 [Turn over
+
+12
+5 (a) State what is meant by electric field strength.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Two point charges A and B are situated a distance 15 cm apart in a vacuum, as illustrated in
+Fig. 5.1.
+A P B
+x
+15 cm
+Fig. 5.1
+Point P lies on the line joining the charges and is a distance x from charge A.
+The variation with distance x of the electric field strength E at point P is shown in Fig. 5.2.
+10
+8
+E / 103 N C–1
+6
+4
+2
+0
+0 2 4 6 8 10 12 14
+x / cm
+–2
+–4
+–6
+Fig. 5.2
+© UCLES 2019 9702/41/M/J/19
+
+13
+(i) By reference to the direction of the electric field, state and explain whether the charges
+A and B have the same, or opposite, signs.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) State why, although charge A is a point charge, the electric field strength between
+x = 3 cm and x = 7 cm does not obey an inverse-square law.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(iii) Use Fig. 5.2 to determine the ratio
+magnitude of charge A
+.
+magnitude of charge B
+ratio = ......................................................... [3]
+[Total: 8]
+© UCLES 2019 9702/41/M/J/19 [Turn over
+
+14
+6 (a) State two different functions of capacitors in electrical circuits.
+1. ...............................................................................................................................................
+...................................................................................................................................................
+2. ...............................................................................................................................................
+...................................................................................................................................................
+[2]
+(b) Three uncharged capacitors of capacitances C , C and C are connected in series with a
+1 2 3
+battery of electromotive force (e.m.f.) E and a switch, as shown in Fig. 6.1.
+E
+C C C
+1 2 3
+plate P
+charge +q
+Fig. 6.1
+When the switch is closed, there is a charge + q on plate P of the capacitor of capacitance C .
+1
+Show that the combined capacitance C of the three capacitors is given by the expression
+1 1 1 1
+= + + .
+C C C C
+1 2 3
+[3]
+© UCLES 2019 9702/41/M/J/19
+
+15
+(c) A student has available four capacitors, each of capacitance 20 μF.
+Draw circuit diagrams, one in each case, to show how the student may connect some or all of
+the capacitors to produce a combined capacitance of:
+(i) 60 μF
+[1]
+(ii) 15 μF.
+[1]
+[Total: 7]
+© UCLES 2019 9702/41/M/J/19 [Turn over
+
+16
+7 The circuit for an inverting amplifier incorporating an ideal operational amplifier (op-amp) is shown
+in Fig. 7.1.
+5.2 k
+0.80 k +5 V
+–
+P
++
+–5 V R
+V IN V OUT
+D
+Fig. 7.1
+(a) For the circuit of Fig. 7.1:
+(i) explain why point P is known as a virtual earth
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(ii) calculate the gain of the amplifier.
+gain = ......................................................... [2]
+© UCLES 2019 9702/41/M/J/19
+
+17
+(b) When the op-amp is saturated, the potential difference across the LED is 2.3 V.
+Calculate the minimum resistance of resistor R so that the current in the LED is limited to
+30 mA.
+resistance = ..................................................... Ω [3]
+[Total: 8]
+© UCLES 2019 9702/41/M/J/19 [Turn over
+
+18
+8 A solenoid is connected in series with a battery and a switch, as illustrated in Fig. 8.1.
+small coil
+A
+solenoid
+axis of
+solenoid
+Fig. 8.1
+A small coil, connected to a sensitive ammeter, is situated near one end of the solenoid.
+As the current in the solenoid is switched on, there is a changing magnetic field inside the solenoid.
+(a) (i) State what is meant by a magnetic field.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) On Fig. 8.1, draw an arrow on the axis of the solenoid to show the direction of the
+magnetic field inside the solenoid. Label this arrow P. [1]
+(b) As the current in the solenoid is switched on, there is a current induced in the small coil. This
+induced current gives rise to a magnetic field in the small coil.
+(i) State Lenz’s law.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+© UCLES 2019 9702/41/M/J/19
+
+19
+(ii) Use Lenz’s law to state and explain the direction of the magnetic field due to the induced
+current in the small coil. On Fig. 8.1, mark this direction with an arrow inside the small
+coil.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(c) The small coil has an area of cross-section 7.0 × 10–4 m2 and contains 75 turns of wire.
+A constant current in the solenoid produces a uniform magnetic flux of flux density 1.4 mT
+throughout the small coil.
+The direction of the current in the solenoid is reversed in a time of 0.12 s.
+Calculate the average e.m.f. induced in the small coil.
+e.m.f. = .......................................................V [3]
+[Total: 10]
+© UCLES 2019 9702/41/M/J/19 [Turn over
+
+20
+BLANK PAGE
+© UCLES 2019 9702/41/M/J/19
+
+21
+9 Nuclear magnetic resonance imaging (NMRI) is used to obtain diagnostic information about
+internal body structures.
+State, during the use of NMRI, the function of:
+(a) the large constant magnetic field
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [3]
+(b) the non-uniform magnetic field.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 5]
+© UCLES 2019 9702/41/M/J/19 [Turn over
+
+22
+10 A bridge rectifier contains four diodes. The output of the rectifier is connected to a resistor R, as
+shown in Fig. 10.1.
+bridge output
+input
+rectifier resistor R
+Fig. 10.1
+The variation with time t of the input e.m.f. E to the rectifier is given by the expression
+E = 15 cos(210t )
+where t is measured in seconds and E in volts.
+The variation with time t of the potential difference V across resistor R is shown in Fig. 10.2.
+V
+0
+t t
+1 2
+time t
+Fig. 10.2
+Determine:
+(a) the maximum potential difference V across resistor R
+MAX
+V = .......................................................V [1]
+MAX
+© UCLES 2019 9702/41/M/J/19
+
+23
+(b) the time interval, to two significant figures, between time t and time t .
+1 2
+time = .......................................................s [3]
+[Total: 4]
+© UCLES 2019 9702/41/M/J/19 [Turn over
+
+24
+11 (a) State three pieces of evidence provided by the photoelectric effect for a particulate nature of
+electromagnetic radiation.
+1. ...............................................................................................................................................
+...................................................................................................................................................
+2. ...............................................................................................................................................
+...................................................................................................................................................
+3. ...............................................................................................................................................
+...................................................................................................................................................
+[3]
+(b) The work function energies of some metals are shown in Fig. 11.1.
+work function
+energy / eV
+sodium 2.4
+calcium 2.9
+zinc 3.6
+silver 4.3
+Fig. 11.1
+Each metal is irradiated with electromagnetic radiation of wavelength 380 nm.
+(i) Calculate the energy, in eV, of a photon of electromagnetic radiation of wavelength 380 nm.
+energy = ......................................................eV [3]
+(ii) Determine which metals will give rise to the emission of photoelectrons. Explain your
+answer.
+...........................................................................................................................................
+..................................................................................................................................... [2]
+© UCLES 2019 9702/41/M/J/19
+
+25
+(c) Photons of wavelength 380 nm are incident normally on a metal surface at a rate of
+7.6 × 1014 s–1.
+All the photons are absorbed in the surface and no photoelectrons are emitted.
+Calculate the force exerted on the metal surface by the incident photons.
+force = ......................................................N [3]
+[Total: 11]
+© UCLES 2019 9702/41/M/J/19 [Turn over
+
+26
+12 (a) A sample of a radioactive isotope contains N nuclei of the isotope at time T.
+At time (T + ΔT ), the sample contains (N – ΔN ) nuclei of the isotope. The time interval ΔT is
+short.
+Use the symbols N, ΔN, T and ΔT to give expressions for:
+(i) the average activity of the sample during the time ΔT
+..................................................................................................................................... [1]
+(ii) the probability of decay of a nucleus in the time ΔT
+..................................................................................................................................... [1]
+(iii) the decay constant λ of the isotope.
+..................................................................................................................................... [1]
+(b) The isotope polonium-208 (2 0 8 Po) is radioactive and decays to form lead-204 ( 2 0 4 Pb).
+84 82
+The nuclear equation for this decay is
+208Po 204Pb + 4He.
+84 82 2
+Data for nuclear masses are given in Fig. 12.1.
+mass / u
+4He
+4.002 603
+2
+204Pb
+203.973 043
+82
+208Po
+207.981 245
+84
+Fig. 12.1
+(i) Determine, for the decay of one nucleus of polonium-208:
+1. the change, in u, of the mass
+mass change = .......................................................u [1]
+© UCLES 2019 9702/41/M/J/19
+
+27
+2. the total energy, in pJ, released.
+energy = .....................................................pJ [3]
+(ii) The polonium-208 nucleus is initially stationary. The initial kinetic energy of the
+4He nucleus (α-particle) is found to be less than the energy calculated in (i) part 2.
+2
+Suggest two possible reasons for this difference.
+1. .......................................................................................................................................
+...........................................................................................................................................
+2. .......................................................................................................................................
+...........................................................................................................................................
+[2]
+[Total: 9]
+© UCLES 2019 9702/41/M/J/19
+
+28
+BLANK PAGE
+Permission to reproduce items where third-party owned material protected by copyright is included has been sought and cleared where possible. Every
+reasonable effort has been made by the publisher (UCLES) to trace copyright holders, but if any items requiring clearance have unwittingly been included, the
+publisher will be pleased to make amends at the earliest possible opportunity.
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+Cambridge Assessment International Education is part of the Cambridge Assessment Group. Cambridge Assessment is the brand name of the University of
+Cambridge Local Examinations Syndicate (UCLES), which itself is a department of the University of Cambridge.
+© UCLES 2019 9702/41/M/J/19

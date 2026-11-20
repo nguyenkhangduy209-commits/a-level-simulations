@@ -1,0 +1,237 @@
+Cambridge Assessment International Education
+Cambridge International Advanced Subsidiary and Advanced Level
+MATHEMATICS 9709/43
+Paper 4 October/November 2019
+MARK SCHEME
+Maximum Mark: 50
+Published
+This mark scheme is published as an aid to teachers and candidates, to indicate the requirements of the
+examination. It shows the basis on which Examiners were instructed to award marks. It does not indicate the
+details of the discussions that took place at an Examiners’ meeting before marking began, which would have
+considered the acceptability of alternative answers.
+Mark schemes should be read in conjunction with the question paper and the Principal Examiner Report for
+Teachers.
+Cambridge International will not enter into discussions about these mark schemes.
+Cambridge International is publishing the mark schemes for the October/November 2019 series for most
+Cambridge IGCSE™, Cambridge International A and AS Level components and some Cambridge O Level
+components.
+This document consists of 11 printed pages.
+© UCLES 2019 [Turn over
+
+9709/43 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Generic Marking Principles
+These general marking principles must be applied by all examiners when marking candidate answers. They should be applied alongside the
+specific content of the mark scheme or generic level descriptors for a question. Each question paper and mark scheme will also comply with these
+marking principles.
+GENERIC MARKING PRINCIPLE 1:
+Marks must be awarded in line with:
+• the specific content of the mark scheme or the generic level descriptors for the question
+• the specific skills defined in the mark scheme or in the generic level descriptors for the question
+• the standard of response required by a candidate as exemplified by the standardisation scripts.
+GENERIC MARKING PRINCIPLE 2:
+Marks awarded are always whole marks (not half marks, or other fractions).
+GENERIC MARKING PRINCIPLE 3:
+Marks must be awarded positively:
+• marks are awarded for correct/valid answers, as defined in the mark scheme. However, credit is given for valid answers which go beyond the
+scope of the syllabus and mark scheme, referring to your Team Leader as appropriate
+• marks are awarded when candidates clearly demonstrate what they know and can do
+• marks are not deducted for errors
+• marks are not deducted for omissions
+• answers should only be judged on the quality of spelling, punctuation and grammar when these features are specifically assessed by the
+question as indicated by the mark scheme. The meaning, however, should be unambiguous.
+GENERIC MARKING PRINCIPLE 4:
+Rules must be applied consistently e.g. in situations where candidates have not followed instructions or in the application of generic level
+descriptors.
+GENERIC MARKING PRINCIPLE 5:
+Marks should be awarded using the full range of marks defined in the mark scheme for the question (however; the use of the full mark range may
+be limited according to the quality of the candidate responses seen).
+GENERIC MARKING PRINCIPLE 6:
+Marks awarded are based solely on the requirements as defined in the mark scheme. Marks should not be awarded with grade thresholds or
+grade descriptors in mind.
+© UCLES 2019 Page 2 of 11
+
+9709/43 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Mark Scheme Notes
+The following notes are intended to aid interpretation of mark schemes in general, but individual mark schemes may include marks awarded for
+specific reasons outside the scope of these notes.
+Types of mark
+M Method mark, awarded for a valid method applied to the problem. Method marks are not lost for numerical errors, algebraic slips or
+errors in units. However, it is not usually sufficient for a candidate just to indicate an intention of using some method or just to quote a
+formula; the formula or idea must be applied to the specific problem in hand, e.g. by substituting the relevant quantities into the
+formula. Correct application of a formula without the formula being quoted obviously earns the M mark and in some cases an M mark
+can be implied from a correct answer.
+A Accuracy mark, awarded for a correct answer or intermediate step correctly obtained. Accuracy marks cannot be given unless the
+associated method mark is earned (or implied).
+B Mark for a correct result or statement independent of method marks.
+DM or DB When a part of a question has two or more “method” steps, the M marks are generally independent unless the scheme specifically
+says otherwise; and similarly, when there are several B marks allocated. The notation DM or DB is used to indicate that a particular M
+or B mark is dependent on an earlier M or B (asterisked) mark in the scheme. When two or more steps are run together by the
+candidate, the earlier marks are implied and full credit is given.
+FT Implies that the A or B mark indicated is allowed for work correctly following on from previously incorrect results. Otherwise, A or B
+marks are given for correct work only.
+© UCLES 2019 Page 3 of 11
+
+9709/43 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Abbreviations
+AEF/OE Any Equivalent Form (of answer is equally acceptable) / Or Equivalent
+AG Answer Given on the question paper (so extra checking is needed to ensure that the detailed working leading to the result is valid)
+CAO Correct Answer Only (emphasising that no “follow through” from a previous error is allowed)
+CWO Correct Working Only
+ISW Ignore Subsequent Working
+SOI Seen Or Implied
+SC Special Case (detailing the mark to be given for a specific wrong solution, or a case where some standard marking practice is to be varied
+in the light of a particular circumstance)
+WWW Without Wrong Working
+AWRT Answer Which Rounds To
+© UCLES 2019 Page 4 of 11
+
+9709/43 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks Guidance
+1 F=µ×500g B1 Use of F=µR
+[2500=µ×500g] M1 Resolving horizontally
+µ=0.5 A1
+3
+Question Answer Marks Guidance
+2 PE gain =150000g × 500sinα (=75000000gsinα) B1 Correct expression for PE gain
+1 1 B1 Correct expression for KE loss
+×150000×452− ×150000×422
+(=19575000)
+2 2
+M1 For 5 term work energy equation
+(or 4 terms if using loss in KE as 1 term)
+150000g × 500sinα=19575000+16000×500 – 4×106 A1
+α =1.8 A1
+5
+© UCLES 2019 Page 5 of 11
+
+9709/43 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks Guidance
+3 Resolving horizontally or vertically M1
+50cos20 + 60 – 100sin30 (=56.984…) A1
+100cos30 – 50sin20 (= 69.501…) A1
+56.984... M1 Method to find either R or α
+R= (56.984...2 +69.501...2) or α=tan−1  
+69.501...
+R=89.9 (89.876…) A1
+α=39.3 (39.348…) A1
+6
+© UCLES 2019 Page 6 of 11
+
+9709/43 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks Guidance
+4(i) s =20×10−0.5a×102 or s =20×10+0.5a×102 M1 1 1
+PQ QR For use of s=vt− at2 or s=ut+ at2 OE
+2 2
+suvat to find PQ or QR
+s = 200–50a and 1.5s = 200 + 50a A1 OE
+1.5(200 – 50a) = 200 + 50a (cid:198) 100 = 125a (cid:198) a = 0.8ms–2 B1 AG
+3
+4(ii) 1 M1 1
+Distance QS =20×20+ ×0.8×202 Using s=ut+ at2
+2 2
+Distance=560 m A1
+560 B1
+Average speed between Q and S = =28ms−1
+20
+3
+© UCLES 2019 Page 7 of 11
+
+9709/43 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks Guidance
+5(i) 240 B1 Use of power = force × velocity
+Driving force= (= 40 N)
+6
+[40 – R = 80 × 0.3] M1 Use of Newton’s Second Law (3 terms)
+Resistance is 16 N A1 AG
+3
+5(ii) 240  M1 Use of P=Fv with DF=resistance
+=16
+ 
+ v 
+Steady speed is 15 ms–1 A1
+2
+5(iii) Use of Newton’s Second Law M1 (4 terms)
+240 A1
+−16−80gsin3=80a
+4
+Acceleration is 0.0266 ms–2 A1
+3
+© UCLES 2019 Page 8 of 11
+
+9709/43 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks Guidance
+Q6(i) 10=0.04×53+52c+5k (5c+k =1) B1 Use of t=5, v=10
+0.04 ct3 kt2 *M1 For use of s=∫vdt
+s= t4 + + +(C)
+4 3 2
+53 52 DM1 Use of t = 0, s = 0 and t = 5, s = 25
+25=0.01×54+ c+ k
+3 2
+125 25 125 25  A1
+6.25+ c+ k =25
+
+c+ k =18.75
+
+3 2  3 2 
+Solving for c or for k M1
+c =– 0.3 and k = 2.5 A1
+6
+Q6(ii) a=0.12t2 −0.6t+2.5 M1 dv
+For use of a=
+dt
+a'=0.24t−0.6=0→t =... or a =0.12(t2 −5t+...)=0.12(t−2.5)2 +... M1 da
+  Uses =0 or completes the square for a
+dt
+Minimum when t = 2.5 A1 AG
+3
+© UCLES 2019 Page 9 of 11
+
+9709/43 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks Guidance
+7(i)  1  M1 1
+0.81=0+ ×a×0.92 For use of s=ut+ at2
+ 
+ 2  2
+a = 2 A1
+T – mg = ma or kmg – T = kma M1 Use of Newton’s Second Law for A or B or
+(m −m )g
+use of a= B A
+(m +m )
+B A
+ (km−m)g A1
+T – mg = ma and kmg – T = kma or a= 
+
+(km+m)
+
+(kg−g) M1 Solves to find k
+a= =2→k =...
+(k+1)
+k = 1.5 A1
+T = 10m + 2m = 12m N B1 AG
+7
+7(ii) Velocity of A when string breaks = 2 × 0.9 (=1.8ms–1 upwards) B1FT For use of v=u+at ft a from (i)
+v2=1.82+2g×1.62 → v=... M1 For use of suvat to find v at ground
+A
+Speed is 5.97 ms–1 A1 AG
+(1.8+5.97) B1
+Time taken = =0.777s (0.7769...)
+g
+4
+© UCLES 2019 Page 10 of 11
+
+9709/43 Cambridge International AS/A Level – Mark Scheme October/November 2019
+PUBLISHED
+Question Answer Marks Guidance
+7(iii) Straight line from (0, 0) to (0.9, 1.8) B1
+Straight line from (0.9, 1.8) to approx. (1.7, –6) B1FT FT 0.9 + t from (ii) for 1.7
+2
+© UCLES 2019 Page 11 of 11

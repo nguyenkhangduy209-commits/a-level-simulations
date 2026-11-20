@@ -1,0 +1,526 @@
+Cambridge International AS & A Level
+PHYSICS 9702/41
+Paper 4 A Level Structured Questions October/November 2020
+2 hours
+You must answer on the question paper.
+No additional materials are needed.
+INSTRUCTIONS
+● Answer all questions.
+● Use a black or dark blue pen. You may use an HB pencil for any diagrams or graphs.
+● Write your name, centre number and candidate number in the boxes at the top of the page.
+● Write your answer to each question in the space provided.
+● Do not use an erasable pen or correction fluid.
+● Do not write on any bar codes.
+● You may use a calculator.
+● You should show all your working and use appropriate units.
+INFORMATION
+● The total mark for this paper is 100.
+● The number of marks for each question or part question is shown in brackets [ ].
+*3530429479*
+This document has 24 pages. Blank pages are indicated.
+DC (KN) 206161
+© UCLES 2020 [Turn over
+
+2
+Data
+speed of light in free space c = 3.00 × 108 m s−1
+permeability of free space μ = 4π × 10−7 H m−1
+0
+permittivity of free space ε = 8.85 × 10−12 F m−1
+0
+1
+( = 8.99 × 109 m F−1)
+4πε
+0
+elementary charge e = 1.60 × 10−19 C
+the Planck constant h = 6.63 × 10−34 J s
+unified atomic mass unit 1 u = 1.66 × 10−27 kg
+rest mass of electron m = 9.11 × 10−31 kg
+e
+rest mass of proton m = 1.67 × 10−27 kg
+p
+molar gas constant R = 8.31 J K−1 mol−1
+the Avogadro constant N = 6.02 × 1023 mol−1
+A
+the Boltzmann constant k = 1.38 × 10−23 J K−1
+gravitational constant G = 6.67 × 10−11 N m2 kg−2
+acceleration of free fall g = 9.81 m s−2
+© UCLES 2020 9702/41/O/N/20
+
+3
+Formulae
+uniformly accelerated motion s = ut + 1 at2
+2
+v2 = u2+2as
+work done on/by a gas W = pΔV
+Gm
+gravitational potential φ = −
+r
+hydrostatic pressure p = ρgh
+pressure of an ideal gas p = 1 Nm 〈c2〉
+3 V
+simple harmonic motion a = − ω 2x
+velocity of particle in s.h.m. v = v cos ωt
+0
+v = ± ω √  ( x  2  –   x 2 )
+0
+f v
+s
+Doppler effect f =
+o v ± v
+s
+Q
+electric potential V =
+4πεr
+0
+capacitors in series 1/C = 1/C + 1/C + . . .
+1 2
+capacitors in parallel C = C + C + . . .
+1 2
+1
+energy of charged capacitor W = QV
+2
+electric current I = Anvq
+resistors in series R = R + R + . . .
+1 2
+resistors in parallel 1/R = 1/R + 1/R + . . .
+1 2
+BI
+Hall voltage V =
+H ntq
+alternating current/voltage x = x sin ω t
+0
+radioactive decay x = x exp(−λt)
+0
+0.693
+decay constant λ =
+t1
+2
+© UCLES 2020 9702/41/O/N/20 [Turn over
+
+4
+BLANK PAGE
+© UCLES 2020 9702/41/O/N/20
+
+5
+Answer all the questions in the spaces provided.
+1 (a) (i) State what is meant by a field of force.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) Define gravitational field strength.
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(b) An isolated planet may be assumed to be a uniform sphere of radius 3.39 × 106 m with its
+mass of 6.42 × 1023 kg concentrated at its centre.
+Calculate the gravitational field strength at the surface of the planet.
+field strength = .............................................. N kg–1 [3]
+(c) Calculate the height above the surface of the planet in (b) at which the gravitational field
+strength is 1.0% less than its value at the surface of the planet.
+height = ..................................................... m [3]
+[Total: 9]
+© UCLES 2020 9702/41/O/N/20 [Turn over
+
+6
+2 (a) The first law of thermodynamics may be expressed as
+ΔU = (+q) + (+w)
+where ΔU is the increase in internal energy of the system.
+State the meaning of:
++q ..............................................................................................................................................
+...................................................................................................................................................
++w. ............................................................................................................................................
+...................................................................................................................................................
+[2]
+(b) The variation with pressure p of the volume V of a fixed mass of an ideal gas is shown in
+Fig. 2.1.
+4.0
+B
+V / 10–3 m3
+3.6
+3.2
+2.8
+2.4
+C
+A
+2.0
+2.2 2.6 3.0 3.4 3.8 4.2 4.6 5.0 5.4
+p / 105 Pa
+Fig. 2.1
+The gas undergoes a cycle of changes A to B to C to A.
+During the change A to B, the volume of the gas increases from 2.3 × 10–3 m3 to 3.8 × 10–3 m3.
+© UCLES 2020 9702/41/O/N/20
+
+7
+(i) Show that the magnitude of the work done during the change A to B is 390 J.
+[1]
+(ii) State and explain the total change, if any, in the internal energy of the gas during one
+complete cycle.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(c) During the change A to B, 1370 J of thermal energy is transferred to the gas.
+During the change B to C, no thermal energy enters or leaves the gas. The work done on the
+gas during this change is 550 J.
+Use these data and the information in (b) to complete Table 2.1.
+Table 2.1
+change q / J w / J ΔU / J
+A to B
+.......................... .......................... ..........................
+B to C
+.......................... .......................... ..........................
+C to A
+.......................... .......................... ..........................
+[4]
+[Total: 9]
+© UCLES 2020 9702/41/O/N/20 [Turn over
+
+8
+3 A pendulum consists of a metal sphere P suspended from a fixed point by means of a thread, as
+illustrated in Fig. 3.1.
+thread
+L
+metal sphere P
+x
+Fig. 3.1
+The centre of gravity of sphere P is a distance L from the fixed point.
+The sphere is pulled to one side and then released so that it oscillates. The sphere may be
+assumed to oscillate with simple harmonic motion.
+(a) State what is meant by simple harmonic motion.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) The variation of the velocity v of sphere P with the displacement x from its mean position is
+shown in Fig. 3.2.
+v / m s–1
+0.3
+0.2
+0.1
+0
+–10 –8 –6 –4 –2 0 2 4 6 8 10
+x / cm
+–0.1
+–0.2
+–0.3
+Fig. 3.2
+© UCLES 2020 9702/41/O/N/20
+
+9
+Use Fig. 3.2 to determine the frequency f of the oscillations of sphere P.
+f = .................................................... Hz [3]
+(c) The period T of the oscillations of sphere P is given by the expression
+L
+T = 2π
+cgm
+where g is the acceleration of free fall.
+Use your answer in (b) to determine the length L.
+L = ..................................................... m [2]
+(d) Another pendulum consists of a sphere Q suspended by a thread. Spheres P and Q are
+identical. The thread attached to sphere Q is longer than the thread attached to sphere P.
+Sphere Q is displaced and then released. The oscillations of sphere Q have the same
+amplitude as the oscillations of sphere P.
+On Fig. 3.2, sketch the variation of the velocity v with displacement x for sphere Q. [2]
+[Total: 9]
+© UCLES 2020 9702/41/O/N/20 [Turn over
+
+10
+BLANK PAGE
+© UCLES 2020 9702/41/O/N/20
+
+11
+4 (a) Explain the principles of the generation of ultrasound waves for use in medical diagnosis.
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [4]
+(b) The linear attenuation (absorption) coefficient for a parallel beam of ultrasound waves in air is
+1.2 cm–1.
+The parallel beam passes through a layer of air of thickness 3.5 cm.
+Calculate the ratio, in dB,
+intensity of beam after passing through the layer of air
+.
+intensity of beam entering the layer of air
+ratio = .................................................... dB [4]
+[Total: 8]
+© UCLES 2020 9702/41/O/N/20 [Turn over
+
+12
+5 (a) Define electric potential at a point.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) Two point charges A and B are separated by a distance of 12.0 cm in a vacuum, as illustrated
+in Fig. 5.1.
+x
+charge A P charge B
+12.0 cm
+Fig. 5.1
+The charge of A is +2.0 × 10–9 C.
+A point P lies on the line joining charges A and B. Its distance from charge A is x.
+The variation with distance x of the electric potential V at point P is shown in Fig. 5.2.
+20
+V / 102 V
+10
+0
+0 2 4 6 8 10 12
+x / cm
+–10
+–20
+–30
+–40
+Fig. 5.2
+© UCLES 2020 9702/41/O/N/20
+
+13
+Use Fig. 5.2 to determine:
+(i) the charge of B
+charge = ..................................................... C [3]
+(ii) the change in electric potential when point P moves from the position where x = 9.0 cm to
+the position where x = 3.0 cm.
+change = ...................................................... V [1]
+(c) An α-particle moves along the line joining point charges A and B in Fig. 5.1.
+The α-particle moves from the position where x = 9.0 cm and just reaches the position where
+x = 3.0 cm.
+Use your answer in (b)(ii) to calculate the speed v of the α-particle at the position where
+x = 9.0 cm.
+v = ................................................ m s–1 [3]
+[Total: 9]
+© UCLES 2020 9702/41/O/N/20 [Turn over
+
+14
+6 (a) (i) Define the capacitance of a parallel plate capacitor.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) State three functions of capacitors in electrical circuits.
+1. .......................................................................................................................................
+2. .......................................................................................................................................
+3. .......................................................................................................................................
+[3]
+(b) A student has available four capacitors, each of capacitance 24 μF.
+The capacitors are connected as shown in Fig. 6.1.
+24 μF
+X
+24 μF 24 μF
+24 μF
+Y
+Fig. 6.1
+Calculate the combined capacitance between the terminals X and Y.
+capacitance = .................................................... μF [2]
+[Total: 7]
+© UCLES 2020 9702/41/O/N/20
+
+15
+7 An ideal operational amplifier (op-amp) is to be used in a comparator circuit.
+Part of the comparator circuit is shown in Fig. 7.1.
++5.0 V
+–
++
+–5.0 V
+V
+OUT
+Fig. 7.1
+Three resistors, each of resistance 1000 Ω, and a negative temperature coefficient thermistor are
+available to complete the circuit.
+The circuit is to be designed so that, at low temperatures, the output V is –5.0 V and at higher
+OUT
+temperatures, the output V is to be +5.0 V.
+OUT
+(a) On Fig. 7.1, draw the input circuit to the inverting and non-inverting inputs of the op-amp. [4]
+(b) State a suitable value for the thermistor resistance when the thermistor is at:
+(i) low temperature where V is –5.0 V
+OUT
+..................................................................................................................................... [1]
+(ii) a higher temperature where V is +5.0 V.
+OUT
+..................................................................................................................................... [1]
+[Total: 6]
+© UCLES 2020 9702/41/O/N/20 [Turn over
+
+16
+8 A slice of a conducting material has its face QRLK normal to a uniform magnetic field of flux
+density B, as illustrated in Fig. 8.1.
+S R
+M
+L
+magnetic flux
+P density B
+Q
+J
+K
+direction of
+movement of
+electrons
+Fig. 8.1
+Electrons enter the slice travelling perpendicular to face PQKJ.
+(a) For the free electrons moving in the slice:
+(i) state the direction of the force on an electron due to movement of the electron in the
+magnetic field
+...........................................................................................................................................
+..................................................................................................................................... [1]
+(ii) identify the faces, using the letters on Fig. 8.1, between which a potential difference is
+developed.
+face ................................. and face ................................. [1]
+(b) Explain why the potential difference in (a)(ii) reaches a maximum value.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+© UCLES 2020 9702/41/O/N/20
+
+17
+(c) The number of free electrons per unit volume in the slice of material is 1.3 × 1029 m–3.
+The thickness PQ of the slice is 0.10 mm.
+The magnetic flux density B is 4.6 × 10–3 T.
+Calculate the potential difference across the slice for a current of 6.3 × 10–4 A.
+potential difference = ...................................................... V [2]
+(d) The slice in (c) is a metal.
+By reference to your answer in (c), suggest why Hall probes are usually made using
+semiconductors rather than metals.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 8]
+© UCLES 2020 9702/41/O/N/20 [Turn over
+
+18
+9 (a) Define magnetic flux.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+(b) A simple transformer consists of two coils of wire wound on a soft-iron core, as illustrated in
+Fig. 9.1.
+soft-iron core
+primary coil
+secondary coil
+Fig. 9.1
+There is a sinusoidal current in the primary coil.
+Explain:
+(i) how this current gives rise to an induced electromotive force (e.m.f.) in the secondary
+coil
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [3]
+(ii) why the e.m.f. induced in the secondary coil is not constant.
+...........................................................................................................................................
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+© UCLES 2020 9702/41/O/N/20
+
+19
+(c) Explain why the soft-iron core in (b) is laminated.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 9]
+© UCLES 2020 9702/41/O/N/20 [Turn over
+
+20
+10 (a) Outline briefly the principles of computed tomography (CT scanning).
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [5]
+© UCLES 2020 9702/41/O/N/20
+
+21
+(b) One section of a model designed to illustrate CT scanning is divided into four voxels.
+The pixel numbers K, L, M and N of the voxels are shown in Fig. 10.1.
+D
+3
+D
+2
+D
+4
+K L
+D
+1
+N M
+Fig. 10.1
+The section is viewed, in turn, from four different directions D , D , D and D , as shown in
+1 2 3 4
+Fig. 10.1.
+The detector readings for each direction are noted and these are summed to give the values
+shown in Fig. 10.2.
+42 45
+51 30
+Fig. 10.2
+The background reading is 24.
+Determine the pixel numbers K, L, M and N shown in Fig. 10.1.
+K = ...............................................................
+L = ...............................................................
+M = ...............................................................
+N = ...............................................................
+[3]
+[Total: 8]
+© UCLES 2020 9702/41/O/N/20 [Turn over
+
+22
+11 A photon of wavelength 540 nm collides with an isolated stationary electron, as illustrated in
+Fig. 11.1.
+electron
+incident photon
+wavelength 540 nm
+deflected photon
+wavelength 544 nm
+Fig. 11.1
+The photon is deflected elastically by the electron.
+The wavelength of the deflected photon is 544 nm.
+(a) (i) State what is meant by a photon.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) On Fig. 11.1, draw an arrow to indicate the approximate direction of motion of the
+deflected electron. [1]
+© UCLES 2020 9702/41/O/N/20
+
+23
+(b) Calculate:
+(i) the momentum of the deflected photon
+momentum = ................................................... N s [2]
+(ii) the energy transferred to the deflected electron.
+energy = ...................................................... J [2]
+(c) Another photon of wavelength 540 nm collides with an isolated stationary electron.
+Explain why it is not possible for the deflected photon to have a wavelength less than 540 nm.
+...................................................................................................................................................
+...................................................................................................................................................
+............................................................................................................................................. [2]
+[Total: 9]
+© UCLES 2020 9702/41/O/N/20 [Turn over
+
+24
+12 Iodine-131 (131I) is a radioactive isotope with a decay constant of 9.9 × 10–7 s–1.
+53
+(a) State what is meant by:
+(i) radioactive
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(ii) decay constant.
+...........................................................................................................................................
+...........................................................................................................................................
+..................................................................................................................................... [2]
+(b) Some water becomes contaminated with iodine-131.
+The activity of the iodine-131 in 1.0 kg of water is 560 Bq.
+Determine the number of iodine-131 atoms in 1.0 kg of water.
+number = ......................................................... [2]
+(c) Regulations require that the activity of iodine-131 in 1.0 kg of water is to be less than 170 Bq.
+Calculate the time, in days, for the activity of the contaminated water in (b) to be reduced to
+170 Bq.
+time = ................................................ days [3]
+[Total: 9]
+To avoid the issue of disclosure of answer-related information to candidates, all copyright acknowledgements are reproduced online in the Cambridge
+Assessment International Education Copyright Acknowledgements Booklet. This is produced for each series of examinations and is freely available to download
+at www.cambridgeinternational.org after the live examination series.
+© UCLES 2020 9702/41/O/N/20
