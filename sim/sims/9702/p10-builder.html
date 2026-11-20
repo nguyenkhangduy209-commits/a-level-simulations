@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuit builder</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../core/util.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/view.js"></script>
+<script src="../../engine/phys-circuits.js"></script>
+<script src="../../engine/phys-circuit-builder.js"></script>
+<style>
+  .cb-hint { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+  .cb-pal { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .cb-tool { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-width: 58px; min-height: 54px; padding: 4px 6px;
+    border-radius: 12px; border: 1px solid var(--line); background: var(--panel2); color: var(--ink); font: 600 11px var(--sans); cursor: pointer; touch-action: manipulation; }
+  .cb-tool svg { width: 40px; height: 28px; overflow: visible; }
+  .cb-tool:hover { border-color: var(--accent); }
+  .cb-tool.on { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+  .cb-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+  .cb-tbl { overflow-x: auto; }
+  .cb-tbl td.txt { white-space: nowrap; }
+  .cb-tbl tr.sel td { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .cb-tbl tr.bad td:first-child { color: var(--warn); }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, CB = SIM.cbuild, TY = CB.TYPES, W = CB.W, H = CB.H, s3 = U.sf;
+  var pg = ui.page({ title: 'Circuit builder: build it, solve it, explain it',
+    tags: ['9702 9 Electricity', '9702 10.1 symbols, e.m.f. and internal resistance', '9702 10.2 Kirchhoff’s laws', '9702 10.3 potential dividers'] });
+
+  /* ---------- layout ---------- */
+  var sceneCard = pg.card('left');
+  var narrow = (typeof innerWidth === 'number' ? innerWidth : 1200) < 720;
+  var cv = ui.canvas(sceneCard, narrow ? 'tall-canvas' : 'main-canvas');
+  var vp = new SIM.view.Viewport(cv, { pad: 6 });
+  ui.legend(sceneCard, [{ color: 'var(--c-applied)', label: 'conventional current (brighter wire = larger current)' }, { color: 'var(--c-s1)', label: 'p.d. across a part' },
+    { color: 'var(--accent)', label: 'selected part' }, { color: 'var(--warn)', label: 'something to fix' }]);
+  sceneCard.appendChild(ui.h('p', { class: 'cb-hint', html: '<b>Add a part:</b> tap it below, then tap between two dots on the grid (or drag from dot to dot). <b>Wires:</b> drag along the dots. <b>Change a part:</b> tap it.' }));
+  var pal = ui.h('div', { class: 'cb-pal', role: 'toolbar', 'aria-label': 'Circuit parts' });
+  sceneCard.appendChild(pal);
+  var viewRow = ui.h('div', { class: 'cb-row' }); sceneCard.appendChild(viewRow);
+  var showIV = ui.toggle(viewRow, { label: 'Show I and V beside each part', value: true }, function () { drawScene(); });
+
+  var presetCard = pg.card('right', 'Ready-made circuits');
+  var envCard = pg.card('right', 'Thermistor and LDR');
+  var tableCard = pg.card('right', 'Every component');
+  var outCard = pg.card('right', 'How to calculate it');
+  var noteCard = pg.card('right', 'Tips and common mistakes');
+
+  var envNote = ui.h('p', { class: 'cb-hint', style: 'margin-top:0' }); envCard.appendChild(envNote);
+  var prm = ui.params(envCard, [
+    { key: 'T', label: 'Temperature of the thermistor', sym: 'T', unit: '°C', min: -10, max: 100, step: 0.5, value: 25 },
+    { key: 'L', label: 'Light intensity on the LDR (arbitrary units)', sym: 'light', unit: 'a.u.', min: 0, max: 100, step: 0.5, value: 20 }
+  ], function () { update(); });
+  var tbl = ui.h('div', { class: 'cb-tbl' }); tableCard.appendChild(tbl);
+  var methodSel = ui.select(outCard, { label: 'Method', value: 'auto', options: [{ value: 'auto', label: 'Simplest (series and parallel where possible)' }, { value: 'kirchhoff', label: 'Kirchhoff’s laws' }] }, function () { readout(); drawScene(); });
+  ui.examToggle(outCard, outCard);
+  var R = ui.Readout(outCard);
+  // circuit explanations for lines whose symbol would otherwise pick up a mechanics hint (R = normal reaction, PE = potential energy)
+  var rawEq = R.eq;
+  R.eq = function (lhs, work, value, unit, why) {
+    var k = String(lhs).replace(/<[^>]+>/g, '');
+    if (!why && k === 'R') why = 'Everything outside the cell, combined into one resistance (series: add; parallel: add the reciprocals).';
+    if (!why && /^PE/.test(k)) why = 'Power supplied by the cell = e.m.f. × current: the energy it gives each coulomb times the coulombs per second.';
+    return rawEq.call(R, lhs, work, value, unit, why);
+  };
+
+  ui.notes(noteCard, [
+    '<b>Ammeters go in series</b> (an ideal ammeter has zero resistance). <b>Voltmeters go in parallel</b>, across the part (an ideal voltmeter has infinite resistance).',
+    'Series: the same current through each part, and the p.d.s add up to the e.m.f. Parallel: the same p.d. across each branch, and the branch currents add up.',
+    'Kirchhoff’s first law: Σ current into a junction = Σ current out (charge is conserved). Second law: round any closed loop, ΣE = ΣIR (energy is conserved).',
+    'Terminal p.d. = E − Ir. The “lost volts” Ir get bigger as the current gets bigger.',
+    'A wire straight across a part short-circuits it: all the current takes the wire. A wire across a cell gives the largest current the cell can drive, I = E/r.',
+    'Conventional current leaves the + terminal of a cell (the long plate) and returns to the − terminal (the short, thick plate).',
+    'Tap a switch to open or close it. Tap a cell or diode, then “Reverse”, to turn it round.'
+  ]);
+
+  /* ---------- the circuit ---------- */
+  var P = CB.make, parts = [], res = null, sel = null, undo = [];
+  var RECT = [[1, 1], [7, 1], [7, 4], [1, 4], [1, 1]];
+  var PRESETS = [
+    { name: 'Series circuit: 6.0 V cell, 10 Ω and 20 Ω', note: 'One loop, so the same current everywhere: I = 6.0/(10 + 20) = 0.20 A. The p.d.s 2.0 V + 4.0 V add up to the e.m.f.',
+      parts: function () { return CB.build([P('cell', 3, 1, 'h', { E: 6 }, true), P('amm', 5, 1, 'h'), P('res', 7, 2, 'v', { R: 10 }), P('res', 4, 4, 'h', { R: 20 })], [RECT]); } },
+    { name: 'Parallel circuit: 6.0 V across 6.0 Ω and 3.0 Ω', note: 'Each branch has the full 6.0 V: 1.0 A + 2.0 A = 3.0 A from the cell. 1/R = 1/6 + 1/3 ⇒ R = 2.0 Ω, less than either resistor.',
+      parts: function () { return CB.build([P('cell', 1, 2, 'v', { E: 6 }), P('amm', 2, 1, 'h'), P('res', 4, 2, 'v', { R: 6 }), P('res', 7, 2, 'v', { R: 3 }), P('amm', 7, 3, 'v')], [RECT, [[4, 1], [4, 4]]]); } },
+    { name: 'Potential divider: 9.0 V across 1.0 kΩ and 2.0 kΩ', note: 'V_out = 9.0 × 2.0/(1.0 + 2.0) = 6.0 V across the 2.0 kΩ resistor. Give the voltmeter a resistance (e.g. 2 kΩ) and the reading drops.',
+      parts: function () { return CB.build([P('cell', 1, 2, 'v', { E: 9 }), P('res', 5, 1, 'v', { R: 1000 }), P('res', 5, 3, 'v', { R: 2000 }), P('volt', 7, 3, 'v')], [[[1, 0], [5, 0], [5, 5], [1, 5], [1, 0]], [[5, 3], [7, 3]], [[5, 4], [7, 4]]]); } },
+    { name: 'Thermistor in a potential divider (heat it: V_out falls)', note: 'Warmer ⇒ the thermistor’s resistance falls ⇒ it gets a smaller share of the 6.0 V. Use the temperature chip under the diagram.', env: { T: 25 },
+      parts: function () { return CB.build([P('cell', 1, 2, 'v', { E: 6 }), P('res', 5, 1, 'v', { R: 10000 }), P('therm', 5, 3, 'v'), P('volt', 7, 3, 'v')], [[[1, 0], [5, 0], [5, 5], [1, 5], [1, 0]], [[5, 3], [7, 3]], [[5, 4], [7, 4]]]); } },
+    { name: 'Cell with internal resistance: E = 6.0 V, r = 2.0 Ω, voltmeter across the cell', note: 'I = 6.0/(10 + 2.0) = 0.50 A; terminal p.d. = E − Ir = 6.0 − 1.0 = 5.0 V. Make the variable resistor smaller: more current, more lost volts.',
+      parts: function () { return CB.build([P('cell', 3, 2, 'h', { E: 6, r: 2 }, true), P('amm', 7, 3, 'v'), P('var', 4, 5, 'h', { R: 10 }), P('volt', 3, 0, 'h')], [[[1, 2], [7, 2], [7, 5], [1, 5], [1, 2]], [[3, 2], [3, 0]], [[4, 0], [4, 2]]]); } },
+    { name: 'Ammeter in series, voltmeter in parallel (real meters)', note: 'A 1.0 Ω ammeter adds a little resistance; a 1.0 kΩ voltmeter draws a little current. Make them ideal (select one, then “Make it ideal”) to compare.',
+      parts: function () { return CB.build([P('cell', 3, 1, 'h', { E: 6 }, true), P('amm', 5, 1, 'h', { R: 1 }), P('res', 4, 4, 'h', { R: 10 }), P('volt', 4, 5, 'h', { R: 1000 })], [RECT, [[4, 4], [4, 5]], [[5, 4], [5, 5]]]); } },
+    { name: 'What if the ammeter and voltmeter are swapped?', note: 'The voltmeter (very high resistance) is in series, so almost no current flows and it reads the e.m.f. The ammeter (zero resistance) short-circuits the resistor.',
+      parts: function () { return CB.build([P('cell', 3, 1, 'h', { E: 6 }, true), P('volt', 5, 1, 'h'), P('res', 4, 4, 'h', { R: 10 }), P('amm', 4, 5, 'h')], [RECT, [[4, 4], [4, 5]], [[5, 4], [5, 5]]]); } },
+    { name: 'Two cells (Kirchhoff): 12 V with 2.0 Ω, 6.0 V with 3.0 Ω, 6.0 Ω across', note: 'The top junction is at 8.0 V: 2.0 A from the 12 V cell, 0.67 A INTO the 6.0 V cell (it is being charged), 1.33 A through 6.0 Ω.',
+      parts: function () { return CB.build([P('cell', 1, 3, 'v', { E: 12 }), P('res', 1, 1, 'v', { R: 2 }), P('cell', 4, 3, 'v', { E: 6 }), P('res', 4, 1, 'v', { R: 3 }), P('res', 7, 2, 'v', { R: 6 })], [[[1, 0], [7, 0], [7, 5], [1, 5], [1, 0]], [[4, 0], [4, 5]]]); } },
+    { name: 'Bridge circuit: not series, not parallel', note: 'R₅ joins the two midpoints, so the circuit does not reduce to series and parallel parts: use Kirchhoff’s laws. Make R₁/R₂ = R₃/R₄ (e.g. R₄ = 60 Ω) and no current flows through R₅ (a balanced bridge).',
+      parts: function () { return CB.build([P('res', 2, 1, 'h', { R: 10 }), P('res', 5, 1, 'h', { R: 20 }), P('res', 2, 3, 'h', { R: 30 }), P('res', 5, 3, 'h', { R: 10 }), P('res', 4, 1, 'v', { R: 10 }), P('cell', 4, 5, 'h', { E: 6 }, true)],
+        [[[1, 1], [7, 1]], [[1, 3], [7, 3]], [[1, 1], [1, 5], [7, 5], [7, 1]], [[4, 1], [4, 3]]]); } },
+    { name: 'An open switch: no current, but the voltmeter across it reads 6.0 V', note: 'No complete loop, so no current and no p.d. across the lamp. The whole e.m.f. appears across the gap in the switch. Tap the switch to close it.',
+      parts: function () { return CB.build([P('cell', 3, 1, 'h', { E: 6 }, true), P('lamp', 7, 2, 'v', { R: 12 }), P('switch', 4, 4, 'h', { on: 0 }), P('volt', 4, 5, 'h')], [RECT, [[4, 4], [4, 5]], [[5, 4], [5, 5]]]); } },
+    { name: 'Diode with a 0.7 V forward drop, in series with 100 Ω', note: 'I = (6.0 − 0.7)/100 = 0.053 A. Select the diode and press “Reverse”: it is reverse-biased and the current stops.',
+      parts: function () { return CB.build([P('cell', 3, 1, 'h', { E: 6 }, true), P('diode', 5, 1, 'h'), P('res', 7, 2, 'v', { R: 100 })], [RECT]); } }
+  ];
+  var presetCtl = ui.presets(presetCard, PRESETS, function (p) {
+    pushUndo(); parts = p.parts(); sel = null;
+    if (p.env) prm.set(p.env, true);
+    update();
+  });
+
+  function env() { return { T: prm.values.T, L: prm.values.L }; }
+  function nm(i) { return res && res.names[i] ? res.names[i] : CB.names(parts)[i]; }
+  function pushUndo() { undo.push(CB.encode(parts)); if (undo.length > 60) undo.shift(); }
+  function update() {
+    res = CB.analyse(parts, env());
+    if (sel && parts.indexOf(sel) < 0) sel = null;
+    var hasT = parts.some(function (p) { return p.t === 'therm'; }), hasL = parts.some(function (p) { return p.t === 'ldr'; });
+    prm.show('T', hasT); prm.show('L', hasL);
+    envNote.innerHTML = hasT || hasL ? 'Resistance from an illustrative model: it falls as the temperature / light intensity rises.' : 'Add a thermistor or LDR to the circuit to control it from here.';
+    drawScene(); table(); readout(); syncActions();
+    ui.writeHash({ c: CB.encode(parts), T: prm.values.T, L: prm.values.L });
+  }
+
+  /* ---------- formatting ---------- */
+  function plain(x) { return String(s3(x)).replace(/<[^>]+>/g, ''); }
+  /** canvas text: 3 s.f. with a k / m / μ prefix, so no powers of ten are needed */
+  function eng(v, u) {
+    if (!isFinite(v)) return '∞ ' + u;
+    var a = Math.abs(v);
+    if (a < 1e-12) return '0 ' + u;
+    if (a >= 9.995e5) return plain(v / 1e6) + ' M' + u;
+    if (a >= 9995) return plain(v / 1e3) + ' k' + u;
+    if (a >= 0.00995) return plain(v) + ' ' + u;
+    if (a >= 9.995e-6) return plain(v * 1e3) + ' m' + u;
+    return plain(v * 1e6) + ' μ' + u;
+  }
+  function note(t) { R.html('<div class="eq"><div class="note" style="margin:0">' + t + '</div></div>'); }
+
+  /* ---------- palette ---------- */
+  var ICON = {
+    wire: '<path d="M2 12H38"/>',
+    cell: '<path d="M0 12H17M23 12H40M17 3V21"/><path d="M23 7.5V16.5" stroke-width="4"/>',
+    battery: '<path d="M0 12H11M29 12H40M11 4V20M25 4V20"/><path d="M15 8V16M29 8V16" stroke-width="4"/><path d="M15 12H25" stroke-dasharray="2 2"/>',
+    res: '<path d="M0 12H10M30 12H40"/><rect x="10" y="7" width="20" height="10"/>',
+    var: '<path d="M0 12H10M30 12H40"/><rect x="10" y="7" width="20" height="10"/><path d="M8 21L32 3M32 3L25 4M32 3L30 9"/>',
+    lamp: '<path d="M0 12H12M28 12H40"/><circle cx="20" cy="12" r="8"/><path d="M14.3 6.3L25.7 17.7M25.7 6.3L14.3 17.7"/>',
+    switch: '<path d="M0 12H11M29 12H40M12 12L27 4"/><circle cx="12" cy="12" r="1.8"/><circle cx="28" cy="12" r="1.8"/>',
+    amm: '<path d="M0 12H11M29 12H40"/><circle cx="20" cy="12" r="9"/><text x="20" y="16.5" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">A</text>',
+    volt: '<path d="M0 12H11M29 12H40"/><circle cx="20" cy="12" r="9"/><text x="20" y="16.5" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">V</text>',
+    therm: '<path d="M0 12H10M30 12H40"/><rect x="10" y="7" width="20" height="10"/><path d="M5 21H9L33 3"/>',
+    ldr: '<path d="M0 12H12M28 12H40"/><rect x="12" y="8" width="16" height="8"/><circle cx="20" cy="12" r="11"/><path d="M2 -3L9 3M9 3L4 2.5M9 3L7.5 -1.5M9 -6L16 0M16 0L11 -0.5M16 0L14.5 -4.5"/>',
+    diode: '<path d="M0 12H40M26 5V19"/><path d="M14 5V19L26 12Z"/>',
+    fuse: '<path d="M0 12H10M30 12H40"/><rect x="10" y="8" width="20" height="8"/><path d="M10 12H30"/>'
+  };
+  var SHORT = { wire: 'Wire', cell: 'Cell', battery: 'Battery', res: 'Resistor', var: 'Variable', lamp: 'Lamp', switch: 'Switch', amm: 'Ammeter', volt: 'Voltmeter', therm: 'Thermistor', ldr: 'LDR', diode: 'Diode', fuse: 'Fuse' };
+  var toolBtns = {};
+  Object.keys(ICON).forEach(function (t) {
+    var b = ui.h('button', { type: 'button', class: 'cb-tool', title: TY[t].label, 'aria-label': 'Add ' + TY[t].label.toLowerCase(),
+      html: '<svg viewBox="0 -6 40 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[t] + '</svg><span>' + SHORT[t] + '</span>',
+      onclick: function () { pickTool(t); } });
+    toolBtns[t] = b; pal.appendChild(b);
+  });
+  pal.appendChild(ui.h('button', { type: 'button', class: 'btn', text: 'Clear all', style: 'min-height:54px', onclick: function () { if (!parts.length) return; pushUndo(); parts = []; sel = null; cancelTool(); update(); } }));
+  function highlightTool() { Object.keys(toolBtns).forEach(function (t) { toolBtns[t].classList.toggle('on', t === tool); toolBtns[t].setAttribute('aria-pressed', String(t === tool)); }); }
+
+  /* ---------- geometry ---------- */
+  function G(gx, gy) { return vp.P(gx, -gy); }
+  function gridOf(x, y) { var w = vp.toWorld(x, y); return [w[0], -w[1]]; }
+  function mid(p) { var e = CB.ends(p), A = G(e[0][0], e[0][1]), B = G(e[1][0], e[1][1]); return [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2]; }
+  function nearestDot(x, y) { var g = gridOf(x, y); return [U.clamp(Math.round(g[0]), 0, W - 1), U.clamp(Math.round(g[1]), 0, H - 1)]; }
+  function nearestEdge(x, y) {
+    var g = gridOf(x, y), best = null, bd = Infinity;
+    [['h', U.clamp(Math.floor(g[0]), 0, W - 2), U.clamp(Math.round(g[1]), 0, H - 1)], ['v', U.clamp(Math.round(g[0]), 0, W - 1), U.clamp(Math.floor(g[1]), 0, H - 2)]].forEach(function (c) {
+      var mx = c[0] === 'h' ? c[1] + 0.5 : c[1], my = c[0] === 'h' ? c[2] : c[2] + 0.5, d = Math.hypot(g[0] - mx, g[1] - my);
+      if (d < bd) { bd = d; best = { x: c[1], y: c[2], d: c[0] }; }
+    });
+    return bd < 1.2 ? best : null;
+  }
+  function partAt(e) { for (var i = 0; i < parts.length; i++) if (parts[i].x === e.x && parts[i].y === e.y && parts[i].d === e.d) return i; return -1; }
+  function pathEdges(A, B) { return CB.edgesOf([A, [B[0], A[1]], B]); }
+
+  /* ---------- placing parts ---------- */
+  var tool = null, pend = null, preview = null;
+  function put(t, e) { var i = partAt(e), np = P(t, e.x, e.y, e.d); if (i >= 0) parts[i] = np; else parts.push(np); return np; }
+  /** place along the dots from A to B: wires everywhere free; a part goes on the middle edge */
+  function placePath(t, edges) {
+    if (!edges.length) return null;
+    pushUndo();
+    var k = t === 'wire' ? -1 : Math.floor((edges.length - 1) / 2), made = null;
+    edges.forEach(function (e, j) {
+      if (j === k) made = put(t, e);
+      else if (partAt(e) < 0) put('wire', e);
+      else if (t === 'wire' && edges.length === 1) put('wire', e);
+    });
+    return made;
+  }
+  function pickTool(t) {
+    if (tool === t) { cancelTool(); return; }
+    tool = t; sel = null; highlightTool(); syncActions(); armPlace(); drawScene();
+  }
+  function cancelTool() { tool = null; pend = null; preview = null; highlightTool(); ui.cancelPlace(); drawScene(); }
+  function armPlace() {
+    if (!tool) return;
+    var nmT = TY[tool].label.toLowerCase();
+    ui.placeMode({ prompt: tool === 'wire' ? 'Tap between two dots, or drag along the dots, to add wire' : 'Tap between two dots to place the ' + nmT,
+      onPlace: function (x, y) { pend = { x0: x, y0: y, moved: false }; },
+      onCancel: function () { tool = null; pend = null; preview = null; highlightTool(); drawScene(); } });
+  }
+  function finishPend(x, y) {
+    var q = pend; pend = null; preview = null;
+    var t = tool, made = null;
+    if (!t) return;
+    if (q.moved) {
+      var A = nearestDot(q.x0, q.y0), B = nearestDot(x, y);
+      if (A[0] !== B[0] || A[1] !== B[1]) made = placePath(t, pathEdges(A, B));
+      else { var e0 = nearestEdge(q.x0, q.y0); if (e0) made = placePath(t, [e0]); }
+    } else { var e = nearestEdge(q.x0, q.y0); if (e) made = placePath(t, [e]); }
+    if (t === 'wire') armPlace(); else { tool = null; highlightTool(); }
+    if (made && t !== 'wire') sel = made;
+    update();
+    if (made && t !== 'wire' && editKey(made)) editValue(made, editKey(made), true);
+  }
+  function pos(e) { var r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+  var downAt = null, downHit = false, downMoved = false, hover = -1;
+  cv.addEventListener('pointerdown', function (e) {
+    var p = pos(e); downAt = p; downMoved = false;
+    downHit = handles().some(function (h) { return Math.hypot(h.x - p[0], h.y - p[1]) <= h.r + (e.pointerType === 'touch' ? 8 : 0); });
+  });
+  cv.addEventListener('pointermove', function (e) {
+    var p = pos(e);
+    if (pend) { if (!pend.moved && Math.hypot(p[0] - pend.x0, p[1] - pend.y0) < 6) return; pend.moved = true; preview = { a: nearestDot(pend.x0, pend.y0), b: nearestDot(p[0], p[1]), t: tool }; drawScene(); return; }
+    if (downAt && Math.hypot(p[0] - downAt[0], p[1] - downAt[1]) >= 6) downMoved = true;
+  });
+  function up(e) {
+    var p = pos(e);
+    if (pend) { finishPend(p[0], p[1]); return; }
+    if (downAt && !downMoved && !downHit && sel) { sel = null; syncActions(); drawScene(); table(); }
+    downAt = null;
+  }
+  cv.addEventListener('pointerup', up);
+  if (typeof document !== 'undefined' && document.addEventListener) {
+    document.addEventListener('pointerup', function (e) { if (pend) up(e); });
+    document.addEventListener('keydown', function (e) {
+      if (!sel || (e.key !== 'Delete' && e.key !== 'Backspace') || (e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName || ''))) return;
+      e.preventDefault(); delSel();
+    });
+  }
+  /* no tool: tap a part to select it; drag on the dots to draw wires */
+  function hr() { return U.clamp(vp.scale * 0.36, 12, 22); }
+  function handles() { var r = hr(); return parts.map(function (p, i) { var m = mid(p); return { id: 'p' + i, i: i, x: m[0], y: m[1], r: r, hidden: true }; }); }
+  function wireDrag(x0, y0, x, y, done) {
+    var A = nearestDot(x0, y0), B = nearestDot(x, y);
+    if (!done) { preview = { a: A, b: B, t: 'wire' }; drawScene(); return; }
+    preview = null;
+    if (A[0] !== B[0] || A[1] !== B[1]) { placePath('wire', pathEdges(A, B)); update(); } else drawScene();
+  }
+  var ix = SIM.view.interact(cv, {
+    handles: handles,
+    onTap: function (h) {
+      var p = parts[h.i]; if (!p) return;
+      if (p.t === 'switch') { pushUndo(); p.v.on = p.v.on > 0 ? 0 : 1; }
+      sel = p; update();
+    },
+    onDrag: function (h, x, y) { if (downAt) wireDrag(downAt[0], downAt[1], x, y, false); },
+    onDrop: function (h, x, y) { if (downAt) wireDrag(downAt[0], downAt[1], x, y, true); },
+    canDraw: function () { return !tool; },
+    onDraw: function (x0, y0, x, y) { wireDrag(x0, y0, x, y, false); },
+    onDrawEnd: function (x0, y0, x, y) { wireDrag(x0, y0, x, y, true); },
+    onHover: function (h) { var n = h ? h.i : -1; if (n !== hover) { hover = n; drawScene(); } }
+  });
+
+  /* ---------- editing the selected part ---------- */
+  var EDIT = {
+    E: function (p) { return ['e.m.f. E of ' + nm(parts.indexOf(p)), 'V', 0, p.t === 'battery' ? 48 : 24, 0.1, p.t === 'battery' ? [6, 9, 12, 24] : [1.5, 2, 6, 12], 'The cell’s e.m.f.: energy given to each coulomb of charge.']; },
+    r: function (p) { return ['Internal resistance r of ' + nm(parts.indexOf(p)), 'Ω', 0, 100, 0.1, [0, 0.5, 1, 2], '0 makes it an ideal cell.']; },
+    R: function (p) {
+      var n = nm(parts.indexOf(p));
+      if (p.t === 'amm') return ['Resistance of ammeter ' + n, 'Ω', 0.01, 100, 0.01, [0.1, 0.5, 1, 5], 'A good ammeter has a very small resistance.'];
+      if (p.t === 'volt') return ['Resistance of voltmeter ' + n, 'Ω', 10, 10000000, 100, [1000, 10000, 100000, 1000000], 'A good voltmeter has a very large resistance.'];
+      if (p.t === 'lamp') return ['Resistance of lamp ' + n, 'Ω', 0.1, 10000, 1, [2, 6, 12, 24], 'Treated as fixed (a real filament’s resistance rises as it heats up).'];
+      if (p.t === 'var') return ['Variable resistor ' + n, 'Ω', 0.1, 200, 1, [1, 5, 10, 20, 50, 100], 'Slide it to change the resistance.'];
+      return ['Resistance ' + n, 'Ω', 0.1, 100000, 1, [1, 2, 5, 10, 100, 1000], 'Type any value, e.g. 4700 for 4.7 kΩ.'];
+    },
+    max: function (p) { return ['Rating of fuse ' + nm(parts.indexOf(p)), 'A', 0.1, 30, 0.1, [1, 3, 5, 13], 'It melts (blows) if the current is larger than this.']; }
+  };
+  function editKey(p) {
+    if (p.t === 'cell' || p.t === 'battery') return 'E';
+    if (p.t === 'res' || p.t === 'var' || p.t === 'lamp') return 'R';
+    if ((p.t === 'amm' || p.t === 'volt') && p.v.R > 0) return 'R';
+    if (p.t === 'fuse') return 'max';
+    if (p.t === 'therm') return 'T';
+    if (p.t === 'ldr') return 'L';
+    return null;
+  }
+  function editValue(p, key, fresh) {
+    if (!p) return;
+    var m = mid(p);
+    if (key === 'T' || key === 'L') {
+      var sp = prm.rows[key].spec;
+      ui.askNumber({ title: key === 'T' ? 'Temperature of the thermistor' : 'Light intensity on the LDR', sub: 'Its resistance falls as this rises (illustrative model).', value: prm.values[key], min: sp.min, max: sp.max, step: 1, decimals: 1, unit: sp.unit,
+        at: { x: m[0], y: m[1] }, quick: key === 'T' ? [0, 25, 50, 100] : [0, 20, 50, 100], onInput: function (v) { var o = {}; o[key] = v; prm.set(o); } });
+      return;
+    }
+    var spec = EDIT[key](p);
+    if (!fresh) pushUndo();
+    ui.askNumber({ title: spec[0], sub: spec[6], value: p.v[key], min: spec[2], max: spec[3], step: spec[4], decimals: 2, unit: spec[1], at: { x: m[0], y: m[1] }, quick: spec[5],
+      onInput: function (v) { p.v[key] = v; update(); } });
+  }
+  function second(p) {
+    if (!p) return null;
+    if (p.t === 'cell' || p.t === 'battery') return { label: 'Internal r', icon: 'r', run: function () { editValue(p, 'r'); } };
+    if (p.t === 'amm' || p.t === 'volt') return p.v.R > 0 ? { label: 'Make it ideal', icon: '✓', run: function () { pushUndo(); p.v.R = 0; update(); } }
+      : { label: 'Give it resistance', icon: 'Ω', run: function () { pushUndo(); p.v.R = p.t === 'amm' ? 0.5 : 10000; update(); editValue(p, 'R', true); } };
+    if (p.t === 'switch') return { label: p.v.on > 0 ? 'Open it' : 'Close it', icon: '⏻', run: function () { pushUndo(); p.v.on = p.v.on > 0 ? 0 : 1; update(); } };
+    if (p.t === 'diode') return { label: p.v.Vf > 0 ? 'Make it ideal (0 V)' : 'Give it a 0.7 V drop', icon: 'V', run: function () { pushUndo(); p.v.Vf = p.v.Vf > 0 ? 0 : 0.7; update(); } };
+    return null;
+  }
+  function delSel() { if (!sel) return; var i = parts.indexOf(sel); if (i < 0) return; pushUndo(); parts.splice(i, 1); sel = null; update(); }
+  var actUndo = ui.stageAction({ label: 'Undo', icon: '↶', onClick: function () { if (!undo.length) return; parts = CB.decode(undo.pop()); sel = null; ui.cancelPlace(); update(); } });
+  var actVal = ui.stageAction({ label: 'Change value', icon: '✎', onClick: function () { if (sel && editKey(sel)) editValue(sel, editKey(sel)); } });
+  var actSec = ui.stageAction({ label: 'Internal r', icon: 'r', onClick: function () { var s = second(sel); if (s) s.run(); } });
+  var actRev = ui.stageAction({ label: 'Reverse', icon: '⇄', onClick: function () { if (sel && TY[sel.t].polar) { pushUndo(); sel.rev = !sel.rev; update(); } } });
+  var actDel = ui.stageAction({ label: 'Delete', icon: '×', onClick: delSel });
+  var VALNAME = { E: 'Change E', R: 'Change R', max: 'Change rating', T: 'Temperature', L: 'Light level' };
+  function syncActions() {
+    if (!actUndo) return;
+    var p = sel, k = p ? editKey(p) : null, s = second(p);
+    actUndo.show(undo.length > 0 && !p);
+    actVal.show(!!k); if (k) actVal.label(VALNAME[k]);
+    actSec.show(!!s); if (s) { actSec.label(s.label); actSec.el.querySelector('b').textContent = s.icon; }
+    actRev.show(!!(p && TY[p.t].polar));
+    actDel.show(!!p);
+  }
+
+  /* ---------- drawing ---------- */
+  function problemSet() {
+    var o = {}; if (!res) return o;
+    res.issues.forEach(function (is) { if (is.kind === 'warn') is.parts.forEach(function (i) { o[i] = 1; }); });
+    if (res.shorted !== undefined) o[res.shorted] = 1;
+    return o;
+  }
+  function symbol(c, p, L, col, ink, o) {
+    var k = L / 40;
+    function X(v) { return (v - 20) * k; }
+    function Y(v) { return (v - 12) * k; }
+    function ln(x1, y1, x2, y2, w) { c.lineWidth = w || 2; c.beginPath(); c.moveTo(X(x1), Y(y1)); c.lineTo(X(x2), Y(y2)); c.stroke(); }
+    function box(x, y, w, h) { c.lineWidth = 2; c.fillStyle = col.panel; c.fillRect(X(x), Y(y), w * k, h * k); c.strokeRect(X(x), Y(y), w * k, h * k); }
+    function circ(cx, cy, r, fill) { c.lineWidth = 2; c.beginPath(); c.arc(X(cx), Y(cy), r * k, 0, 7); if (fill) { c.fillStyle = fill; c.fill(); } c.stroke(); }
+    function head(x1, y1, x2, y2) { var a = Math.atan2(y2 - y1, x2 - x1), s = 5 * k; c.beginPath(); c.moveTo(X(x2), Y(y2)); c.lineTo(X(x2) - s * Math.cos(a - 0.45), Y(y2) - s * Math.sin(a - 0.45)); c.lineTo(X(x2) - s * Math.cos(a + 0.45), Y(y2) - s * Math.sin(a + 0.45)); c.closePath(); c.fillStyle = ink; c.fill(); }
+    c.strokeStyle = ink; c.lineWidth = 2;
+    switch (p.t) {
+      case 'wire': ln(0, 12, 40, 12); break;
+      case 'cell': ln(0, 12, 17, 12); ln(23, 12, 40, 12); ln(17, 3, 17, 21); ln(23, 7.5, 23, 16.5, 4); break;
+      case 'battery': ln(0, 12, 11, 12); ln(29, 12, 40, 12); ln(11, 4, 11, 20); ln(15, 8, 15, 16, 4); ln(25, 4, 25, 20); ln(29, 8, 29, 16, 4);
+        c.save(); c.setLineDash([2, 2]); ln(15, 12, 25, 12, 1.2); c.restore(); break;
+      case 'res': ln(0, 12, 10, 12); ln(30, 12, 40, 12); box(10, 7, 20, 10); break;
+      case 'var': ln(0, 12, 10, 12); ln(30, 12, 40, 12); box(10, 7, 20, 10); ln(8, 21, 32, 3, 1.6); head(8, 21, 32, 3); break;
+      case 'therm': ln(0, 12, 10, 12); ln(30, 12, 40, 12); box(10, 7, 20, 10); ln(5, 21, 9, 21, 1.6); ln(9, 21, 33, 3, 1.6); break;
+      case 'ldr': ln(0, 12, 12, 12); ln(28, 12, 40, 12); circ(20, 12, 11, col.panel); box(12, 8, 16, 8);
+        c.strokeStyle = ink; ln(1, -4, 8, 2, 1.4); head(1, -4, 8, 2); ln(8, -7, 15, -1, 1.4); head(8, -7, 15, -1); break;
+      case 'lamp':
+        ln(0, 12, 12, 12); ln(28, 12, 40, 12);
+        if (o.glow > 0) { c.save(); c.globalAlpha = 0.15 + 0.65 * o.glow; c.fillStyle = col.friction; c.beginPath(); c.arc(0, 0, 13 * k, 0, 7); c.fill(); c.restore(); }
+        circ(20, 12, 8, o.glow > 0 ? null : col.panel); ln(14.3, 6.3, 25.7, 17.7); ln(25.7, 6.3, 14.3, 17.7); break;
+      case 'switch':
+        ln(0, 12, 11, 12); ln(29, 12, 40, 12);
+        if (p.v.on > 0) ln(12, 12, 28, 12); else ln(12, 12, 27, 3);
+        c.fillStyle = col.panel; circ(12, 12, 2, col.panel); circ(28, 12, 2, col.panel); break;
+      case 'amm': case 'volt': ln(0, 12, 11, 12); ln(29, 12, 40, 12); circ(20, 12, 9, col.panel); break;
+      case 'diode': ln(0, 12, 14, 12); ln(26, 12, 40, 12); c.beginPath(); c.moveTo(X(14), Y(5)); c.lineTo(X(14), Y(19)); c.lineTo(X(26), Y(12)); c.closePath();
+        c.fillStyle = o.on ? ink : col.panel; c.fill(); c.lineWidth = 2; c.stroke(); ln(26, 5, 26, 19); break;
+      case 'fuse': ln(0, 12, 10, 12); ln(30, 12, 40, 12); box(10, 8, 20, 8);
+        if (o.blown) { c.strokeStyle = col.warn; ln(10, 12, 17, 12); ln(23, 12, 30, 12); } else ln(10, 12, 30, 12); break;
+    }
+  }
+  function drawScene() {
+    if (!res) return;
+    var col = ui.colors(), c, Ln = col['object-line'];
+    vp.fit(-0.65, W - 1 + 0.65, -(H - 1) - 0.62, 1.3);
+    c = vp.begin();
+    var u = vp.scale, bad = problemSet(), Imax = 0, Plamp = 0, kirch = activeMethod() === 'kirchhoff';
+    parts.forEach(function (p, i) { var r = res.parts[i]; if (!res.fatal) Imax = Math.max(Imax, Math.abs(r.I)); if (p.t === 'lamp') Plamp = Math.max(Plamp, r.P || 0); });
+    // grid dots
+    c.fillStyle = col.muted; c.globalAlpha = 0.5;
+    for (var gy = 0; gy < H; gy++) for (var gx = 0; gx < W; gx++) { var q = G(gx, gy); c.beginPath(); c.arc(q[0], q[1], Math.max(1.6, u * 0.035), 0, 7); c.fill(); }
+    c.globalAlpha = 1;
+    // parts
+    parts.forEach(function (p, i) {
+      var e = CB.ends(p), A = G(e[0][0], e[0][1]), B = G(e[1][0], e[1][1]), L = Math.hypot(B[0] - A[0], B[1] - A[1]), r = res.parts[i];
+      var mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, I = res.fatal ? 0 : r.I;
+      // halos: selected / hovered / problem
+      var halo = p === sel ? [col.accent, 0.3] : bad[i] ? [col.warn, 0.22] : i === hover ? [col.accent, 0.14] : null;
+      if (halo) { c.save(); c.globalAlpha = halo[1]; c.strokeStyle = halo[0]; c.lineWidth = Math.max(10, u * 0.4); c.beginPath(); c.moveTo(A[0], A[1]); c.lineTo(B[0], B[1]); c.stroke(); c.restore(); }
+      c.save(); c.translate(mx, my); c.rotate(Math.atan2(B[1] - A[1], B[0] - A[0]));
+      if (TY[p.t].polar && p.rev) c.scale(-1, 1);
+      symbol(c, p, L, col, Ln, { glow: p.t === 'lamp' && Plamp > 0 ? (r.P || 0) / Plamp : 0, on: r.on, blown: r.blown });
+      c.restore();
+      if (p.t === 'amm' || p.t === 'volt') D.label(c, p.t === 'amm' ? 'A' : 'V', mx, my, Ln, { bold: true, size: U.clamp(L * 0.24, 10, 15), fs: 'none' });
+      // current on wires: brighter and thicker for more current, with an arrowhead
+      var aI = Math.abs(I), fr = Imax > 0 ? aI / Imax : 0;
+      if (p.t === 'wire' || r.link) {
+        if (aI > 1e-9 && fr > 1e-4) {
+          c.save(); c.globalAlpha = 0.3 + 0.7 * fr; c.strokeStyle = col.applied; c.lineWidth = 2 + 2.5 * fr;
+          if (p.t === 'wire') { c.beginPath(); c.moveTo(A[0], A[1]); c.lineTo(B[0], B[1]); c.stroke(); }
+          c.restore();
+          if (p.t === 'wire') arrowAt(c, A, B, I > 0 ? 1 : -1, col.applied, Math.max(5, Math.min(8, u * 0.12)));
+        }
+      }
+    });
+    // junction dots and loose ends
+    Object.keys(res.dotDeg).forEach(function (k) {
+      var n = res.dotDeg[k], x = k % W, y = Math.floor(k / W), q = G(x, y);
+      if (n >= 3) { c.fillStyle = Ln; c.beginPath(); c.arc(q[0], q[1], Math.max(3, u * 0.06), 0, 7); c.fill(); }
+      else if (n === 1) { c.strokeStyle = col.warn; c.lineWidth = 2; c.beginPath(); c.arc(q[0], q[1], Math.max(5, u * 0.1), 0, 7); c.stroke(); }
+    });
+    // labels
+    var fs = U.clamp(u * 0.19, 9.5, 12);
+    parts.forEach(function (p, i) { if (p.t !== 'wire') labelPart(c, p, i, col, fs, u); });
+    // Kirchhoff junction names
+    if (kirch && res.method && res.method.kirchhoff) res.method.kirchhoff.junctions.forEach(function (j, ji) {
+      var dots = res.netList[j.net] || [], best = dots[0], bd = -1;
+      dots.forEach(function (k) { if (res.dotDeg[k] > bd) { bd = res.dotDeg[k]; best = k; } });
+      if (best === undefined) return;
+      var q = G(best % W, Math.floor(best / W));
+      D.label(c, 'J' + CB.sub(ji + 1), q[0] + 0.2 * u, q[1] - 0.2 * u, col.accent, { bold: true, size: fs + 1, bg: true, align: 'left', fs: 'none' });
+    });
+    // drag preview
+    if (preview) {
+      var pts = [preview.a, [preview.b[0], preview.a[1]], preview.b].map(function (g) { return G(g[0], g[1]); });
+      D.line(c, pts, col.accent, { width: 3, dash: [6, 5] });
+      [preview.a, preview.b].forEach(function (g) { var q2 = G(g[0], g[1]); c.fillStyle = col.accent; c.beginPath(); c.arc(q2[0], q2[1], 5, 0, 7); c.fill(); });
+    }
+    if (res.empty) D.label(c, 'Pick a part below, then tap between two dots', vp.w / 2, vp.h / 2, col.muted, { size: 14, bg: true, fs: 'none' });
+    if (res.fatal) D.label(c, 'Short circuit: no single answer (see the working)', vp.w / 2, vp.h - 14, col.warn, { bold: true, bg: true, size: 12.5, fs: 'none' });
+    if (ix) ix.paint(c);
+  }
+  function arrowAt(c, A, B, dir, color, s) {
+    var mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, dx = (B[0] - A[0]) * dir, dy = (B[1] - A[1]) * dir, L = Math.hypot(dx, dy); if (L < 1) return;
+    var ux = dx / L, uy = dy / L;
+    c.save(); c.fillStyle = color; c.beginPath(); c.moveTo(mx + ux * s, my + uy * s); c.lineTo(mx - ux * s - uy * s * 0.8, my - uy * s + ux * s * 0.8); c.lineTo(mx - ux * s + uy * s * 0.8, my - uy * s - ux * s * 0.8); c.closePath(); c.fill(); c.restore();
+  }
+  function nameLine(p, i) {
+    var n = nm(i), r = res.parts[i];
+    switch (p.t) {
+      case 'cell': case 'battery': return n + ' = ' + eng(p.v.E, 'V') + (p.v.r > 0 ? ', r = ' + eng(p.v.r, 'Ω') : '');
+      case 'res': case 'var': case 'lamp': return n + ' = ' + eng(p.v.R, 'Ω');
+      case 'therm': case 'ldr': return n + ' = ' + eng(r.R, 'Ω');
+      case 'amm': return n + ' reads ' + (res.fatal ? '—' : eng(r.reading, 'A'));
+      case 'volt': return n + ' reads ' + (res.fatal ? '—' : eng(r.reading, 'V'));
+      case 'switch': return n + (p.v.on > 0 ? ' closed' : ' open');
+      case 'diode': return n + (r.on ? ' on' : ' off') + (p.v.Vf > 0 ? ' (0.7 V)' : '');
+      case 'fuse': return n + (r.blown ? ' blown!' : ' ' + eng(p.v.max, 'A'));
+    }
+    return n;
+  }
+  function labelPart(c, p, i, col, fs, u) {
+    var e = CB.ends(p), A = G(e[0][0], e[0][1]), B = G(e[1][0], e[1][1]), mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, horiz = p.d === 'h', r = res.parts[i];
+    var meter = p.t === 'amm' || p.t === 'volt', off = 0.36 * u, lh = fs + 3;
+    var nameCol = meter ? col.accent : col.ink;
+    // name on one side (meters: below / right, so a meter next to a part does not hide its values), I and V on the other
+    var nSide = meter ? 1 : -1;
+    if (horiz) D.label(c, nameLine(p, i), mx, my + nSide * off, nameCol, { size: fs, bg: true, base: nSide > 0 ? 'top' : 'bottom', bold: meter });
+    else D.label(c, nameLine(p, i), mx + off, my, nameCol, { size: fs, bg: true, align: 'left', bold: meter });
+    if (!showIV.get() || res.fatal || meter || p.t === 'wire') return;
+    var I = r.I, V = Math.abs(r.V), lines = [];
+    if (p.t === 'switch' || p.t === 'fuse') { if (V > 1e-9) lines.push([eng(V, 'V') + ' across', col.s1]); else if (Math.abs(I) > 1e-12) lines.push([eng(Math.abs(I), 'A'), col.applied]); }
+    else {
+      lines.push([eng(Math.abs(I), 'A'), col.applied]);
+      lines.push([eng(TY[p.t].polar && p.t !== 'diode' ? r.Vt : V, 'V'), col.s1]);
+    }
+    if (!lines.length) return;
+    if (horiz) {
+      lines.forEach(function (l, k) { D.label(c, l[0], mx, my + off + k * lh, l[1], { size: fs, bg: true, base: 'top' }); });
+      if (Math.abs(I) > 1e-12 && p.t !== 'switch' && p.t !== 'fuse') arrowAt(c, [mx - 0.5 * u, my + off * 0.62], [mx + 0.5 * u, my + off * 0.62], I > 0 ? 1 : -1, col.applied, Math.max(4, u * 0.08));
+    } else {
+      var y0 = my - (lines.length - 1) * lh / 2;
+      lines.forEach(function (l, k) { D.label(c, l[0], mx - off, y0 + k * lh, l[1], { size: fs, bg: true, align: 'right' }); });
+      if (Math.abs(I) > 1e-12 && p.t !== 'switch' && p.t !== 'fuse') arrowAt(c, [mx - off * 0.55, my - 0.5 * u], [mx - off * 0.55, my + 0.5 * u], I > 0 ? 1 : -1, col.applied, Math.max(4, u * 0.08));
+    }
+  }
+
+  /* ---------- table of every component ---------- */
+  function table() {
+    if (!res || res.empty) { tbl.innerHTML = '<p class="cb-hint" style="margin:0">No parts yet: add some from the list under the diagram.</p>'; return; }
+    var bad = problemSet(), dash = '—';
+    var rows = parts.map(function (p, i) {
+      if (p.t === 'wire') return '';
+      var r = res.parts[i], f = res.fatal, val = '', V = f ? dash : s3(Math.abs(r.V)), I = f ? dash : s3(Math.abs(r.I)), Pw = f ? dash : s3(r.P || 0);
+      switch (p.t) {
+        case 'cell': case 'battery': val = 'E = ' + s3(p.v.E) + ' V, r = ' + s3(p.v.r || 0) + ' Ω';
+          if (!f) { V = s3(r.Vt) + ' <span class="txt">terminal</span>'; I = s3(r.Iout) + (r.Iout < -1e-12 ? ' <span class="txt">(charging)</span>' : ''); Pw = s3(r.P) + ' <span class="txt">supplied</span>'; } break;
+        case 'res': case 'var': val = s3(p.v.R) + ' Ω'; break;
+        case 'lamp': val = s3(p.v.R) + ' Ω <span class="txt">(fixed)</span>'; break;
+        case 'therm': val = s3(r.R) + ' Ω <span class="txt">at ' + U.num(prm.values.T, 1) + ' °C</span>'; break;
+        case 'ldr': val = s3(r.R) + ' Ω <span class="txt">light ' + U.num(prm.values.L, 1) + '</span>'; break;
+        case 'amm': val = p.v.R > 0 ? s3(p.v.R) + ' Ω' : '<span class="txt">ideal, 0 Ω</span>'; if (!(p.v.R > 0)) Pw = '0'; break;
+        case 'volt': val = p.v.R > 0 ? s3(p.v.R) + ' Ω' : '<span class="txt">ideal, ∞ Ω</span>'; break;
+        case 'switch': val = '<span class="txt">' + (p.v.on > 0 ? 'closed' : 'open') + '</span>'; Pw = '0'; break;
+        case 'diode': val = '<span class="txt">' + (p.v.Vf > 0 ? '0.7 V drop' : 'ideal') + ', ' + (r.on ? 'on' : 'off') + '</span>'; break;
+        case 'fuse': val = s3(p.v.max) + ' A <span class="txt">' + (r.blown ? 'BLOWN' : 'rating') + '</span>'; Pw = '0'; break;
+      }
+      return '<tr class="' + (p === sel ? 'sel ' : '') + (bad[i] ? 'bad' : '') + '"><td>' + nm(i) + '</td><td class="txt" style="font-family:var(--math);font-size:14px;color:var(--ink)">' + val + '</td><td>' + V + '</td><td>' + I + '</td><td>' + Pw + '</td></tr>';
+    }).join('');
+    tbl.innerHTML = '<table class="tbl"><thead><tr><th>Part</th><th style="text-align:left">Value</th><th>V / V</th><th>I / A</th><th>P / W</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<p class="cb-hint">V and I are sizes (3 s.f.); the arrows on the diagram show the direction of the current. For a cell, V is the terminal p.d. and P = EI is the power it supplies.</p>';
+  }
+
+  /* ---------- how to calculate it ---------- */
+  function activeMethod() { var m = res && res.method; if (!m || !m.kirchhoff) return 'none'; return methodSel.get() === 'auto' && m.reduce ? 'reduce' : 'kirchhoff'; }
+  function rsym(i) { var p = parts[i]; return p.t === 'res' || p.t === 'var' ? nm(i) : 'R<sub>' + nm(i) + '</sub>'; }
+  function nodeSym(n) { return n.kind === 'leaf' ? rsym(n.i) : n.name; }
+  function subOf(n) { return n.kind === 'leaf' ? nm(n.i) : n.name.replace(/<[^>]+>/g, '').replace(/^R/, ''); }
+  function andList(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
+  function signed(terms) {
+    return terms.map(function (t, k) { return (t[0] < 0 ? (k ? ' − ' : '−') : (k ? ' + ' : '')) + t[1]; }).join('');
+  }
+  function readout() {
+    if (!res) return;
+    R.clear();
+    if (res.empty) { R.badge('Nothing to solve yet: build a circuit, or pick a ready-made one.', 'info').render(); return; }
+    var warns = res.issues.filter(function (x) { return x.kind === 'warn'; });
+    res.issues.forEach(function (x) { R.badge(x.text, x.kind); });
+    if (res.fatal) { R.render(); return; }
+    if (!warns.length && res.anyCurrent) R.badge('Complete circuit: every part is connected correctly.', 'ok');
+    var m = activeMethod();
+    if (m === 'reduce') readReduce(res.method.reduce);
+    else if (m === 'kirchhoff') readKirch(res.method.kirchhoff);
+    meterStep();
+    R.render();
+  }
+  function readReduce(red) {
+    var En = nm(red.src), rn = CB.rName(En), E = red.E, r = red.r, I = red.I, top = red.top;
+    if (red.steps.length) {
+      R.head('Combine the resistors');
+      red.steps.forEach(function (n) {
+        var ks = n.kids.map(nodeSym), vs = n.kids.map(function (k) { return s3(k.R); });
+        if (n.kind === 'ser') R.eq(n.name, andList(ks) + ' are in series (one after another, same current) = ' + ks.join(' + ') + ' = ' + vs.join(' + '), n.R, 'Ω');
+        else R.eq(n.name, andList(ks) + ' are in parallel (between the same two junctions) = (' + ks.map(function (k) { return '1/' + k; }).join(' + ') + ')<sup>−1</sup> = (' +
+          vs.map(function (v) { return '1/' + v; }).join(' + ') + ')<sup>−1</sup>', n.R, 'Ω');
+      });
+    }
+    R.head('Current from ' + En);
+    R.eq('R', 'total resistance outside the cell = ' + (top ? nodeSym(top) : '0'), red.Rext, 'Ω');
+    if (r > 0) R.eq('I', 'E ÷ (R + r) = ' + s3(E) + ' ÷ (' + s3(red.Rext) + ' + ' + s3(r) + ')', I, 'A');
+    else R.eq('I', 'E ÷ R = ' + s3(E) + ' ÷ ' + s3(red.Rext), I, 'A');
+    if (r > 0) {
+      R.eq('lost volts', 'I' + rn + ' = ' + s3(I) + ' × ' + s3(r), I * r, 'V');
+      R.eq('terminal p.d.', 'E − I' + rn + ' = ' + s3(E) + ' − ' + s3(I * r), E - I * r, 'V');
+    } else note(rn + ' = 0, so the terminal p.d. equals the e.m.f., ' + s3(E) + ' V.');
+    if (top) {
+      R.head('Share out the current and p.d.');
+      if (top.kind === 'leaf') R.eq('V<sub>' + subOf(top) + '</sub>', 'I R = ' + s3(I) + ' × ' + s3(top.R), top.V, 'V');
+      else share(top);
+    }
+    function share(n) {
+      if (n.kind === 'ser') {
+        note(andList(n.kids.map(nodeSym)) + ' are in series: each carries the same current, ' + s3(n.I) + ' A, so V = IR for each.');
+        n.kids.forEach(function (k) { R.eq('V<sub>' + subOf(k) + '</sub>', 'I R = ' + s3(n.I) + ' × ' + s3(k.R), k.V, 'V'); k.vShown = true; });
+      } else {
+        if (!n.vShown) R.eq('V<sub>' + subOf(n) + '</sub>', 'I R = ' + s3(n.I) + ' × ' + s3(n.R), n.V, 'V');
+        note(andList(n.kids.map(nodeSym)) + ' are in parallel: each has the same p.d., ' + s3(n.V) + ' V, so I = V/R for each.');
+        n.kids.forEach(function (k) { R.eq('I<sub>' + subOf(k) + '</sub>', 'V ÷ R = ' + s3(n.V) + ' ÷ ' + s3(k.R), k.I, 'A'); k.vShown = true; });
+      }
+      n.kids.forEach(function (k) { if (k.kind !== 'leaf') share(k); });
+    }
+    powerStep(res.method.live.map(function (e) { return e.i; }), true);
+  }
+  function powerStep(idx, viaI2R) {
+    var any = false;
+    idx.forEach(function (i) {
+      var p = parts[i], r = res.parts[i], aI = Math.abs(r.I), aV = Math.abs(r.V), n = nm(i);
+      if (!any) { R.head(viaI2R ? 'Power' : 'p.d. and power of each part'); note(viaI2R ? 'P = VI = I²R for each resistor; the cell supplies P = EI.' : 'V = IR for each resistor, and P = VI.'); any = true; }
+      if (CB.isSource(p)) {
+        var rn = CB.rName(n);
+        if (!viaI2R && r.r > 0) R.eq('V<sub>' + n + '</sub>', 'terminal p.d. = E − I' + rn + ' = ' + s3(r.E) + ' − ' + s3(r.Iout) + ' × ' + s3(r.r), r.Vt, 'V');
+        R.eq('P<sub>' + n + '</sub>', 'power supplied = E I = ' + s3(r.E) + ' × ' + s3(r.Iout), r.P, 'W');
+        if (r.r > 0) R.eq('P<sub>' + rn + '</sub>', 'wasted inside the cell = I²' + rn + ' = ' + s3(r.Iout) + '² × ' + s3(r.r), r.Pr, 'W');
+      } else if (p.t === 'diode') {
+        R.eq('P<sub>' + n + '</sub>', 'V I = ' + s3(aV) + ' × ' + s3(aI), r.P, 'W');
+      } else {
+        if (!viaI2R) R.eq('V<sub>' + n + '</sub>', 'I R = ' + s3(aI) + ' × ' + s3(r.R), aV, 'V');
+        R.eq('P<sub>' + n + '</sub>', viaI2R ? 'I²R = ' + s3(aI) + '² × ' + s3(r.R) : 'V I = ' + s3(aV) + ' × ' + s3(aI), r.P, 'W');
+      }
+    });
+    if (any) {
+      var give = 0, take = 0;
+      idx.forEach(function (i) { var p = parts[i], r = res.parts[i]; if (CB.isSource(p)) { give += r.P; take += r.Pr; } else take += r.P || 0; });
+      note('Check: total power supplied ΣEI = ' + s3(give) + ' W = total power dissipated ' + s3(take) + ' W ✓ (energy is conserved).');
+    }
+  }
+  function readKirch(K) {
+    var Bs = K.branches, single = Bs.length === 1;
+    function In(b) { return single ? 'I' : 'I' + CB.sub(b + 1); }
+    function names(list) { var seen = []; list.forEach(function (i) { if (seen.indexOf(nm(i)) < 0) seen.push(nm(i)); }); return seen; }
+    R.head('Label the currents');
+    note(single ? 'There is only one loop, so one current I flows all the way round.' :
+      'Each branch (a path between two junctions) gets its own current. The junctions J₁, J₂ … are marked on the diagram. Each current is taken in the direction of the arrows; a current that came out negative would simply flow the other way.');
+    Bs.forEach(function (b, bi) { note('<b>' + In(bi) + '</b> flows through ' + andList(names(b.parts)) + '.'); });
+    if (K.junctions.length) {
+      R.head('Kirchhoff’s first law at the junctions');
+      note('Σ current into a junction = Σ current out of it (charge is conserved).');
+      K.junctions.forEach(function (j, ji) {
+        var lhs = j.ins.length ? j.ins.map(In).join(' + ') : '0';
+        var rhs = j.outs.length ? j.outs.map(In).join(' + ') : '0', num = j.outs.length ? j.outs.map(function (b) { return s3(Bs[b].I); }).join(' + ') : '0';
+        var vin = j.ins.reduce(function (s, b) { return s + Bs[b].I; }, 0), vout = j.outs.reduce(function (s, b) { return s + Bs[b].I; }, 0);
+        R.eq(lhs, 'currents at junction J' + CB.sub(ji + 1) + ' = ' + rhs + ' = ' + num, vout, 'A');
+        if (j.ins.length > 1) note('current in: ' + j.ins.map(function (b) { return s3(Bs[b].I); }).join(' + ') + ' = ' + s3(vin) + ' A ✓');
+        else if (j.ins.length === 1) note(In(j.ins[0]) + ' = ' + s3(vin) + ' A ✓');
+      });
+    }
+    K.loops.forEach(function (L, li) {
+      R.head('Kirchhoff’s second law, loop ' + (li + 1) + ': ' + names(L.seq).join(' → '));
+      if (li === 0) note('Go round the loop in one direction. An e.m.f. counts + when you pass from its − to its + terminal. An IR term counts + when you go the same way as the current, − against it.');
+      else note('Loop ' + (li + 1) + ' goes through ' + andList(names(L.seq)) + '.');
+      var eS = signed(L.emf.map(function (t) { return [t.sign, nm(t.i)]; })), eN = signed(L.emf.map(function (t) { return [t.sign, s3(t.E)]; }));
+      var dS = signed(L.drops.map(function (t) { return [t.sign, t.Vf !== undefined ? 'V<sub>' + nm(t.i) + '</sub>' : In(t.b) + (t.internal ? CB.rName(nm(t.i)) : rsym(t.i))]; }));
+      var dN = signed(L.drops.map(function (t) { return [t.sign, t.Vf !== undefined ? s3(t.Vf) : s3(t.I) + ' × ' + s3(t.R)]; }));
+      R.eq('ΣE', eS ? eS + ' = ' + eN : '0', L.sumE, 'V');
+      R.eq('ΣIR', dS ? dS + ' = ' + dN : '0', L.sumIR, 'V');
+      note(Math.abs(L.sumE - L.sumIR) <= 1e-6 * Math.max(1, Math.abs(L.sumE)) ? 'ΣE = ΣIR ✓ — energy is conserved round the loop.' : 'These do not match: check the signs.');
+    });
+    if (single && K.loops.length) {
+      var L0 = K.loops[0], sR = 0, sV = 0;
+      L0.drops.forEach(function (t) { if (t.Vf !== undefined) sV += t.sign * t.Vf; else sR += t.R; });
+      if (sR > 0) {
+        R.head('Solve for I');
+        R.eq('I', (sV ? '(ΣE − V<sub>diode</sub>) ÷ ΣR = (' + s3(L0.sumE) + ' − ' + s3(sV) + ') ÷ ' + s3(sR) : 'ΣE ÷ ΣR = ' + s3(L0.sumE) + ' ÷ ' + s3(sR)), Bs[0].I, 'A');
+      }
+    } else if (!single) {
+      R.head('Solve the equations together');
+      note('There are ' + Bs.length + ' unknown currents. The junction equations (one of them always repeats the others) and the ' + K.loops.length + ' loop equations, solved as simultaneous equations, give:');
+      Bs.forEach(function (b, bi) { R.eq(In(bi), '', b.I, 'A'); });
+      parts.forEach(function (p, i) { if (CB.isSource(p) && res.parts[i].Iout < -1e-12) note(nm(i) + ' is being charged: the current goes INTO its + terminal.'); });
+    }
+    powerStep(res.method.live.map(function (e) { return e.i; }), false);
+  }
+  function acrossName(i) {
+    var a = res.netOf[CB.dkey(parts[i].x, parts[i].y)], e = CB.endB(parts[i]), b = res.netOf[CB.dkey(e[0], e[1])], best = null;
+    parts.forEach(function (q, j) {
+      if (j === i || q.t === 'wire' || q.t === 'volt' || res.parts[j].link) return;
+      var e2 = CB.endB(q), a2 = res.netOf[CB.dkey(q.x, q.y)], b2 = res.netOf[CB.dkey(e2[0], e2[1])];
+      if ((a2 === a && b2 === b) || (a2 === b && b2 === a)) if (best === null || CB.isSource(q)) best = j;
+    });
+    if (best === null) return 'between its two ends';
+    return CB.isSource(parts[best]) ? 'across the terminals of ' + nm(best) + ' (its terminal p.d.)' : 'across ' + nm(best);
+  }
+  function meterStep() {
+    var ms = []; parts.forEach(function (p, i) { if (p.t === 'amm' || p.t === 'volt') ms.push(i); });
+    if (!ms.length) return;
+    R.head('Meter readings');
+    ms.forEach(function (i) {
+      var p = parts[i], r = res.parts[i];
+      if (p.t === 'amm') R.eq(nm(i), (p.v.R > 0 ? 'the current through it (it has resistance ' + s3(p.v.R) + ' Ω, so it also takes a p.d. of ' + s3(Math.abs(r.V)) + ' V)' : 'the current through it'), r.reading, 'A');
+      else R.eq(nm(i), 'the p.d. ' + acrossName(i) + (p.v.R > 0 ? '; it has resistance ' + s3(p.v.R) + ' Ω, so it takes ' + s3(Math.abs(r.I)) + ' A itself' : ''), r.reading, 'V');
+    });
+  }
+
+  ui.onTheme(drawScene);
+  vp.onResize = drawScene;
+  ui.stageTip('Tap a part to change it · drag along the dots to draw wires · pick a part below to add it');
+
+  /* start: the shared set-up in the URL, otherwise a ready-built series circuit */
+  var hsh = ui.readHash();
+  if (typeof hsh.T === 'number' || typeof hsh.L === 'number') prm.set({ T: typeof hsh.T === 'number' ? U.clamp(hsh.T, -10, 100) : 25, L: typeof hsh.L === 'number' ? U.clamp(hsh.L, 0, 100) : 20 }, true);
+  if (typeof hsh.c === 'string' && CB.decode(hsh.c).length) { parts = CB.decode(hsh.c); update(); }
+  else presetCtl.select(0);
+  undo = [];
+  syncActions();
+  presetCtl.fromQuery();
+})();
+</script>
+</body>
+</html>

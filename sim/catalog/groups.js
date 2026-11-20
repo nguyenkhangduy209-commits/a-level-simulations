@@ -83,6 +83,7 @@ window.SIM_GROUPS = [
   { id: 'electricity', course: '9702', title: 'Electricity and D.C. circuits', topics: ['9702-9', '9702-10'],
     summary: 'Current, p.d., resistance and resistivity, I–V characteristics, e.m.f. and internal resistance, Kirchhoff’s laws, potential dividers.',
     modes: [
+      { id: 'builder', label: 'Build a circuit', path: 'sims/9702/p10-builder.html' },
       { id: 'current', label: 'Current, p.d. and resistivity', path: 'sims/9702/p9-current.html' },
       { id: 'iv', label: 'I–V characteristics', path: 'sims/9702/p9-iv.html' },
       { id: 'emf', label: 'E.m.f. and internal resistance', path: 'sims/9702/p10-emf.html' },
