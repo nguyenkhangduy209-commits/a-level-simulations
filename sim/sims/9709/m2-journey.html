@@ -199,6 +199,7 @@
   function cloneBody(src) { return { u0: src.u0 || 0, u0link: !!src.u0link, u0k: src.u0k || 1, stages: src.stages.map(function (s) { return newStage(s.type, s); }), delay: src.delay || 0, s0: src.s0 || 0 }; }
   var presetCtl = ui.presets(presetCard, PRESETS, function (p) {
     clock.pause();
+    look = /elevator/i.test(p.name) ? 'lift' : /cyclist/i.test(p.name) ? 'bike' : /\bbus\b/i.test(p.name) ? 'bus' : /projected/i.test(p.name) ? 'ball' : 'car';
     var a = cloneBody(p.A); A.u0 = a.u0; A.u0link = a.u0link; A.u0k = a.u0k; A.stages = a.stages;
     solveOn = !!p.solve; solveToggle.set(solveOn, true); solveBox.style.display = solveOn ? '' : 'none';
     if (p.solve) { conSel.set(p.solve.con, true); kSel.set(String(p.solve.k || 0), true); sp.set({ target: p.solve.target, lo: p.solve.lo, hi: p.solve.hi }, true); }
@@ -279,8 +280,9 @@
     var W = vp.w, H = vp.h, x0 = 30, x1 = W - 30;
     function X(s) { return x0 + (s - (lo - 0.04 * span)) / (span * 1.08) * (x1 - x0); }
     var yA = Math.max(H * 0.42, Math.min(H * 0.6, 96)), yB = Math.min(H - 14, Math.max(H * 0.78, yA + 44));   // track sits below the stage buttons
-    // axis with ticks
     var tk = U.niceTicks(lo, hi, Math.max(3, Math.floor((x1 - x0) / 80)));
+    if (SC.real()) { drawReal(c, col, X, lo, span, yA, yB, tk); return; }
+    // axis with ticks
     c.strokeStyle = col.muted; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x0, yA); c.lineTo(x1, yA); c.stroke();
     tk.ticks.forEach(function (v) {
       if (v < lo - 0.04 * span || v > hi + 0.04 * span) return;
@@ -301,6 +303,98 @@
       if (Math.abs(sb2.v) > 1e-9) D.arrow(c, X(sb2.s), yB - 26, X(sb2.s) + U.sgn(sb2.v) * (14 + Math.min(70, Math.abs(sb2.v) * 3)), yB - 26, col.velocity, { width: 1.6 });
     }
     lay = { X: X, A: [X(st.s), yA - 12], dots: jA.segs.map(function (g2) { return { i: g2.i, x: X(g2.s1), y: yA }; }) };
+    if (ix) ix.paint(c);
+  }
+
+  /* ---------- real-life look (soft pastel): a car / bus / cyclist on a road with distance posts, wheels turning with the distance ---------- */
+  var SC = SIM.scene, LINE = 'rgba(60,60,90,.22)', look = 'car';   // 'car' | 'bus' | 'bike' | 'lift' | 'ball' (chosen from the preset)
+  function tint(hex, k) { return SC.shade(hex, SC.dark() ? -k * 0.55 : k); }
+  /** a cyclist on a bicycle, wheels of radius r on the road at y; ang = wheel turn (the pedals go round too); returns the height */
+  function bike(c, x, y, r, ang, color) {
+    var wb = r * 2.6, xb = x - wb / 2, xf = x + wb / 2, yw = y - r, dk = SC.dark();
+    c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+    [xb, xf].forEach(function (wx) {
+      c.strokeStyle = dk ? '#9aa0b4' : '#5d6480'; c.lineWidth = 2; c.beginPath(); c.arc(wx, yw, r - 1, 0, 2 * Math.PI); c.stroke();
+      c.save(); c.translate(wx, yw); c.rotate(-ang); c.strokeStyle = 'rgba(160,165,185,.8)'; c.lineWidth = 0.8;
+      for (var i = 0; i < 4; i++) { var a = i * Math.PI / 4; c.beginPath(); c.moveTo(-Math.cos(a) * (r - 2), -Math.sin(a) * (r - 2)); c.lineTo(Math.cos(a) * (r - 2), Math.sin(a) * (r - 2)); c.stroke(); }
+      c.restore();
+    });
+    var crank = [x - r * 0.1, yw], seat = [x - r * 0.45, yw - r * 1.25], head = [xf - r * 0.4, yw - r * 1.3];
+    c.strokeStyle = color; c.lineWidth = Math.max(1.6, r * 0.18); c.beginPath();
+    c.moveTo(xb, yw); c.lineTo(crank[0], crank[1]); c.lineTo(seat[0], seat[1]); c.lineTo(xb, yw);
+    c.moveTo(crank[0], crank[1]); c.lineTo(head[0], head[1]); c.lineTo(xf, yw); c.moveTo(seat[0], seat[1]); c.lineTo(head[0], head[1] + r * 0.1); c.stroke();
+    var pa = -ang, ped = [crank[0] + Math.cos(pa) * r * 0.45, crank[1] - Math.sin(pa) * r * 0.45];
+    var hip = [seat[0], seat[1] - r * 0.25], sh = [x + r * 0.3, yw - r * 2.45], hand = [head[0] + r * 0.1, head[1] - r * 0.2];
+    var knee = [(hip[0] + ped[0]) / 2 + r * 0.45, (hip[1] + ped[1]) / 2 - r * 0.2];
+    c.strokeStyle = '#5d6480'; c.lineWidth = Math.max(2, r * 0.22); c.beginPath(); c.moveTo(hip[0], hip[1]); c.lineTo(knee[0], knee[1]); c.lineTo(ped[0], ped[1]); c.stroke();
+    c.strokeStyle = dk ? '#b7c4e8' : '#8fa8e0'; c.lineWidth = Math.max(3, r * 0.34); c.beginPath(); c.moveTo(hip[0], hip[1]); c.lineTo(sh[0], sh[1]); c.stroke();
+    c.strokeStyle = '#f1c7a6'; c.lineWidth = Math.max(1.5, r * 0.14); c.beginPath(); c.moveTo(sh[0], sh[1]); c.lineTo(hand[0], hand[1]); c.stroke();
+    c.fillStyle = '#f1c7a6'; c.beginPath(); c.arc(sh[0] + r * 0.25, sh[1] - r * 0.4, r * 0.32, 0, 2 * Math.PI); c.fill();
+    c.fillStyle = tint(color, 0.3); c.beginPath(); c.arc(sh[0] + r * 0.25, sh[1] - r * 0.48, r * 0.36, Math.PI, 2 * Math.PI); c.fill();   // helmet
+    c.restore();
+    return r * 3.4;
+  }
+  /** the moving body for this look, its base on the road at (x, y); dist = signed distance (px) along the road, so wheels turn by dist ÷ radius */
+  function vehicle(c, kind, x, y, len, color, dist) {
+    if (kind === 'bike') return bike(c, x, y, len * 0.19, -dist / (len * 0.19), color);
+    if (kind === 'ball') { var r = len * 0.22; SC.shadow(c, x, y, r * 0.9, 3); SC.ball(c, x, y - r, r, { kind: 'football', spin: -dist / r }); return 2 * r; }
+    if (kind === 'lift') {
+      var w = len * 0.62, h = len * 0.72;
+      SC.lift(c, x, y - h - 4, w, h, { cableTop: y - h - 4, people: true });
+      [-0.3, 0.3].forEach(function (k) { SC.wheel(c, x + k * w, y - 2.5, 2.5, -dist / 2.5); });   // guide rollers on the rail
+      return h + 4;
+    }
+    var bus = kind === 'bus', L = bus ? len * 1.3 : len;
+    var info = SC.car(c, x, y, L, 0, { kind: bus ? 'van' : 'car', color: color, wheel: -dist / (L * 0.1) });
+    if (bus) {   // a row of bus windows
+      c.save(); c.fillStyle = 'rgba(190,225,245,.9)';
+      for (var k = 0; k < 3; k++) c.fillRect(x - L * 0.44 + k * L * 0.19, y - info.height + L * 0.06, L * 0.14, L * 0.11);
+      c.restore();
+    }
+    return info.height;
+  }
+  function drawReal(c, col, X, lo, span, yA, yB, tk) {
+    var W = vp.w, H = vp.h, x0 = 30, x1 = W - 30, dk = SC.dark(), road = look !== 'ball' && look !== 'lift';
+    var kind = road ? 'road' : 'floor', pxm = (x1 - x0) / (span * 1.08);
+    SC.sky(c, 0, 0, W, yA, { horizon: yA });
+    [0.1, 0.47, 0.83].forEach(function (f, i) { SC.tree(c, W * f, yA, Math.min(52 - i * 8, yA * 0.55)); });
+    SC.ground(c, 0, W, yA, { kind: kind, depth: PB ? Math.max(10, yB - yA) : Math.max(10, H - yA) });
+    if (PB) SC.ground(c, 0, W, yB, { kind: kind, depth: Math.max(10, H - yB) });
+    if (look === 'lift') { c.save(); c.fillStyle = dk ? '#8a90a4' : '#c9cfdb'; c.fillRect(0, yA - 1, W, 3); c.restore(); }
+    // distance posts at the scale marks
+    c.save();
+    tk.ticks.forEach(function (v) {
+      if (v < lo - 0.04 * span || v > lo + 1.04 * span) return;
+      var px = X(v);
+      c.fillStyle = dk ? '#c9cede' : '#ffffff'; c.strokeStyle = LINE; c.lineWidth = 1;
+      c.beginPath(); if (c.roundRect) c.roundRect(px - 2.5, yA - 17, 5, 17, 2); else c.rect(px - 2.5, yA - 17, 5, 17); c.fill(); c.stroke();
+      c.fillStyle = Math.abs(v) < 1e-9 ? '#9fd39a' : '#ef9a8c'; c.fillRect(px - 2.5, yA - 17, 5, 4);
+    });
+    c.restore();
+    tk.ticks.forEach(function (v) { if (v >= lo - 0.04 * span && v <= lo + 1.04 * span) D.label(c, U.num(v, 6), X(v), yA + 21, col.ink, { size: 11, bg: true }); });
+    D.label(c, 'O', X(0), yA - 26, col.ink, { bold: true, size: 12, bg: true });
+    D.label(c, 's / m  (positive →)', x0, 12, col.ink, { size: 11, align: 'left', bg: true });
+    if (look === 'lift') D.label(c, 'the lift moves vertically: its displacement is drawn along the line', x0, H - 10, col.muted, { size: 11, align: 'left', bg: true });
+    // stage boundaries: small road studs
+    c.save(); c.fillStyle = dk ? '#e3b06a' : '#f4b860';
+    jA.segs.forEach(function (g2) { c.beginPath(); c.arc(X(g2.s1), yA + 3, 3, 0, 2 * Math.PI); c.fill(); });
+    c.restore();
+    var len = Math.max(36, Math.min(76, W * 0.13)), vmx = Math.max(jA.total.vmax || 0, 1e-9);
+    function body(P, y, name, color, kindB, small) {
+      var st = K.trackAt(P, clock.t), x = X(st.s), L = small ? len * 0.85 : len;
+      var sp = Math.abs(st.v), dir = U.sgn(st.v);
+      if (sp > 0.2 * vmx && sp > 1e-9) SC.motionLines(c, x - dir * L * (kindB === 'bus' ? 0.6 : 0.45) + dir * 10, y - L * 0.16, dir, 0, 10 + 34 * Math.min(1, sp / vmx), null, 6);
+      var h = vehicle(c, kindB, x, y, L, color, st.s * pxm);
+      D.label(c, name, x, y - h * 0.5, col.ink, { bold: true, size: 11, bg: true });
+      return { st: st, x: x, h: h };
+    }
+    var a = body(PA, yA, 'A', look === 'bus' ? '#f7d679' : tint(col.s1, 0.45), look, false);
+    if (Math.abs(a.st.v) > 1e-9) D.arrow(c, a.x, yA - a.h - 12, a.x + U.sgn(a.st.v) * (14 + Math.min(70, Math.abs(a.st.v) * 3)), yA - a.h - 12, col.velocity, { label: 'v = ' + U.sf(a.st.v) + ' m/s', width: 2 });
+    if (PB) {
+      var b = body(PB, yB, 'B', tint(col.s2, 0.45), look === 'bus' ? 'car' : look, true);
+      if (Math.abs(b.st.v) > 1e-9) D.arrow(c, b.x, yB - b.h - 8, b.x + U.sgn(b.st.v) * (14 + Math.min(70, Math.abs(b.st.v) * 3)), yB - b.h - 8, col.velocity, { width: 1.6 });
+    }
+    lay = { X: X, A: [a.x, yA - a.h * 0.5], dots: jA.segs.map(function (g2) { return { i: g2.i, x: X(g2.s1), y: yA }; }) };
     if (ix) ix.paint(c);
   }
 
@@ -369,38 +463,38 @@
   /* ---------- live working ---------- */
   function stageWorking(g2, st) {
     var u = g2.u, v = g2.v, a = g2.a, T = g2.T, s3 = function (x) { return x < 0 ? '(' + U.sf(x) + ')' : U.sf(x); }, lab = 'Stage ' + (g2.i + 1) + ': ' + TYPES[g2.type].label;
-    var E = function (l, w, val, un) { R.eq(l, w.replace(/\(\((−[^()]*)\)\)/g, '($1)'), val, un); };
+    var E = function (l, w, val, un, why) { R.eq(l, w.replace(/\(\((−[^()]*)\)\)/g, '($1)'), val, un, why); };
     R.head(lab);
     if (g2.jump) R.badge('velocity jumps from ' + U.sf(g2.uPrev) + ' to ' + U.sf(u) + ' m s⁻¹ (instantaneous change — a model)', 'warn');
     switch (g2.type) {
       case 'ta':
-        E('v', 'u + at = ' + s3(u) + ' + (' + s3(a) + ')(' + s3(T) + ')', v, 'm s<sup>−1</sup>');
-        E('s', 'ut + ½at² = (' + s3(u) + ')(' + s3(T) + ') + ½(' + s3(a) + ')(' + s3(T) + ')²', g2.ds, 'm'); break;
+        E('v', 'u + at = ' + s3(u) + ' + (' + s3(a) + ')(' + s3(T) + ')', v, 'm s<sup>−1</sup>', 'Constant acceleration for a known time: use v = u + at.');
+        E('s', 'ut + ½at² = (' + s3(u) + ')(' + s3(T) + ') + ½(' + s3(a) + ')(' + s3(T) + ')²', g2.ds, 'm', 'Displacement in this stage from s = ut + ½at² (u, a and t are all known). It equals the area under this part of the v–t graph.'); break;
       case 'tv':
-        E('a', '(v − u) ÷ t = (' + s3(v) + ' − ' + s3(u) + ') ÷ ' + s3(T), a, 'm s<sup>−2</sup>');
-        E('s', '½(u + v)t = ½(' + s3(u) + ' + ' + s3(v) + ')(' + s3(T) + ')', g2.ds, 'm'); break;
+        E('a', '(v − u) ÷ t = (' + s3(v) + ' − ' + s3(u) + ') ÷ ' + s3(T), a, 'm s<sup>−2</sup>', 'Acceleration = change in velocity ÷ time: the gradient of this straight part of the v–t graph.');
+        E('s', '½(u + v)t = ½(' + s3(u) + ' + ' + s3(v) + ')(' + s3(T) + ')', g2.ds, 'm', 's = ½(u + v)t: the area of the trapezium under this part of the v–t graph.'); break;
       case 'dv':
-        E('t', '2d ÷ (u + v) = 2(' + s3(g2.ds) + ') ÷ (' + s3(u) + ' + ' + s3(v) + ')', T, 's');
-        E('a', '(v² − u²) ÷ (2d) = (' + s3(v) + '² − ' + s3(u) + '²) ÷ (2 × ' + s3(g2.ds) + ')', a, 'm s<sup>−2</sup>'); break;
+        E('t', '2d ÷ (u + v) = 2(' + s3(g2.ds) + ') ÷ (' + s3(u) + ' + ' + s3(v) + ')', T, 's', 'Displacement and both velocities are known, so rearrange s = ½(u + v)t for t.');
+        E('a', '(v² − u²) ÷ (2d) = (' + s3(v) + '² − ' + s3(u) + '²) ÷ (2 × ' + s3(g2.ds) + ')', a, 'm s<sup>−2</sup>', 'No time needed: rearrange v² = u² + 2as for a.'); break;
       case 'da':
-        E('v²', 'u² + 2ad = ' + s3(u) + '² + 2(' + s3(a) + ')(' + s3(g2.ds) + ')', v * v, 'm² s<sup>−2</sup>');
-        E('v', g2.tTurn !== null ? 'u + at (passes through v = 0 first)' : '±√(v²), same direction as the motion', v, 'm s<sup>−1</sup>');
-        E('t', Math.abs(a) > 0 ? '(v − u) ÷ a = (' + s3(v) + ' − ' + s3(u) + ') ÷ ' + s3(a) : 'd ÷ u', T, 's'); break;
+        E('v²', 'u² + 2ad = ' + s3(u) + '² + 2(' + s3(a) + ')(' + s3(g2.ds) + ')', v * v, 'm² s<sup>−2</sup>', 'Displacement and acceleration are known but not the time, so use v² = u² + 2as.');
+        E('v', g2.tTurn !== null ? 'u + at (passes through v = 0 first)' : '±√(v²), same direction as the motion', v, 'm s<sup>−1</sup>', 'A square root has two signs: choose the one that matches the direction of motion at the end of the stage.');
+        E('t', Math.abs(a) > 0 ? '(v − u) ÷ a = (' + s3(v) + ' − ' + s3(u) + ') ÷ ' + s3(a) : 'd ÷ u', T, 's', 'Now v is known, so the time follows from v = u + at (or from distance ÷ speed if a = 0).'); break;
       case 'av':
-        E('t', '(v − u) ÷ a = (' + s3(v) + ' − ' + s3(u) + ') ÷ ' + s3(a), T, 's');
-        E('s', '(v² − u²) ÷ (2a) = (' + s3(v) + '² − ' + s3(u) + '²) ÷ (2 × ' + s3(a) + ')', g2.ds, 'm'); break;
+        E('t', '(v − u) ÷ a = (' + s3(v) + ' − ' + s3(u) + ') ÷ ' + s3(a), T, 's', 'The stage lasts until the velocity reaches v: rearrange v = u + at for t.');
+        E('s', '(v² − u²) ÷ (2a) = (' + s3(v) + '² − ' + s3(u) + '²) ÷ (2 × ' + s3(a) + ')', g2.ds, 'm', 'Rearrange v² = u² + 2as for s (no time needed).'); break;
       case 'fill':
-        E('t', 'T − (other stages) = ' + s3(st.T) + ' − ' + s3(st.T - T), T, 's');
-        E('s', 'ut = (' + s3(u) + ')(' + s3(T) + ')', g2.ds, 'm'); break;
+        E('t', 'T − (other stages) = ' + s3(st.T) + ' − ' + s3(st.T - T), T, 's', 'The whole journey takes T, so this stage lasts whatever time the other stages leave.');
+        E('s', 'ut = (' + s3(u) + ')(' + s3(T) + ')', g2.ds, 'm', 'Constant velocity: displacement = velocity × time (a rectangle under the v–t graph).'); break;
       case 'rest':
-        E('s', 'at rest for ' + s3(T) + ' s', 0, 'm'); break;
+        E('s', 'at rest for ' + s3(T) + ' s', 0, 'm', 'v = 0 throughout, so there is no area under the v–t graph and no displacement.'); break;
       default:
-        E('s', 'vt = (' + s3(u) + ')(' + s3(T) + ')', g2.ds, 'm');
+        E('s', 'vt = (' + s3(u) + ')(' + s3(T) + ')', g2.ds, 'm', 'Constant velocity: displacement = velocity × time.');
     }
     if (g2.tTurn !== null) {
       var t0 = g2.tTurn - g2.t0, s1 = u * t0 + 0.5 * a * t0 * t0;
-      E('t₀', 'v = 0 when t = −u ÷ a = ' + s3(-u) + ' ÷ ' + s3(a), t0, 's after the stage starts');
-      E('distance', '|s(t₀)| + |s(t) − s(t₀)| = ' + s3(Math.abs(s1)) + ' + ' + s3(Math.abs(g2.ds - s1)), g2.dist, 'm');
+      E('t₀', 'v = 0 when t = −u ÷ a = ' + s3(-u) + ' ÷ ' + s3(a), t0, 's after the stage starts', 'The velocity changes sign inside this stage. It is momentarily zero when u + at = 0.');
+      E('distance', '|s(t₀)| + |s(t) − s(t₀)| = ' + s3(Math.abs(s1)) + ' + ' + s3(Math.abs(g2.ds - s1)), g2.dist, 'm', 'Distance counts both parts as positive: before and after it turns round. Displacement would subtract them.');
     }
   }
   /** 3 s.f., plus the exact value when it is a short exact decimal that 3 s.f. would round */
@@ -453,47 +547,47 @@
           if (Math.abs(q[0]) > 1e-9) terms += coefTxt(q[0], true) + 'X²';
           if (Math.abs(q[1]) > 1e-9) terms += coefTxt(q[1], !terms) + 'X';
           if (Math.abs(q[2]) > 1e-9 || !terms) terms += coefTxt(q[2], !terms);
-          R.eq(cl, terms + ' = ' + s3(sp.values.target), '', '');
+          R.eq(cl, terms + ' = ' + s3(sp.values.target), '', '', 'Write the condition in the question as an equation in X using the stage formulas.');
         } else if (fit && fit.kind === 'inv') {
-          R.eq(cl, coefTxt(fit.c[0], true) + coefTxt(fit.c[1], false) + ' ÷ X = ' + s3(sp.values.target), '', '');
+          R.eq(cl, coefTxt(fit.c[0], true) + coefTxt(fit.c[1], false) + ' ÷ X = ' + s3(sp.values.target), '', '', 'Write the condition in the question as an equation in X using the stage formulas.');
         }
         if (!solveRes.roots.length) R.badge('No value of X in [' + s3(sp.values.lo) + ', ' + s3(sp.values.hi) + '] satisfies ' + cl + ' = ' + s3(sp.values.target) + '. Widen the search range or check the set-up.', 'warn');
         solveRes.roots.forEach(function (r, i) {
-          R.eq('X<sub>' + (i + 1) + '</sub>', r.warnings.length ? 'check: ' + r.warnings.join('; ') : 'all stages valid', pr(r.X));
+          R.eq('X<sub>' + (i + 1) + '</sub>', r.warnings.length ? 'check: ' + r.warnings.join('; ') : 'all stages valid', pr(r.X), '', 'A root of the equation. Check it against the question: every time must be positive and the motion must make sense.');
         });
         var cur = K.metric(jA, con);
-        R.eq(cl + ' with X = ' + s3(Xused), 'current value', isFinite(cur) ? cur : '—');
+        R.eq(cl + ' with X = ' + s3(Xused), 'current value', isFinite(cur) ? cur : '—', '', 'Substitute the X in use back into the journey to check that the condition holds.');
       }
     }
     jA.segs.forEach(function (g2) { stageWorking(g2, jA.resolved.stages[g2.i]); });
     if (jA.segs.length) {
       var tot = jA.total;
       R.head('Whole journey of A');
-      R.eq('total time', jA.segs.map(function (g2) { return s3(g2.T); }).join(' + '), pr(tot.T), 's');
-      R.eq('displacement', 'sum of signed areas = ' + jA.segs.map(function (g2) { return '(' + s3(g2.ds) + ')'; }).join(' + '), pr(tot.s), 'm');
-      R.eq('distance', 'sum of |areas| = ' + jA.segs.map(function (g2) { return s3(g2.dist); }).join(' + '), pr(tot.dist), 'm');
-      R.eq('average speed', 'distance ÷ time = ' + s3(tot.dist) + ' ÷ ' + s3(tot.T), tot.T > 0 ? pr(tot.avgSpeed) : '—', tot.T > 0 ? 'm s<sup>−1</sup>' : '');
-      R.eq('average velocity', 'displacement ÷ time = ' + s3(tot.s) + ' ÷ ' + s3(tot.T), tot.T > 0 ? tot.avgVel : '—', tot.T > 0 ? 'm s<sup>−1</sup>' : '');
-      R.eq('greatest speed', 'largest |v| at a stage boundary', tot.vmax, 'm s<sup>−1</sup>');
+      R.eq('total time', jA.segs.map(function (g2) { return s3(g2.T); }).join(' + '), pr(tot.T), 's', 'Add the times of all the stages.');
+      R.eq('displacement', 'sum of signed areas = ' + jA.segs.map(function (g2) { return '(' + s3(g2.ds) + ')'; }).join(' + '), pr(tot.s), 'm', 'Displacement = total signed area under the v–t graph: areas below the t-axis count as negative.');
+      R.eq('distance', 'sum of |areas| = ' + jA.segs.map(function (g2) { return s3(g2.dist); }).join(' + '), pr(tot.dist), 'm', 'Distance adds every area as a positive number, whichever way the body is moving.');
+      R.eq('average speed', 'distance ÷ time = ' + s3(tot.dist) + ' ÷ ' + s3(tot.T), tot.T > 0 ? pr(tot.avgSpeed) : '—', tot.T > 0 ? 'm s<sup>−1</sup>' : '', 'Average speed = total distance ÷ total time (not the mean of the speeds).');
+      R.eq('average velocity', 'displacement ÷ time = ' + s3(tot.s) + ' ÷ ' + s3(tot.T), tot.T > 0 ? tot.avgVel : '—', tot.T > 0 ? 'm s<sup>−1</sup>' : '', 'Average velocity = displacement ÷ time; it has a sign and can be zero if the body returns to O.');
+      R.eq('greatest speed', 'largest |v| at a stage boundary', tot.vmax, 'm s<sup>−1</sup>', 'Velocity changes linearly within each stage, so the greatest speed occurs at the start or end of a stage.');
     }
     var st = K.trackAt(PA, clock.t);
     R.head('A at t = ' + clock.t.toFixed(2) + ' s');
-    R.eq('s', 'displacement from O', st.s, 'm');
-    R.eq('v', 'velocity', st.v, 'm s<sup>−1</sup>');
-    R.eq('a', 'acceleration', st.a, 'm s<sup>−2</sup>');
-    R.eq('distance', 'travelled so far', jA.distanceAt(clock.t), 'm');
+    R.eq('s', 'displacement from O', st.s, 'm', 'Area under the v–t graph from t = 0 up to now.');
+    R.eq('v', 'velocity', st.v, 'm s<sup>−1</sup>', 'Read from the v–t graph at this time: v = u + at within the current stage.');
+    R.eq('a', 'acceleration', st.a, 'm s<sup>−2</sup>', 'The gradient of the v–t graph in the current stage.');
+    R.eq('distance', 'travelled so far', jA.distanceAt(clock.t), 'm', 'Total of the areas up to now, all counted as positive.');
     var n = Math.floor(clock.t + 1e-9);
-    if (n >= 1) R.eq('in the ' + ordinal(n) + ' second', 'distance travelled between t = ' + (n - 1) + ' and t = ' + n, jA.distanceAt(n) - jA.distanceAt(n - 1), 'm');
+    if (n >= 1) R.eq('in the ' + ordinal(n) + ' second', 'distance travelled between t = ' + (n - 1) + ' and t = ' + n, jA.distanceAt(n) - jA.distanceAt(n - 1), 'm', 'The n-th second runs from t = n − 1 to t = n, so subtract the distance at t = n − 1 from the distance at t = n.');
     if (PB && meet) {
       R.head('Two bodies: when is s<sub>A</sub> = s<sub>B</sub>?');
       if (jB.error) R.badge('B stage ' + (jB.error.stage + 1) + ' is impossible: ' + jB.error.msg, 'warn');
       if (meet.together.length) R.badge('A and B move together for ' + meet.together.map(function (iv) { return s3(iv[0]) + ' ≤ t ≤ ' + s3(iv[1]); }).join(', '), 'info');
       if (!meet.list.length && !meet.together.length) R.badge('A and B are never level for 0 ≤ t ≤ ' + s3(tMax), 'info');
       meet.list.forEach(function (m) {
-        R.eq('level at t', 's = ' + s3(m.s) + ' m; v<sub>A</sub> = ' + s3(m.v1) + ', v<sub>B</sub> = ' + s3(m.v2) + (m.t < 1e-9 ? ' (start)' : ''), m.t, 's');
+        R.eq('level at t', 's = ' + s3(m.s) + ' m; v<sub>A</sub> = ' + s3(m.v1) + ', v<sub>B</sub> = ' + s3(m.v2) + (m.t < 1e-9 ? ' (start)' : ''), m.t, 's', 'They are level when s<sub>A</sub> = s<sub>B</sub>: the s–t graphs cross here.');
       });
       var sb = K.trackAt(PB, clock.t);
-      R.eq('s<sub>A</sub> − s<sub>B</sub>', 'gap at t = ' + clock.t.toFixed(2) + ' s', st.s - sb.s, 'm');
+      R.eq('s<sub>A</sub> − s<sub>B</sub>', 'gap at t = ' + clock.t.toFixed(2) + ' s', st.s - sb.s, 'm', 'Gap = difference of the two displacements from O at this instant.');
     }
     R.render();
   }

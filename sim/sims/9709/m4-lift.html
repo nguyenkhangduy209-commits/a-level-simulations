@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/mech-dynamics.js"></script>
@@ -17,7 +18,7 @@
 <script>
 (function () {
   'use strict';
-  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, DY = SIM.dyn;
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, DY = SIM.dyn, SC = SIM.scene;
   var course = ui.course('9709'), g = ui.gFor(course), is02 = course === '9702';
   var pg = ui.page({ title: 'Lift with a load: cable tension and floor reaction', g: g,
     tags: is02 ? ['9702 3 Dynamics'] : ['9709 4.4 Newton’s laws (lifts)', '9709 4.2 multi-stage motion'] });
@@ -66,7 +67,7 @@
 
   var exam = ui.examToggle(outCard, outCard);
   var R = ui.Readout(outCard);
-  var eq0 = R.eq; R.eq = function (l, w, v, u) { return eq0(l, w, typeof v === 'number' ? fmtX(v) : v, u); };
+  var eq0 = R.eq; R.eq = function (l, w, v, u, why) { return eq0(l, w, typeof v === 'number' ? fmtX(v) : v, u, why); };
   /* exact values (e.g. 172.5) are shown in full; others to 3 s.f. */
   function fmtX(x) {
     if (typeof x !== 'number' || !isFinite(x)) return U.sf(x);
@@ -84,7 +85,7 @@
   var presets9709 = [
     { name: '9709/43 M/J 23 Q6: elevator 0.4 m s⁻² for 5 s, 25 s steady, −0.2 m s⁻² to rest; crate m (T = 12 250 N when decelerating)', M: 1200, m: 50, u: 0, solve: 'mload', Tg: 12250, k: 3,
       st: stg([['a', 5, 0.4], ['const', 25], ['v', 10, 0]]),
-      note: 'v_max = 2 m s⁻¹; distance 5 + 50 + 10 = 65 m. Decelerating: 12 250 = (1200 + m)(10 − 0.2) ⇒ m = 50. Greatest floor force on the crate: 50(10 + 0.4) = 520 N, upwards.' },
+      who: 'crate', note: 'v_max = 2 m s⁻¹; distance 5 + 50 + 10 = 65 m. Decelerating: 12 250 = (1200 + m)(10 − 0.2) ⇒ m = 50. Greatest floor force on the crate: 50(10 + 0.4) = 520 N, upwards.' },
     { name: '9709/42 F/M 21 Q6: elevator up and back down (7 segments), total mass 1500 kg', M: 1500, m: 0, u: 0,
       st: stg([['v', 1.5, 2], ['const', 4.5], ['v', 1, 0], ['rest', 6], ['v', 2, -46 / 27], ['const', 5], ['v', 1.5, 0]]),
       note: 'Up: ½(1.5)(2) + 4.5(2) + ½(1)(2) = 11.5 m. Down: ½(2)V + 5V + ½(1.5)V = 6.75V. Back to the ground floor ⇒ 6.75V = 11.5 ⇒ V = 46/27 = 1.70 m s⁻¹. Decelerating on the way up: a = −2 ⇒ T = 1500(10 − 2) = 12 000 N.' },
@@ -92,7 +93,7 @@
       note: 'R = m(g + a) = 60(10 − 2) = 480 N: the person “feels lighter”. With a = −g the reaction would be zero.' },
     { name: 'Lift moving down and slowing to rest (a is UPWARDS)', M: 1000, m: 80, u: -3, st: stg([['const', 4], ['v', 2, 0]]),
       note: 'Moving down and slowing down ⇒ acceleration up (a = +1.5): T = (M + m)(g + 1.5) > weight.' },
-    { name: 'Impossible: acceleration downwards greater than g', M: 500, m: 50, u: 0, st: stg([['a', 1, -12]]),
+    { name: 'Impossible: acceleration downwards greater than g', M: 500, m: 50, u: 0, st: stg([['a', 1, -12]]), who: 'crate',
       note: 'a < −g ⇒ T < 0 (a cable cannot push) and R < 0 (the load leaves the floor). The model is invalid.' }
   ];
   var presets9702 = [
@@ -101,7 +102,7 @@
     { name: 'Free fall (a = −g): apparent weightlessness', M: 800, m: 60, u: 0, st: stg([['a', 1, -9.81]]), note: 'R = m(g + a) = 0.' }
   ];
   var presetCtl = ui.presets(presetCard, is02 ? presets9702 : presets9709, function (p) {
-    clock.pause(); nSel.set(String(p.st.length), true);
+    clock.pause(); who = p.who || 'person'; nSel.set(String(p.st.length), true);
     p.st.forEach(function (s, i) { stSel[i].set(s[0], true); var o = { t: s[1] }; if (s[0] === 'a') o.a = s[2]; if (s[0] === 'v') o.v = s[2]; stPrm[i].set(o, true); });
     solveSel.set(p.solve || 'none', true); if (p.Tg) prmS.set({ Tg: p.Tg, k: p.k }, true);
     prm.set({ M: p.M, m: p.m, u: p.u || 0 }); clock.seek(0);
@@ -116,7 +117,7 @@
   ]);
 
   /* ---------- model ---------- */
-  var prof = null, Mused = 0, mused = 0, solved = null;
+  var prof = null, Mused = 0, mused = 0, solved = null, who = is02 ? 'person' : 'crate';   // what stands on the lift floor in the real-life look
   function update() {
     var n = Number(nSel.get()), v = prm.values;
     for (var i = 0; i < 7; i++) {
@@ -141,6 +142,24 @@
     drawScene(); drawPlots(); readout();
   }
 
+  /* ---------- real-life look: a lift shaft in a building, winch drum at the top (soft pastel) ---------- */
+  function rr(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
+  function shaft(c, H, turn) {
+    var dk = SC.dark(), x1 = vp.X(-2), x2 = vp.X(2), top = vp.Y(H + 2.5);
+    c.save();
+    c.fillStyle = dk ? '#2b2e3d' : '#f3eee6'; c.fillRect(0, 0, vp.w, vp.h);                                  // building walls
+    var g = c.createLinearGradient(x1, 0, x2, 0); g.addColorStop(0, dk ? '#1f2230' : '#d9dbe4'); g.addColorStop(0.5, dk ? '#262a3a' : '#e6e8ef'); g.addColorStop(1, dk ? '#1f2230' : '#d9dbe4');
+    c.fillStyle = g; c.fillRect(x1, top, x2 - x1, vp.h - top);                                               // the shaft
+    c.fillStyle = dk ? '#3a3e52' : '#e2dccf';                                                                 // floor slabs either side
+    for (var fy = -0.5; fy < H + 2.4; fy += 2.8) { var y = vp.Y(fy); rr(c, 0, y, x1, 7, 2); c.fill(); rr(c, x2, y, vp.w - x2, 7, 2); c.fill(); }
+    c.strokeStyle = dk ? 'rgba(170,177,196,.35)' : 'rgba(150,158,180,.45)'; c.lineWidth = 2;                // guide rails
+    [vp.X(-1.8), vp.X(1.8)].forEach(function (x) { c.beginPath(); c.moveTo(x, top); c.lineTo(x, vp.h); c.stroke(); });
+    c.fillStyle = dk ? '#4a4f66' : '#d9d4e6'; rr(c, vp.X(-1.4), top - 20, vp.X(1.4) - vp.X(-1.4), 26, 6); c.fill();   // winch housing
+    c.strokeStyle = 'rgba(120,110,140,.3)'; c.lineWidth = 1; c.stroke();
+    c.restore();
+    SC.pulley(c, vp.X(0), top, 11, turn);   // the drum turns as the cable winds on
+  }
+
   /* ---------- scene ---------- */
   function drawScene() {
     if (!prof) return;
@@ -151,12 +170,22 @@
     vp.fit(-6, 6, -1, H + 3);
     var c = vp.begin();
     var y = (st.s - smin) * ky;
+    if (SC.real()) {
+      shaft(c, H, -(st.s * ky * vp.scale) / 11);
+      var carH = vp.Y(y) - vp.Y(y + 1.6);
+      SC.lift(c, vp.X(0), vp.Y(y + 1.6), vp.X(1.6) - vp.X(-1.6), carH, { cableTop: vp.Y(H + 2.5) });
+      if (mused > 0) {
+        if (who === 'person') SC.person(c, vp.X(0.4), vp.Y(y) - 1, carH * 0.74, { color: '#f2a08e' });
+        else D.block(c, vp.X(0.4), vp.Y(y), 30, 22, 0, { label: 'm' });
+      }
+    } else {
     c.save(); c.strokeStyle = col.line; c.lineWidth = 1; c.beginPath(); c.moveTo(vp.X(-2), vp.Y(-0.5)); c.lineTo(vp.X(-2), vp.Y(H + 2.5)); c.moveTo(vp.X(2), vp.Y(-0.5)); c.lineTo(vp.X(2), vp.Y(H + 2.5)); c.stroke(); c.restore();
     D.pulley(c, vp.X(0), vp.Y(H + 2.5), 10);
     D.line(c, [vp.P(0, H + 2.5), vp.P(0, y + 1.6)], col.tension, { width: 2 });
     c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.6;
     c.fillRect(vp.X(-1.6), vp.Y(y + 1.6), vp.X(1.6) - vp.X(-1.6), vp.Y(y) - vp.Y(y + 1.6)); c.strokeRect(vp.X(-1.6), vp.Y(y + 1.6), vp.X(1.6) - vp.X(-1.6), vp.Y(y) - vp.Y(y + 1.6)); c.restore();
     if (mused > 0) D.block(c, vp.X(0.4), vp.Y(y), 30, 22, 0, { label: 'm' });
+    }
     var list = [Math.abs(st.T), (Mused + mused) * g, Math.abs(st.R), mused * g], kf = SIM.view.forceScale(list, Math.min(90, vp.h * 0.3));
     lay = { y: y, st: st, Ttip: st.T > 0 ? vp.Y(y + 1.6) - st.T * kf : null,
       atip: Math.abs(st.a) > 1e-9 ? vp.Y(y + 0.8) - U.sgn(st.a) * (15 + Math.min(50, Math.abs(st.a) * 12)) : null };
@@ -195,9 +224,9 @@
       R.head('Solve');
       if (solved.err) R.badge(solved.err, 'warn');
       else {
-        R.eq('a in stage ' + (solved.k + 1), 'from the motion profile', solved.a, 'm s<sup>−2</sup>');
-        if (solved.what === 'm') R.eq('m', 'T ÷ (g + a) − M = ' + s3(prmS.values.Tg) + ' ÷ (' + g + ' + ' + (solved.a < 0 ? '(' + s3(solved.a) + ')' : s3(solved.a)) + ') − ' + s3(Mused), solved.val, 'kg');
-        else R.eq('M', 'T ÷ (g + a) − m', solved.val, 'kg');
+        R.eq('a in stage ' + (solved.k + 1), 'from the motion profile', solved.a, 'm s<sup>−2</sup>', 'First find the acceleration in the stage where T is given: a = (v − u) ÷ t for that stage (up positive).');
+        if (solved.what === 'm') R.eq('m', 'T ÷ (g + a) − M = ' + s3(prmS.values.Tg) + ' ÷ (' + g + ' + ' + (solved.a < 0 ? '(' + s3(solved.a) + ')' : s3(solved.a)) + ') − ' + s3(Mused), solved.val, 'kg', 'Whole system: T − (M + m)g = (M + m)a, so M + m = T ÷ (g + a). Then subtract the lift’s own mass.');
+        else R.eq('M', 'T ÷ (g + a) − m', solved.val, 'kg', 'Whole system: T − (M + m)g = (M + m)a, so M + m = T ÷ (g + a). Then subtract the load.');
         if (solved.val < 0) R.badge('Negative mass: the given tension is too small for this acceleration.', 'warn');
       }
     }
@@ -207,21 +236,21 @@
       return '<tr><td>' + (i + 1) + '</td><td>' + s3(sg.u) + '</td><td>' + s3(ve) + '</td><td>' + s3(sg.a) + '</td><td>' + s3(dur) + '</td><td>' + s3(ds) + '</td><td>' + s3(sg.T) + '</td><td>' + s3(sg.R) + '</td></tr>';
     }).join('');
     R.html('<table class="tbl"><tr><th>stage</th><th>u</th><th>v</th><th>a</th><th>t</th><th>Δs</th><th>T / N</th><th>R / N</th></tr>' + rows + '</table>');
-    R.eq('displacement', 'sum of Δs (up +)', prof.sEnd, 'm');
-    R.eq('distance', 'sum of |Δs| (split where v = 0)', prof.distance, 'm');
+    R.eq('displacement', 'sum of Δs (up +)', prof.sEnd, 'm', 'Each stage’s Δs is the area under its part of the v–t graph. Add them with their signs (up positive).');
+    R.eq('distance', 'sum of |Δs| (split where v = 0)', prof.distance, 'm', 'Distance ignores direction: split any stage where v changes sign and add the sizes.');
     var Tmax = -Infinity, Tmin = Infinity, Rmax = -Infinity, Rmin = Infinity;
     prof.segs.forEach(function (sg) { Tmax = Math.max(Tmax, sg.T); Tmin = Math.min(Tmin, sg.T); Rmax = Math.max(Rmax, sg.R); Rmin = Math.min(Rmin, sg.R); });
     if (prof.segs.length) {
-      R.eq('greatest T', '(M + m)(g + a<sub>max</sub>)', Tmax, 'N'); R.eq('least T', '(M + m)(g + a<sub>min</sub>)', Tmin, 'N');
-      if (mused > 0) { R.eq('greatest R', 'm(g + a<sub>max</sub>), on the load, upwards', Rmax, 'N'); R.eq('least R', 'm(g + a<sub>min</sub>)', Rmin, 'N'); }
+      R.eq('greatest T', '(M + m)(g + a<sub>max</sub>)', Tmax, 'N', 'T = (M + m)(g + a), so the tension is greatest in the stage where a is most upwards.'); R.eq('least T', '(M + m)(g + a<sub>min</sub>)', Tmin, 'N', 'And least where a is most downwards (accelerating down, or slowing while going up).');
+      if (mused > 0) { R.eq('greatest R', 'm(g + a<sub>max</sub>), on the load, upwards', Rmax, 'N', 'For the load alone R − mg = ma, so R = m(g + a): greatest when a is greatest.'); R.eq('least R', 'm(g + a<sub>min</sub>)', Rmin, 'N', 'Least when a is most negative. R < 0 would mean the load leaves the floor.'); }
     }
     if (prof.segs.some(function (sg) { return sg.slack; })) R.badge('In some stage a < −g: T &lt; 0 (cable slack) — impossible.', 'warn');
     if (prof.segs.some(function (sg) { return sg.leavesFloor; })) R.badge('In some stage R &lt; 0: the load would leave the floor — impossible.', 'warn');
     R.head('At t = ' + clock.t.toFixed(2) + ' s');
-    R.eq('a', 'acceleration in the current stage', st.a, 'm s<sup>−2</sup>');
-    R.eq('T', '(M + m)(g + a) = ' + s3(Mt) + ' × (' + g + ' + ' + (st.a < 0 ? '(' + s3(st.a) + ')' : s3(st.a)) + ')', st.T, 'N');
-    if (mused > 0) R.eq('R', 'm(g + a) = ' + s3(mused) + ' × (' + g + ' + ' + (st.a < 0 ? '(' + s3(st.a) + ')' : s3(st.a)) + ')', st.R, 'N');
-    R.eq('v, s', 'velocity and displacement', s3(st.v) + ' m s⁻¹, ' + s3(st.s) + ' m', '');
+    R.eq('a', 'acceleration in the current stage', st.a, 'm s<sup>−2</sup>', 'Constant within each stage. Up is positive, so slowing down while moving up gives a negative a.');
+    R.eq('T', '(M + m)(g + a) = ' + s3(Mt) + ' × (' + g + ' + ' + (st.a < 0 ? '(' + s3(st.a) + ')' : s3(st.a)) + ')', st.T, 'N', 'Newton’s second law for the lift and load together: T − (M + m)g = (M + m)a.');
+    if (mused > 0) R.eq('R', 'm(g + a) = ' + s3(mused) + ' × (' + g + ' + ' + (st.a < 0 ? '(' + s3(st.a) + ')' : s3(st.a)) + ')', st.R, 'N', 'Newton’s second law for the load alone: R − mg = ma. The cable tension does not act on the load.');
+    R.eq('v, s', 'velocity and displacement', s3(st.v) + ' m s⁻¹, ' + s3(st.s) + ' m', '', 'v = u + at and s = ut + ½at² within the current stage, added on to the earlier stages.');
     R.render();
   }
 

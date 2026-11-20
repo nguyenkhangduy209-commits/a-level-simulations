@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/mech-calculus.js"></script>
@@ -213,16 +214,31 @@
     if (hi - lo < 1e-9) { hi += 1; lo -= 1; }
     var span = hi - lo, W = vp.w, H = vp.h, x0 = 26, x1 = W - 26, y = H * 0.58;
     function X(s) { return x0 + (s - lo + 0.04 * span) / (span * 1.08) * (x1 - x0); }
+    var REAL = SIM.scene.real(), SC = SIM.scene;
+    if (REAL) {   // a straight road under a soft sky; the particle becomes a car
+      SC.sky(c, 0, 0, W, y, { horizon: y });
+      SC.tree(c, W * 0.18, y, Math.min(46, y * 0.6)); SC.tree(c, W * 0.71, y, Math.min(38, y * 0.5));
+      SC.ground(c, 0, W, y, { kind: 'road', depth: H - y + 2 });
+    }
     c.strokeStyle = col.muted; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x0, y); c.lineTo(x1, y); c.stroke();
     U.niceTicks(lo, hi, Math.max(3, Math.floor((x1 - x0) / 80))).ticks.forEach(function (v) {
       if (v < lo - 0.04 * span || v > hi + 0.04 * span) return;
-      c.beginPath(); c.moveTo(X(v), y - 3); c.lineTo(X(v), y + 3); c.stroke(); D.label(c, U.num(v, 6), X(v), y + 13, col.muted, { size: 10 });
+      if (REAL) distPost(c, X(v), y);
+      c.beginPath(); c.moveTo(X(v), y - 3); c.lineTo(X(v), y + 3); c.stroke(); D.label(c, U.num(v, 6), X(v), y + 13, col.muted, { size: 10, bg: REAL });
     });
     D.label(c, 'O', X(0), y - 12, col.ink, { size: 11, bold: true });
     var t = tNow(), s0 = M.s(t), v0 = M.v(t);
     if (!isFinite(s0)) return;
-    D.particle(c, X(s0), y - 10, 8, { fill: col.s1 });
-    if (isFinite(v0) && Math.abs(v0) > 1e-9) D.arrow(c, X(s0), y - 26, X(s0) + U.sgn(v0) * (12 + Math.min(60, Math.abs(v0) * 3)), y - 26, col.velocity, { label: 'v = ' + U.sf(v0) + ' m/s', width: 2 });
+    var ay = y - 26;
+    if (REAL) {
+      // car length scales with the canvas; it faces the way it is moving (or about to move); wheels turn by the distance driven
+      var L = U.clamp(W * 0.07, 34, 64), wr = L * 0.1, vf = isFinite(v0) && Math.abs(v0) > 1e-9 ? v0 : M.v(Math.min(T1, t + 1e-3 * (T1 - T0 || 1)));
+      var face = vf < 0 ? -1 : 1, spin = (X(s0) - X(0)) / wr;
+      if (isFinite(v0) && Math.abs(v0) > 1e-9) SC.motionLines(c, X(s0) - face * L * 0.45, y - L * 0.18, face, 0, Math.min(50, Math.abs(v0) * 3), null, 6);
+      SC.car(c, X(s0), y, L, 0, { kind: 'car', facing: face, wheel: -spin * face, color: '#e9a0a0' });
+      ay = y - L * 0.42 - wr - 12;
+    } else D.particle(c, X(s0), y - 10, 8, { fill: col.s1 });
+    if (isFinite(v0) && Math.abs(v0) > 1e-9) D.arrow(c, X(s0), ay, X(s0) + U.sgn(v0) * (12 + Math.min(60, Math.abs(v0) * 3)), ay, col.velocity, { label: 'v = ' + U.sf(v0) + ' m/s', width: 2 });
     D.label(c, 's / m  (positive →)', x1, 10, col.muted, { size: 10, align: 'right' });
     // t_a / t_b markers under the line (tap to type) and the layout used by direct manipulation
     lay = { X: X, y: y, body: [X(s0), y - 10], ta: null, tb: null };
@@ -237,6 +253,15 @@
       });
     }
     if (ix) ix.paint(c);
+  }
+
+  /** a small roadside distance post (soft pastel) standing at the road edge at screen x */
+  function distPost(c, x, y) {
+    var dk = SIM.scene.dark();
+    c.save(); c.fillStyle = dk ? '#cfcbd8' : '#fbf8f2'; c.strokeStyle = 'rgba(90,80,70,.3)'; c.lineWidth = 1;
+    c.beginPath(); if (c.roundRect) c.roundRect(x - 2.5, y - 16, 5, 16, 2); else c.rect(x - 2.5, y - 16, 5, 16); c.fill(); c.stroke();
+    c.fillStyle = dk ? '#c98a8a' : '#f2a7a0'; c.fillRect(x - 2.5, y - 14, 5, 3.5);
+    c.restore();
   }
 
   /* ---------- plots ---------- */
@@ -336,9 +361,9 @@
     if (M.unknowns.length) {
       R.head('Finding the constants');
       M.equations.forEach(function (e) {
-        R.eq(e.kind === 'cond' ? e.label.replace(/^([sva])\(/, '$1(') : e.label, '', affText(e.aff, e.target), '');
+        R.eq(e.kind === 'cond' ? e.label.replace(/^([sva])\(/, '$1(') : e.label, '', affText(e.aff, e.target), '', 'Each given condition (a value of s, v or a at a known time, or continuity at a join) gives one equation in the unknown constants.');
       });
-      M.unknowns.forEach(function (u) { R.eq(C.fmtSym(u, true), 'solving the equation' + (M.unknowns.length > 1 ? 's simultaneously' : ''), pr(M.values[u]) + (C.fmtMag(Math.abs(M.values[u])).charAt(0) === '(' ? ' = ' + (M.values[u] < 0 ? '−' : '') + C.fmtMag(Math.abs(M.values[u])) : '')); });
+      M.unknowns.forEach(function (u) { R.eq(C.fmtSym(u, true), 'solving the equation' + (M.unknowns.length > 1 ? 's simultaneously' : ''), pr(M.values[u]) + (C.fmtMag(Math.abs(M.values[u])).charAt(0) === '(' ? ' = ' + (M.values[u] < 0 ? '−' : '') + C.fmtMag(Math.abs(M.values[u])) : ''), '', 'Solve these equations for the constants of integration (simultaneously if there is more than one).'); });
       R.head('With the constants substituted');
       M.pieces.forEach(function (pc, i) {
         var pre = multi ? '(' + U.num(pc.t0, 4) + ' ≤ t ≤ ' + U.num(pc.t1, 4) + ')  ' : '';
@@ -351,28 +376,28 @@
       var ta = IA.table.length ? IA.table[0].t0 : 0, tb = IA.table.length ? IA.table[IA.table.length - 1].t1 : 0;
       R.head('Motion for ' + s3(ta) + ' ≤ t ≤ ' + s3(tb));
       if (IA.restAll.length) R.badge('At rest throughout ' + IA.restAll.map(function (iv) { return s3(iv[0]) + ' ≤ t ≤ ' + s3(iv[1]); }).join(', '), 'info');
-      if (!IA.rest.length && !IA.restAll.length) R.eq('v = 0', 'never in this interval', '—');
+      if (!IA.rest.length && !IA.restAll.length) R.eq('v = 0', 'never in this interval', '—', '', 'Solve v(t) = 0: it has no root in this interval, so the particle never stops here.');
       IA.rest.forEach(function (r) {
         var why = r.kind === 'touch' ? 'double root: instantaneously at rest, NO change of direction' : r.kind === 'end' ? 'at an end of the interval' : r.kind === 'jump' ? 'velocity jumps through 0' : 'v changes sign: changes direction';
-        R.eq('v = 0 at t', why, r.t, 's');
+        R.eq('v = 0 at t', why, r.t, 's', 'Solve v(t) = 0. The particle changes direction only if v changes sign there.');
       });
-      IA.turning.forEach(function (tp) { R.eq('a = 0 at t = ' + s3(tp.t), 'velocity there', tp.v, 'm s<sup>−1</sup>'); });
-      if (IA.vmax) R.eq('greatest v', 'at t = ' + s3(IA.vmax.t) + ' (check a = 0 points and the ends)', IA.vmax.v, 'm s<sup>−1</sup>');
-      if (IA.vmin) R.eq('least v', 'at t = ' + s3(IA.vmin.t), IA.vmin.v, 'm s<sup>−1</sup>');
+      IA.turning.forEach(function (tp) { R.eq('a = 0 at t = ' + s3(tp.t), 'velocity there', tp.v, 'm s<sup>−1</sup>', 'v is greatest or least where dv/dt = a = 0: solve a(t) = 0, then substitute into v(t).'); });
+      if (IA.vmax) R.eq('greatest v', 'at t = ' + s3(IA.vmax.t) + ' (check a = 0 points and the ends)', IA.vmax.v, 'm s<sup>−1</sup>', 'Compare v at the points where a = 0 and at the ends of the interval.');
+      if (IA.vmin) R.eq('least v', 'at t = ' + s3(IA.vmin.t), IA.vmin.v, 'm s<sup>−1</sup>', 'Compare v at the points where a = 0 and at the ends of the interval.');
       IA.aInf.forEach(function (x) { R.badge('a is unbounded near t = ' + s3(x.t) + ' (a → ' + (x.sign > 0 ? '+' : '−') + '∞), so it has no ' + (x.sign > 0 ? 'greatest' : 'least') + ' value here', 'info'); });
-      if (IA.amax) R.eq('greatest a', 'at t = ' + s3(IA.amax.t), IA.amax.a, 'm s<sup>−2</sup>');
-      if (IA.amin) R.eq('least a', 'at t = ' + s3(IA.amin.t), IA.amin.a, 'm s<sup>−2</sup>');
-      R.eq('displacement', 's(' + s3(tb) + ') − s(' + s3(ta) + ')', pr(IA.displacement), 'm');
-      R.eq('distance', IA.table.map(function (r) { return '|' + s3(r.ds) + '|'; }).join(' + '), pr(IA.distance), 'm');
+      if (IA.amax) R.eq('greatest a', 'at t = ' + s3(IA.amax.t), IA.amax.a, 'm s<sup>−2</sup>', 'Compare a at its stationary points and at the ends of the interval.');
+      if (IA.amin) R.eq('least a', 'at t = ' + s3(IA.amin.t), IA.amin.a, 'm s<sup>−2</sup>', 'Compare a at its stationary points and at the ends of the interval.');
+      R.eq('displacement', 's(' + s3(tb) + ') − s(' + s3(ta) + ')', pr(IA.displacement), 'm', 'Displacement = ∫v dt from t_a to t_b = s(t_b) − s(t_a): backwards motion counts as negative.');
+      R.eq('distance', IA.table.map(function (r) { return '|' + s3(r.ds) + '|'; }).join(' + '), pr(IA.distance), 'm', 'Distance ignores direction: split the interval where v = 0 and add the size of each part’s displacement.');
       var fq = findQ.get(), fv = fp.values.V, tw = C.timesWhen(M, fq, fv, T0, T1);
-      R.eq(fq + ' = ' + s3(fv) + ' when t =', tw.length ? 'solving ' + fq + '(t) = ' + s3(fv) + ' for ' + s3(T0) + ' ≤ t ≤ ' + s3(T1) : 'no solution for ' + s3(T0) + ' ≤ t ≤ ' + s3(T1), tw.length ? tw.map(function (t) { return pr(t); }).join(', ') : '—', tw.length ? 's' : '');
+      R.eq(fq + ' = ' + s3(fv) + ' when t =', tw.length ? 'solving ' + fq + '(t) = ' + s3(fv) + ' for ' + s3(T0) + ' ≤ t ≤ ' + s3(T1) : 'no solution for ' + s3(T0) + ' ≤ t ≤ ' + s3(T1), tw.length ? tw.map(function (t) { return pr(t); }).join(', ') : '—', tw.length ? 's' : '', 'Set the expression equal to the given value and solve for t, keeping only roots inside the interval.');
     }
     var t = tNow();
     R.head('At t = ' + t.toFixed(2) + ' s');
     var sv = M.s(t), vv = M.v(t), av = M.a(t);
-    R.eq('s', 'displacement', isFinite(sv) ? sv : '— (not defined)', isFinite(sv) ? 'm' : '');
-    R.eq('v', 'velocity', isFinite(vv) ? vv : '— (not defined)', isFinite(vv) ? 'm s<sup>−1</sup>' : '');
-    R.eq('a', 'acceleration', isFinite(av) ? av : '— (not defined)', isFinite(av) ? 'm s<sup>−2</sup>' : '');
+    R.eq('s', 'displacement', isFinite(sv) ? sv : '— (not defined)', isFinite(sv) ? 'm' : '', 'Substitute the current t into s(t).');
+    R.eq('v', 'velocity', isFinite(vv) ? vv : '— (not defined)', isFinite(vv) ? 'm s<sup>−1</sup>' : '', 'v = ds/dt, evaluated at the current t.');
+    R.eq('a', 'acceleration', isFinite(av) ? av : '— (not defined)', isFinite(av) ? 'm s<sup>−2</sup>' : '', 'a = dv/dt, evaluated at the current t.');
     R.render();
   }
 

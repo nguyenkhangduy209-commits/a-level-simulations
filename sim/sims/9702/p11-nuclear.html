@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-particles.js"></script>
@@ -88,6 +89,14 @@
   }
   function drawCluster(c, cx, cy, A, Z, rPx) {
     var col = ui.colors(), n = Math.min(A, 260), r = Math.max(2.2, rPx / Math.sqrt(n) * 0.95);
+    if (real()) {   // shaded nucleon balls, outer ones first so the pile looks rounded
+      c.save(); c.globalAlpha = 0.18; c.fillStyle = SC.shade(col.s4, 0.4); c.beginPath(); c.arc(cx, cy, r * 1.05 * Math.sqrt(n) + r * 2.2, 0, 2 * Math.PI); c.fill(); c.restore();
+      for (var j = n - 1; j >= 0; j--) {
+        var rj = r * 1.05 * Math.sqrt(j + 0.5), tj = j * 2.39996, pj = Math.floor((j + 1) * Z / n) > Math.floor(j * Z / n);
+        SC.ball(c, cx + rj * Math.cos(tj), cy + rj * Math.sin(tj), r * 1.08, { color: SC.shade(pj ? col.s2 : col.s1, 0.3) });
+      }
+      return;
+    }
     // deterministic sunflower packing, protons spread evenly through the nucleus
     for (var i = 0; i < n; i++) {
       var rr = r * 1.05 * Math.sqrt(i + 0.5) * 1.0, th = i * 2.39996;
@@ -122,20 +131,39 @@
     drawNuc(c, vp.X(9.6), vp.Y(1.2), d.daughter.A, d.daughter.Z, d.daughter.label, col.ink, 24);
     D.label(c, dtype.get() === 'gamma' ? 'same nuclide (lower energy)' : 'daughter', vp.X(10), vp.Y(8.5), col.muted, { size: 12 });
     // emitted particles
-    var ex = vp.X(14.2), ey = vp.Y(6.2), t = dtype.get();
-    if (t === 'alpha') { var s = vp.scale * 0.32; [[-1, -1, 1], [1, -1, 0], [-1, 1, 0], [1, 1, 1]].forEach(function (q) { c.fillStyle = q[2] ? col.s2 : col.s1; c.beginPath(); c.arc(ex + q[0] * s * 0.7, ey + q[1] * s * 0.7, s, 0, 7); c.fill(); }); drawNuc(c, ex - 4, vp.Y(4.6), 4, 2, 'α', col.s4, 20); }
+    var ex = vp.X(14.2), ey = vp.Y(6.2), t = dtype.get(), RL = real();
+    if (RL) track(c, t, ex, ey);
+    if (t === 'alpha') { var s = vp.scale * 0.32; [[-1, -1, 1], [1, -1, 0], [-1, 1, 0], [1, 1, 1]].forEach(function (q) { if (RL) { SC.ball(c, ex + q[0] * s * 0.7, ey + q[1] * s * 0.7, s, { color: SC.shade(q[2] ? col.s2 : col.s1, 0.3) }); return; } c.fillStyle = q[2] ? col.s2 : col.s1; c.beginPath(); c.arc(ex + q[0] * s * 0.7, ey + q[1] * s * 0.7, s, 0, 7); c.fill(); }); drawNuc(c, ex - 4, vp.Y(4.6), 4, 2, 'α', col.s4, 20); }
     else if (t === 'gamma') {
       c.strokeStyle = col.s4; c.lineWidth = 2; c.beginPath();
       for (var i = 0; i <= 60; i++) { var xx = vp.X(12.4) + i * vp.scale * 0.06, yy = ey + Math.sin(i * 0.6) * 7; if (i) c.lineTo(xx, yy); else c.moveTo(xx, yy); } c.stroke();
       drawNuc(c, ex, vp.Y(4.6), 0, 0, 'γ', col.s4, 20);
     } else {
-      c.fillStyle = col.s4; c.beginPath(); c.arc(ex, ey, vp.scale * 0.22, 0, 7); c.fill();
+      if (RL) SC.ball(c, ex, ey, vp.scale * 0.22, { color: SC.shade(col.s4, 0.3) });
+      else { c.fillStyle = col.s4; c.beginPath(); c.arc(ex, ey, vp.scale * 0.22, 0, 7); c.fill(); }
       drawNuc(c, ex - 4, vp.Y(4.6), 0, t === 'betaMinus' ? -1 : 1, 'β', col.s4, 20);
       D.label(c, t === 'betaMinus' ? '−' : '+', ex + 14, vp.Y(4.6) - 10, col.s4, { size: 12, bold: true });
       c.strokeStyle = col.muted; c.setLineDash([3, 3]); c.beginPath(); c.arc(vp.X(14.2), vp.Y(2.6), vp.scale * 0.16, 0, 7); c.stroke(); c.setLineDash([]);
       D.label(c, t === 'betaMinus' ? 'ν̄ (antineutrino)' : 'ν (neutrino)', vp.X(14.2), vp.Y(1.9), col.muted, { size: 11 });
     }
     D.label(c, '+', vp.X(12.4), vp.Y(5), col.ink, { size: 20, bold: true });
+  }
+
+  /* ---------- real-life look: shaded nucleon balls and the emitted particle flying off with a track behind it ---------- */
+  var SC = SIM.scene;
+  function real() { return !!(SC && SC.real && SC.real()); }
+  /** a cloud-chamber style trail behind the emitted particle (thick and straight for α, thin and wandering for β, a soft glow for γ) */
+  function track(c, t, ex, ey) {
+    var col = ui.colors(), x0 = vp.X(11.9), y0 = vp.Y(5.2), tint = SC.shade(col.s4, 0.35);
+    c.save(); c.lineCap = 'round';
+    if (t === 'alpha') { c.strokeStyle = tint; c.globalAlpha = 0.45; c.lineWidth = vp.scale * 0.28; c.beginPath(); c.moveTo(x0, y0); c.lineTo(ex - vp.scale * 0.4, ey + vp.scale * 0.1); c.stroke(); }
+    else if (t === 'gamma') { c.strokeStyle = tint; c.globalAlpha = 0.25; c.lineWidth = 9; c.beginPath(); c.moveTo(vp.X(12.4), ey); c.lineTo(vp.X(12.4) + 60 * vp.scale * 0.06, ey); c.stroke(); }
+    else {
+      c.strokeStyle = tint; c.globalAlpha = 0.6; c.lineWidth = 1.6; c.beginPath();
+      for (var i = 0; i <= 24; i++) { var k = i / 24, xx = x0 + (ex - x0) * k, yy = y0 + (ey - y0) * k + Math.sin(i * 1.7) * 3 * (1 - k * 0.5); if (i) c.lineTo(xx, yy); else c.moveTo(xx, yy); }
+      c.stroke();
+    }
+    c.restore();
   }
 
   /* energy spectra: qualitative — no numbers */
@@ -195,31 +223,31 @@
     if (n.invalid) R.badge(n.invalid, 'warn');
     else {
       R.head('Nuclide ' + nucHTML(n.A, n.Z, n.sym));
-      R.eq('protons', 'Z', String(n.Z)); R.eq('neutrons', 'N = A − Z = ' + n.A + ' − ' + n.Z, String(n.N));
-      R.eq('charge of nucleus', 'Ze = ' + n.Z + ' × 1.60 × 10<sup>−19</sup>', sfT(n.charge), 'C');
-      R.eq('mass', '≈ A u = ' + n.A + ' × 1.66 × 10<sup>−27</sup> (approximate: each nucleon ≈ 1 u)', sfT(n.massApproxKg), 'kg');
-      R.eq('quarks', 'p = uud, n = udd ⇒ up = 2Z + N, down = Z + 2N', n.up + ' up, ' + n.down + ' down');
+      R.eq('protons', 'Z', String(n.Z), '', 'The proton number Z is the lower number in the nuclide notation; it decides which element it is.'); R.eq('neutrons', 'N = A − Z = ' + n.A + ' − ' + n.Z, String(n.N), '', 'The nucleon number A counts protons and neutrons together, so subtract the protons.');
+      R.eq('charge of nucleus', 'Ze = ' + n.Z + ' × 1.60 × 10<sup>−19</sup>', sfT(n.charge), 'C', 'Each proton carries charge +e; neutrons are uncharged.');
+      R.eq('mass', '≈ A u = ' + n.A + ' × 1.66 × 10<sup>−27</sup> (approximate: each nucleon ≈ 1 u)', sfT(n.massApproxKg), 'kg', 'Protons and neutrons each have a mass of about 1 u, so the nucleus is about A u.');
+      R.eq('quarks', 'p = uud, n = udd ⇒ up = 2Z + N, down = Z + 2N', n.up + ' up, ' + n.down + ' down', '', 'Each proton has two up and one down quark; each neutron one up and two down.');
     }
     R.head('Decay equation');
     if (d.invalid) R.badge(d.invalid, 'warn');
     else {
       var eq = nucHTML(d.parent.A, d.parent.Z, d.parent.label) + ' → ' + d.products.map(function (p) { return nucHTML(p.A, p.Z, p.label); }).join(' + ');
       R.html('<div class="eq" style="font-size:1.15em">' + eq + '</div>');
-      R.eq('nucleon number', d.parent.A + ' = ' + d.products.map(function (p) { return p.A; }).join(' + '), d.conserved.A ? 'conserved ✓' : 'NOT conserved');
-      R.eq('charge (proton number)', d.parent.Z + ' = ' + d.products.map(function (p) { return p.Z < 0 ? '(' + '−' + (-p.Z) + ')' : p.Z; }).join(' + '), d.conserved.Z ? 'conserved ✓' : 'NOT conserved');
+      R.eq('nucleon number', d.parent.A + ' = ' + d.products.map(function (p) { return p.A; }).join(' + '), d.conserved.A ? 'conserved ✓' : 'NOT conserved', '', 'The top numbers must balance: nucleon number is conserved in every nuclear process.');
+      R.eq('charge (proton number)', d.parent.Z + ' = ' + d.products.map(function (p) { return p.Z < 0 ? '(' + '−' + (-p.Z) + ')' : p.Z; }).join(' + '), d.conserved.Z ? 'conserved ✓' : 'NOT conserved', '', 'The bottom numbers must balance: charge is conserved (a β⁻ particle counts as −1, a β⁺ as +1).');
       var rad = d.radiation;
-      R.eq(rad.name, rad.composition, 'charge ' + (rad.charge > 0 ? '+' : rad.charge < 0 ? '−' : '') + (rad.charge ? Math.abs(rad.charge) + 'e' : '0') + ', mass ' + (rad.massU === 0 ? '0' : rad.massU >= 1 ? '≈ ' + rad.massU + ' u' : s3(rad.massU) + ' u'));
-      if (rad.partner) R.eq('also emitted', 'needed because β energies form a continuous range', rad.partner);
-      R.eq('energies', dtype.get() === 'alpha' ? 'α-particles from this decay' : dtype.get() === 'gamma' ? 'γ photons' : 'β-particles (energy shared with the (anti)neutrino)', rad.energies);
-      if (d.quark) R.eq('quark change', d.quark.nucleon, d.quark.change);
-      if (dtype.get() === 'alpha') R.eq('α mass', '4 u = 4 × 1.66 × 10<sup>−27</sup>', sfT(PP.uToKg(4)), 'kg');
+      R.eq(rad.name, rad.composition, 'charge ' + (rad.charge > 0 ? '+' : rad.charge < 0 ? '−' : '') + (rad.charge ? Math.abs(rad.charge) + 'e' : '0') + ', mass ' + (rad.massU === 0 ? '0' : rad.massU >= 1 ? '≈ ' + rad.massU + ' u' : s3(rad.massU) + ' u'), '', 'The nature of the radiation emitted: what it is made of, its charge and its mass.');
+      if (rad.partner) R.eq('also emitted', 'needed because β energies form a continuous range', rad.partner, '', 'The energy released is shared between the β-particle and the (anti)neutrino, so β energies vary continuously.');
+      R.eq('energies', dtype.get() === 'alpha' ? 'α-particles from this decay' : dtype.get() === 'gamma' ? 'γ photons' : 'β-particles (energy shared with the (anti)neutrino)', rad.energies, '', 'α-particles and γ photons from one decay have discrete energies; β-particles have a continuous range.');
+      if (d.quark) R.eq('quark change', d.quark.nucleon, d.quark.change, '', 'In β decay one quark changes flavour, turning a neutron into a proton (β⁻) or a proton into a neutron (β⁺).');
+      if (dtype.get() === 'alpha') R.eq('α mass', '4 u = 4 × 1.66 × 10<sup>−27</sup>', sfT(PP.uToKg(4)), 'kg', 'An α-particle is two protons and two neutrons, about 4 u. Multiply by 1.66 × 10<sup>−27</sup> kg per u.');
     }
     R.head('Quark builder');
     var h = M.had;
     if (!h.tokens.length) R.html('<div class="eq">Choose up to three quarks / antiquarks.</div>');
     else {
-      R.eq('charge', h.tokens.map(function (t) { return PP.fracCharge(PP.quarkCharge3(t)); }).join(' ') + ' (in units of e)', h.charge + 'e');
-      R.eq('type', h.kind === 'baryon' ? 'three quarks' : h.kind === 'antibaryon' ? 'three antiquarks' : h.kind === 'meson' ? 'one quark + one antiquark' : 'not a baryon (qqq) or meson (qq̄)', h.kind ? h.kind + ' (a hadron)' + (h.named ? ' — ' + h.named : '') : 'not a hadron');
+      R.eq('charge', h.tokens.map(function (t) { return PP.fracCharge(PP.quarkCharge3(t)); }).join(' ') + ' (in units of e)', h.charge + 'e', '', 'Add the charges of the quarks: up-type +⅔e, down-type −⅓e, antiquarks the opposite.');
+      R.eq('type', h.kind === 'baryon' ? 'three quarks' : h.kind === 'antibaryon' ? 'three antiquarks' : h.kind === 'meson' ? 'one quark + one antiquark' : 'not a baryon (qqq) or meson (qq̄)', h.kind ? h.kind + ' (a hadron)' + (h.named ? ' — ' + h.named : '') : 'not a hadron', '', 'Baryons are three quarks, mesons are one quark and one antiquark; both are hadrons.');
     }
     R.head('Classification');
     R.html('<table class="tbl"><tr><th>particle</th><th>class</th><th>fundamental?</th></tr>' +

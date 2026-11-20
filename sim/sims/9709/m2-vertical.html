@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/mech-kinematics.js"></script>
@@ -159,7 +160,9 @@
     function Y(y) { return bot - (y / ymax) * (bot - top); }
     var cx = W * 0.5;
     lay = { ymax: ymax, ku: ku, top: top, bot: bot, cx: cx, launch: [] };
-    D.ground(c, 40, bot, W - 20, bot);
+    var REAL = SIM.scene.real(), SC = SIM.scene, two0 = !!sim.opts.B;
+    if (REAL) realBackdrop(c, W, H, bot, Y, cx, two0);
+    else D.ground(c, 40, bot, W - 20, bot);
     // height axis
     var tk = U.niceTicks(0, ymax, 6);
     c.strokeStyle = col.muted; c.lineWidth = 1; c.beginPath(); c.moveTo(46, Y(0)); c.lineTo(46, top); c.stroke();
@@ -185,7 +188,13 @@
     function drawP(s, name, colr, dx) {
       if (!s) return;
       var x = cx + dx, y = Y(s.y) - 9;
-      D.particle(c, x, y, 9, { fill: colr, label: name });
+      if (REAL) {
+        var hgt = Math.max(0, Y(0) - y - 9), k = Math.min(1, hgt / 160);
+        SC.shadow(c, x, Y(0) + 1, 9 * (1 - 0.5 * k), 2.5 * (1 - 0.5 * k));
+        if (Math.abs(s.v) > 12 && clock.t > 1e-9) SC.motionLines(c, x, y, 0, s.v > 0 ? -1 : 1, Math.min(40, Math.abs(s.v) * 1.2), null, 9);
+        SC.ball(c, x, y, 9, { color: colr, spin: s.mode === 'ground' || s.mode === 'held' ? 0 : clock.t * 5 * (dx < 0 ? -1 : 1) });
+        D.label(c, name, x, y, '#fff', { size: 11, bold: true });
+      } else D.particle(c, x, y, 9, { fill: colr, label: name });
       if (Math.abs(s.v) > 1e-9 && clock.t > 1e-9) D.arrow(c, x + (dx >= 0 ? 18 : -18), y, x + (dx >= 0 ? 18 : -18), y - U.sgn(s.v) * (12 + Math.min(70, Math.abs(s.v) * 1.5)), col.velocity, { label: U.sf(Math.abs(s.v)) + ' m/s', width: 2 });
     }
     var merged = st.B && st.B.mode === 'merged';
@@ -194,9 +203,47 @@
       drawP(st.A, 'A', col.s1, st.B ? -14 : 0);
       if (st.B) drawP(st.B, 'B', col.s2, 14);
     }
+    if (REAL) realEvents(c, Y, cx, two);
     if (st.B && st.B.mode === 'held' && sim.opts.B && sim.opts.B.delay > 0) D.label(c, 'B waits until t = ' + U.sf(sim.opts.B.delay) + ' s', cx + 30, Y(st.B.y) - 24, col.muted, { size: 11, align: 'left' });
     D.label(c, 'up = positive', W - 22, 12, col.muted, { size: 11, align: 'right' });
     if (ix) ix.paint(c);
+  }
+
+  /* ---------- real-life look: sky, grass, a cliff / balcony under a raised launch point, a thrower, landing dust and impact bursts ---------- */
+  function realBackdrop(c, W, H, bot, Y, cx, two) {
+    var SC = SIM.scene, hA = pa.values.hA, hB = two ? pb.values.hB : 0;
+    SC.sky(c, 0, 0, W, bot, { horizon: bot });
+    SC.tree(c, W - 60, bot, Math.min(90, (bot - 20) * 0.45));
+    SC.ground(c, 0, W, bot, { kind: 'grass', depth: H - bot + 2 });
+    // particle A (left of the line) starts on a grassy cliff; particle B (right) on a balcony of a building
+    if (hA > 1e-9 && Y(hA) < bot - 2) SC.cliff(c, cx + (two ? -14 : 0) - 12, Y(hA), bot, 'left', 50);
+    if (two && hB > 1e-9 && Y(hB) < bot - 2) balcony(c, cx + 14 + 12, Y(hB), bot, W);
+    // the thrower stands beside each launch point (only at the start, before the throw)
+    if (clock.t < 0.25) {
+      SC.person(c, cx + (two ? -14 : 0) - 30, Y(hA), 34, { pose: 'stand', color: '#8fb3e0' });
+      if (two) SC.person(c, cx + 14 + 30, Y(hB), 34, { pose: 'stand', color: '#e8a7a0', facing: -1 });
+    }
+  }
+  /** a soft pastel building with a balcony ledge at screen y = yTop, from x to the right edge */
+  function balcony(c, x, yTop, bot, W) {
+    var dk = SIM.scene.dark(), sh = SIM.scene.shade, base = dk ? '#5d5a72' : '#efe2d0';
+    c.save();
+    c.fillStyle = base; c.strokeStyle = 'rgba(80,70,60,.25)'; c.lineWidth = 1;
+    c.beginPath(); if (c.roundRect) c.roundRect(x + 6, yTop - 4, W - x, bot - yTop + 4, [6, 0, 0, 0]); else c.rect(x + 6, yTop - 4, W - x, bot - yTop + 4); c.fill(); c.stroke();
+    c.fillStyle = sh(base, dk ? 0.15 : -0.12); c.fillRect(x - 2, yTop - 2, Math.min(40, W - x), 5);   // balcony ledge
+    c.fillStyle = dk ? 'rgba(255,240,190,.25)' : 'rgba(150,190,225,.55)';
+    for (var wy = yTop + 16; wy < bot - 22; wy += 30) for (var wx = x + 20; wx < W - 14; wx += 26) { c.beginPath(); if (c.roundRect) c.roundRect(wx, wy, 12, 16, 3); else c.rect(wx, wy, 12, 16); c.fill(); }
+    c.restore();
+  }
+  /** dust where a particle lands or bounces, a burst where A and B collide — each lasts 0.3 s of clock time */
+  function realEvents(c, Y, cx, two) {
+    var SC = SIM.scene, t = clock.t;
+    sim.events.forEach(function (e) {
+      var k = (t - e.t) / 0.3; if (!(k >= 0 && k <= 1)) return;
+      var dx = !two || e.who === 'C' ? 0 : e.who === 'B' ? 14 : -14;
+      if (e.type === 'land' || e.type === 'bounce') SC.dust(c, cx + dx, Y(0), k);
+      else if (e.type === 'meet' && e.collision) SC.impact(c, cx, Y(e.y) - 9, 26, k);
+    });
   }
 
   /* ---------- plots ---------- */
@@ -271,16 +318,16 @@
       R.head('Particle ' + name + (t0 > 0 ? ' (projected at t = ' + s3(t0) + ' s)' : ''));
       var T = t0 > 0 ? '(t − ' + U.num(t0, 4) + ')' : 't';
       var uT = u === 0 ? '' : (u < 0 ? ' − ' : ' + ') + U.num(Math.abs(u), 4) + T;
-      R.eq('y', U.num(h, 4) + uT + ' − ½(' + g + ')' + T + '²', '', 'm');
-      R.eq('v', (u === 0 ? '' : (u < 0 ? '−' : '') + U.num(Math.abs(u), 4) + ' ') + '− ' + g + T, '', 'm s<sup>−1</sup>');
+      R.eq('y', U.num(h, 4) + uT + ' − ½(' + g + ')' + T + '²', '', 'm', 's = ut + ½at² with a = −g (up is positive), added to the starting height h.');
+      R.eq('v', (u === 0 ? '' : (u < 0 ? '−' : '') + U.num(Math.abs(u), 4) + ' ') + '− ' + g + T, '', 'm s<sup>−1</sup>', 'v = u + at with a = −g: the velocity falls by g every second, on the way up and on the way down.');
       if (u > 0) {
-        R.eq('greatest height', 'h + u² ÷ (2g) = ' + s3(h) + ' + ' + s3(u) + '² ÷ ' + (2 * g), h + u * u / (2 * g), 'm');
-        R.eq('reached at t', (t0 > 0 ? U.num(t0, 4) + ' + ' : '') + 'u ÷ g = ' + (t0 > 0 ? U.num(t0, 4) + ' + ' : '') + s3(u) + ' ÷ ' + g, t0 + u / g, 's');
+        R.eq('greatest height', 'h + u² ÷ (2g) = ' + s3(h) + ' + ' + s3(u) + '² ÷ ' + (2 * g), h + u * u / (2 * g), 'm', 'At the greatest height v = 0, so v² = u² − 2gs gives the extra height s = u² ÷ 2g.');
+        R.eq('reached at t', (t0 > 0 ? U.num(t0, 4) + ' + ' : '') + 'u ÷ g = ' + (t0 > 0 ? U.num(t0, 4) + ' + ' : '') + s3(u) + ' ÷ ' + g, t0 + u / g, 's', 'At the top v = 0, so v = u − gt gives t = u ÷ g.');
       }
       if (h > 0 || u > 0) {
         var tg = (u + Math.sqrt(u * u + 2 * g * h)) / g;
-        R.eq('reaches the ground', 'if nothing else happens: t = [u + √(u² + 2gh)] ÷ g', t0 + tg, 's');
-        R.eq('impact speed', '√(u² + 2gh) = √(' + br(u) + '² + 2(' + g + ')(' + s3(h) + '))', Math.sqrt(u * u + 2 * g * h), 'm s<sup>−1</sup>');
+        R.eq('reaches the ground', 'if nothing else happens: t = [u + √(u² + 2gh)] ÷ g', t0 + tg, 's', 'Put y = 0 in the height equation and solve the quadratic; take the positive root.');
+        R.eq('impact speed', '√(u² + 2gh) = √(' + br(u) + '² + 2(' + g + ')(' + s3(h) + '))', Math.sqrt(u * u + 2 * g * h), 'm s<sup>−1</sup>', 'v² = u² + 2as with the whole drop h (a = g downwards); the sign of u does not matter because it is squared.');
       }
     }
     flight('A', o.A, 0);
@@ -290,45 +337,45 @@
       if (e.type === 'bounce' && ++nb === 4) R.badge('Further bounces are listed in the event timeline.', 'info');
       if (e.type === 'bounce' && nb <= 3) {
         R.head('Bounce at t = ' + s3(e.t) + ' s');
-        R.eq('speed after', 'k × impact speed = ' + s3(o.k) + ' × ' + s3(Math.abs(e.vBefore)), e.vAfter, 'm s<sup>−1</sup> (up)');
-        R.eq('next greatest height', 'v² ÷ (2g) = ' + s3(e.vAfter) + '² ÷ ' + (2 * g), e.vAfter * e.vAfter / (2 * g), 'm');
+        R.eq('speed after', 'k × impact speed = ' + s3(o.k) + ' × ' + s3(Math.abs(e.vBefore)), e.vAfter, 'm s<sup>−1</sup> (up)', 'The question gives the rebound speed as a fraction k of the impact speed; the ball now moves upwards.');
+        R.eq('next greatest height', 'v² ÷ (2g) = ' + s3(e.vAfter) + '² ÷ ' + (2 * g), e.vAfter * e.vAfter / (2 * g), 'm', 'It rises until v = 0: v² = u² − 2gs with u = the rebound speed.');
       }
       if (e.type === 'meet') {
         R.head((e.collision ? 'Collision' : 'A and B at the same height') + ' at t = ' + s3(e.t) + ' s');
-        R.eq('y', 'y<sub>A</sub> = y<sub>B</sub> (solve for t, then substitute)', pr(e.y), 'm');
-        R.eq('v<sub>A</sub>, v<sub>B</sub>', 'just before', s3(e.vA) + ', ' + s3(e.vB), 'm s<sup>−1</sup>');
+        R.eq('y', 'y<sub>A</sub> = y<sub>B</sub> (solve for t, then substitute)', pr(e.y), 'm', 'Both particles are at the same height: equate their height expressions, solve for t, then substitute back.');
+        R.eq('v<sub>A</sub>, v<sub>B</sub>', 'just before', s3(e.vA) + ', ' + s3(e.vB), 'm s<sup>−1</sup>', 'Substitute that time into v = u − gt for each particle (negative means moving down).');
         if (e.collision) {
           var mA = o.A.m, mB = o.B.m, Mom = mA * e.vA + mB * e.vB;
-          R.eq('momentum before', s3(mA) + '(' + s3(e.vA) + ') + ' + s3(mB) + '(' + s3(e.vB) + ')', pr(Mom), 'N s');
-          if (e.collision === 'coalesce') R.eq('v<sub>C</sub>', 'momentum ÷ (m<sub>A</sub> + m<sub>B</sub>) = ' + s3(Mom) + ' ÷ ' + s3(mA + mB), e.vA2, 'm s<sup>−1</sup>');
-          else if (e.collision === 'Arest') R.eq('v<sub>B</sub> after', 'momentum ÷ m<sub>B</sub> = ' + s3(Mom) + ' ÷ ' + s3(mB), e.vB2, 'm s<sup>−1</sup>');
-          else if (e.collision === 'Brest') R.eq('v<sub>A</sub> after', 'momentum ÷ m<sub>A</sub> = ' + s3(Mom) + ' ÷ ' + s3(mA), e.vA2, 'm s<sup>−1</sup>');
-          else if (sim.mode === 'vB') R.eq('v<sub>A</sub> after', '(momentum − m<sub>B</sub>v<sub>B</sub>′) ÷ m<sub>A</sub> = (' + s3(Mom) + ' − ' + s3(mB) + '(' + s3(e.vB2) + ')) ÷ ' + s3(mA), e.vA2, 'm s<sup>−1</sup>');
-          else R.eq('v<sub>B</sub> after', '(momentum − m<sub>A</sub>v<sub>A</sub>′) ÷ m<sub>B</sub> = (' + s3(Mom) + ' − ' + s3(mA) + '(' + s3(e.vA2) + ')) ÷ ' + s3(mB), e.vB2, 'm s<sup>−1</sup>');
-          R.eq('KE lost', '½Σmv² before − after = ' + pr(e.keBefore) + ' − ' + pr(e.keAfter), pr(e.keBefore - e.keAfter), 'J');
+          R.eq('momentum before', s3(mA) + '(' + s3(e.vA) + ') + ' + s3(mB) + '(' + s3(e.vB) + ')', pr(Mom), 'N s', 'Total momentum just before the collision, with down velocities negative. Gravity acts for no time during the impact.');
+          if (e.collision === 'coalesce') R.eq('v<sub>C</sub>', 'momentum ÷ (m<sub>A</sub> + m<sub>B</sub>) = ' + s3(Mom) + ' ÷ ' + s3(mA + mB), e.vA2, 'm s<sup>−1</sup>', 'They coalesce, so they move with one common velocity: total momentum ÷ total mass.');
+          else if (e.collision === 'Arest') R.eq('v<sub>B</sub> after', 'momentum ÷ m<sub>B</sub> = ' + s3(Mom) + ' ÷ ' + s3(mB), e.vB2, 'm s<sup>−1</sup>', 'A is at rest afterwards, so all the momentum now belongs to B: momentum ÷ m_B.');
+          else if (e.collision === 'Brest') R.eq('v<sub>A</sub> after', 'momentum ÷ m<sub>A</sub> = ' + s3(Mom) + ' ÷ ' + s3(mA), e.vA2, 'm s<sup>−1</sup>', 'B is at rest afterwards, so all the momentum now belongs to A: momentum ÷ m_A.');
+          else if (sim.mode === 'vB') R.eq('v<sub>A</sub> after', '(momentum − m<sub>B</sub>v<sub>B</sub>′) ÷ m<sub>A</sub> = (' + s3(Mom) + ' − ' + s3(mB) + '(' + s3(e.vB2) + ')) ÷ ' + s3(mA), e.vA2, 'm s<sup>−1</sup>', 'Momentum is conserved: subtract B’s momentum after from the total, then divide by m_A.');
+          else R.eq('v<sub>B</sub> after', '(momentum − m<sub>A</sub>v<sub>A</sub>′) ÷ m<sub>B</sub> = (' + s3(Mom) + ' − ' + s3(mA) + '(' + s3(e.vA2) + ')) ÷ ' + s3(mB), e.vB2, 'm s<sup>−1</sup>', 'Momentum is conserved: subtract A’s momentum after from the total, then divide by m_B.');
+          R.eq('KE lost', '½Σmv² before − after = ' + pr(e.keBefore) + ' − ' + pr(e.keAfter), pr(e.keBefore - e.keAfter), 'J', 'Kinetic energy is not conserved in this collision: the loss is KE before − KE after.');
         }
       }
-      if (e.type === 'land') { R.head(e.who + ' lands at t = ' + s3(e.t) + ' s'); R.eq('impact speed', '|v| just before landing', Math.abs(e.vBefore), 'm s<sup>−1</sup>'); }
+      if (e.type === 'land') { R.head(e.who + ' lands at t = ' + s3(e.t) + ' s'); R.eq('impact speed', '|v| just before landing', Math.abs(e.vBefore), 'm s<sup>−1</sup>', 'The speed just before landing; it then comes to rest on the ground.'); }
     });
     if (o.B && !sim.events.some(function (e) { return e.type === 'meet'; })) R.badge('A and B are never at the same height while both are in the air.', 'info');
     var lands = sim.events.filter(function (e) { return e.type === 'land'; });
-    if (lands.length === 2) R.eq('time between landings', s3(lands[1].t) + ' − ' + s3(lands[0].t), lands[1].t - lands[0].t, 's');
+    if (lands.length === 2) R.eq('time between landings', s3(lands[1].t) + ' − ' + s3(lands[0].t), lands[1].t - lands[0].t, 's', 'Subtract the two landing times.');
 
     var nm = focus === 'A' && sim.merged ? 'A / C' : focus;
     R.head('Questions about ' + nm);
-    R.eq('time with speed ≥ ' + s3(pq.values.V), q.speed.intervals.length ? q.speed.intervals.map(function (x) { return s3(x[0]) + ' ≤ t ≤ ' + s3(x[1]); }).join(', ') : 'never', q.speed.total, 's');
-    R.eq('time with height ≥ ' + s3(pq.values.H), q.height.intervals.length ? q.height.intervals.map(function (x) { return s3(x[0]) + ' ≤ t ≤ ' + s3(x[1]); }).join(', ') : 'never', q.height.total, 's');
-    if (q.atH.length) q.atH.forEach(function (x) { R.eq('at height ' + s3(pq.values.H), 't = ' + s3(x.t) + ' s, moving ' + (x.v > 1e-12 ? 'up' : x.v < -1e-12 ? 'down' : '— at the top'), Math.abs(x.v), 'm s<sup>−1</sup> (speed)'); });
-    else R.eq('at height ' + s3(pq.values.H), 'never reached in flight', '—');
-    q.apex.slice(0, 4).forEach(function (a) { R.eq('top of a flight', 't = ' + s3(a.t) + ' s', pr(a.y), 'm'); });
+    R.eq('time with speed ≥ ' + s3(pq.values.V), q.speed.intervals.length ? q.speed.intervals.map(function (x) { return s3(x[0]) + ' ≤ t ≤ ' + s3(x[1]); }).join(', ') : 'never', q.speed.total, 's', 'Find when |v| = V from v = u − gt, then add the lengths of the time intervals where the speed is at least V.');
+    R.eq('time with height ≥ ' + s3(pq.values.H), q.height.intervals.length ? q.height.intervals.map(function (x) { return s3(x[0]) + ' ≤ t ≤ ' + s3(x[1]); }).join(', ') : 'never', q.height.total, 's', 'Solve y = H for t (two roots: going up and coming down); the particle is at or above H between them.');
+    if (q.atH.length) q.atH.forEach(function (x) { R.eq('at height ' + s3(pq.values.H), 't = ' + s3(x.t) + ' s, moving ' + (x.v > 1e-12 ? 'up' : x.v < -1e-12 ? 'down' : '— at the top'), Math.abs(x.v), 'm s<sup>−1</sup> (speed)', 'Solve y = H for t, then v = u − gt; the speed is the same going up and coming down.'); });
+    else R.eq('at height ' + s3(pq.values.H), 'never reached in flight', '—', '', 'The greatest height is below H, so the equation y = H has no real roots.');
+    q.apex.slice(0, 4).forEach(function (a) { R.eq('top of a flight', 't = ' + s3(a.t) + ' s', pr(a.y), 'm', 'Each flight peaks where v = 0.'); });
     if (q.apex.length > 4) R.badge((q.apex.length - 4) + ' more (smaller) flights not listed.', 'info');
 
     var st = sim.stateAt(clock.t);
     R.head('At t = ' + clock.t.toFixed(2) + ' s');
-    if (st.B && st.B.mode === 'merged') R.eq('C', 'y = ' + s3(st.A.y) + ' m', st.A.v, 'm s<sup>−1</sup>');
+    if (st.B && st.B.mode === 'merged') R.eq('C', 'y = ' + s3(st.A.y) + ' m', st.A.v, 'm s<sup>−1</sup>', 'The combined particle C: its height and velocity now.');
     else {
-      R.eq('A', 'y = ' + s3(st.A.y) + ' m' + (st.A.mode === 'ground' ? ' (at rest on the ground)' : ''), st.A.v, 'm s<sup>−1</sup>');
-      if (st.B) R.eq('B', 'y = ' + s3(st.B.y) + ' m' + (st.B.mode === 'held' ? ' (not yet projected)' : st.B.mode === 'ground' ? ' (at rest on the ground)' : ''), st.B.v, 'm s<sup>−1</sup>');
+      R.eq('A', 'y = ' + s3(st.A.y) + ' m' + (st.A.mode === 'ground' ? ' (at rest on the ground)' : ''), st.A.v, 'm s<sup>−1</sup>', 'Height and velocity of A now (up positive).');
+      if (st.B) R.eq('B', 'y = ' + s3(st.B.y) + ' m' + (st.B.mode === 'held' ? ' (not yet projected)' : st.B.mode === 'ground' ? ' (at rest on the ground)' : ''), st.B.v, 'm s<sup>−1</sup>', 'Height and velocity of B now (up positive).');
     }
     R.render();
   }

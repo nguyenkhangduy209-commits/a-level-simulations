@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-dynamics.js"></script>
@@ -97,13 +98,16 @@
     if (!tr) return;
     var c, col = ui.colors(), v = prm.values, s = tr.stateAt(clock.t), open = chute.get() && clock.t >= v.to;
     vp.fit(-5, 5, -3, 3); c = vp.begin();
-    var cx = vp.X(-1.5), cy = vp.Y(0);
+    var cx = vp.X(-1.5), cy = vp.Y(0), real = SIM.scene.real();
+    if (real) realFall(c, s, cx, cy, open);
+    else {
     // streaks to suggest motion relative to the air
     var sp = Math.abs(s.v), off = (clock.t * 60 * Math.min(1, sp / 20)) % 40;
     c.strokeStyle = col.grid; c.lineWidth = 1;
     for (var i = -1; i < 8; i++) { var yy = vp.Y(3) + i * 40 + (s.v >= 0 ? -off : off); c.beginPath(); c.moveTo(cx - 70, yy); c.lineTo(cx - 70, yy + 18); c.moveTo(cx + 70, yy + 20); c.lineTo(cx + 70, yy + 38); c.stroke(); }
     if (open) { c.strokeStyle = col['object-line']; c.fillStyle = col.surface; c.beginPath(); c.arc(cx, cy - 60, 46, Math.PI, 0); c.fill(); c.stroke(); D.line(c, [[cx - 46, cy - 60], [cx, cy - 12]], col['object-line']); D.line(c, [[cx + 46, cy - 60], [cx, cy - 12]], col['object-line']); }
     D.particle(c, cx, cy, 12, {});
+    }
     var mx = Math.max(s.W, s.U, Math.abs(s.D), 1e-9), k = 90 / mx;
     D.arrowPolar(c, cx, cy + 12, -Math.PI / 2, s.W * k, col.weight, { label: 'W = ' + U.sf(s.W).replace(/<[^>]+>/g, '') + ' N' });
     if (s.U > 1e-12) D.arrowPolar(c, cx + 18, cy, Math.PI / 2, s.U * k, col.normal, { label: 'U' });
@@ -112,9 +116,66 @@
     if (Math.abs(Fres) > 1e-6 * mx) D.arrowPolar(c, vp.X(1.2), cy, Fres > 0 ? -Math.PI / 2 : Math.PI / 2, Math.abs(Fres) * k, col.resultant, { width: 3, label: 'resultant' });
     else D.label(c, 'resultant ≈ 0', vp.X(1.2), cy, col.resultant, { bold: true });
     if (Math.abs(s.v) > 1e-6) D.arrowPolar(c, vp.X(3), cy, s.v > 0 ? -Math.PI / 2 : Math.PI / 2, 20 + Math.min(80, Math.abs(s.v) * 2), col.velocity, { label: 'v' });
-    D.label(c, stageText(s), vp.w / 2, vp.h - 12, col.ink, { size: 12 });
+    D.label(c, stageText(s), vp.w / 2, vp.h - 12, col.ink, real ? { size: 12, bg: true } : { size: 12 });
     scene = { cx: cx, cy: cy, k: k, s: s, open: open };
     if (ix) ix.paint(c);
+  }
+
+
+  /* ---------- real-life look (soft pastel): sky with clouds or water with bubbles, and the falling object ---------- */
+  function wrap(a, m) { return ((a % m) + m) % m; }
+  function cloud(c, x, y, w, dk) {
+    c.save(); c.fillStyle = dk ? 'rgba(200,205,235,.18)' : 'rgba(255,255,255,.85)';
+    [[0, 0, 0.32], [0.3, -0.12, 0.26], [-0.3, 0.02, 0.24], [0.55, 0.06, 0.18], [-0.55, 0.08, 0.16]].forEach(function (b) { c.beginPath(); c.arc(x + b[0] * w, y + b[1] * w, b[2] * w, 0, 2 * Math.PI); c.fill(); });
+    c.restore();
+  }
+  function realFall(c, s, cx, cy, open) {
+    var v = prm.values, W = v.m * g, dk = SIM.scene.dark(), n = Number(model.get()), Wd = vp.w, H = vp.h, sh = SIM.scene.shade;
+    var liquid = n === 1 || (v.U >= 0.3 * W && v.U < W), balloon = !liquid && v.U >= W;
+    var ref = vt !== null && vt > 0 ? vt : 10, kpx = 140 / Math.max(2, ref), dy = (s.x || 0) * kpx;   // background moves up as the object moves down
+    if (liquid) {
+      c.save();
+      var gr = c.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, dk ? '#22385a' : '#cfe8f6'); gr.addColorStop(1, dk ? '#172640' : '#a9d3ec');
+      c.fillStyle = gr; c.fillRect(0, 0, Wd, H);
+      c.fillStyle = dk ? 'rgba(200,230,255,.05)' : 'rgba(255,255,255,.18)';   // soft light shafts
+      for (var r = 0; r < 4; r++) { var x0 = Wd * (0.1 + r * 0.25); c.beginPath(); c.moveTo(x0, 0); c.lineTo(x0 + 40, 0); c.lineTo(x0 - 30, H); c.lineTo(x0 - 60, H); c.closePath(); c.fill(); }
+      c.strokeStyle = dk ? 'rgba(210,235,255,.35)' : 'rgba(255,255,255,.85)'; c.lineWidth = 1.2;
+      for (var b = 0; b < 26; b++) {
+        var bx = wrap(b * 97.3, Wd), by = wrap(b * 53.1 - dy - clock.t * 25, H + 20) - 10, br = 2 + (b % 4);
+        c.beginPath(); c.arc(bx, by, br, 0, 2 * Math.PI); c.stroke();
+      }
+      c.restore();
+    } else {
+      SIM.scene.sky(c, 0, 0, Wd, H, { horizon: H });
+      for (var k = 0; k < 6; k++) cloud(c, wrap(k * 173 + 40, Wd + 120) - 60, wrap(k * 131 - dy, H + 120) - 60, 50 + (k % 3) * 18, dk);
+    }
+    if (balloon) {
+      c.save(); c.strokeStyle = dk ? 'rgba(255,255,255,.4)' : 'rgba(90,90,120,.4)'; c.lineWidth = 1; c.beginPath(); c.moveTo(cx, cy + 16); c.quadraticCurveTo(cx + 6, cy + 30, cx, cy + 44); c.stroke();
+      c.fillStyle = dk ? '#c77d95' : '#f5a9bf'; c.beginPath(); if (c.ellipse) c.ellipse(cx, cy, 13, 16, 0, 0, 2 * Math.PI); else c.arc(cx, cy, 14, 0, 2 * Math.PI); c.fill();
+      c.fillStyle = 'rgba(255,255,255,.5)'; c.beginPath(); c.arc(cx - 5, cy - 6, 3.5, 0, 2 * Math.PI); c.fill(); c.restore();
+      return;
+    }
+    var big = v.m >= 20;
+    if (!liquid && (chute.get() || big)) {
+      if (open) {   // canopy unfolds over ~0.6 s after it opens (visual only)
+        var kk = U.clamp((clock.t - v.to) / 0.6, 0.15, 1), cw = 50 * kk, top = cy - 70;
+        c.save(); c.strokeStyle = dk ? 'rgba(230,230,250,.45)' : 'rgba(90,95,130,.35)'; c.lineWidth = 1;
+        [-1, -0.45, 0.45, 1].forEach(function (f) { c.beginPath(); c.moveTo(cx + f * cw, top); c.lineTo(cx + f * 4, cy - 12); c.stroke(); });
+        var cols = dk ? ['#c77d95', '#d9b36c', '#7fa6d9'] : ['#f5a9bf', '#f9d98f', '#a9c8f2'];
+        for (var p = 0; p < 6; p++) {
+          var a0 = Math.PI + p * Math.PI / 6, a1 = a0 + Math.PI / 6;
+          c.fillStyle = cols[p % 3]; c.beginPath(); c.moveTo(cx, top); c.arc(cx, top, cw, a0, a1); c.closePath(); c.fill();
+        }
+        c.strokeStyle = dk ? 'rgba(255,255,255,.25)' : 'rgba(90,95,130,.25)'; c.beginPath(); c.arc(cx, top, cw, Math.PI, 2 * Math.PI); c.stroke();
+        c.restore();
+        SIM.scene.person(c, cx, cy + 20, 40, { color: '#f4a6b8' });
+      } else {   // belly-to-earth free fall: body horizontal
+        c.save(); c.translate(cx, cy); c.rotate(-Math.PI / 2); SIM.scene.person(c, 0, 20, 40, { color: '#f4a6b8' }); c.restore();
+      }
+      return;
+    }
+    if (liquid && big) { c.save(); c.translate(cx, cy); c.rotate(Math.PI); SIM.scene.person(c, 0, 20, 40, { color: '#8fd3c8' }); c.restore(); return; }   // diver, head first
+    SIM.scene.ball(c, cx, cy, 12, { kind: 'steel', spin: (s.x || 0) * 0.5 });
   }
 
   /* ---------- direct manipulation: tap the object / forces to type, drag the velocity arrow to set u ---------- */
@@ -198,28 +259,28 @@
     R.clear();
     R.badge('Down is positive', 'info');
     R.head('Forces (exact, Newton’s second law)');
-    R.eq('W', 'mg = ' + U.num(v.m, 4) + ' × ' + g, v.m * g, 'N');
-    R.eq('a just after release', '(W − U) ÷ m = (' + U.sf(v.m * g) + ' − ' + U.num(v.U, 4) + ') ÷ ' + U.num(v.m, 4) + (v.v0 !== 0 ? ' (only if released from rest)' : ''), (v.m * g - v.U) / v.m, ma);
-    if (v.m * g > v.U) R.eq('drag at terminal velocity', 'resultant = 0 ⇒ D = W − U', v.m * g - v.U, 'N');
+    R.eq('W', 'mg = ' + U.num(v.m, 4) + ' × ' + g, v.m * g, 'N', 'Weight = mass × acceleration of free fall, acting vertically downwards.');
+    R.eq('a just after release', '(W − U) ÷ m = (' + U.sf(v.m * g) + ' − ' + U.num(v.U, 4) + ') ÷ ' + U.num(v.m, 4) + (v.v0 !== 0 ? ' (only if released from rest)' : ''), (v.m * g - v.U) / v.m, ma, 'At the moment of release from rest v = 0, so there is no drag yet: resultant force = W − U and a = F ÷ m.');
+    if (v.m * g > v.U) R.eq('drag at terminal velocity', 'resultant = 0 ⇒ D = W − U', v.m * g - v.U, 'N', 'At terminal velocity the acceleration is zero, so the resultant force is zero: the upward forces D + U balance W.');
     else R.badge('Upthrust ≥ weight: the object does not sink, so there is no downward terminal velocity', 'warn');
     if (inst.get() === 'a') {
       var a = DY.accelAt(v.m, g, v.U, v.Dg);
       R.head('At the instant described in the question');
-      R.eq('resultant', 'W − U − D = ' + U.sf(v.m * g) + ' − ' + U.num(v.U, 4) + ' − ' + U.num(v.Dg, 4), v.m * g - v.U - v.Dg, 'N');
-      R.eq('a', 'resultant ÷ m', a, ma);
+      R.eq('resultant', 'W − U − D = ' + U.sf(v.m * g) + ' − ' + U.num(v.U, 4) + ' − ' + U.num(v.Dg, 4), v.m * g - v.U - v.Dg, 'N', 'Take down as positive: weight acts down; upthrust and drag (on a body moving down) act up, so they are subtracted.');
+      R.eq('a', 'resultant ÷ m', a, ma, 'Newton’s second law: a = F ÷ m. A negative value means the acceleration is upwards (the body is slowing down while moving down).');
       R.badge(Math.abs(a) < 1e-9 ? 'a = 0: terminal velocity' : 'Acceleration ' + U.sf(Math.abs(a)) + ' m s⁻² ' + (a > 0 ? 'downwards' : 'upwards'), 'ok');
     } else if (inst.get() === 'D') {
       R.head('At the instant described in the question');
-      R.eq('resultant', 'ma = ' + U.num(v.m, 4) + ' × ' + U.num(v.ag, 4), v.m * v.ag, 'N');
-      R.eq('D', 'W − U − ma = ' + U.sf(v.m * g) + ' − ' + U.num(v.U, 4) + ' − ' + U.sf(v.m * v.ag), DY.dragFromAccel(v.m, g, v.U, v.ag), 'N');
+      R.eq('resultant', 'ma = ' + U.num(v.m, 4) + ' × ' + U.num(v.ag, 4), v.m * v.ag, 'N', 'Newton’s second law: the resultant force needed for the given acceleration is F = ma.');
+      R.eq('D', 'W − U − ma = ' + U.sf(v.m * g) + ' − ' + U.num(v.U, 4) + ' − ' + U.sf(v.m * v.ag), DY.dragFromAccel(v.m, g, v.U, v.ag), 'N', 'Resultant = W − U − D = ma, so the drag is whatever force is left over: D = W − U − ma.');
       if (DY.dragFromAccel(v.m, g, v.U, v.ag) < 0) R.badge('Negative drag is impossible for an object moving down: check the data', 'warn');
     }
     R.head('Illustrative model, qualitative only (t = ' + clock.t.toFixed(2) + ' s)');
-    R.eq('v', 'model', s.v, 'm s<sup>−1</sup>');
-    R.eq('D', n === 1 ? 'k v (model)' : 'k v² (model)', s.D, 'N');
-    R.eq('a', '(W − U − D) ÷ m', s.a, ma);
-    if (vt !== null) R.eq('terminal velocity', (n === 1 ? '(W − U) ÷ k' : '√((W − U) ÷ k)') + ' (model only)', vt, 'm s<sup>−1</sup>');
-    if (vt2 !== null) R.eq('with parachute', 'same with k<sub>open</sub> (model only)', vt2, 'm s<sup>−1</sup>');
+    R.eq('v', 'model', s.v, 'm s<sup>−1</sup>', 'Velocity from the illustrative model at this instant (down +). Only the shape of the v–t graph matters.');
+    R.eq('D', n === 1 ? 'k v (model)' : 'k v² (model)', s.D, 'N', 'Drag increases with speed and acts opposite to the velocity. The formula is only a model for this simulation, not a syllabus equation.');
+    R.eq('a', '(W − U − D) ÷ m', s.a, ma, 'Newton’s second law with the forces at this instant: as D grows the resultant force, and so a, gets smaller.');
+    if (vt !== null) R.eq('terminal velocity', (n === 1 ? '(W − U) ÷ k' : '√((W − U) ÷ k)') + ' (model only)', vt, 'm s<sup>−1</sup>', 'Terminal velocity is reached when D = W − U (zero resultant force). Here the model’s D formula is solved for v.');
+    if (vt2 !== null) R.eq('with parachute', 'same with k<sub>open</sub> (model only)', vt2, 'm s<sup>−1</sup>', 'A larger area gives more drag at the same speed, so the forces balance at a much lower terminal velocity.');
     R.badge(stageText(s), 'info');
     R.render();
   }

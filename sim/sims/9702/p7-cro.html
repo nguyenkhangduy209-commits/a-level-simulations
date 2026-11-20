@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-waves.js"></script>
@@ -98,13 +99,16 @@
   function draw() {
     if (!r) return;
     var col = ui.colors(), v = prm.values;
-    vp.fit(-0.3, 10.3, -4.3, 4.3);
+    var RL = real();
+    if (RL) vp.fit(-0.9, 10.9, -6.95, 4.85); else vp.fit(-0.3, 10.3, -4.3, 4.3);
     var c = vp.begin();
-    c.save(); c.fillStyle = col.bg; c.fillRect(vp.X(0), vp.Y(4), vp.X(10) - vp.X(0), vp.Y(-4) - vp.Y(4)); c.restore();
-    for (var i = 0; i <= 10; i++) D.line(c, [vp.P(i, -4), vp.P(i, 4)], i === 5 ? col.muted : col.grid, { width: i === 5 ? 1.2 : 1 });
-    for (var j = -4; j <= 4; j++) D.line(c, [vp.P(0, j), vp.P(10, j)], j === 0 ? col.muted : col.grid, { width: j === 0 ? 1.2 : 1 });
-    for (var m = 0; m <= 50; m++) { D.line(c, [vp.P(m / 5, -0.08), vp.P(m / 5, 0.08)], col.muted, { width: 1 }); }
-    for (var n = -20; n <= 20; n++) { D.line(c, [vp.P(4.92, n / 5), vp.P(5.08, n / 5)], col.muted, { width: 1 }); }
+    if (RL) croPanel(c);
+    else { c.save(); c.fillStyle = col.bg; c.fillRect(vp.X(0), vp.Y(4), vp.X(10) - vp.X(0), vp.Y(-4) - vp.Y(4)); c.restore(); }
+    var gMain = RL ? 'rgba(170,240,205,.42)' : col.muted, gLine = RL ? 'rgba(170,240,205,.18)' : col.grid;
+    for (var i = 0; i <= 10; i++) D.line(c, [vp.P(i, -4), vp.P(i, 4)], i === 5 ? gMain : gLine, { width: i === 5 ? 1.2 : 1 });
+    for (var j = -4; j <= 4; j++) D.line(c, [vp.P(0, j), vp.P(10, j)], j === 0 ? gMain : gLine, { width: j === 0 ? 1.2 : 1 });
+    for (var m = 0; m <= 50; m++) { D.line(c, [vp.P(m / 5, -0.08), vp.P(m / 5, 0.08)], gMain, { width: 1 }); }
+    for (var n = -20; n <= 20; n++) { D.line(c, [vp.P(4.92, n / 5), vp.P(5.08, n / 5)], gMain, { width: 1 }); }
     var tbv = tb(), ygv = yg();
     function trace(V, lagDeg, color, dash) {
       var pts = [], N = Math.min(6000, Math.max(800, Math.ceil(r.cycles * 40)));
@@ -112,12 +116,15 @@
         var xd = 10 * k / N, t = xd * tbv, y = V * Math.sin(2 * Math.PI * v.f * t - U.rad(lagDeg)) / ygv;
         pts.push(vp.P(xd, U.clamp(y, -4.15, 4.15)));
       }
+      if (RL) {   // soft phosphor glow: a wide faint stroke under the sharp trace
+        c.save(); c.globalAlpha = 0.25; D.line(c, pts, color, { width: 6, dash: dash }); c.restore();
+      }
       D.line(c, pts, color, { width: 2, dash: dash });
     }
     c.save(); c.beginPath(); c.rect(vp.X(0), vp.Y(4.2), vp.X(10) - vp.X(0), vp.Y(-4.2) - vp.Y(4.2)); c.clip();
     if (r.cycles <= 400) {
-      trace(v.V0, 0, col.s1);
-      if (two.get() && v.V2 > 0) trace(v.V2, v.phi, col.s3, [6, 4]);
+      trace(v.V0, 0, RL ? '#8ff5b8' : col.s1);
+      if (two.get() && v.V2 > 0) trace(v.V2, v.phi, RL ? '#ffd98f' : col.s3, [6, 4]);
     }
     c.restore();
     if (guides.get() && !r.tooMany && r.divPerCycle <= 10) {
@@ -141,6 +148,14 @@
     // two separate labels so each can be tapped to type its setting
     var ygTxt = 'y-gain ' + U.num(v.yg, 3) + ' ' + { '1e-3': 'mV/div', '1': 'V/div' }[ygUnit.get()];
     var tbTxt = 'time-base ' + U.num(v.tb, 3) + ' ' + { '1e-6': 'µs/div', '1e-3': 'ms/div', '1': 's/div' }[tbUnit.get()];
+    if (RL) {   // the settings sit under the two big knobs; tapping a knob types its setting
+      var kr = knobR(), kyy = vp.Y(-5.62);
+      D.label(c, tbTxt.replace('time-base ', ''), vp.X(KTB), kyy + kr + 11, col.ink, { size: 11, bold: true, bg: true });
+      D.label(c, ygTxt.replace('y-gain ', ''), vp.X(KYG), kyy + kr + 11, col.ink, { size: 11, bold: true, bg: true });
+      labels = { yg: { x: vp.X(KYG), y: kyy }, tb: { x: vp.X(KTB), y: kyy } };
+      if (ix) ix.paint(c);
+      return;
+    }
     c.save(); c.font = '11px system-ui, sans-serif';
     var wY = (c.measureText && c.measureText(ygTxt).width) || ygTxt.length * 6, wT = (c.measureText && c.measureText(tbTxt).width) || tbTxt.length * 6;
     c.restore();
@@ -151,34 +166,84 @@
     if (ix) ix.paint(c);
   }
 
+  /* ---------- real-life look: a soft, rounded oscilloscope front panel ---------- */
+  var SC = SIM.scene, KTB = 7.0, KYG = 9.3;
+  function real() { return !!(SC && SC.real && SC.real()); }
+  function rr(c, x, y, w, h, rad) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, rad); else c.rect(x, y, w, h); }
+  function knobR() { return Math.max(9, Math.min(22, vp.scale * 0.55)); }
+  /** knob pointer position: frac 0…1 maps to the usual 270° sweep (7 o'clock → 5 o'clock) */
+  function knob(c, x, y, rad, frac, name) {
+    var dk = SC.dark(), a = (0.75 + 1.5 * U.clamp(frac, 0, 1)) * Math.PI;
+    c.save();
+    c.strokeStyle = dk ? 'rgba(220,230,245,.35)' : 'rgba(80,90,120,.3)'; c.lineWidth = 1;
+    for (var i = 0; i <= 10; i++) { var t = (0.75 + 0.15 * i) * Math.PI; c.beginPath(); c.moveTo(x + Math.cos(t) * rad * 1.15, y + Math.sin(t) * rad * 1.15); c.lineTo(x + Math.cos(t) * rad * 1.3, y + Math.sin(t) * rad * 1.3); c.stroke(); }
+    c.fillStyle = 'rgba(70,60,110,.14)'; c.beginPath(); c.arc(x + 1.5, y + 2.5, rad, 0, 2 * Math.PI); c.fill();
+    c.fillStyle = dk ? '#6b7488' : '#f4f1fa'; c.beginPath(); c.arc(x, y, rad, 0, 2 * Math.PI); c.fill();
+    c.fillStyle = dk ? '#7d879c' : '#ffffff'; c.beginPath(); c.arc(x - rad * 0.12, y - rad * 0.14, rad * 0.72, 0, 2 * Math.PI); c.fill();
+    c.strokeStyle = dk ? 'rgba(255,255,255,.25)' : 'rgba(90,80,140,.28)'; c.beginPath(); c.arc(x, y, rad, 0, 2 * Math.PI); c.stroke();
+    c.strokeStyle = '#e88a8a'; c.lineWidth = Math.max(2, rad * 0.14); c.lineCap = 'round';
+    c.beginPath(); c.moveTo(x + Math.cos(a) * rad * 0.2, y + Math.sin(a) * rad * 0.2); c.lineTo(x + Math.cos(a) * rad * 0.82, y + Math.sin(a) * rad * 0.82); c.stroke();
+    c.restore();
+    if (name) D.label(c, name, x, y - rad * 1.3 - 7, dk ? '#c9d0e0' : '#7b7894', { size: 9, bold: true });
+  }
+  function croPanel(c) {
+    var dk = SC.dark(), x0 = vp.X(-0.8), x1 = vp.X(10.8), y0 = vp.Y(4.8), y1 = vp.Y(-6.9);
+    c.save();
+    c.fillStyle = 'rgba(70,60,110,.12)'; rr(c, x0 + 3, y0 + 5, x1 - x0, y1 - y0, 18); c.fill();
+    c.fillStyle = dk ? '#3d4456' : '#e6e3f2'; rr(c, x0, y0, x1 - x0, y1 - y0, 18); c.fill();
+    c.strokeStyle = dk ? 'rgba(255,255,255,.12)' : 'rgba(90,80,140,.22)'; c.lineWidth = 1.2; c.stroke();
+    var bx0 = vp.X(-0.35), bx1 = vp.X(10.35), by0 = vp.Y(4.35), by1 = vp.Y(-4.35);   // bezel round the screen
+    c.fillStyle = dk ? '#2b3140' : '#cfcbe2'; rr(c, bx0, by0, bx1 - bx0, by1 - by0, 14); c.fill();
+    var sx0 = vp.X(-0.12), sx1 = vp.X(10.12), sy0 = vp.Y(4.12), sy1 = vp.Y(-4.12);
+    c.fillStyle = dk ? '#14302b' : '#1f4a42'; rr(c, sx0, sy0, sx1 - sx0, sy1 - sy0, 10); c.fill();
+    c.fillStyle = 'rgba(255,255,255,.05)'; rr(c, sx0 + 4, sy0 + 4, (sx1 - sx0) * 0.6, (sy1 - sy0) * 0.25, 8); c.fill();   // a gentle glass sheen
+    c.restore();
+    var kr = knobR(), ky = vp.Y(-5.62), small = kr * 0.62;
+    // power button with a green lamp, intensity and focus knobs, CH1 input socket
+    c.save();
+    c.fillStyle = dk ? '#596276' : '#f7f5fc'; rr(c, vp.X(0.1) - small, ky - small * 0.7, small * 2, small * 1.4, 6); c.fill();
+    c.strokeStyle = 'rgba(90,80,140,.25)'; c.stroke();
+    c.fillStyle = '#8fe0a6'; c.beginPath(); c.arc(vp.X(0.1), ky, Math.max(2, small * 0.28), 0, 2 * Math.PI); c.fill();
+    c.restore();
+    D.label(c, 'POWER', vp.X(0.1), ky - kr * 1.3 - 7, dk ? '#c9d0e0' : '#7b7894', { size: 9, bold: true });
+    knob(c, vp.X(1.7), ky, small, 0.6, 'INTENSITY'); knob(c, vp.X(3.2), ky, small, 0.45, 'FOCUS');
+    c.save(); c.fillStyle = dk ? '#8a93a6' : '#d9d4ea'; c.beginPath(); c.arc(vp.X(4.75), ky, small * 0.8, 0, 2 * Math.PI); c.fill();
+    c.fillStyle = dk ? '#2b3140' : '#8a86a6'; c.beginPath(); c.arc(vp.X(4.75), ky, small * 0.35, 0, 2 * Math.PI); c.fill(); c.restore();
+    D.label(c, 'CH1 IN', vp.X(4.75), ky - kr * 1.3 - 7, dk ? '#c9d0e0' : '#7b7894', { size: 9, bold: true });
+    // big knobs: pointer follows the setting (log scale)
+    var lg = function (x, lo, hi) { return (Math.log10(x) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo)); };
+    knob(c, vp.X(KTB), ky, kr, lg(Math.max(tb(), 1e-9), 1e-8, 10), 'TIME / DIV');
+    knob(c, vp.X(KYG), ky, kr, lg(Math.max(yg(), 1e-9), 1e-5, 10), 'VOLTS / DIV');
+  }
+
   /* ---------- working ---------- */
   function readout() {
     if (!r) return;
     var v = prm.values, s3 = U.sf, tbv = tb(), ygv = yg();
     R.clear();
     R.head('Horizontal: time-base ' + fmtTime(tbv) + ' per div');
-    R.eq('divisions per cycle', 'T ÷ time-base = ' + fmtTime(r.T) + ' ÷ ' + fmtTime(tbv), r.divPerCycle, 'div');
-    R.eq('T', 'divisions × time-base = ' + s3(r.divPerCycle) + ' × ' + fmtTime(tbv), fmtTime(r.T));
-    R.eq('f', '1 ÷ T = 1 ÷ ' + (r.T < 1e-3 ? '(' + s3(r.T) + ')' : s3(r.T)) + ' s', r.fRead, 'Hz');
-    R.eq('cycles on screen', '10 div ÷ ' + s3(r.divPerCycle) + ' div', r.cycles);
+    R.eq('divisions per cycle', 'T ÷ time-base = ' + fmtTime(r.T) + ' ÷ ' + fmtTime(tbv), r.divPerCycle, 'div', 'The time-base says how much time each horizontal division represents, so dividing the period by it gives the length of one cycle on the screen.');
+    R.eq('T', 'divisions × time-base = ' + s3(r.divPerCycle) + ' × ' + fmtTime(tbv), fmtTime(r.T), '', 'In the exam you read the number of divisions for one complete cycle off the screen, then multiply by the time-base to get the period.');
+    R.eq('f', '1 ÷ T = 1 ÷ ' + (r.T < 1e-3 ? '(' + s3(r.T) + ')' : s3(r.T)) + ' s', r.fRead, 'Hz', 'Frequency is the number of cycles per second, f = 1/T. Convert the period to seconds first.');
+    R.eq('cycles on screen', '10 div ÷ ' + s3(r.divPerCycle) + ' div', r.cycles, '', 'The screen is 10 divisions wide; several complete cycles on screen let you measure the period more precisely.');
     R.head('Vertical: y-gain ' + fmtV(ygv) + ' per div');
-    R.eq('amplitude on screen', 'V<sub>0</sub> ÷ y-gain = ' + fmtV(v.V0) + ' ÷ ' + fmtV(ygv), r.ampDiv, 'div');
-    R.eq('amplitude', 'divisions × y-gain = ' + s3(r.ampDiv) + ' × ' + fmtV(ygv), fmtV(r.ampRead));
-    R.eq('peak-to-peak', '2 × amplitude', r.ppDiv, 'div');
+    R.eq('amplitude on screen', 'V<sub>0</sub> ÷ y-gain = ' + fmtV(v.V0) + ' ÷ ' + fmtV(ygv), r.ampDiv, 'div', 'The y-gain is the voltage per vertical division, so the peak voltage divided by it gives the height of a peak above the centre line.');
+    R.eq('amplitude', 'divisions × y-gain = ' + s3(r.ampDiv) + ' × ' + fmtV(ygv), fmtV(r.ampRead), '', 'Amplitude is measured from the centre line (equilibrium) to a peak, then multiplied by the y-gain.');
+    R.eq('peak-to-peak', '2 × amplitude', r.ppDiv, 'div', 'Peak-to-peak is crest to trough, twice the amplitude. Do not quote it as the amplitude.');
     if (r.clipped) R.badge('Peaks are off the 8-division screen: use a larger V/div setting', 'warn');
     if (r.tooMany) R.badge('More than 40 cycles on screen: use a smaller time-base setting', 'warn');
     if (r.tooFew) R.badge('Less than one complete cycle on screen: use a larger time-base setting', 'warn');
     if (two.get()) {
       var sh = v.phi / 360 * r.divPerCycle;
       R.head('Phase difference between the traces');
-      R.eq('horizontal shift', 'Δφ/360° × divisions per cycle', sh, 'div');
-      R.eq('Δφ', '360° × shift ÷ divisions per cycle = 360° × ' + s3(sh) + ' ÷ ' + s3(r.divPerCycle), U.dp(v.phi, 1) + '°');
-      R.eq('Δφ', 'in radians', s3(U.rad(v.phi)) + ' rad');
-      R.eq('time difference', 'shift × time-base', fmtTime(sh * tbv));
+      R.eq('horizontal shift', 'Δφ/360° × divisions per cycle', sh, 'div', 'One whole cycle on the screen corresponds to 360°, so the horizontal shift is the same fraction of a cycle as Δφ is of 360°.');
+      R.eq('Δφ', '360° × shift ÷ divisions per cycle = 360° × ' + s3(sh) + ' ÷ ' + s3(r.divPerCycle), U.dp(v.phi, 1) + '°', '', 'Phase difference = (shift ÷ divisions per cycle) × 360°.');
+      R.eq('Δφ', 'in radians', s3(U.rad(v.phi)) + ' rad', '', '360° = 2π rad, so multiply the angle in degrees by π/180.');
+      R.eq('time difference', 'shift × time-base', fmtTime(sh * tbv), '', 'The same horizontal shift read as a time: divisions × time-base.');
     }
     R.head('Wavelength');
     var speed = em.get() ? WV.C : v.vw;
-    R.eq('λ', 'v ÷ f = ' + s3(speed) + ' ÷ ' + s3(r.fRead), speed / r.fRead, 'm');
+    R.eq('λ', 'v ÷ f = ' + s3(speed) + ' ÷ ' + s3(r.fRead), speed / r.fRead, 'm', 'The wave equation v = fλ links the speed, the frequency read from the screen and the wavelength.');
     R.render();
   }
 

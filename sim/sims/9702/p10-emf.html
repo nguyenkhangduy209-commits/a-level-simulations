@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-circuits.js"></script>
@@ -21,6 +22,156 @@
   var pg = ui.page({ title: 'E.m.f., internal resistance and terminal p.d.', g: 9.81,
     tags: ['9702 10.1.3–5 e.m.f. and internal resistance', '9702 9.2.3 power'] });
   (function hideG() { try { var t = document.querySelector('header').children[2], l = t.children[t.children.length - 1]; if (l && /g =/.test(l.innerHTML)) l.style.display = 'none'; } catch (e) { /* header layout changed */ } })();
+
+  /* ---------- real-life look: soft illustrated bench apparatus (screen pixels; used only when SIM.scene.real()) ---------- */
+  var KIT = (function () {
+    var S = SIM.scene, T = 0, raf = 0;
+    function dk() { return S.dark(); }
+    function edge() { return dk() ? 'rgba(255,255,255,.22)' : 'rgba(70,60,110,.22)'; }
+    function path(c, pts) { c.beginPath(); pts.forEach(function (p, i) { if (i) c.lineTo(p[0], p[1]); else c.moveTo(p[0], p[1]); }); }
+    function rrect(c, x, y, w, h, r) { r = Math.max(0, Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2)); c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
+    function grad(c, x0, y0, x1, y1, stops) { var g = c.createLinearGradient(x0, y0, x1, y1); stops.forEach(function (s) { g.addColorStop(s[0], s[1]); }); return g; }
+    function glow(c, x, y, r, rgb, a) {   // soft radial glow (solid fallback when radial gradients are missing)
+      if (!(r > 0) || !(a > 0)) return;
+      c.save();
+      var g = c.createRadialGradient ? c.createRadialGradient(x, y, 0, x, y, r) : null;
+      if (g && g.addColorStop) { g.addColorStop(0, 'rgba(' + rgb + ',' + a + ')'); g.addColorStop(1, 'rgba(' + rgb + ',0)'); c.fillStyle = g; }
+      else { c.globalAlpha = a * 0.4; c.fillStyle = 'rgb(' + rgb + ')'; }
+      c.beginPath(); c.arc(x, y, r, 0, 2 * Math.PI); c.fill(); c.restore();
+    }
+    function reduced() { return !!(SIM.anim && SIM.anim.reducedMotion && SIM.anim.reducedMotion()); }
+    /** keep redrawing while the real look is on (charge flow); time stays 0 with reduced motion */
+    function loop(fn) {
+      if (raf || !S.real() || reduced() || typeof requestAnimationFrame === 'undefined') return;
+      raf = requestAnimationFrame(function (now) { raf = 0; if (!S.real()) return; T = now / 1000; fn(); });
+    }
+    /** a pale pegboard bench behind the circuit */
+    function bench(c, w, h) {
+      var d = dk();
+      c.save(); c.fillStyle = grad(c, 0, 0, 0, h, [[0, d ? '#262b3d' : '#f7f3ec'], [1, d ? '#1f2333' : '#f0e9dd']]); c.fillRect(0, 0, w, h);
+      c.fillStyle = d ? 'rgba(255,255,255,.04)' : 'rgba(150,125,95,.08)';
+      for (var y = 16, row = 0; y < h; y += 28, row++) for (var x = 16 + (row % 2) * 14; x < w; x += 28) { c.beginPath(); c.arc(x, y, 1.6, 0, 2 * Math.PI); c.fill(); }
+      c.restore();
+    }
+    /** an insulated lead: soft coloured sleeve with a light highlight */
+    function wire(c, pts, color) {
+      c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+      c.strokeStyle = color || (dk() ? '#7e8cb8' : '#a9b6de'); c.lineWidth = 5; path(c, pts); c.stroke();
+      c.strokeStyle = 'rgba(255,255,255,.4)'; c.lineWidth = 1.4; path(c, pts); c.stroke(); c.restore();
+    }
+    /** charge dots moving along a polyline; phase in px (dots move from the first point towards the last as phase grows) */
+    function charges(c, pts, phase, color, gap) {
+      var segs = [], tot = 0, i;
+      for (i = 1; i < pts.length; i++) { var Lg = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); segs.push(Lg); tot += Lg; }
+      if (!(tot > 1) || !isFinite(phase)) return;
+      gap = gap || 22; var off = ((phase % gap) + gap) % gap;
+      c.save(); c.fillStyle = color || '#ffd36b'; c.strokeStyle = 'rgba(190,130,40,.35)'; c.lineWidth = 1;
+      for (var s = off; s < tot; s += gap) {
+        var k = 0, a = s; while (k < segs.length - 1 && a > segs[k]) { a -= segs[k]; k++; }
+        var f = segs[k] > 0 ? a / segs[k] : 0, p = pts[k], q = pts[k + 1];
+        c.beginPath(); c.arc(p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f, 2.7, 0, 2 * Math.PI); c.fill(); c.stroke();
+      }
+      c.restore();
+    }
+    /** work in a frame along A→B: callback(c, len) draws with the axis along +x, centred on the midpoint */
+    function along(c, A, B, fn) {
+      var dx = B[0] - A[0], dy = B[1] - A[1], len = Math.hypot(dx, dy); if (!(len > 0)) return;
+      c.save(); c.translate((A[0] + B[0]) / 2, (A[1] + B[1]) / 2); c.rotate(Math.atan2(dy, dx)); fn(c, len); c.restore();
+    }
+    /** a cylindrical cell from A (+ end) to B (− end); opt.size = diameter px */
+    function cell(c, A, B, opt) {
+      opt = opt || {};
+      along(c, A, B, function (c, len) {
+        var d = opt.size || 16, bl = Math.min(len * 0.78, d * 3.6), L0 = -bl / 2;
+        wire(c, [[-len / 2, 0], [L0, 0]]); wire(c, [[bl / 2, 0], [len / 2, 0]]);
+        rrect(c, L0 - d * 0.18, -d * 0.2, d * 0.3, d * 0.4, 2); c.fillStyle = '#d9dce6'; c.fill();   // + nub
+        rrect(c, L0, -d / 2, bl, d, d * 0.3); c.fillStyle = grad(c, 0, -d / 2, 0, d / 2, [[0, '#a8b8ea'], [0.45, '#8fa2df'], [1, '#7486c4']]); c.fill();
+        rrect(c, L0, -d / 2, bl * 0.24, d, d * 0.3); c.fillStyle = grad(c, 0, -d / 2, 0, d / 2, [[0, '#ffd59a'], [1, '#f2b46c']]); c.fill();
+        rrect(c, L0, -d / 2, bl, d, d * 0.3); c.strokeStyle = 'rgba(60,60,110,.25)'; c.lineWidth = 1; c.stroke();
+        c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(L0 + 3, -d * 0.36, bl - 6, d * 0.14);
+        c.fillStyle = 'rgba(40,40,70,.7)'; c.font = '700 ' + Math.round(Math.max(9, d * 0.6)) + 'px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.fillText('+', L0 + bl * 0.12, 0.5); c.fillText('−', bl / 2 - d * 0.45, 0.5);
+      });
+    }
+    var BAND = ['#5d5a70', '#b88a6a', '#ef8f8f', '#f6b27a', '#f3dc7c', '#8fd3a0', '#8fb6ee', '#c3a2ea', '#b7b7c4', '#fbfbfb'];
+    function bandsOf(R) {
+      if (!(R > 0) || !isFinite(R)) return null;
+      var e = Math.floor(Math.log10(R) + 1e-9) - 1, m = Math.round(R / Math.pow(10, e));
+      if (m >= 100) { m = 10; e++; }
+      if (e < -2 || e > 9) return null;
+      return [BAND[Math.floor(m / 10)], BAND[m % 10], e === -1 ? '#e7c46a' : e === -2 ? '#cfd3dc' : BAND[e]];
+    }
+    /** a resistor from A to B: rounded body with colour bands; opt.heat 0…1 adds a warm glow; opt.kind 'th' | 'ldr' for sensors */
+    function resistor(c, A, B, R, opt) {
+      opt = opt || {};
+      along(c, A, B, function (c, len) {
+        var bl = Math.min(len * 0.62, opt.body || 64), th = opt.thick || 15, h = opt.heat > 0 ? Math.min(1, opt.heat) : 0;
+        wire(c, [[-len / 2, 0], [len / 2, 0]], dk() ? '#9aa0b4' : '#c3c7d3');
+        if (h > 0.02) glow(c, 0, 0, bl * 0.75, '255,150,90', 0.55 * h);
+        var base = opt.kind === 'th' ? '#9fd4c2' : opt.kind === 'ldr' ? '#f3e1a6' : '#f0d9b5';
+        rrect(c, -bl / 2, -th / 2, bl, th, th / 2); c.fillStyle = grad(c, 0, -th / 2, 0, th / 2, [[0, S.shade(base, 0.35)], [0.5, base], [1, S.shade(base, -0.12)]]); c.fill();
+        if (h > 0.02) { c.globalAlpha = 0.5 * h; c.fillStyle = '#ff9f73'; c.fill(); c.globalAlpha = 1; }
+        c.strokeStyle = 'rgba(120,90,60,.3)'; c.lineWidth = 1; c.stroke();
+        if (!opt.kind) {
+          var bd = bandsOf(R);
+          if (bd) bd.forEach(function (colr, i) { c.fillStyle = colr; c.fillRect(-bl * 0.3 + i * bl * 0.14, -th / 2 + 1, Math.max(2, bl * 0.07), th - 2); });
+          c.fillStyle = '#e7c46a'; c.fillRect(bl * 0.28, -th / 2 + 1, Math.max(2, bl * 0.06), th - 2);   // tolerance band
+        } else if (opt.kind === 'ldr') {   // zig-zag track on a round window
+          c.strokeStyle = 'rgba(190,120,80,.65)'; c.lineWidth = 1.4; c.beginPath();
+          for (var z = 0; z <= 8; z++) { var zx = -bl * 0.32 + z * bl * 0.08; c.lineTo(zx, (z % 2 ? 1 : -1) * th * 0.25); } c.stroke();
+        } else {   // thermistor: a bead on two legs
+          c.fillStyle = '#6fb9a3'; c.beginPath(); c.arc(0, 0, th * 0.36, 0, 2 * Math.PI); c.fill();
+        }
+        c.fillStyle = 'rgba(255,255,255,.4)'; c.fillRect(-bl / 2 + th / 2, -th * 0.34, bl - th, th * 0.13);
+      });
+    }
+    /** a filament lamp at (x, y), radius r; k = 0…1 brightness */
+    function bulb(c, x, y, r, k) {
+      k = U.clamp(k || 0, 0, 1);
+      if (k > 0.02) glow(c, x, y, r * (1.6 + 1.6 * k), '255,214,120', 0.25 + 0.55 * k);
+      c.save();
+      rrect(c, x - r * 0.5, y + r * 0.6, r, r * 0.65, 3); c.fillStyle = grad(c, x - r * 0.5, 0, x + r * 0.5, 0, [[0, '#c9ccd8'], [0.5, '#eef0f6'], [1, '#b4b8c8']]); c.fill();
+      c.beginPath(); c.arc(x, y, r, 0, 2 * Math.PI);
+      c.fillStyle = k > 0.02 ? 'rgba(255,' + Math.round(236 - 20 * k) + ',' + Math.round(190 - 80 * k) + ',' + (0.45 + 0.5 * k) + ')' : (dk() ? 'rgba(200,215,240,.25)' : 'rgba(225,235,250,.75)');
+      c.fill(); c.strokeStyle = edge(); c.lineWidth = 1; c.stroke();
+      c.strokeStyle = k > 0.02 ? 'rgba(255,170,60,' + (0.6 + 0.4 * k) + ')' : 'rgba(120,110,130,.6)'; c.lineWidth = 1.3;
+      c.beginPath(); c.moveTo(x - r * 0.35, y + r * 0.6); c.lineTo(x - r * 0.3, y); for (var i = 0; i <= 6; i++) c.lineTo(x - r * 0.3 + i * r * 0.1, y + (i % 2 ? -1 : 1) * r * 0.1); c.lineTo(x + r * 0.35, y + r * 0.6); c.stroke();
+      c.fillStyle = 'rgba(255,255,255,.55)'; c.beginPath(); c.arc(x - r * 0.4, y - r * 0.4, r * 0.18, 0, 2 * Math.PI); c.fill();
+      c.restore();
+    }
+    /** an analogue dial meter: frac 0…1 of full scale (or −1…1 with centreZero); letter 'A' | 'V' | 'G' */
+    function meter(c, x, y, r, letter, frac, centreZero) {
+      var f = isFinite(frac) ? (centreZero ? 0.5 + 0.5 * U.clamp(frac, -1, 1) : U.clamp(frac, 0, 1.05)) : 0, d = dk();
+      c.save();
+      rrect(c, x - r * 1.15, y - r * 1.05, r * 2.3, r * 2.1, r * 0.35); c.fillStyle = grad(c, 0, y - r, 0, y + r, [[0, d ? '#4a5272' : '#e9edf8'], [1, d ? '#3a4160' : '#d6dcef']]); c.fill(); c.strokeStyle = edge(); c.lineWidth = 1; c.stroke();
+      var px = x, py = y + r * 0.55, R0 = r * 1.15, a0 = -Math.PI * 5 / 6, a1 = -Math.PI / 6;
+      c.beginPath(); c.arc(px, py, R0, a0, a1); c.lineTo(px, py); c.closePath(); c.fillStyle = d ? '#f2efe6' : '#fffdf6'; c.fill();
+      c.strokeStyle = 'rgba(90,80,110,.45)'; c.lineWidth = 1;
+      for (var i = 0; i <= 10; i++) { var a = a0 + (a1 - a0) * i / 10, t1 = R0 * (i % 5 ? 0.86 : 0.78); c.beginPath(); c.moveTo(px + Math.cos(a) * R0 * 0.95, py + Math.sin(a) * R0 * 0.95); c.lineTo(px + Math.cos(a) * t1, py + Math.sin(a) * t1); c.stroke(); }
+      var an = a0 + (a1 - a0) * f;
+      c.strokeStyle = '#e46f6f'; c.lineWidth = 1.8; c.lineCap = 'round'; c.beginPath(); c.moveTo(px, py); c.lineTo(px + Math.cos(an) * R0 * 0.9, py + Math.sin(an) * R0 * 0.9); c.stroke();
+      c.fillStyle = '#6d6a85'; c.beginPath(); c.arc(px, py, 2.5, 0, 2 * Math.PI); c.fill();
+      c.fillStyle = d ? '#e8e8f2' : '#4c4966'; c.font = '700 ' + Math.round(Math.max(9, r * 0.5)) + 'px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(letter, x, y + r * 0.78);
+      c.restore();
+    }
+    /** a soft translucent casing (battery box) */
+    function casing(c, x, y, w, h) {
+      c.save(); rrect(c, x, y, w, h, Math.min(16, h * 0.3));
+      c.fillStyle = dk() ? 'rgba(150,170,230,.13)' : 'rgba(180,195,240,.28)'; c.fill(); c.strokeStyle = dk() ? 'rgba(170,185,240,.45)' : 'rgba(120,135,200,.45)'; c.lineWidth = 1.5; c.stroke();
+      c.fillStyle = 'rgba(255,255,255,.22)'; rrect(c, x + 6, y + 4, w - 12, Math.max(2, h * 0.12), 4); c.fill(); c.restore();
+    }
+    /** a knife switch from A to B (open lifts the blade) */
+    function knife(c, A, B, isOpen) {
+      c.save(); c.lineCap = 'round';
+      [A, B].forEach(function (p) { c.fillStyle = dk() ? '#8a90a8' : '#c7cad6'; c.beginPath(); c.arc(p[0], p[1], 5, 0, 2 * Math.PI); c.fill(); c.strokeStyle = edge(); c.lineWidth = 1; c.stroke(); });
+      var L = Math.hypot(B[0] - A[0], B[1] - A[1]), a = Math.atan2(B[1] - A[1], B[0] - A[0]) - (isOpen ? 0.55 : 0);
+      c.strokeStyle = '#e9b97a'; c.lineWidth = 4.5; c.beginPath(); c.moveTo(A[0], A[1]); c.lineTo(A[0] + Math.cos(a) * L, A[1] + Math.sin(a) * L); c.stroke();
+      c.fillStyle = '#ef8f8f'; c.beginPath(); c.arc(A[0] + Math.cos(a) * L * 0.85, A[1] + Math.sin(a) * L * 0.85 - 5, 4, 0, 2 * Math.PI); c.fill();
+      c.restore();
+    }
+    return { t: function () { return T; }, loop: loop, bench: bench, wire: wire, charges: charges, cell: cell, resistor: resistor, bulb: bulb, meter: meter, casing: casing, knife: knife, glow: glow, rrect: rrect, grad: grad, along: along, edge: edge };
+  })();
+  function niceFS(x) { var a = Math.abs(x); if (!(a > 0) || !isFinite(a)) return 1; var e = Math.pow(10, Math.floor(Math.log10(a))), m = a / e; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * e; }   // meter full-scale
 
   /* ---------- layout ---------- */
   var sceneCard = pg.card('left');
@@ -79,37 +230,40 @@
   }
 
   /* ---------- scene ---------- */
-  function drawScene() { sceneBody(); if (ix) ix.paint(vp.ctx); }
+  function drawScene() { sceneBody(); if (ix) ix.paint(vp.ctx); if (SIM.scene.real()) KIT.loop(drawScene); }
   function sceneBody() {
     if (!M) return;
     var col = ui.colors(), c, L = col['object-line'], v = prm.values, cc = M.c;
     vp.fit(0, 16, 0, 9);
     c = vp.begin();
     function wire(pts) { D.line(c, pts.map(function (p) { return vp.P(p[0], p[1]); }), L, { width: 2 }); }
-    // cell with internal resistance in a dashed box (bottom)
-    c.save(); c.setLineDash([6, 4]); c.strokeStyle = col.muted; c.lineWidth = 1.3; c.strokeRect(vp.X(4.2), vp.Y(2.6), vp.X(11.8) - vp.X(4.2), vp.Y(0.4) - vp.Y(2.6)); c.restore();
-    D.label(c, 'the cell', vp.X(8), vp.Y(2.85), col.muted, { size: 11 });
-    wire([[2.5, 1.5], [5, 1.5]]); wire([[6.1, 1.5], [8.6, 1.5]]); wire([[10.8, 1.5], [13.5, 1.5]]);
-    c.strokeStyle = L; c.lineWidth = 2;
-    c.beginPath(); c.moveTo(vp.X(5), vp.Y(2.3)); c.lineTo(vp.X(5), vp.Y(0.7)); c.moveTo(vp.X(5.6), vp.Y(1.95)); c.lineTo(vp.X(5.6), vp.Y(1.05)); c.stroke();
-    wire([[5.6, 1.5], [6.1, 1.5]]);
-    D.label(c, 'E = ' + U.sf(v.E) + ' V', vp.X(5.3), vp.Y(0.25), col.ink, { size: 12 });
-    c.fillStyle = col.panel; c.fillRect(vp.X(8.6), vp.Y(1.85), vp.X(10.8) - vp.X(8.6), vp.Y(1.15) - vp.Y(1.85)); c.strokeRect(vp.X(8.6), vp.Y(1.85), vp.X(10.8) - vp.X(8.6), vp.Y(1.15) - vp.Y(1.85));
-    D.label(c, 'r = ' + U.sf(v.r) + ' Ω', vp.X(9.7), vp.Y(0.25), col.ink, { size: 12 });
-    D.label(c, '+', vp.X(4.7), vp.Y(2.5), col.ink, { size: 12, bold: true }); D.label(c, '−', vp.X(5.9), vp.Y(2.3), col.ink, { size: 12, bold: true });
-    // terminals
-    [[4.4, 1.5], [11.6, 1.5]].forEach(function (p) { c.fillStyle = L; c.beginPath(); c.arc(vp.X(p[0]), vp.Y(p[1]), 3.5, 0, 7); c.fill(); });
-    // outer loop: left up to load at top, switch on right
-    wire([[2.5, 1.5], [2.5, 6.5], [6.9, 6.5]]); wire([[9.1, 6.5], [11, 6.5]]); wire([[12.4, 6.5], [13.5, 6.5], [13.5, 1.5]]);
-    c.fillStyle = col.panel; c.fillRect(vp.X(6.9), vp.Y(6.85), vp.X(9.1) - vp.X(6.9), vp.Y(6.15) - vp.Y(6.85)); c.strokeStyle = L; c.strokeRect(vp.X(6.9), vp.Y(6.85), vp.X(9.1) - vp.X(6.9), vp.Y(6.15) - vp.Y(6.85));
-    D.label(c, 'R = ' + U.sf(v.R) + ' Ω', vp.X(8), vp.Y(7.3), col.ink, { size: 12 });
-    // switch
-    c.strokeStyle = L; c.lineWidth = 2; c.beginPath(); c.moveTo(vp.X(11), vp.Y(6.5));
-    if (open.get()) c.lineTo(vp.X(12.3), vp.Y(7.3)); else c.lineTo(vp.X(12.4), vp.Y(6.5)); c.stroke();
-    [11, 12.4].forEach(function (x) { c.beginPath(); c.arc(vp.X(x), vp.Y(6.5), 3, 0, 7); c.fillStyle = col.panel; c.fill(); c.stroke(); });
-    // voltmeter across the terminals
-    wire([[4.4, 1.5], [4.4, 4]]); wire([[4.4, 4], [7.4, 4]]); wire([[8.6, 4], [11.6, 4], [11.6, 1.5]]);
-    c.beginPath(); c.arc(vp.X(8), vp.Y(4), vp.scale * 0.6, 0, 7); c.fillStyle = col.panel; c.fill(); c.strokeStyle = L; c.stroke(); D.label(c, 'V', vp.X(8), vp.Y(4), col.ink, { bold: true });
+    if (SIM.scene.real()) realCell(c, col, v, cc);
+    else {
+      // cell with internal resistance in a dashed box (bottom)
+      c.save(); c.setLineDash([6, 4]); c.strokeStyle = col.muted; c.lineWidth = 1.3; c.strokeRect(vp.X(4.2), vp.Y(2.6), vp.X(11.8) - vp.X(4.2), vp.Y(0.4) - vp.Y(2.6)); c.restore();
+      D.label(c, 'the cell', vp.X(8), vp.Y(2.85), col.muted, { size: 11 });
+      wire([[2.5, 1.5], [5, 1.5]]); wire([[6.1, 1.5], [8.6, 1.5]]); wire([[10.8, 1.5], [13.5, 1.5]]);
+      c.strokeStyle = L; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(vp.X(5), vp.Y(2.3)); c.lineTo(vp.X(5), vp.Y(0.7)); c.moveTo(vp.X(5.6), vp.Y(1.95)); c.lineTo(vp.X(5.6), vp.Y(1.05)); c.stroke();
+      wire([[5.6, 1.5], [6.1, 1.5]]);
+      D.label(c, 'E = ' + U.sf(v.E) + ' V', vp.X(5.3), vp.Y(0.25), col.ink, { size: 12 });
+      c.fillStyle = col.panel; c.fillRect(vp.X(8.6), vp.Y(1.85), vp.X(10.8) - vp.X(8.6), vp.Y(1.15) - vp.Y(1.85)); c.strokeRect(vp.X(8.6), vp.Y(1.85), vp.X(10.8) - vp.X(8.6), vp.Y(1.15) - vp.Y(1.85));
+      D.label(c, 'r = ' + U.sf(v.r) + ' Ω', vp.X(9.7), vp.Y(0.25), col.ink, { size: 12 });
+      D.label(c, '+', vp.X(4.7), vp.Y(2.5), col.ink, { size: 12, bold: true }); D.label(c, '−', vp.X(5.9), vp.Y(2.3), col.ink, { size: 12, bold: true });
+      // terminals
+      [[4.4, 1.5], [11.6, 1.5]].forEach(function (p) { c.fillStyle = L; c.beginPath(); c.arc(vp.X(p[0]), vp.Y(p[1]), 3.5, 0, 7); c.fill(); });
+      // outer loop: left up to load at top, switch on right
+      wire([[2.5, 1.5], [2.5, 6.5], [6.9, 6.5]]); wire([[9.1, 6.5], [11, 6.5]]); wire([[12.4, 6.5], [13.5, 6.5], [13.5, 1.5]]);
+      c.fillStyle = col.panel; c.fillRect(vp.X(6.9), vp.Y(6.85), vp.X(9.1) - vp.X(6.9), vp.Y(6.15) - vp.Y(6.85)); c.strokeStyle = L; c.strokeRect(vp.X(6.9), vp.Y(6.85), vp.X(9.1) - vp.X(6.9), vp.Y(6.15) - vp.Y(6.85));
+      D.label(c, 'R = ' + U.sf(v.R) + ' Ω', vp.X(8), vp.Y(7.3), col.ink, { size: 12 });
+      // switch
+      c.strokeStyle = L; c.lineWidth = 2; c.beginPath(); c.moveTo(vp.X(11), vp.Y(6.5));
+      if (open.get()) c.lineTo(vp.X(12.3), vp.Y(7.3)); else c.lineTo(vp.X(12.4), vp.Y(6.5)); c.stroke();
+      [11, 12.4].forEach(function (x) { c.beginPath(); c.arc(vp.X(x), vp.Y(6.5), 3, 0, 7); c.fillStyle = col.panel; c.fill(); c.stroke(); });
+      // voltmeter across the terminals
+      wire([[4.4, 1.5], [4.4, 4]]); wire([[4.4, 4], [7.4, 4]]); wire([[8.6, 4], [11.6, 4], [11.6, 1.5]]);
+      c.beginPath(); c.arc(vp.X(8), vp.Y(4), vp.scale * 0.6, 0, 7); c.fillStyle = col.panel; c.fill(); c.strokeStyle = L; c.stroke(); D.label(c, 'V', vp.X(8), vp.Y(4), col.ink, { bold: true });
+    }
     if (cc.invalid) { D.label(c, cc.invalid, vp.w / 2, 16, col.warn, { bold: true, bg: true }); return; }
     D.label(c, U.sf(cc.V) + ' V', vp.X(8), vp.Y(4.95), col.s1, { size: 13, bold: true, bg: true });
     if (cc.I > 0) {
@@ -126,6 +280,32 @@
       if (fV > 0.08) D.label(c, 'V', bx + bw / 2, bot - Eh * fV / 2, col.panel, { size: 12, bold: true });
       if (1 - fV > 0.08) D.label(c, 'Ir', bx + bw / 2, top + Eh * (1 - fV) / 2, col.panel, { size: 12, bold: true });
     }
+  }
+
+  /** real-life look: a battery whose casing is see-through, showing the ideal e.m.f. and the internal resistance r inside it */
+  function realCell(c, col, v, cc) {
+    var P = function (x, y) { return vp.P(x, y); }, s = vp.scale;
+    KIT.bench(c, vp.w, vp.h);
+    KIT.wire(c, [P(4.4, 1.5), P(4.4, 4), P(7.4, 4)], '#f2a7a7'); KIT.wire(c, [P(8.6, 4), P(11.6, 4), P(11.6, 1.5)], '#b9bccd');   // voltmeter leads
+    KIT.wire(c, [P(4.4, 1.5), P(2.5, 1.5), P(2.5, 6.5), P(6.9, 6.5)]); KIT.wire(c, [P(9.1, 6.5), P(11, 6.5)]); KIT.wire(c, [P(12.4, 6.5), P(13.5, 6.5), P(13.5, 1.5), P(11.6, 1.5)]);
+    KIT.casing(c, vp.X(4.2), vp.Y(2.6), vp.X(11.8) - vp.X(4.2), vp.Y(0.4) - vp.Y(2.6));
+    KIT.wire(c, [P(6.4, 1.5), P(8.6, 1.5)]); KIT.wire(c, [P(10.8, 1.5), P(11.6, 1.5)]);
+    KIT.cell(c, P(4.5, 1.5), P(6.4, 1.5), { size: Math.max(12, 0.5 * s) });
+    var lost = v.E > 0 && !cc.invalid ? cc.lost / v.E : 0;   // the internal resistance warms up with the lost volts
+    KIT.resistor(c, P(8.6, 1.5), P(10.8, 1.5), v.r, { heat: lost, body: 1.6 * s, thick: Math.max(10, 0.42 * s) });
+    [[4.4, '#f2a7a7'], [11.6, '#b9bccd']].forEach(function (t) { var q = P(t[0], 1.5); c.fillStyle = t[1]; c.beginPath(); c.arc(q[0], q[1], 6, 0, 2 * Math.PI); c.fill(); c.strokeStyle = KIT.edge(); c.lineWidth = 1; c.stroke(); });
+    if (v.R > 0) KIT.resistor(c, P(6.9, 6.5), P(9.1, 6.5), v.R, { body: 1.8 * s, thick: Math.max(12, 0.5 * s) }); else KIT.wire(c, [P(6.9, 6.5), P(9.1, 6.5)], '#d9b48a');   // R = 0: a thick connecting wire
+    KIT.knife(c, P(11, 6.5), P(12.4, 6.5), open.get());
+    KIT.meter(c, vp.X(8), vp.Y(4), Math.max(14, 0.62 * s), 'V', cc.invalid ? 0 : cc.V / niceFS(Math.max(v.E, 1e-9)));
+    if (!cc.invalid && cc.I > 0) {   // charge flow (conventional direction) round the loop and through the cell; speed ∝ I
+      var Iref = v.r > 0 ? Math.max(cc.I, v.E / v.r / 4) : cc.I, sp = 140 * U.clamp(cc.I / Iref, 0, 1);
+      KIT.charges(c, [P(4.4, 1.5), P(2.5, 1.5), P(2.5, 6.5), P(13.5, 6.5), P(13.5, 1.5), P(11.6, 1.5), P(4.4, 1.5)], KIT.t() * sp);
+    }
+    D.label(c, 'the cell (casing drawn see-through)', vp.X(8), vp.Y(2.85), col.muted, { size: 11 });
+    D.label(c, 'E = ' + U.sf(v.E) + ' V', vp.X(5.4), vp.Y(0.25), col.ink, { size: 12 });
+    D.label(c, 'r = ' + U.sf(v.r) + ' Ω', vp.X(9.7), vp.Y(0.25), col.ink, { size: 12 });
+    D.label(c, '+', vp.X(4.4), vp.Y(2.15), col.ink, { size: 12, bold: true }); D.label(c, '−', vp.X(11.6), vp.Y(2.15), col.ink, { size: 12, bold: true });
+    D.label(c, 'R = ' + U.sf(v.R) + ' Ω', vp.X(8), vp.Y(7.3), col.ink, { size: 12 });
   }
 
   /* ---------- plots ---------- */
@@ -154,21 +334,21 @@
     if (cc.invalid) { R.badge(cc.invalid + '. Increase R or r.', 'warn').render(); return; }
     if (open.get()) {
       R.badge('Open circuit: I = 0, no lost volts, V = E', 'info');
-      R.eq('V', 'E − Ir = ' + s3(v.E) + ' − 0 × ' + s3(v.r), v.E, 'V');
+      R.eq('V', 'E − Ir = ' + s3(v.E) + ' − 0 × ' + s3(v.r), v.E, 'V', 'No current flows, so there are no lost volts inside the cell: the terminal p.d. equals the e.m.f.');
     } else {
       R.head('Current: E = I(R + r)');
-      R.eq('I', 'E ÷ (R + r) = ' + s3(v.E) + ' ÷ (' + s3(v.R) + ' + ' + s3(v.r) + ')', cc.I, 'A');
+      R.eq('I', 'E ÷ (R + r) = ' + s3(v.E) + ' ÷ (' + s3(v.R) + ' + ' + s3(v.r) + ')', cc.I, 'A', 'Kirchhoff’s second law round the loop: the e.m.f. equals the sum of the p.d.s, E = IR + Ir = I(R + r).');
       R.head('Terminal p.d. and lost volts');
-      R.eq('lost volts', 'Ir = ' + s3(cc.I) + ' × ' + s3(v.r), cc.lost, 'V');
-      R.eq('V', 'E − Ir = ' + s3(v.E) + ' − ' + s3(cc.lost), cc.V, 'V');
-      R.eq('check', 'IR = ' + s3(cc.I) + ' × ' + s3(v.R), cc.I * v.R, 'V');
+      R.eq('lost volts', 'Ir = ' + s3(cc.I) + ' × ' + s3(v.r), cc.lost, 'V', 'Part of the e.m.f. is used to drive the current through the cell’s own internal resistance: these are the “lost volts”.');
+      R.eq('V', 'E − Ir = ' + s3(v.E) + ' − ' + s3(cc.lost), cc.V, 'V', 'The terminal p.d. is what is left of the e.m.f. after the lost volts inside the cell.');
+      R.eq('check', 'IR = ' + s3(cc.I) + ' × ' + s3(v.R), cc.I * v.R, 'V', 'The terminal p.d. is also the p.d. across the external resistor, so V = IR must give the same answer.');
       R.head('Power and energy (9.2)');
-      R.eq('total power', 'EI = ' + s3(v.E) + ' × ' + s3(cc.I), cc.Ptot, 'W');
-      R.eq('power in R', 'I²R = ' + s3(cc.I) + '² × ' + s3(v.R), cc.Pext, 'W');
-      R.eq('power wasted in r', 'I²r = ' + s3(cc.I) + '² × ' + s3(v.r), cc.Pint, 'W');
-      R.eq('charge in time t', 'Q = It = ' + s3(cc.I) + ' × ' + U.num(v.t, 4), cc.I * v.t, 'C');
-      R.eq('energy from the cell', 'EQ = ' + s3(v.E) + ' × ' + s3(cc.I * v.t), v.E * cc.I * v.t, 'J');
-      R.eq('energy to R', 'VQ = ' + s3(cc.V) + ' × ' + s3(cc.I * v.t), cc.V * cc.I * v.t, 'J');
+      R.eq('total power', 'EI = ' + s3(v.E) + ' × ' + s3(cc.I), cc.Ptot, 'W', 'The e.m.f. is energy per unit charge given by the cell, so the total power it supplies is EI.');
+      R.eq('power in R', 'I²R = ' + s3(cc.I) + '² × ' + s3(v.R), cc.Pext, 'W', 'Power dissipated in the external resistor: P = I²R (useful power delivered to the load).');
+      R.eq('power wasted in r', 'I²r = ' + s3(cc.I) + '² × ' + s3(v.r), cc.Pint, 'W', 'Power dissipated inside the cell, heating it: EI = I²R + I²r (energy is conserved).');
+      R.eq('charge in time t', 'Q = It = ' + s3(cc.I) + ' × ' + U.num(v.t, 4), cc.I * v.t, 'C', 'Current is the rate of flow of charge, so the charge passing in time t is Q = It.');
+      R.eq('energy from the cell', 'EQ = ' + s3(v.E) + ' × ' + s3(cc.I * v.t), v.E * cc.I * v.t, 'J', 'e.m.f. is energy transferred per unit charge by the source, so energy = EQ.');
+      R.eq('energy to R', 'VQ = ' + s3(cc.V) + ' × ' + s3(cc.I * v.t), cc.V * cc.I * v.t, 'J', 'p.d. is energy transferred per unit charge in a component, so the energy given to R is VQ.');
     }
     R.head('Finding E and r from two readings');
     if (readings.length < 2) R.html('<div class="eq">Change R and press “Record (I, V) reading” twice (' + readings.length + ' recorded).</div>');
@@ -176,8 +356,8 @@
       var a = readings[0], b = readings[1], f = CI.fromTwoReadings(a[0], a[1], b[0], b[1]);
       if (!f) R.html('<div class="eq">The two readings have the same current — change R between readings.</div>');
       else {
-        R.eq('r', '(V₁ − V₂) ÷ (I₂ − I₁) = (' + s3(a[1]) + ' − ' + s3(b[1]) + ') ÷ (' + s3(b[0]) + ' − ' + s3(a[0]) + ')', f.r, 'Ω');
-        R.eq('E', 'V₁ + I₁r = ' + s3(a[1]) + ' + ' + s3(a[0]) + ' × ' + s3(f.r), f.E, 'V');
+        R.eq('r', '(V₁ − V₂) ÷ (I₂ − I₁) = (' + s3(a[1]) + ' − ' + s3(b[1]) + ') ÷ (' + s3(b[0]) + ' − ' + s3(a[0]) + ')', f.r, 'Ω', 'V = E − Ir is a straight line with gradient −r, so r = −ΔV/ΔI from the two readings.');
+        R.eq('E', 'V₁ + I₁r = ' + s3(a[1]) + ' + ' + s3(a[0]) + ' × ' + s3(f.r), f.E, 'V', 'Rearrange V = E − Ir for either reading to get the e.m.f. (the intercept on the V axis).');
       }
     }
     R.render();

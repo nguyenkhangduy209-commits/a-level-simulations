@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/mech-plane.js"></script>
@@ -17,7 +18,7 @@
 <script>
 (function () {
   'use strict';
-  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, PL = SIM.plane;
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, PL = SIM.plane, SC = SIM.scene;
   var course = ui.course('9709'), g = ui.gFor(course);
   var pg = ui.page({ title: 'Particle on a plane: friction, equilibrium and motion', g: g,
     tags: course === '9709' ? ['9709 4.1 Forces & equilibrium', '9709 4.4 Newton’s laws', '9709 4.2 suvat'] : ['9702 3 Dynamics', '9702 4 Forces'] });
@@ -102,6 +103,71 @@
     drawScene(); drawPlots(); readout();
   }
 
+  /* ---------- real-life look: a soft pastel person applying the force P (helper kept in this page) ---------- */
+  var HUMAN = (function () {
+    var SHIRT = '#8fa8e0', LEGS = '#5d6480', SKIN = '#f1c7a6', HAIR = '#7a5a48';
+    function seg(c, a, b) { c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke(); }
+    function leg(c, hip, foot, L, face) {   // two-part leg; the knee bends towards the way the person faces
+      var dx = foot[0] - hip[0], dy = foot[1] - hip[1], d = Math.hypot(dx, dy) || 1, m = [(hip[0] + foot[0]) / 2, (hip[1] + foot[1]) / 2];
+      var k = Math.sqrt(Math.max(0, L * L / 4 - d * d / 4)), nx = -dy / d, ny = dx / d;
+      if (nx * face < 0) { nx = -nx; ny = -ny; }
+      var knee = [m[0] + nx * k, m[1] + ny * k];
+      c.beginPath(); c.moveTo(hip[0], hip[1]); c.lineTo(knee[0], knee[1]); c.lineTo(foot[0], foot[1]); c.stroke();
+    }
+    /** feet F (screen), facing +1 right / −1 left, shoulder and hip points, the hand position */
+    function figure(c, F, face, sh, hip, hand, h) {
+      c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+      SIM.scene.shadow(c, F[0], F[1], h * 0.18, h * 0.04);
+      c.strokeStyle = LEGS; c.lineWidth = Math.max(2, h * 0.075);
+      leg(c, hip, [F[0] + face * h * 0.09, F[1]], h * 0.5, face); leg(c, hip, [F[0] - face * h * 0.07, F[1]], h * 0.5, face);
+      c.strokeStyle = SHIRT; c.lineWidth = Math.max(3, h * 0.13); seg(c, hip, sh);
+      c.strokeStyle = SKIN; c.lineWidth = Math.max(1.5, h * 0.05); seg(c, sh, hand);
+      var bx = sh[0] - hip[0], by = sh[1] - hip[1], bl = Math.hypot(bx, by) || 1, hd = [sh[0] + bx / bl * h * 0.12, sh[1] + by / bl * h * 0.12];
+      c.fillStyle = SKIN; c.beginPath(); c.arc(hd[0], hd[1], h * 0.08, 0, 2 * Math.PI); c.fill();
+      c.fillStyle = HAIR; c.beginPath(); c.arc(hd[0] - face * h * 0.01, hd[1] - h * 0.02, h * 0.078, Math.PI, 2 * Math.PI); c.fill();
+      c.fillStyle = SKIN; c.beginPath(); c.arc(hand[0], hand[1], Math.max(1.6, h * 0.035), 0, 2 * Math.PI); c.fill();
+      c.restore();
+    }
+    /** load centre C (screen), force at math angle ang, person height h, surface height surf(x), canvas width W, half-width of the load */
+    function apply(c, C, ang, h, surf, W, half) {
+      var ux = Math.cos(ang), uy = -Math.sin(ang), best = null, s = ux >= 0 ? 1 : -1, d, q, fx, fy, yh;
+      if (Math.abs(ux) > 0.08) for (d = half + 14; d < 560; d += 3) {   // pull: hand somewhere along the line of the force
+        q = [C[0] + ux * d, C[1] + uy * d];
+        if (q[0] < 8 + 0.4 * h || q[0] > W - 8 - 0.4 * h || q[1] < 6) break;
+        fx = q[0] + s * 0.13 * h; yh = surf(fx) - q[1];
+        if (yh < 0.28 * h || yh > 0.85 * h) continue;
+        var cost = Math.abs(yh - 0.55 * h) + 0.08 * d;
+        if (!best || cost < best.cost) best = { q: q, cost: cost };
+      }
+      if (best) {
+        q = best.q; fx = q[0] + s * 0.13 * h; fy = surf(fx); yh = fy - q[1];
+        var shH = U.clamp(yh + 0.15 * h, 0.45 * h, 0.8 * h);
+        SIM.scene.rope(c, [C, q], { width: 2.4 });
+        figure(c, [fx, fy], -s, [fx + s * 0.2 * h, fy - shH], [fx + s * 0.1 * h, fy - shH * 0.55], q, h);
+        return true;
+      }
+      // push: hands on the back of the load, leaning into it
+      if (Math.abs(ux) > 0.2) {
+        q = [C[0] - ux * (half + 1), C[1] - uy * (half + 1)];
+        fx = q[0] - s * 0.42 * h;
+        if (fx > 8 && fx < W - 8) {
+          fy = surf(fx); yh = fy - q[1];
+          if (yh >= 0.25 * h && yh <= 0.85 * h) {
+            var sh2 = U.clamp(yh + 0.12 * h, 0.5 * h, 0.8 * h);
+            figure(c, [fx, fy], s, [fx + s * 0.22 * h, fy - sh2], [fx + s * 0.06 * h, fy - sh2 * 0.55], q, h);
+            return true;
+          }
+        }
+      }
+      // otherwise just a short rope with a handle on the line of the force
+      var e = [C[0] + ux * (half + 40), C[1] + uy * (half + 40)];
+      SIM.scene.rope(c, [C, e], { width: 2.4 });
+      c.save(); c.strokeStyle = SIM.scene.dark() ? '#d8c3a0' : '#c59c6c'; c.lineWidth = 3; c.beginPath(); c.arc(e[0] + ux * 5, e[1] + uy * 5, 5, 0, 2 * Math.PI); c.stroke(); c.restore();
+      return false;
+    }
+    return { apply: apply, figure: figure };
+  })();
+
   /* ---------- scene ---------- */
   var SL = 10; // drawn slope length (scene units)
   function drawScene() {
@@ -109,8 +175,25 @@
     var col = ui.colors(), p = params(), th = U.rad(p.theta), ct = Math.cos(th), st = Math.sin(th);
     var top = Math.max(SL * st, 0);
     vp.fit(-1.2, SL * ct + 1.2, -1.2, Math.max(top + 3.2, 4.5));
-    var c = vp.begin();
+    var c = vp.begin(), real = SC.real(), slick = smooth.get() || p.mu === 0;
     // ground and slope
+    if (real) {
+      // real-life look: outdoors on a wooden ramp (icy run when smooth); indoors on a floor when horizontal
+      var gy = vp.Y(0);
+      if (p.theta > 0) { SC.sky(c, 0, 0, vp.w, gy, { horizon: gy }); SC.tree(c, vp.X(-0.7), gy, Math.min(90, vp.h * 0.3)); SC.tree(c, vp.X(SL * ct + 0.75), gy, Math.min(70, vp.h * 0.24)); }
+      else SC.wall(c, 0, 0, vp.w, gy, { kind: 'concrete' });
+      SC.ground(c, 0, vp.w, gy, { kind: slick ? 'ice' : p.theta > 0 ? 'grass' : 'floor', depth: vp.h - gy + 2 });
+      if (p.theta > 0) {
+        SC.ramp(c, [[vp.X(0), gy], [vp.X(SL * ct), vp.Y(SL * st)], [vp.X(SL * ct), gy]], { kind: slick ? 'concrete' : 'wood' });
+        if (slick) { c.save(); c.strokeStyle = SC.dark() ? 'rgba(190,220,240,.55)' : 'rgba(225,242,252,.95)'; c.lineWidth = 4; c.lineCap = 'round'; c.beginPath(); c.moveTo(vp.X(0), gy - 1); c.lineTo(vp.X(SL * ct), vp.Y(SL * st) - 1); c.stroke(); c.restore(); }
+      }
+      if (p.contact === 'ring') {   // a polished rail on two little posts
+        c.save(); c.lineCap = 'round'; c.strokeStyle = SC.dark() ? '#8d94a8' : '#c3c9d6'; c.lineWidth = 5;
+        c.beginPath(); c.moveTo(vp.X(-1.2 * ct), vp.Y(-1.2 * st)); c.lineTo(vp.X((SL + 1) * ct), vp.Y((SL + 1) * st)); c.stroke();
+        c.strokeStyle = 'rgba(255,255,255,.55)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(vp.X(-1.2 * ct), vp.Y(-1.2 * st) - 1.5); c.lineTo(vp.X((SL + 1) * ct), vp.Y((SL + 1) * st) - 1.5); c.stroke(); c.restore();
+      }
+      if (p.theta > 0) D.arc(c, vp.X(0), vp.Y(0), 34, 0, th, col.muted, 'θ = ' + U.num(p.theta, 1) + '°');
+    } else {
     D.ground(c, vp.X(-1.2), vp.Y(0), vp.X(SL * ct + 1.2), vp.Y(0));
     if (p.theta > 0) {
       c.save(); c.fillStyle = col.surface; c.beginPath(); c.moveTo(vp.X(0), vp.Y(0)); c.lineTo(vp.X(SL * ct), vp.Y(SL * st)); c.lineTo(vp.X(SL * ct), vp.Y(0)); c.closePath(); c.fill();
@@ -118,16 +201,31 @@
       D.arc(c, vp.X(0), vp.Y(0), 34, 0, th, col.muted, 'θ = ' + U.num(p.theta, 1) + '°');
     }
     if (p.contact === 'ring') { D.line(c, [vp.P(-1.2 * ct, -1.2 * st), vp.P((SL + 1) * ct, (SL + 1) * st)], col['object-line'], { width: 4 }); }
+    }
     // block position: map displacement s into the drawn slope
     var st0 = sim.stateAt(clock.t);
     var span = Math.max(Math.abs(srange[0]), Math.abs(srange[1]), 1e-9), ks = Math.min(1, SL * 0.4 / span);
     var mid = (srange[0] + srange[1]) / 2;
     var d = SL / 2 + (st0.s - mid) * ks;
     var bx = vp.X(d * ct), by = vp.Y(d * st);
-    var bw = 54, bh = 34;
-    if (p.contact === 'ring') { D.particle(c, bx, by, 11, {}); bh = 0; }
-    else D.block(c, bx, by, bw, bh, th, { label: U.num(p.m, 2) + ' kg' });
+    var bw = 54, bh = p.contact === 'ring' ? 0 : 34;
     var cx = bx - st * bh / 2, cy = by - ct * bh / 2;
+    if (real) {
+      // the applied force as a person pulling a rope (or pushing from behind); a little dust whenever it comes to rest
+      if (p.P > 0) {
+        var surf = function (x) { var x0 = vp.X(0), x1 = vp.X(SL * ct); return (p.theta > 0 && x >= x0 && x <= x1) ? vp.Y(0) - (x - x0) * Math.tan(th) : vp.Y(0); };
+        HUMAN.apply(c, [cx, cy], th + U.rad(p.phi), Math.max(44, Math.min(64, vp.h * 0.2)), surf, vp.w, bw / 2);
+      }
+      var vNow = st0.v * ks * vp.scale;
+      if (Math.abs(vNow) > 6) SC.motionLines(c, cx, cy, Math.sign(st0.v) * ct, -Math.sign(st0.v) * st, Math.abs(vNow) * 0.5, null, 14);
+      sim.phases.forEach(function (ph) { var kd = (clock.t - ph.t0) / 0.4; if (ph.t0 > 1e-9 && kd >= 0 && kd <= 1) SC.dust(c, bx, by, kd); });
+    }
+    if (p.contact === 'ring') {
+      if (real) { c.save(); c.strokeStyle = SC.dark() ? '#d9b86a' : '#e6c27a'; c.lineWidth = 4; c.beginPath(); c.arc(bx, by, 9, 0, 2 * Math.PI); c.stroke();
+        c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 1.2; c.beginPath(); c.arc(bx, by, 9, 3.6, 4.6); c.stroke(); c.restore(); }
+      else D.particle(c, bx, by, 11, {});
+    }
+    else D.block(c, bx, by, bw, bh, th, { label: U.num(p.m, 2) + ' kg' });
     if (ks < 1) D.label(c, 'motion drawn at ' + U.sf(ks, 2) + '× scale', vp.w - 10, 14, col.muted, { align: 'right', size: 11 });
     // surface point for the μ handle: on the slope, away from the block
     var dm = d > SL * 0.5 ? SL * 0.18 : SL * 0.82;
@@ -190,16 +288,16 @@
     else R.badge('Moving ' + dir(st0.v || f.D) + ': friction = μR = ' + s3(f.Fmax) + ' N, opposing motion', 'info');
 
     R.head('Resolve perpendicular to the plane');
-    R.eq('mg', U.num(p.m, 4) + ' × ' + g, f.W, 'N');
-    if (th > 0) { R.eq('mg cos θ', s3(f.W) + ' × cos ' + U.num(th, 2) + '°', f.Wperp, 'N'); }
-    if (p.P > 0) R.eq('P sin φ', U.num(p.P, 4) + ' × sin ' + U.num(p.phi, 2) + '°', f.Pperp, 'N');
-    R.eq('R', (p.contact === 'ring' ? '|' : '') + (th > 0 ? 'mg cos θ' : 'mg') + (p.P > 0 ? ' − P sin φ' : '') + (p.contact === 'ring' ? '|' : ''), f.R, 'N');
-    R.eq('μR', U.num(mu, 4) + ' × ' + s3(f.R), f.Fmax, 'N');
+    R.eq('mg', U.num(p.m, 4) + ' × ' + g, f.W, 'N', 'Weight = mass × g, acting vertically downwards.');
+    if (th > 0) { R.eq('mg cos θ', s3(f.W) + ' × cos ' + U.num(th, 2) + '°', f.Wperp, 'N', 'The part of the weight into the plane. The angle between mg and the normal is θ, so this component uses cos θ.'); }
+    if (p.P > 0) R.eq('P sin φ', U.num(p.P, 4) + ' × sin ' + U.num(p.phi, 2) + '°', f.Pperp, 'N', 'The part of P perpendicular to the plane (φ is measured from the plane). It pulls away from the surface, so it reduces R.');
+    R.eq('R', (p.contact === 'ring' ? '|' : '') + (th > 0 ? 'mg cos θ' : 'mg') + (p.P > 0 ? ' − P sin φ' : '') + (p.contact === 'ring' ? '|' : ''), f.R, 'N', p.contact === 'ring' ? 'Nothing accelerates perpendicular to the rod. The rod can push either way, so R is the size of whatever is left over.' : 'Nothing accelerates perpendicular to the plane, so the forces that way balance.');
+    R.eq('μR', U.num(mu, 4) + ' × ' + s3(f.R), f.Fmax, 'N', 'Limiting friction = μR: the most friction the surface can give. The actual friction can be anything up to this.');
 
     R.head('Resolve along the plane (up slope +)');
-    if (th > 0) R.eq('mg sin θ', s3(f.W) + ' × sin ' + U.num(th, 2) + '°', f.Wpar, 'N');
-    if (p.P > 0) R.eq('P cos φ', U.num(p.P, 4) + ' × cos ' + U.num(p.phi, 2) + '°', f.Ppar, 'N');
-    R.eq('D', 'net force without friction = ' + (p.P > 0 ? 'P cos φ' : '0') + (th > 0 ? ' − mg sin θ' : ''), f.D, 'N');
+    if (th > 0) R.eq('mg sin θ', s3(f.W) + ' × sin ' + U.num(th, 2) + '°', f.Wpar, 'N', 'The part of the weight along the plane. It always acts down the slope.');
+    if (p.P > 0) R.eq('P cos φ', U.num(p.P, 4) + ' × cos ' + U.num(p.phi, 2) + '°', f.Ppar, 'N', 'The part of P along the plane (up the slope when φ is acute).');
+    R.eq('D', 'net force without friction = ' + (p.P > 0 ? 'P cos φ' : '0') + (th > 0 ? ' − mg sin θ' : ''), f.D, 'N', 'Add every force along the plane except friction. This is the push friction has to resist; its sign shows which way the particle tends to move.');
     if (f.Fmax > 0) {
       var ratio = Math.abs(f.D) / f.Fmax;
       R.html('<div class="head">Friction needed ÷ friction available: |D| ÷ μR = ' + s3(ratio) + '</div><div class="meter"><div style="width:' + Math.min(100, ratio * 100) + '%;background:' + (ratio > 1 + 1e-9 ? 'var(--warn)' : 'var(--c-friction)') + '"></div></div>');
@@ -207,31 +305,31 @@
     sim.phases.forEach(function (ph, i) {
       if (ph.kind !== 'sliding') return;
       var sgnTxt = ph.F < 0 ? ' − μR' : ' + μR';
-      R.eq('a' + (sim.phases.length > 1 ? '<sub>' + (i + 1) + '</sub>' : ''), '(D' + sgnTxt + ') ÷ m = (' + s3(f.D) + sgnTxt.replace('μR', s3(f.Fmax)) + ') ÷ ' + U.num(p.m, 4), ph.a, 'm s<sup>−2</sup>');
+      R.eq('a' + (sim.phases.length > 1 ? '<sub>' + (i + 1) + '</sub>' : ''), '(D' + sgnTxt + ') ÷ m = (' + s3(f.D) + sgnTxt.replace('μR', s3(f.Fmax)) + ') ÷ ' + U.num(p.m, 4), ph.a, 'm s<sup>−2</sup>', 'Newton’s second law along the plane. While it slides, friction is μR and opposes the motion.');
     });
 
     R.head('Equilibrium conditions');
     var rng = PL.equilibriumRange(p);
-    R.eq('least μ', '|D| ÷ R = ' + s3(Math.abs(f.D)) + ' ÷ ' + s3(f.R), PL.leastMu(p));
+    R.eq('least μ', '|D| ÷ R = ' + s3(Math.abs(f.D)) + ' ÷ ' + s3(f.R), PL.leastMu(p), '', 'To stay at rest friction must supply |D|, and it can supply at most μR. So μR ≥ |D|.');
     if (rng.intervals.length) {
-      rng.intervals.forEach(function (iv) { R.eq('P range', 'equilibrium for this φ', s3(iv[0]) + ' ≤ P ≤ ' + (isFinite(iv[1]) ? s3(iv[1]) : '∞'), 'N'); });
-    } else R.eq('P range', 'no value of P (at this φ) gives equilibrium', '—');
-    if (isFinite(rng.Pup)) R.eq('P (about to move up)', 'mg(sin θ + μ cos θ) ÷ (cos φ + μ sin φ)', rng.Pup, 'N');
-    if (isFinite(rng.Pdown)) R.eq('P (about to move down)', 'mg(sin θ − μ cos θ) ÷ (cos φ − μ sin φ)' + (rng.Pdown <= 0 ? ' ≤ 0 ⇒ rests with no P' : ''), rng.Pdown, 'N');
+      rng.intervals.forEach(function (iv) { R.eq('P range', 'equilibrium for this φ', s3(iv[0]) + ' ≤ P ≤ ' + (isFinite(iv[1]) ? s3(iv[1]) : '∞'), 'N', 'Between the two limiting cases (about to slide down, about to slide up) friction can hold the particle.'); });
+    } else R.eq('P range', 'no value of P (at this φ) gives equilibrium', '—', '', 'Even the most helpful friction cannot balance the other forces at this angle of P.');
+    if (isFinite(rng.Pup)) R.eq('P (about to move up)', 'mg(sin θ + μ cos θ) ÷ (cos φ + μ sin φ)', rng.Pup, 'N', 'On the point of moving up, friction = μR and acts DOWN the slope. Resolve both ways and eliminate R.');
+    if (isFinite(rng.Pdown)) R.eq('P (about to move down)', 'mg(sin θ − μ cos θ) ÷ (cos φ − μ sin φ)' + (rng.Pdown <= 0 ? ' ≤ 0 ⇒ rests with no P' : ''), rng.Pdown, 'N', 'On the point of sliding down, friction = μR and acts UP the slope. Resolve both ways and eliminate R.');
 
     R.head('Motion at t = ' + clock.t.toFixed(2) + ' s');
-    R.eq('s', 'displacement (up slope +)', st0.s, 'm');
-    R.eq('v', 'velocity (up slope +)', st0.v, 'm s<sup>−1</sup>');
-    R.eq('distance', 'total path length so far', PL.distanceAt(sim, clock.t), 'm');
+    R.eq('s', 'displacement (up slope +)', st0.s, 'm', 'From s = ut + ½at² in each phase, measured from the start, up the slope positive.');
+    R.eq('v', 'velocity (up slope +)', st0.v, 'm s<sup>−1</sup>', 'From v = u + at in the current phase. A negative value means it is moving down the slope.');
+    R.eq('distance', 'total path length so far', PL.distanceAt(sim, clock.t), 'm', 'Distance adds the length of every part of the path; displacement cancels when the particle turns back.');
     sim.phases.forEach(function (ph, i) {
       if (isFinite(ph.t1)) {
         var dd = ph.v0 * (ph.t1 - ph.t0) / 2;
-        R.eq('stops at', 't = −u ÷ a = ' + s3(-ph.v0) + ' ÷ ' + s3(ph.a), ph.t1, 's');
-        R.eq('distance to stop', 'u² ÷ (2|a|) = ' + s3(ph.v0) + '² ÷ ' + s3(2 * Math.abs(ph.a)), Math.abs(dd), 'm');
+        R.eq('stops at', 't = −u ÷ a = ' + s3(-ph.v0) + ' ÷ ' + s3(ph.a), ph.t1, 's', 'It is instantaneously at rest when v = 0: solve 0 = u + at.');
+        R.eq('distance to stop', 'u² ÷ (2|a|) = ' + s3(ph.v0) + '² ÷ ' + s3(2 * Math.abs(ph.a)), Math.abs(dd), 'm', 'Use v² = u² + 2as with v = 0. Then test whether friction can hold it there.');
       }
     });
     var n = Math.floor(clock.t);
-    if (n >= 1) R.eq('in the ' + ordinal(n) + ' second', 's(' + n + ') − s(' + (n - 1) + ')', sim.stateAt(n).s - sim.stateAt(n - 1).s, 'm');
+    if (n >= 1) R.eq('in the ' + ordinal(n) + ' second', 's(' + n + ') − s(' + (n - 1) + ')', sim.stateAt(n).s - sim.stateAt(n - 1).s, 'm', 'The nth second runs from t = n − 1 to t = n, so subtract the two displacements.');
     R.render();
   }
   function ordinal(n) { var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }

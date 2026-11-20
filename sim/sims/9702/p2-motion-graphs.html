@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-measure.js"></script>
@@ -161,11 +162,20 @@
       if (frozenFit) ymax = frozenFit.ymax;   // keep the frame still while the start height is dragged
       vp.fit(-ymax * 0.9, ymax * 0.9, -ymax * 0.08, ymax * 1.1);
       c = vp.begin();
-      D.ground(c, vp.X(-ymax * 0.6), vp.Y(0), vp.X(ymax * 0.6), vp.Y(0));
+      var realB = SIM.scene.real(), by = vp.Y(q.y), r = Math.max(6, Math.min(16, vp.scale * ymax * 0.05));
+      if (realB) {
+        SIM.scene.sky(c, 0, 0, vp.w, vp.Y(0), { horizon: vp.Y(0) });
+        SIM.scene.tree(c, vp.w * 0.12, vp.Y(0), U.clamp(vp.Y(0) * 0.45, 30, 110));
+        SIM.scene.ground(c, 0, vp.w, vp.Y(0), { kind: 'grass', depth: Math.max(8, vp.h - vp.Y(0)) });
+      } else D.ground(c, vp.X(-ymax * 0.6), vp.Y(0), vp.X(ymax * 0.6), vp.Y(0));
       D.line(c, [vp.P(-ymax * 0.3, prm.values.h), vp.P(ymax * 0.3, prm.values.h)], col.muted, { dash: [4, 4] });
       D.label(c, 'start', vp.X(ymax * 0.3) + 4, vp.Y(prm.values.h), col.muted, { align: 'left', size: 11 });
-      var by = vp.Y(q.y), r = Math.max(6, Math.min(16, vp.scale * ymax * 0.05));
-      D.particle(c, vp.X(0), by - r, r, {});
+      if (realB) {
+        var hFrac = U.clamp(q.y / ymax, 0, 1);
+        SIM.scene.shadow(c, vp.X(0), vp.Y(0) + 2, r * (1.1 - 0.5 * hFrac), r * 0.28 * (1.1 - 0.5 * hFrac));
+        B.impacts.forEach(function (im) { var k = (t - im.t) / 0.3; if (k >= 0 && k <= 1) SIM.scene.dust(c, vp.X(0), vp.Y(0), k); });
+        SIM.scene.ball(c, vp.X(0), by - r, r, { kind: 'basketball', spin: 0.6 * (q.dist || 0) * vp.scale / r });
+      } else D.particle(c, vp.X(0), by - r, r, {});
       var ar = sgn() > 0 ? 'up +' : 'down +';
       D.arrow(c, vp.X(-ymax * 0.7), vp.Y(ymax * 0.5), vp.X(-ymax * 0.7), vp.Y(ymax * 0.5) + (sgn() > 0 ? -40 : 40), col.muted, { label: ar, width: 1.4 });
       if (Math.abs(q.v) > 1e-6) D.arrow(c, vp.X(0) + r + 6, by - r, vp.X(0) + r + 6, by - r - U.sgn(sgn() * q.v) * (16 + Math.min(60, Math.abs(q.v) * 8)), col.velocity, { label: 'v = ' + U.num(q.v, 2) + ' m/s', width: 2 });
@@ -179,10 +189,13 @@
     var span = Math.max(smax - smin, 1e-6), pad = span * 0.08;
     vp.fit(smin - pad, smax + pad, -span * 0.25, span * 0.3);
     c = vp.begin();
-    D.line(c, [vp.P(smin - pad, 0), vp.P(smax + pad, 0)], col['object-line'], { width: 2 });
-    U.niceTicks(smin, smax, 6).ticks.forEach(function (tk) { if (tk < smin - pad || tk > smax + pad) return; D.line(c, [[vp.X(tk), vp.Y(0)], [vp.X(tk), vp.Y(0) + 6]], col.muted); D.label(c, U.num(tk, 3), vp.X(tk), vp.Y(0) + 16, col.muted, { size: 10 }); });
+    var realS = SIM.scene.real(), ticksS = U.niceTicks(smin, smax, 6).ticks, allFall = realS && stages().length > 0 && stages().every(function (st) { return st.type === 'fall'; });
+    if (realS) realTrack(c, q, ticksS, smin - pad, smax + pad, allFall);
+    if (!realS || allFall) D.line(c, [vp.P(smin - pad, 0), vp.P(smax + pad, 0)], col['object-line'], { width: 2, dash: allFall ? [6, 5] : null });
+    ticksS.forEach(function (tk) { if (tk < smin - pad || tk > smax + pad) return; D.line(c, [[vp.X(tk), vp.Y(0)], [vp.X(tk), vp.Y(0) + 6]], col.muted); D.label(c, U.num(tk, 3), vp.X(tk), vp.Y(0) + 16, col.muted, realS ? { size: 10, bg: true } : { size: 10 }); });
     D.label(c, 's = 0', vp.X(0), vp.Y(0) - 28, col.muted, { size: 11 });
-    D.particle(c, vp.X(q.s), vp.Y(0) - 10, 10, {});
+    if (allFall) { SIM.scene.ball(c, vp.X(q.s), vp.Y(0) - 10, 10, { kind: 'tennis', spin: (vp.X(q.s) - vp.X(0)) / 10 }); D.label(c, 'vertical motion drawn sideways: + is up', 12, 14, col.muted, { align: 'left', size: 11, bg: true }); }
+    else if (!realS) D.particle(c, vp.X(q.s), vp.Y(0) - 10, 10, {});
     if (Math.abs(q.v) > 1e-6) D.arrowPolar(c, vp.X(q.s), vp.Y(0) - 32, q.v > 0 ? 0 : Math.PI, 18 + Math.min(70, Math.abs(q.v) * 3), col.velocity, { label: 'v = ' + U.num(q.v, 2) + ' m/s', width: 2 });
     if (Math.abs(q.a) > 1e-9) D.arrowPolar(c, vp.X(q.s), vp.Y(0) - 56, q.a > 0 ? 0 : Math.PI, 30, col.accel, { label: 'a', width: 1.6 });
     D.label(c, '+ direction →', vp.w - 12, 14, col.muted, { align: 'right', size: 11 });
@@ -192,6 +205,30 @@
     J.segs.forEach(function (sg, n) { var x = vp.X(sg.s1); D.line(c, [[x, vp.Y(0) - 7], [x, vp.Y(0) + 7]], col.component, { width: 2 }); D.label(c, String((lst[sg.i] || {}).slot || n + 1), x, vp.Y(0) + 30, col.component, { size: 10 }); });
     scene = { md: 'stages', smin: smin, smax: smax };
     if (ix) ix.paint(c);
+  }
+
+
+  /* ---------- real-life look for the straight-line stages: sky, road with distance posts, a car whose wheels turn with the distance ---------- */
+  function realTrack(c, q, ticks, x0, x1, allFall) {
+    var yR = vp.Y(0), dk = SIM.scene.dark();
+    SIM.scene.sky(c, 0, 0, vp.w, yR, { horizon: yR });
+    if (allFall) { SIM.scene.ground(c, 0, vp.w, vp.h - 10, { kind: 'grass', depth: 10 }); return; }
+    var th = U.clamp(yR * 0.5, 26, 90);
+    SIM.scene.tree(c, vp.w * 0.08, yR, th); SIM.scene.tree(c, vp.w * 0.62, yR, th * 0.8);
+    SIM.scene.ground(c, 0, vp.w, yR, { kind: 'road', depth: Math.max(10, vp.h - yR) });
+    // distance-marker posts at the scale ticks
+    ticks.forEach(function (tk) {
+      if (tk < x0 || tk > x1) return;
+      var x = vp.X(tk);
+      c.save(); c.fillStyle = dk ? '#cfd3e6' : '#fbfbff'; c.strokeStyle = dk ? 'rgba(255,255,255,.2)' : 'rgba(60,70,110,.2)'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(x - 2.5, yR); c.lineTo(x - 2.5, yR - 14); c.quadraticCurveTo(x, yR - 17, x + 2.5, yR - 14); c.lineTo(x + 2.5, yR); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = dk ? '#d98c8c' : '#f2a7a7'; c.fillRect(x - 2.5, yR - 12, 5, 3); c.restore();
+    });
+    var L = U.clamp(vp.w * 0.08, 40, 70), wr = L * 0.1, T = duration(), f = 1;
+    if (q.v < -1e-9) f = -1; else if (Math.abs(q.v) <= 1e-9) { var qn = S(Math.min(T, clock.t + 1e-3)), qp = S(Math.max(0, clock.t - 1e-3)); f = (Math.abs(qn.v) > 1e-9 ? qn.v : qp.v) < 0 ? -1 : 1; }
+    var dx = vp.X(q.s) - vp.X(0);
+    SIM.scene.car(c, vp.X(q.s), yR + 1, L, 0, { kind: 'car', facing: f, wheel: -dx / wr * f });
+    if (Math.abs(q.v) > 1e-6) SIM.scene.motionLines(c, vp.X(q.s) - f * L * 0.2, yR - L * 0.2, q.v > 0 ? 1 : -1, 0, Math.min(40, Math.abs(q.v) * 2), null, 8);
   }
 
   /* ---------- direct manipulation ---------- */
@@ -313,45 +350,45 @@
       var i0 = B.impacts[0];
       R.head('First fall');
       if (v.ub === 0) {
-        R.eq('t', '√(2h ÷ g) = √(2 × ' + U.num(v.h, 3) + ' ÷ ' + g + ')', i0.t, 's');
-        R.eq('impact speed', '√(2gh) = √(2 × ' + g + ' × ' + U.num(v.h, 3) + ')', -i0.vIn, mu);
+        R.eq('t', '√(2h ÷ g) = √(2 × ' + U.num(v.h, 3) + ' ÷ ' + g + ')', i0.t, 's', 'Dropped from rest, so u = 0 and s = ut + ½at² becomes h = ½gt²; rearrange for t.');
+        R.eq('impact speed', '√(2gh) = √(2 × ' + g + ' × ' + U.num(v.h, 3) + ')', -i0.vIn, mu, 'v² = u² + 2as with u = 0, a = g and s = h, so v = √(2gh). No time is needed.');
       } else {
-        R.eq('t', '½gt² − ut − h = 0, larger root', i0.t, 's');
-        R.eq('impact speed', '√(u² + 2gh) = √(' + U.num(v.ub, 3) + '² + 2 × ' + g + ' × ' + U.num(v.h, 3) + ')', -i0.vIn, mu);
+        R.eq('t', '½gt² − ut − h = 0, larger root', i0.t, 's', 'Taking up as positive, the ground is at s = −h: −h = ut − ½gt². The negative root is before the throw, so take the larger root.');
+        R.eq('impact speed', '√(u² + 2gh) = √(' + U.num(v.ub, 3) + '² + 2 × ' + g + ' × ' + U.num(v.h, 3) + ')', -i0.vIn, mu, 'v² = u² + 2as: the ball falls a net distance h below its start, whichever way it was first thrown.');
       }
       if (v.k > 0 && B.impacts.length > 1) {
-        R.eq('rebound speed', 'k × impact speed = ' + U.num(v.k, 3) + ' × ' + U.sf(-i0.vIn), i0.vOut, mu);
-        R.eq('rebound height', '(rebound speed)² ÷ 2g', i0.vOut * i0.vOut / (2 * g), 'm');
-        R.eq('time to next bounce', '2 × rebound speed ÷ g', 2 * i0.vOut / g, 's');
+        R.eq('rebound speed', 'k × impact speed = ' + U.num(v.k, 3) + ' × ' + U.sf(-i0.vIn), i0.vOut, mu, 'The question gives the fraction of the speed kept at the bounce; the direction reverses.');
+        R.eq('rebound height', '(rebound speed)² ÷ 2g', i0.vOut * i0.vOut / (2 * g), 'm', 'At the top v = 0, so 0 = u² − 2gs gives s = u² ÷ 2g.');
+        R.eq('time to next bounce', '2 × rebound speed ÷ g', 2 * i0.vOut / g, 's', 'Up and down take equal times (u ÷ g each way) because the acceleration is g throughout the flight.');
       } else if (v.k === 0) R.badge('k = 0: the ball does not bounce', 'info');
-      if (B.impacts.length > 1 && B.impacts[B.impacts.length - 1].last && B.tRest < v.T) R.eq('comes to rest', 'bounces die away (model)', B.tRest, 's');
+      if (B.impacts.length > 1 && B.impacts[B.impacts.length - 1].last && B.tRest < v.T) R.eq('comes to rest', 'bounces die away (model)', B.tRest, 's', 'Each flight is shorter by the factor k, so the bounce times form a series that adds up to a finite time.');
     } else if (J.segs.length) {
       R.head('Totals for the whole journey');
-      R.eq('displacement', 'signed area under v–t', J.totals.disp, 'm');
-      R.eq('distance', 'total area, ignoring sign', J.totals.dist, 'm');
-      R.eq('average speed', 'distance ÷ time = ' + U.sf(J.totals.dist) + ' ÷ ' + U.sf(J.T), J.totals.avgSpeed, mu);
-      R.eq('average velocity', 'displacement ÷ time', J.totals.avgVel, mu);
+      R.eq('displacement', 'signed area under v–t', J.totals.disp, 'm', 'Area under a velocity–time graph = displacement. Area below the time axis counts as negative (moving backwards).');
+      R.eq('distance', 'total area, ignoring sign', J.totals.dist, 'm', 'Distance is a scalar: add all the areas as positive, whichever way the object moved.');
+      R.eq('average speed', 'distance ÷ time = ' + U.sf(J.totals.dist) + ' ÷ ' + U.sf(J.T), J.totals.avgSpeed, mu, 'Average speed = total distance ÷ total time.');
+      R.eq('average velocity', 'displacement ÷ time', J.totals.avgVel, mu, 'Average velocity = displacement ÷ time; it is zero if the object ends where it started.');
     }
     R.head('Graph tools');
-    R.eq('v at t<sub>A</sub> = ' + U.num(tA, 2) + ' s', 'gradient of the s–t tangent', qA.v, mu);
-    R.eq('a at t<sub>A</sub>', 'gradient of v–t', qA.a, ma);
+    R.eq('v at t<sub>A</sub> = ' + U.num(tA, 2) + ' s', 'gradient of the s–t tangent', qA.v, mu, 'Velocity = rate of change of displacement = gradient of the tangent to the s–t graph at that instant.');
+    R.eq('a at t<sub>A</sub>', 'gradient of v–t', qA.a, ma, 'Acceleration = rate of change of velocity = gradient of the v–t graph.');
     if (Math.abs(tB - tA) > 1e-9) {
-      R.eq('chord gradient', '(s<sub>B</sub> − s<sub>A</sub>) ÷ (t<sub>B</sub> − t<sub>A</sub>) = (' + U.sf(qB.s) + ' − ' + P(qA.s) + ') ÷ ' + P(tB - tA), (qB.s - qA.s) / (tB - tA), mu);
-      R.eq('area under v–t', 'from t<sub>A</sub> to t<sub>B</sub> = displacement', qB.s - qA.s, 'm');
-      R.eq('distance', 'unsigned area from t<sub>A</sub> to t<sub>B</sub>', Math.abs(qB.dist - qA.dist), 'm');
+      R.eq('chord gradient', '(s<sub>B</sub> − s<sub>A</sub>) ÷ (t<sub>B</sub> − t<sub>A</sub>) = (' + U.sf(qB.s) + ' − ' + P(qA.s) + ') ÷ ' + P(tB - tA), (qB.s - qA.s) / (tB - tA), mu, 'The gradient of a chord is the average velocity between the two times, not the velocity at an instant.');
+      R.eq('area under v–t', 'from t<sub>A</sub> to t<sub>B</sub> = displacement', qB.s - qA.s, 'm', 'The signed area under the v–t graph between two times equals the change in displacement.');
+      R.eq('distance', 'unsigned area from t<sub>A</sub> to t<sub>B</sub>', Math.abs(qB.dist - qA.dist), 'm', 'Count every area as positive to get the distance travelled in that interval.');
     }
     var stg = stageAt(tA);
     if (derive.get() && stg && stg.t1 - stg.t0 > 1e-9) {
       var dt = stg.t1 - stg.t0, s = stg.u * dt + 0.5 * stg.a * dt * dt;
       R.head('suvat from the v–t graph of ' + stg.name + ' (u = ' + U.sf(stg.u) + ', v = ' + U.sf(stg.v) + ', t = ' + U.sf(dt) + ')');
-      R.eq('a', 'gradient = (v − u) ÷ t ⇒ v = u + at', stg.a, ma);
-      R.eq('s', 'area = rectangle ut + triangle ½(v − u)t = ut + ½at² = ' + P(stg.u) + ' × ' + U.sf(dt) + ' + ½ × ' + P(stg.a) + ' × ' + U.sf(dt) + '²', s, 'm');
-      R.eq('s', 'trapezium = ½(u + v)t', 0.5 * (stg.u + stg.v) * dt, 'm');
-      R.eq('v²', 'eliminate t: v² = u² + 2as = ' + P(stg.u) + '² + 2 × ' + P(stg.a) + ' × ' + P(s), stg.u * stg.u + 2 * stg.a * s, 'm<sup>2</sup> s<sup>−2</sup>');
+      R.eq('a', 'gradient = (v − u) ÷ t ⇒ v = u + at', stg.a, ma, 'The v–t graph of this stage is a straight line, so a = gradient = (v − u) ÷ t. Rearranged, this is v = u + at.');
+      R.eq('s', 'area = rectangle ut + triangle ½(v − u)t = ut + ½at² = ' + P(stg.u) + ' × ' + U.sf(dt) + ' + ½ × ' + P(stg.a) + ' × ' + U.sf(dt) + '²', s, 'm', 'Split the area under the line into a rectangle (ut) and a triangle (½(v − u)t); with v − u = at this is s = ut + ½at².');
+      R.eq('s', 'trapezium = ½(u + v)t', 0.5 * (stg.u + stg.v) * dt, 'm', 'The same area as one trapezium: mean of the parallel sides × width. It must agree with the line above.');
+      R.eq('v²', 'eliminate t: v² = u² + 2as = ' + P(stg.u) + '² + 2 × ' + P(stg.a) + ' × ' + P(s), stg.u * stg.u + 2 * stg.a * s, 'm<sup>2</sup> s<sup>−2</sup>', 'Substitute t = (v − u) ÷ a into s = ½(u + v)t to remove t; check that it gives v² for this stage.');
     }
     R.head('Now (t = ' + clock.t.toFixed(2) + ' s)');
     var q = S(clock.t);
-    R.eq('s', '', q.s, 'm'); R.eq('v', '', q.v, mu); R.eq('a', '', q.a, ma);
+    R.eq('s', '', q.s, 'm', 'Displacement from the start at this instant: read it off the s–t graph at the cursor.'); R.eq('v', '', q.v, mu, 'Velocity now: the height of the v–t graph at the cursor (sign shows the direction).'); R.eq('a', '', q.a, ma, 'Acceleration now: the height of the a–t graph, which is the gradient of the v–t graph.');
     R.render();
     // table
     if (J) {

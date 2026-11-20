@@ -114,6 +114,7 @@
     { name: 'Couple with forces at 30° to the bar', mode: 'couple', solve: 'none', uniform: true,
       values: { Fc: 20, dc: 0.5, thc: 30, xO: -0.3 }, note: 'Perpendicular separation = 0.50 sin 30° = 0.25 m ⇒ torque = 20 × 0.25 = 5.0 N m.' }
   ], function (p) {
+    style = /see-saw/i.test(p.name) ? 'seesaw' : /person/i.test(p.name) ? 'walk' : /shelf/i.test(p.name) ? 'shelf' : /non-uniform rod/i.test(p.name) ? 'rod' : /hinged/i.test(p.name) ? 'hinged' : 'auto';
     mode.set(p.mode, true); refreshSolveOptions(); solve.set(p.solve, true); uniform.set(p.uniform, true);
     if (p.values.L !== undefined) setRanges(p.values.L);
     prm.set(p.values);
@@ -187,6 +188,13 @@
     c = vp.begin();
     var by = vp.Y(0), th = Math.max(8, Math.min(16, vp.scale * L * 0.03));
     scene = { md: md, by: by, th: th, L: L, arrows: [] };
+    var real = SC.real();
+    if (real) {   // backdrop, wall / stands / trestles, ropes and springs, then the plank itself and what sits on it
+      realBack(c, col, v, md, L, by, th);
+      realRopes(c, v, md, L, by, th);
+      realBeam(c, L, by, th);
+      realLoads(c, v, md, L, by, th);
+    } else {
     // wall for a hinge at an end
     if (md === 'pin' && (v.xP < 1e-9 || v.xP > L - 1e-9)) {
       var wx = vp.X(v.xP), dir = v.xP < 1e-9 ? -1 : 1;
@@ -196,13 +204,14 @@
     // beam
     c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
     c.beginPath(); c.rect(vp.X(0), by - th / 2, vp.X(L) - vp.X(0), th); c.fill(); c.stroke(); c.restore();
+    }
     // scale ticks
     var tk = U.niceTicks(0, L, 6);
-    tk.ticks.forEach(function (t) { if (t < -1e-9 || t > L + 1e-9) return; D.line(c, [[vp.X(t), by + th / 2], [vp.X(t), by + th / 2 + 5]], col.muted, { width: 1 }); D.label(c, U.num(t, 3), vp.X(t), by + th / 2 + 13, col.muted, { size: 10 }); });
+    tk.ticks.forEach(function (t) { if (t < -1e-9 || t > L + 1e-9) return; D.line(c, [[vp.X(t), by + th / 2], [vp.X(t), by + th / 2 + 5]], col.muted, { width: 1 }); D.label(c, U.num(t, 3), vp.X(t), by + th / 2 + 13, real ? col.ink : col.muted, { size: 10, bg: real }); });
     // supports / pivot
     function tri(x) { var px = vp.X(x); c.save(); c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.4; c.beginPath(); c.moveTo(px, by + th / 2); c.lineTo(px - 11, by + th / 2 + 20); c.lineTo(px + 11, by + th / 2 + 20); c.closePath(); c.fill(); c.stroke(); c.restore(); }
-    if (md === 'supports') { tri(v.xA); tri(v.xB); D.label(c, 'A', vp.X(v.xA), by + th / 2 + 30, col.ink, { bold: true }); D.label(c, 'B', vp.X(v.xB), by + th / 2 + 30, col.ink, { bold: true }); }
-    else { c.save(); c.fillStyle = col['object-line']; c.beginPath(); c.arc(vp.X(v.xP), by, 4, 0, 2 * Math.PI); c.fill(); c.restore(); if (v.xP > 1e-9 && v.xP < L - 1e-9) tri(v.xP); D.label(c, 'pivot', vp.X(v.xP), by + th / 2 + 30, col.muted, { size: 11 }); }
+    if (md === 'supports') { if (!real) { tri(v.xA); tri(v.xB); } D.label(c, 'A', vp.X(v.xA), by + th / 2 + 30, col.ink, { bold: true, bg: real }); D.label(c, 'B', vp.X(v.xB), by + th / 2 + 30, col.ink, { bold: true, bg: real }); }
+    else { c.save(); c.fillStyle = col['object-line']; c.beginPath(); c.arc(vp.X(v.xP), by, 4, 0, 2 * Math.PI); c.fill(); c.restore(); if (!real && v.xP > 1e-9 && v.xP < L - 1e-9) tri(v.xP); D.label(c, real && (v.xP < 1e-9 || v.xP > L - 1e-9) ? 'hinge' : 'pivot', vp.X(v.xP), by + th / 2 + 30, real ? col.ink : col.muted, { size: 11, bg: real }); }
     if (!res) return;
     if (res.invalid) { D.label(c, res.invalid, vp.w / 2, 18, col.warn, { bold: true, size: 12 }); }
     var all = res.all || res.forces;
@@ -265,9 +274,12 @@
     var col = ui.colors(), v = prm.values, d = v.dc, cp = ST.couple(v.Fc, d, v.thc);
     vp.fit(-1.1 * d, 2.1 * d, -0.75 * d, 0.75 * d);
     var c = vp.begin(), by = vp.Y(0);
+    if (SC.real()) realCouple(c, d, by, v.thc);
+    else {
     c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
     c.beginPath(); c.rect(vp.X(0), by - 6, vp.X(d) - vp.X(0), 12); c.fill(); c.stroke(); c.restore();
     c.save(); c.fillStyle = col['object-line']; c.beginPath(); c.arc(vp.X(d / 2), by, 3, 0, 2 * Math.PI); c.fill(); c.restore();
+    }
     var len = Math.min(110, vp.h * 0.3);
     cp.forces.forEach(function (f, i) {
       if (!(f.F > 0)) return;
@@ -293,6 +305,152 @@
     } else D.label(c, 'forces in line: no turning effect (not a couple)', vp.w / 2, 16, col.warn, { bold: true, size: 12 });
     scene = { md: 'couple', by: by, len: len, d: d, forces: cp.forces.map(function (f, i) { var a = U.rad(f.ang), px = vp.X(f.x); return { i: i, bx: px, x: px + Math.cos(a) * len, y: by - Math.sin(a) * len }; }) };
     if (ix) ix.paint(c);
+  }
+
+  /* ---------- real-life look (soft pastel, static): plank on trestles, see-saw with children, hinged shelf on a wall, metre rule with slotted masses, steering wheel ---------- */
+  var SC = SIM.scene, LINE = 'rgba(60,60,90,.22)', style = 'auto';   // 'seesaw' | 'walk' | 'shelf' | 'hinged' | 'rod' | 'auto' (chosen from the preset)
+  function rrect(c, x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r); c.lineTo(x + w, y + h - r);
+    c.quadraticCurveTo(x + w, y + h, x + w - r, y + h); c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r); c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y); c.closePath();
+  }
+  function isHinge(v, md, L) { return md === 'pin' && (v.xP < 1e-9 || v.xP > L - 1e-9); }
+  function indoor(v, md, L) { return style === 'shelf' || style === 'hinged' || style === 'rod' || (style === 'auto' && isHinge(v, md, L)); }
+  function groundY(v, md, L, by, th) { return isHinge(v, md, L) ? Math.min(vp.h - 8, by + Math.max(70, (vp.h - by) * 0.75)) : by + th / 2 + 24; }
+  function loadAng(v, md, i) { return md === 'supports' ? -90 : v['a' + i]; }
+  function realBack(c, col, v, md, L, by, th) {
+    var W = vp.w, H = vp.h, dk = SC.dark(), gy = groundY(v, md, L, by, th), inside = indoor(v, md, L);
+    if (inside) {   // a softly painted room wall with a skirting board
+      c.save(); var g = c.createLinearGradient(0, 0, 0, gy); g.addColorStop(0, dk ? '#33313f' : '#f6f1ea'); g.addColorStop(1, dk ? '#2b2a36' : '#eee6db');
+      c.fillStyle = g; c.fillRect(0, 0, W, gy); c.fillStyle = dk ? '#3d3b4a' : '#e6dccd'; c.fillRect(0, gy - 7, W, 7); c.restore();
+    } else {
+      SC.sky(c, 0, 0, W, gy, { horizon: gy });
+      SC.tree(c, W * 0.06, gy, Math.min(80, gy * 0.5)); SC.tree(c, W * 0.95, gy, Math.min(60, gy * 0.4));
+    }
+    SC.ground(c, 0, W, gy, { kind: inside ? 'floor' : 'grass', depth: Math.max(10, H - gy) });
+    if (isHinge(v, md, L)) {   // brick wall with a hinge plate
+      var wx = vp.X(v.xP), left = v.xP < 1e-9;
+      SC.wall(c, left ? wx - 24 : wx, 0, 24, gy, { kind: 'brick' });
+      c.save(); c.fillStyle = dk ? '#8a90a4' : '#c3c8d6'; c.strokeStyle = LINE; rrect(c, wx - 3, by - th / 2 - 8, 6, th + 16, 2); c.fill(); c.stroke(); c.restore();
+    } else if (md === 'supports') { trestle(c, vp.X(v.xA), by + th / 2, gy); trestle(c, vp.X(v.xB), by + th / 2, gy); }
+    else stand(c, vp.X(v.xP), by, gy);
+  }
+  /** a small wooden trestle (A-frame) from the underside of the plank down to the ground */
+  function trestle(c, px, top, gy) {
+    var dk = SC.dark(), wood = dk ? '#7a614c' : '#e6bf92';
+    c.save(); c.strokeStyle = wood; c.lineCap = 'round'; c.lineWidth = 4;
+    c.beginPath(); c.moveTo(px - 4, top + 4); c.lineTo(px - 13, gy); c.moveTo(px + 4, top + 4); c.lineTo(px + 13, gy); c.stroke();
+    c.lineWidth = 2.5; c.beginPath(); c.moveTo(px - 9, (top + gy) / 2 + 2); c.lineTo(px + 9, (top + gy) / 2 + 2); c.stroke();
+    c.fillStyle = SC.shade(wood, dk ? -0.1 : -0.06); c.strokeStyle = LINE; c.lineWidth = 1; rrect(c, px - 12, top, 24, 5, 2); c.fill(); c.stroke();
+    c.restore();
+  }
+  /** the pivot: a rounded triangular stand with its pin at the beam */
+  function stand(c, px, by, gy) {
+    var dk = SC.dark(), b = Math.max(16, (gy - by) * 0.55);
+    c.save(); c.fillStyle = dk ? '#55607a' : '#bccae8'; c.strokeStyle = LINE; c.lineWidth = 1; c.lineJoin = 'round';
+    c.beginPath(); c.moveTo(px - 5, by); c.lineTo(px + 5, by); c.lineTo(px + b, gy); c.lineTo(px - b, gy); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = 'rgba(255,255,255,.25)'; c.beginPath(); c.moveTo(px - 3, by + 4); c.lineTo(px - b * 0.55, gy - 2); c.lineTo(px - b * 0.25, gy - 2); c.closePath(); c.fill();
+    c.restore();
+  }
+  function spring(c, x, y0, y1) {
+    var n = 9, dk = SC.dark(), dy = (y1 - y0) / (n + 1);
+    c.save(); c.strokeStyle = dk ? '#c9cede' : '#8a91a6'; c.lineWidth = 1.6; c.lineJoin = 'round';
+    c.beginPath(); c.moveTo(x, y0); c.lineTo(x, y0 + dy * 0.5);
+    for (var i = 1; i <= n; i++) c.lineTo(x + (i % 2 ? 6 : -6), y0 + dy * (i + 0.5) - dy * 0.5);
+    c.lineTo(x, y1 - dy * 0.5); c.lineTo(x, y1); c.stroke(); c.restore();
+  }
+  /** strings, wires and springs for loads that do not simply press down on the beam */
+  function realRopes(c, v, md, L, by, th) {
+    var gy = groundY(v, md, L, by, th), hinge = isHinge(v, md, L), dk = SC.dark();
+    for (var i = 1; i <= 3; i++) {
+      var F = v['F' + i]; if (!(F > 1e-12) || md === 'supports') continue;
+      var a = U.rad(loadAng(v, md, i)), s = Math.sin(a), cs = Math.cos(a), px = vp.X(v['x' + i]);
+      if (s < -0.995) continue;   // a load pressing straight down: drawn by realLoads
+      if (s > 0.995) {            // pulled straight up: a spring from the ceiling
+        c.save(); c.fillStyle = dk ? '#55596a' : '#dfe2ea'; c.strokeStyle = LINE; rrect(c, px - 18, -4, 36, 11, 3); c.fill(); c.stroke(); c.restore();
+        spring(c, px, 7, by - th / 2);
+        continue;
+      }
+      // a string along the line of action, tied to the wall (if it meets it) or to a peg at the edge of the picture
+      var ux = cs, uy = -s, t = Infinity, xMin = 4, xMax = vp.w - 4;
+      if (hinge && v.xP < 1e-9) xMin = vp.X(0); if (hinge && v.xP > L - 1e-9) xMax = vp.X(L);
+      if (ux > 1e-9) t = Math.min(t, (xMax - px) / ux); if (ux < -1e-9) t = Math.min(t, (xMin - px) / ux);
+      if (uy > 1e-9) t = Math.min(t, (gy - by) / uy); if (uy < -1e-9) t = Math.min(t, (6 - by) / uy);
+      if (!(t > 0) || !isFinite(t)) continue;
+      var ex = px + ux * t, ey = by + uy * t;
+      SC.rope(c, [[px, by], [ex, ey]], { width: 2 });
+      c.save(); c.fillStyle = dk ? '#9aa0b4' : '#9aa1b5'; c.beginPath(); c.arc(ex, ey, 3.5, 0, 2 * Math.PI); c.fill(); c.restore();
+    }
+  }
+  function realBeam(c, L, by, th) {
+    var x0 = vp.X(0), x1 = vp.X(L), dk = SC.dark(), rod = style === 'rod', w = x1 - x0;
+    var base = rod ? (dk ? '#a39663' : '#f7e8a6') : (dk ? '#8a6a50' : '#f1cf9e');
+    c.save();
+    c.fillStyle = 'rgba(70,50,90,.10)'; rrect(c, x0 + 2, by - th / 2 + 3, w, th, 3); c.fill();
+    var g = c.createLinearGradient(0, by - th / 2, 0, by + th / 2); g.addColorStop(0, SC.shade(base, 0.18)); g.addColorStop(1, SC.shade(base, -0.06));
+    c.fillStyle = g; rrect(c, x0, by - th / 2, w, th, Math.min(4, th * 0.35)); c.fill();
+    c.strokeStyle = SC.shade(base, -0.28); c.lineWidth = 1; c.stroke();
+    if (rod) {   // metre-rule markings along the top edge
+      c.strokeStyle = dk ? 'rgba(0,0,0,.35)' : 'rgba(120,95,40,.45)'; c.lineWidth = 0.8;
+      var N = w > 400 ? 100 : w > 160 ? 50 : 20;
+      for (var k = 1; k < N; k++) { var px = x0 + w * k / N, ln = k % 10 === 0 ? th * 0.55 : k % 5 === 0 ? th * 0.4 : th * 0.22; c.beginPath(); c.moveTo(px, by - th / 2); c.lineTo(px, by - th / 2 + ln); c.stroke(); }
+    } else {     // soft wood grain
+      c.strokeStyle = dk ? 'rgba(0,0,0,.15)' : 'rgba(160,110,60,.18)'; c.lineWidth = 1;
+      [-0.18, 0.2].forEach(function (f) { c.beginPath(); c.moveTo(x0 + 4, by + th * f); c.bezierCurveTo(x0 + w * 0.3, by + th * f - 1.5, x0 + w * 0.7, by + th * f + 1.5, x1 - 4, by + th * f); c.stroke(); });
+    }
+    c.restore();
+  }
+  /** a child sitting on the see-saw at x, facing the pivot (f = ±1), feet dangling below the plank */
+  function child(c, x, yTop, h, f, shirt) {
+    var dk = SC.dark(), hip = [x, yTop - h * 0.06], sh = [x + f * h * 0.04, yTop - h * 0.52], knee = [x + f * h * 0.26, yTop - h * 0.1], foot = [x + f * h * 0.3, yTop + h * 0.24];
+    var handle = x + f * h * 0.34;
+    c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+    c.strokeStyle = dk ? '#9aa0b4' : '#b9bfcd'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(handle, yTop); c.lineTo(handle, yTop - h * 0.34); c.lineTo(handle - f * h * 0.06, yTop - h * 0.34); c.stroke();
+    c.strokeStyle = '#5d6480'; c.lineWidth = Math.max(2.5, h * 0.09); c.beginPath(); c.moveTo(hip[0], hip[1]); c.lineTo(knee[0], knee[1]); c.lineTo(foot[0], foot[1]); c.stroke();
+    c.strokeStyle = shirt; c.lineWidth = Math.max(4, h * 0.17); c.beginPath(); c.moveTo(hip[0], hip[1] - h * 0.04); c.lineTo(sh[0], sh[1]); c.stroke();
+    c.strokeStyle = '#f1c7a6'; c.lineWidth = Math.max(1.8, h * 0.06); c.beginPath(); c.moveTo(sh[0], sh[1] + h * 0.04); c.lineTo(handle - f * h * 0.05, yTop - h * 0.32); c.stroke();
+    c.fillStyle = '#f1c7a6'; c.beginPath(); c.arc(sh[0] + f * h * 0.02, sh[1] - h * 0.13, h * 0.11, 0, 2 * Math.PI); c.fill();
+    c.fillStyle = '#9a7660'; c.beginPath(); c.arc(sh[0] - f * h * 0.01, sh[1] - h * 0.16, h * 0.1, Math.PI, 2 * Math.PI); c.fill();
+    c.restore();
+  }
+  /** a slotted mass on a hanger, hung on a thread below the beam */
+  function hanging(c, px, yb, k) {
+    var dk = SC.dark(), n = 2 + Math.round(2 * k), y = yb + 14;
+    c.save(); c.strokeStyle = dk ? '#c9cede' : '#8a91a6'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(px, yb); c.lineTo(px, y); c.stroke();
+    c.fillStyle = dk ? '#a68c4c' : '#ecd08a'; c.strokeStyle = LINE;
+    for (var i = 0; i < n; i++) { rrect(c, px - 10, y + i * 5, 20, 4.2, 2); c.fill(); c.stroke(); }
+    c.restore();
+  }
+  function realLoads(c, v, md, L, by, th) {
+    var Fmax = Math.max(v.F1, v.F2, v.F3, 1e-9), top = by - th / 2, size = U.clamp(vp.scale * L * 0.08, 16, 46), shirts = ['#8fb3e0', '#f2a08e', '#a8d8a0'];
+    for (var i = 1; i <= 3; i++) {
+      var F = v['F' + i]; if (!(F > 1e-12)) continue;
+      if (Math.sin(U.rad(loadAng(v, md, i))) > -0.995) continue;   // only loads that press straight down sit on or hang from the beam
+      var px = vp.X(v['x' + i]), k = Math.cbrt(F / Fmax);
+      if (style === 'seesaw') child(c, px, top, U.clamp(vp.h * 0.22, 40, 76) * (0.75 + 0.25 * k), px < vp.X(v.xP) ? 1 : -1, shirts[(i - 1) % 3]);
+      else if (style === 'walk' && i === 1) SC.person(c, px, top, U.clamp(vp.h * 0.28, 44, 96), { pose: 'stand', color: '#f2a08e', facing: -1 });
+      else if (style === 'rod' || style === 'hinged') hanging(c, px, by + th / 2, k);
+      else SC.crate(c, px, top, size * (0.6 + 0.4 * k), size * (0.6 + 0.4 * k) * 0.85, 0);
+    }
+  }
+  /** couple: a steering wheel seen face-on, the bar of length d across it, a hand at each end */
+  function realCouple(c, d, by) {
+    var W = vp.w, H = vp.h, dk = SC.dark(), cx = vp.X(d / 2), R = Math.max(8, (vp.X(d) - vp.X(0)) / 2), hz = H * 0.4;
+    SC.sky(c, 0, 0, W, hz, { horizon: hz });
+    c.save();
+    var g = c.createLinearGradient(0, hz, 0, H); g.addColorStop(0, dk ? '#3a3848' : '#efe6da'); g.addColorStop(1, dk ? '#2e2c3a' : '#e2d6c6');
+    c.fillStyle = g; rrect(c, -10, hz, W + 20, H - hz + 10, 18); c.fill();
+    c.fillStyle = 'rgba(255,255,255,.3)'; c.fillRect(0, hz + 2, W, 1.5);
+    c.fillStyle = dk ? '#4d5164' : '#c9cedc'; c.beginPath(); c.moveTo(cx - R * 0.12, by); c.lineTo(cx + R * 0.12, by); c.lineTo(cx + R * 0.22, H); c.lineTo(cx - R * 0.22, H); c.closePath(); c.fill();   // steering column
+    var lw = Math.max(6, R * 0.13);
+    c.strokeStyle = dk ? '#6c7186' : '#7d8399'; c.lineWidth = lw; c.beginPath(); c.arc(cx, by, R, 0, 2 * Math.PI); c.stroke();   // rim
+    c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = Math.max(1.5, lw * 0.25); c.beginPath(); c.arc(cx, by, R - lw * 0.2, Math.PI * 1.1, Math.PI * 1.6); c.stroke();
+    c.fillStyle = dk ? '#5d6378' : '#a3a9ba'; rrect(c, vp.X(0), by - 5, vp.X(d) - vp.X(0), 10, 4); c.fill();   // the bar (a spoke) of length d
+    c.fillStyle = dk ? '#6f7690' : '#c3c8d6'; c.beginPath(); c.arc(cx, by, Math.max(7, R * 0.2), 0, 2 * Math.PI); c.fill();
+    c.fillStyle = dk ? '#8a90a8' : '#e4e7ef'; c.beginPath(); c.arc(cx, by, Math.max(3, R * 0.08), 0, 2 * Math.PI); c.fill();
+    c.fillStyle = '#f1c7a6'; c.strokeStyle = 'rgba(150,100,70,.25)'; c.lineWidth = 1;   // a hand gripping each end
+    [vp.X(0), vp.X(d)].forEach(function (hx) { c.beginPath(); if (c.ellipse) c.ellipse(hx, by, Math.max(5, lw * 0.75), Math.max(7, lw * 1.1), 0, 0, 2 * Math.PI); c.fill(); c.stroke(); });
+    c.restore();
   }
 
   /* ---------- working ---------- */
@@ -324,10 +482,10 @@
       var M = ST.momentAbout(f, v.xO);
       if (M > 0) sumACW += M; else sumCW -= M;
       var nm = f.kind === 'weight' ? 'W' : f.name.replace(/_(\w)/, '<sub>$1</sub>');
-      R.eq('moment of ' + nm, momentWork(f, v.xO), Math.abs(M) < 1e-12 ? '0' : s3(Math.abs(M)) + ' ' + sense(M), 'N m');
+      R.eq('moment of ' + nm, momentWork(f, v.xO), Math.abs(M) < 1e-12 ? '0' : s3(Math.abs(M)) + ' ' + sense(M), 'N m', 'Moment = force × perpendicular distance from O to its line of action. Look at which way it would turn the beam about O.');
     });
-    R.eq('Σ clockwise', '', sumCW, 'N m');
-    R.eq('Σ anticlockwise', '', sumACW, 'N m');
+    R.eq('Σ clockwise', '', sumCW, 'N m', 'Add the sizes of all the clockwise moments about O.');
+    R.eq('Σ anticlockwise', '', sumACW, 'N m', 'Add the sizes of all the anticlockwise moments about O. In equilibrium (reactions included) the two sums are equal.');
     var bal = res.balanced;
     if (md === 'pin') {
       R.head('Principle of moments about the pivot (x<sub>P</sub> = ' + U.num(v.xP, 4) + ' m)');
@@ -338,32 +496,32 @@
         var t = s3(f.F) + '×' + s3(ST.perpDist(f, v.xP));
         if (M < 0) { cw -= M; cwT.push(t); } else { acw += M; acwT.push(t); }
       });
-      R.eq('Σ clockwise', cwT.join(' + ') || '0', cw, 'N m');
-      R.eq('Σ anticlockwise', acwT.join(' + ') || '0', acw, 'N m');
+      R.eq('Σ clockwise', cwT.join(' + ') || '0', cw, 'N m', 'Take moments about the pivot: the pivot force passes through it, so it has no moment and drops out.');
+      R.eq('Σ anticlockwise', acwT.join(' + ') || '0', acw, 'N m', 'Principle of moments: for equilibrium, sum of clockwise moments = sum of anticlockwise moments about any point.');
       if (bal) R.badge('Equilibrium: no resultant moment about the pivot', 'ok');
       else R.badge('Not in equilibrium: resultant moment ' + s3(Math.abs(res.Mnet)) + ' N m ' + sense(res.Mnet), 'warn');
       R.head('Force from the pivot / hinge on the beam' + (bal ? '' : ' (needed for zero resultant force)'));
-      R.eq('ΣF<sub>x</sub> applied', 'sum of F cos θ', res.sumApplied.x, 'N');
-      R.eq('ΣF<sub>y</sub> applied', 'sum of F sin θ (up +)', res.sumApplied.y, 'N');
-      R.eq('R<sub>x</sub>', '−ΣF<sub>x</sub>', res.R.x, 'N');
-      R.eq('R<sub>y</sub>', '−ΣF<sub>y</sub>', res.R.y, 'N');
-      R.eq('|R|', '√(R<sub>x</sub>² + R<sub>y</sub>²) = √(' + sq(res.R.x) + '² + ' + sq(res.R.y) + '²)', res.Rmag, 'N');
-      if (res.Rmag > 1e-9) R.eq('direction of R', 'tan⁻¹(R<sub>y</sub> ÷ R<sub>x</sub>), anticlockwise from →', U.dp(res.Rang, 1) + '°');
+      R.eq('ΣF<sub>x</sub> applied', 'sum of F cos θ', res.sumApplied.x, 'N', 'Resolve every applied force (and the weight) horizontally, right positive.');
+      R.eq('ΣF<sub>y</sub> applied', 'sum of F sin θ (up +)', res.sumApplied.y, 'N', 'Resolve vertically, up positive. The weight counts as a downward force.');
+      R.eq('R<sub>x</sub>', '−ΣF<sub>x</sub>', res.R.x, 'N', 'No resultant force in equilibrium, so the pivot must supply the opposite of the other horizontal forces.');
+      R.eq('R<sub>y</sub>', '−ΣF<sub>y</sub>', res.R.y, 'N', 'Likewise vertically: the pivot balances the other vertical forces.');
+      R.eq('|R|', '√(R<sub>x</sub>² + R<sub>y</sub>²) = √(' + sq(res.R.x) + '² + ' + sq(res.R.y) + '²)', res.Rmag, 'N', 'The two components are perpendicular, so the size of the pivot force comes from Pythagoras.');
+      if (res.Rmag > 1e-9) R.eq('direction of R', 'tan⁻¹(R<sub>y</sub> ÷ R<sub>x</sub>), anticlockwise from →', U.dp(res.Rang, 1) + '°', '', 'tan of the angle = vertical component ÷ horizontal component; the signs say which quadrant.');
     } else {
       R.head('Take moments about support A (removes R<sub>A</sub>)');
       var terms = [], tot = 0, span = v.xB - v.xA;
       res.forces.forEach(function (f) { if (!(f.F > 1e-12)) return; var M = -ST.momentAbout(f, v.xA); tot += M; terms.push(s3(f.F) + ' × ' + (f.x - v.xA < 0 ? '(' + s3(f.x - v.xA) + ')' : s3(f.x - v.xA))); });
-      R.eq('R<sub>B</sub> × (x<sub>B</sub> − x<sub>A</sub>)', 'Σ load × (x − x<sub>A</sub>) = ' + (terms.join(' + ') || '0'), tot, 'N m');
-      R.eq('R<sub>B</sub>', s3(tot) + ' ÷ ' + s3(span), res.RB, 'N');
+      R.eq('R<sub>B</sub> × (x<sub>B</sub> − x<sub>A</sub>)', 'Σ load × (x − x<sub>A</sub>) = ' + (terms.join(' + ') || '0'), tot, 'N m', 'Take moments about A: R<sub>A</sub> acts through A, so it has no moment. The moment of R<sub>B</sub> balances the moments of the loads.');
+      R.eq('R<sub>B</sub>', s3(tot) + ' ÷ ' + s3(span), res.RB, 'N', 'Divide the total moment by the distance from A to B.');
       R.head('Resolve vertically');
-      R.eq('R<sub>A</sub>', 'total load − R<sub>B</sub> = ' + s3(-res.sumApplied.y) + ' − ' + s3(res.RB), res.RA, 'N');
+      R.eq('R<sub>A</sub>', 'total load − R<sub>B</sub> = ' + s3(-res.sumApplied.y) + ' − ' + s3(res.RB), res.RA, 'N', 'No resultant vertical force: upward reactions together equal the total downward load.');
       if (res.tips) R.badge('A support cannot pull: R<sub>' + (res.tips === 'B' ? 'A' : 'B') + '</sub> &lt; 0 ⇒ the beam tips about ' + res.tips, 'warn');
       else if (res.limiting) R.badge('On the point of tipping (one reaction is zero)', 'warn');
       else R.badge('Equilibrium: both reactions push up', 'ok');
     }
     R.head('Check');
     var chk = ST.sumM(res.all, v.xO);
-    R.eq('Σ moments about O', 'all forces including reactions (zero about every point in equilibrium)', Math.abs(chk) < 1e-9 * res.scale ? 0 : chk, 'N m');
+    R.eq('Σ moments about O', 'all forces including reactions (zero about every point in equilibrium)', Math.abs(chk) < 1e-9 * res.scale ? 0 : chk, 'N m', 'In equilibrium the resultant moment is zero about every point, so this check works wherever O is.');
     R.render();
     // moment balance meter under the scene
     var tot2 = sumCW + sumACW;
@@ -375,15 +533,16 @@
   function coupleReadout() {
     var v = prm.values, cp = ST.couple(v.Fc, v.dc, v.thc), s3 = U.sf;
     R.html('<div class="head">Two equal and opposite forces F at the ends of a bar of length d, each at θ to the bar.</div>');
-    R.eq('perpendicular distance', 'd sin θ = ' + s3(v.dc) + ' × sin ' + U.dp(v.thc, 1) + '°', cp.dPerp, 'm');
-    R.eq('torque of couple', 'F × d sin θ = ' + s3(v.Fc) + ' × ' + s3(cp.dPerp), cp.torque, 'N m');
-    R.eq('resultant force', 'F + (−F)', 0, 'N');
+    R.head('Torque of the couple');
+    R.eq('perpendicular distance', 'd sin θ = ' + s3(v.dc) + ' × sin ' + U.dp(v.thc, 1) + '°', cp.dPerp, 'm', 'Torque uses the perpendicular distance between the two lines of action, not the length of the bar.');
+    R.eq('torque of couple', 'F × d sin θ = ' + s3(v.Fc) + ' × ' + s3(cp.dPerp), cp.torque, 'N m', 'Torque of a couple = one of the forces × perpendicular distance between them.');
+    R.eq('resultant force', 'F + (−F)', 0, 'N', 'The forces are equal and opposite, so a couple gives no resultant force: it only turns the object.');
     R.head('Moments about O (x<sub>O</sub> = ' + U.num(v.xO, 4).replace('-', '−') + ' m from the left force)');
     cp.forces.forEach(function (f, i) {
       var M = ST.momentAbout(f, v.xO);
-      R.eq('force ' + (i + 1), Math.abs(f.x - v.xO) < 1e-12 ? 'acts through O' : 'F × ' + s3(Math.abs(f.x - v.xO)) + ' × sin ' + U.dp(v.thc, 1) + '°', Math.abs(M) < 1e-12 ? '0' : s3(Math.abs(M)) + ' ' + sense(M), 'N m');
+      R.eq('force ' + (i + 1), Math.abs(f.x - v.xO) < 1e-12 ? 'acts through O' : 'F × ' + s3(Math.abs(f.x - v.xO)) + ' × sin ' + U.dp(v.thc, 1) + '°', Math.abs(M) < 1e-12 ? '0' : s3(Math.abs(M)) + ' ' + sense(M), 'N m', 'Moment of this force about O = F × perpendicular distance from O to its line of action.');
     });
-    R.eq('total', 'sum (independent of O)', Math.abs(cp.momentAbout(v.xO)) < 1e-12 ? '0' : s3(Math.abs(cp.momentAbout(v.xO))) + ' ' + sense(cp.momentAbout(v.xO)), 'N m');
+    R.eq('total', 'sum (independent of O)', Math.abs(cp.momentAbout(v.xO)) < 1e-12 ? '0' : s3(Math.abs(cp.momentAbout(v.xO))) + ' ' + sense(cp.momentAbout(v.xO)), 'N m', 'Add the two moments about O. The total is F × d sin θ wherever O is: the torque of a couple does not depend on the point.');
     if (cp.torque > 1e-12) R.badge('Rotation only: zero resultant force, non-zero torque', 'info');
     else R.badge('θ = 0° or 180°: the forces act along the same line, so there is no couple', 'warn');
     R.render();

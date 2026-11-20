@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-circuits.js"></script>
@@ -21,6 +22,156 @@
   var pg = ui.page({ title: 'Potential divider, sensors and the potentiometer', g: 9.81,
     tags: ['9702 10.3 Potential dividers', '9702 10.3.2–3 potentiometer, null method', '9702 10.3.4 thermistor / LDR'] });
   (function hideG() { try { var t = document.querySelector('header').children[2], l = t.children[t.children.length - 1]; if (l && /g =/.test(l.innerHTML)) l.style.display = 'none'; } catch (e) { /* header layout changed */ } })();
+
+  /* ---------- real-life look: soft illustrated bench apparatus (screen pixels; used only when SIM.scene.real()) ---------- */
+  var KIT = (function () {
+    var S = SIM.scene, T = 0, raf = 0;
+    function dk() { return S.dark(); }
+    function edge() { return dk() ? 'rgba(255,255,255,.22)' : 'rgba(70,60,110,.22)'; }
+    function path(c, pts) { c.beginPath(); pts.forEach(function (p, i) { if (i) c.lineTo(p[0], p[1]); else c.moveTo(p[0], p[1]); }); }
+    function rrect(c, x, y, w, h, r) { r = Math.max(0, Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2)); c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
+    function grad(c, x0, y0, x1, y1, stops) { var g = c.createLinearGradient(x0, y0, x1, y1); stops.forEach(function (s) { g.addColorStop(s[0], s[1]); }); return g; }
+    function glow(c, x, y, r, rgb, a) {   // soft radial glow (solid fallback when radial gradients are missing)
+      if (!(r > 0) || !(a > 0)) return;
+      c.save();
+      var g = c.createRadialGradient ? c.createRadialGradient(x, y, 0, x, y, r) : null;
+      if (g && g.addColorStop) { g.addColorStop(0, 'rgba(' + rgb + ',' + a + ')'); g.addColorStop(1, 'rgba(' + rgb + ',0)'); c.fillStyle = g; }
+      else { c.globalAlpha = a * 0.4; c.fillStyle = 'rgb(' + rgb + ')'; }
+      c.beginPath(); c.arc(x, y, r, 0, 2 * Math.PI); c.fill(); c.restore();
+    }
+    function reduced() { return !!(SIM.anim && SIM.anim.reducedMotion && SIM.anim.reducedMotion()); }
+    /** keep redrawing while the real look is on (charge flow); time stays 0 with reduced motion */
+    function loop(fn) {
+      if (raf || !S.real() || reduced() || typeof requestAnimationFrame === 'undefined') return;
+      raf = requestAnimationFrame(function (now) { raf = 0; if (!S.real()) return; T = now / 1000; fn(); });
+    }
+    /** a pale pegboard bench behind the circuit */
+    function bench(c, w, h) {
+      var d = dk();
+      c.save(); c.fillStyle = grad(c, 0, 0, 0, h, [[0, d ? '#262b3d' : '#f7f3ec'], [1, d ? '#1f2333' : '#f0e9dd']]); c.fillRect(0, 0, w, h);
+      c.fillStyle = d ? 'rgba(255,255,255,.04)' : 'rgba(150,125,95,.08)';
+      for (var y = 16, row = 0; y < h; y += 28, row++) for (var x = 16 + (row % 2) * 14; x < w; x += 28) { c.beginPath(); c.arc(x, y, 1.6, 0, 2 * Math.PI); c.fill(); }
+      c.restore();
+    }
+    /** an insulated lead: soft coloured sleeve with a light highlight */
+    function wire(c, pts, color) {
+      c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+      c.strokeStyle = color || (dk() ? '#7e8cb8' : '#a9b6de'); c.lineWidth = 5; path(c, pts); c.stroke();
+      c.strokeStyle = 'rgba(255,255,255,.4)'; c.lineWidth = 1.4; path(c, pts); c.stroke(); c.restore();
+    }
+    /** charge dots moving along a polyline; phase in px (dots move from the first point towards the last as phase grows) */
+    function charges(c, pts, phase, color, gap) {
+      var segs = [], tot = 0, i;
+      for (i = 1; i < pts.length; i++) { var Lg = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); segs.push(Lg); tot += Lg; }
+      if (!(tot > 1) || !isFinite(phase)) return;
+      gap = gap || 22; var off = ((phase % gap) + gap) % gap;
+      c.save(); c.fillStyle = color || '#ffd36b'; c.strokeStyle = 'rgba(190,130,40,.35)'; c.lineWidth = 1;
+      for (var s = off; s < tot; s += gap) {
+        var k = 0, a = s; while (k < segs.length - 1 && a > segs[k]) { a -= segs[k]; k++; }
+        var f = segs[k] > 0 ? a / segs[k] : 0, p = pts[k], q = pts[k + 1];
+        c.beginPath(); c.arc(p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f, 2.7, 0, 2 * Math.PI); c.fill(); c.stroke();
+      }
+      c.restore();
+    }
+    /** work in a frame along A→B: callback(c, len) draws with the axis along +x, centred on the midpoint */
+    function along(c, A, B, fn) {
+      var dx = B[0] - A[0], dy = B[1] - A[1], len = Math.hypot(dx, dy); if (!(len > 0)) return;
+      c.save(); c.translate((A[0] + B[0]) / 2, (A[1] + B[1]) / 2); c.rotate(Math.atan2(dy, dx)); fn(c, len); c.restore();
+    }
+    /** a cylindrical cell from A (+ end) to B (− end); opt.size = diameter px */
+    function cell(c, A, B, opt) {
+      opt = opt || {};
+      along(c, A, B, function (c, len) {
+        var d = opt.size || 16, bl = Math.min(len * 0.78, d * 3.6), L0 = -bl / 2;
+        wire(c, [[-len / 2, 0], [L0, 0]]); wire(c, [[bl / 2, 0], [len / 2, 0]]);
+        rrect(c, L0 - d * 0.18, -d * 0.2, d * 0.3, d * 0.4, 2); c.fillStyle = '#d9dce6'; c.fill();   // + nub
+        rrect(c, L0, -d / 2, bl, d, d * 0.3); c.fillStyle = grad(c, 0, -d / 2, 0, d / 2, [[0, '#a8b8ea'], [0.45, '#8fa2df'], [1, '#7486c4']]); c.fill();
+        rrect(c, L0, -d / 2, bl * 0.24, d, d * 0.3); c.fillStyle = grad(c, 0, -d / 2, 0, d / 2, [[0, '#ffd59a'], [1, '#f2b46c']]); c.fill();
+        rrect(c, L0, -d / 2, bl, d, d * 0.3); c.strokeStyle = 'rgba(60,60,110,.25)'; c.lineWidth = 1; c.stroke();
+        c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(L0 + 3, -d * 0.36, bl - 6, d * 0.14);
+        c.fillStyle = 'rgba(40,40,70,.7)'; c.font = '700 ' + Math.round(Math.max(9, d * 0.6)) + 'px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.fillText('+', L0 + bl * 0.12, 0.5); c.fillText('−', bl / 2 - d * 0.45, 0.5);
+      });
+    }
+    var BAND = ['#5d5a70', '#b88a6a', '#ef8f8f', '#f6b27a', '#f3dc7c', '#8fd3a0', '#8fb6ee', '#c3a2ea', '#b7b7c4', '#fbfbfb'];
+    function bandsOf(R) {
+      if (!(R > 0) || !isFinite(R)) return null;
+      var e = Math.floor(Math.log10(R) + 1e-9) - 1, m = Math.round(R / Math.pow(10, e));
+      if (m >= 100) { m = 10; e++; }
+      if (e < -2 || e > 9) return null;
+      return [BAND[Math.floor(m / 10)], BAND[m % 10], e === -1 ? '#e7c46a' : e === -2 ? '#cfd3dc' : BAND[e]];
+    }
+    /** a resistor from A to B: rounded body with colour bands; opt.heat 0…1 adds a warm glow; opt.kind 'th' | 'ldr' for sensors */
+    function resistor(c, A, B, R, opt) {
+      opt = opt || {};
+      along(c, A, B, function (c, len) {
+        var bl = Math.min(len * 0.62, opt.body || 64), th = opt.thick || 15, h = opt.heat > 0 ? Math.min(1, opt.heat) : 0;
+        wire(c, [[-len / 2, 0], [len / 2, 0]], dk() ? '#9aa0b4' : '#c3c7d3');
+        if (h > 0.02) glow(c, 0, 0, bl * 0.75, '255,150,90', 0.55 * h);
+        var base = opt.kind === 'th' ? '#9fd4c2' : opt.kind === 'ldr' ? '#f3e1a6' : '#f0d9b5';
+        rrect(c, -bl / 2, -th / 2, bl, th, th / 2); c.fillStyle = grad(c, 0, -th / 2, 0, th / 2, [[0, S.shade(base, 0.35)], [0.5, base], [1, S.shade(base, -0.12)]]); c.fill();
+        if (h > 0.02) { c.globalAlpha = 0.5 * h; c.fillStyle = '#ff9f73'; c.fill(); c.globalAlpha = 1; }
+        c.strokeStyle = 'rgba(120,90,60,.3)'; c.lineWidth = 1; c.stroke();
+        if (!opt.kind) {
+          var bd = bandsOf(R);
+          if (bd) bd.forEach(function (colr, i) { c.fillStyle = colr; c.fillRect(-bl * 0.3 + i * bl * 0.14, -th / 2 + 1, Math.max(2, bl * 0.07), th - 2); });
+          c.fillStyle = '#e7c46a'; c.fillRect(bl * 0.28, -th / 2 + 1, Math.max(2, bl * 0.06), th - 2);   // tolerance band
+        } else if (opt.kind === 'ldr') {   // zig-zag track on a round window
+          c.strokeStyle = 'rgba(190,120,80,.65)'; c.lineWidth = 1.4; c.beginPath();
+          for (var z = 0; z <= 8; z++) { var zx = -bl * 0.32 + z * bl * 0.08; c.lineTo(zx, (z % 2 ? 1 : -1) * th * 0.25); } c.stroke();
+        } else {   // thermistor: a bead on two legs
+          c.fillStyle = '#6fb9a3'; c.beginPath(); c.arc(0, 0, th * 0.36, 0, 2 * Math.PI); c.fill();
+        }
+        c.fillStyle = 'rgba(255,255,255,.4)'; c.fillRect(-bl / 2 + th / 2, -th * 0.34, bl - th, th * 0.13);
+      });
+    }
+    /** a filament lamp at (x, y), radius r; k = 0…1 brightness */
+    function bulb(c, x, y, r, k) {
+      k = U.clamp(k || 0, 0, 1);
+      if (k > 0.02) glow(c, x, y, r * (1.6 + 1.6 * k), '255,214,120', 0.25 + 0.55 * k);
+      c.save();
+      rrect(c, x - r * 0.5, y + r * 0.6, r, r * 0.65, 3); c.fillStyle = grad(c, x - r * 0.5, 0, x + r * 0.5, 0, [[0, '#c9ccd8'], [0.5, '#eef0f6'], [1, '#b4b8c8']]); c.fill();
+      c.beginPath(); c.arc(x, y, r, 0, 2 * Math.PI);
+      c.fillStyle = k > 0.02 ? 'rgba(255,' + Math.round(236 - 20 * k) + ',' + Math.round(190 - 80 * k) + ',' + (0.45 + 0.5 * k) + ')' : (dk() ? 'rgba(200,215,240,.25)' : 'rgba(225,235,250,.75)');
+      c.fill(); c.strokeStyle = edge(); c.lineWidth = 1; c.stroke();
+      c.strokeStyle = k > 0.02 ? 'rgba(255,170,60,' + (0.6 + 0.4 * k) + ')' : 'rgba(120,110,130,.6)'; c.lineWidth = 1.3;
+      c.beginPath(); c.moveTo(x - r * 0.35, y + r * 0.6); c.lineTo(x - r * 0.3, y); for (var i = 0; i <= 6; i++) c.lineTo(x - r * 0.3 + i * r * 0.1, y + (i % 2 ? -1 : 1) * r * 0.1); c.lineTo(x + r * 0.35, y + r * 0.6); c.stroke();
+      c.fillStyle = 'rgba(255,255,255,.55)'; c.beginPath(); c.arc(x - r * 0.4, y - r * 0.4, r * 0.18, 0, 2 * Math.PI); c.fill();
+      c.restore();
+    }
+    /** an analogue dial meter: frac 0…1 of full scale (or −1…1 with centreZero); letter 'A' | 'V' | 'G' */
+    function meter(c, x, y, r, letter, frac, centreZero) {
+      var f = isFinite(frac) ? (centreZero ? 0.5 + 0.5 * U.clamp(frac, -1, 1) : U.clamp(frac, 0, 1.05)) : 0, d = dk();
+      c.save();
+      rrect(c, x - r * 1.15, y - r * 1.05, r * 2.3, r * 2.1, r * 0.35); c.fillStyle = grad(c, 0, y - r, 0, y + r, [[0, d ? '#4a5272' : '#e9edf8'], [1, d ? '#3a4160' : '#d6dcef']]); c.fill(); c.strokeStyle = edge(); c.lineWidth = 1; c.stroke();
+      var px = x, py = y + r * 0.55, R0 = r * 1.15, a0 = -Math.PI * 5 / 6, a1 = -Math.PI / 6;
+      c.beginPath(); c.arc(px, py, R0, a0, a1); c.lineTo(px, py); c.closePath(); c.fillStyle = d ? '#f2efe6' : '#fffdf6'; c.fill();
+      c.strokeStyle = 'rgba(90,80,110,.45)'; c.lineWidth = 1;
+      for (var i = 0; i <= 10; i++) { var a = a0 + (a1 - a0) * i / 10, t1 = R0 * (i % 5 ? 0.86 : 0.78); c.beginPath(); c.moveTo(px + Math.cos(a) * R0 * 0.95, py + Math.sin(a) * R0 * 0.95); c.lineTo(px + Math.cos(a) * t1, py + Math.sin(a) * t1); c.stroke(); }
+      var an = a0 + (a1 - a0) * f;
+      c.strokeStyle = '#e46f6f'; c.lineWidth = 1.8; c.lineCap = 'round'; c.beginPath(); c.moveTo(px, py); c.lineTo(px + Math.cos(an) * R0 * 0.9, py + Math.sin(an) * R0 * 0.9); c.stroke();
+      c.fillStyle = '#6d6a85'; c.beginPath(); c.arc(px, py, 2.5, 0, 2 * Math.PI); c.fill();
+      c.fillStyle = d ? '#e8e8f2' : '#4c4966'; c.font = '700 ' + Math.round(Math.max(9, r * 0.5)) + 'px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(letter, x, y + r * 0.78);
+      c.restore();
+    }
+    /** a soft translucent casing (battery box) */
+    function casing(c, x, y, w, h) {
+      c.save(); rrect(c, x, y, w, h, Math.min(16, h * 0.3));
+      c.fillStyle = dk() ? 'rgba(150,170,230,.13)' : 'rgba(180,195,240,.28)'; c.fill(); c.strokeStyle = dk() ? 'rgba(170,185,240,.45)' : 'rgba(120,135,200,.45)'; c.lineWidth = 1.5; c.stroke();
+      c.fillStyle = 'rgba(255,255,255,.22)'; rrect(c, x + 6, y + 4, w - 12, Math.max(2, h * 0.12), 4); c.fill(); c.restore();
+    }
+    /** a knife switch from A to B (open lifts the blade) */
+    function knife(c, A, B, isOpen) {
+      c.save(); c.lineCap = 'round';
+      [A, B].forEach(function (p) { c.fillStyle = dk() ? '#8a90a8' : '#c7cad6'; c.beginPath(); c.arc(p[0], p[1], 5, 0, 2 * Math.PI); c.fill(); c.strokeStyle = edge(); c.lineWidth = 1; c.stroke(); });
+      var L = Math.hypot(B[0] - A[0], B[1] - A[1]), a = Math.atan2(B[1] - A[1], B[0] - A[0]) - (isOpen ? 0.55 : 0);
+      c.strokeStyle = '#e9b97a'; c.lineWidth = 4.5; c.beginPath(); c.moveTo(A[0], A[1]); c.lineTo(A[0] + Math.cos(a) * L, A[1] + Math.sin(a) * L); c.stroke();
+      c.fillStyle = '#ef8f8f'; c.beginPath(); c.arc(A[0] + Math.cos(a) * L * 0.85, A[1] + Math.sin(a) * L * 0.85 - 5, 4, 0, 2 * Math.PI); c.fill();
+      c.restore();
+    }
+    return { t: function () { return T; }, loop: loop, bench: bench, wire: wire, charges: charges, cell: cell, resistor: resistor, bulb: bulb, meter: meter, casing: casing, knife: knife, glow: glow, rrect: rrect, grad: grad, along: along, edge: edge };
+  })();
+  function niceFS(x) { var a = Math.abs(x); if (!(a > 0) || !isFinite(a)) return 1; var e = Math.pow(10, Math.floor(Math.log10(a))), m = a / e; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * e; }   // meter full-scale
 
   /* ---------- layout ---------- */
   var sceneCard = pg.card('left');
@@ -115,6 +266,12 @@
   /* ---------- drawing helpers ---------- */
   function resistor(c, x, y, w, h, vertical, label, col, kind) {
     var L = col['object-line'];
+    if (SIM.scene.real()) {
+      var ln = (vertical ? h : w) / 2 + 3;
+      KIT.resistor(c, vertical ? [x, y - ln] : [x - ln, y], vertical ? [x, y + ln] : [x + ln, y], kind ? 0 : Number(label && /([\d.]+)\s*(k?)Ω/.test(label) ? RegExp.$1 * (RegExp.$2 ? 1e3 : 1) : 0), { kind: kind, body: (vertical ? h : w) * 0.95, thick: Math.max(10, (vertical ? w : h) * 0.75) });
+      if (label) D.label(c, label, x + (vertical ? Math.max(w, h) * 0.7 + 10 : 0), y + (vertical ? 0 : -Math.min(w, h) / 2 - 12), col.ink, { size: 11, bg: true, align: vertical ? 'left' : 'center' });
+      return;
+    }
     c.save(); c.strokeStyle = L; c.lineWidth = 2; c.fillStyle = col.panel;
     var rw = vertical ? h : w, rh = vertical ? w : h;
     c.fillRect(x - rw / 2, y - rh / 2, rw, rh); c.strokeRect(x - rw / 2, y - rh / 2, rw, rh);
@@ -129,6 +286,11 @@
   }
   function cellSym(c, x, y, vertical, col, label) {
     var L = col['object-line'], s = vp.scale;
+    if (SIM.scene.real()) {   // + terminal on top (vertical) or on the left (horizontal), as in the symbol
+      if (vertical) KIT.cell(c, [x, y - 0.9 * s], [x, y + 0.9 * s], { size: Math.max(11, 0.42 * s) }); else KIT.cell(c, [x - 0.9 * s, y], [x + 0.9 * s, y], { size: Math.max(11, 0.42 * s) });
+      if (label) D.label(c, label, x + (vertical ? -0.8 * s : 0), y + (vertical ? 0 : -0.9 * s), col.ink, { size: 11, bg: true, align: vertical ? 'right' : 'center' });
+      return;
+    }
     c.save(); c.strokeStyle = L; c.lineWidth = 2;
     if (vertical) { c.beginPath(); c.moveTo(x - 0.55 * s, y - 0.12 * s); c.lineTo(x + 0.55 * s, y - 0.12 * s); c.stroke(); c.lineWidth = 3.5; c.beginPath(); c.moveTo(x - 0.28 * s, y + 0.12 * s); c.lineTo(x + 0.28 * s, y + 0.12 * s); c.stroke(); }
     else { c.beginPath(); c.moveTo(x - 0.12 * s, y - 0.55 * s); c.lineTo(x - 0.12 * s, y + 0.55 * s); c.stroke(); c.lineWidth = 3.5; c.beginPath(); c.moveTo(x + 0.12 * s, y - 0.28 * s); c.lineTo(x + 0.12 * s, y + 0.28 * s); c.stroke(); }
@@ -137,12 +299,14 @@
   }
 
   /* ---------- scene ---------- */
-  function drawScene() { sceneBody(); if (ix) ix.paint(vp.ctx); }
+  function drawScene() { sceneBody(); if (ix) ix.paint(vp.ctx); if (SIM.scene.real()) KIT.loop(drawScene); }
   function sceneBody() {
     if (!M) return;
     var col = ui.colors(), c, L = col['object-line'], s, v = prm.values;
     vp.fit(0, 16, 0, 9); c = vp.begin(); s = vp.scale;
-    function wire(pts) { D.line(c, pts.map(function (p) { return vp.P(p[0], p[1]); }), L, { width: 2 }); }
+    var real = SIM.scene.real(), Pw = function (p) { return vp.P(p[0], p[1]); };
+    if (real) KIT.bench(c, vp.w, vp.h);
+    function wire(pts) { if (real) KIT.wire(c, pts.map(Pw)); else D.line(c, pts.map(Pw), L, { width: 2 }); }
     function dot(x, y) { c.fillStyle = L; c.beginPath(); c.arc(vp.X(x), vp.Y(y), 3.5, 0, 7); c.fill(); }
     if (M.div) {
       var dv = M.div, d = dv.d, sn = sensor.get(), top = spos.get() === 'top';
@@ -155,7 +319,15 @@
       c.strokeStyle = L; c.fillStyle = col.panel; [4, 1].forEach(function (y) { c.beginPath(); c.arc(vp.X(11), vp.Y(y), 4.5, 0, 7); c.fill(); c.stroke(); });
       D.label(c, 'V_out', vp.X(11.6), vp.Y(2.5), col.s1, { size: 12, bold: true, align: 'left' });
       if (load.get()) { wire([[9.5, 4], [9.5, 3.2]]); wire([[9.5, 1.8], [9.5, 1]]); resistor(c, vp.X(9.5), vp.Y(2.5), 0.6 * s, 1.4 * s, true, 'R_L = ' + U.sf(v.RL) + ' kΩ', col); dot(9.5, 4); dot(9.5, 1); }
+      if (real) realSensor(c, sn, top, s);
       if (d.invalid) { D.label(c, d.invalid, vp.w / 2, 14, col.warn, { bold: true, bg: true }); return; }
+      if (real && d.I > 0) {   // charge flow (conventional), speed ∝ current in each part
+        var Iref = Math.max(d.I, v.Vin / 1000), ph = KIT.t() * 80 / Iref, Ibot = dv.bot > 0 ? d.Vout / dv.bot : 0;
+        KIT.charges(c, [[3, 4.6], [3, 8], [7, 8], [7, 4]].map(Pw), ph * d.I, null, 18);
+        KIT.charges(c, [[7, 4], [7, 1]].map(Pw), ph * Ibot, null, 18);
+        KIT.charges(c, [[7, 1], [3, 1], [3, 3]].map(Pw), ph * d.I, null, 18);
+        if (load.get()) KIT.charges(c, [[7, 4], [9.5, 4], [9.5, 1], [7, 1]].map(Pw), ph * d.Vout / (v.RL * 1e3), null, 18);
+      }
       D.label(c, U.sf(d.Vout) + ' V', vp.X(12.6), vp.Y(2.5), col.s1, { size: 16, bold: true, align: 'left', bg: true });
       if (d.I > 0) D.arrow(c, vp.X(5), vp.Y(8.5), vp.X(6.4), vp.Y(8.5), col.applied, { head: 7, label: 'I = ' + (d.I >= 1e-2 ? U.sf(d.I) + ' A' : U.sf(d.I * 1e3) + ' mA') });
       // share bar
@@ -169,7 +341,12 @@
       cellSym(c, vp.X(8), vp.Y(8), false, col, 'E₀ = ' + U.sf(v.E0) + ' V' + (v.r0 > 0 ? ', r₀ = ' + U.sf(v.r0) + ' Ω' : ''));
       if (v.Rs > 0) resistor(c, vp.X(10.8), vp.Y(8), 0.6 * s, 1.6 * s, false, 'R_s = ' + U.sf(v.Rs) + ' Ω', col); else wire([[10, 8], [11.6, 8]]);
       // the wire with a scale
-      c.strokeStyle = col.s4; c.lineWidth = 4; c.beginPath(); c.moveTo(vp.X(xA), vp.Y(yW)); c.lineTo(vp.X(xB), vp.Y(yW)); c.stroke();
+      if (real) {   // a metre rule under a bare resistance wire
+        KIT.rrect(c, vp.X(xA) - 14, vp.Y(yW) - 6, vp.X(xB) - vp.X(xA) + 28, 34, 6); c.fillStyle = KIT.grad(c, 0, vp.Y(yW) - 6, 0, vp.Y(yW) + 28, [[0, '#f6e3bf'], [1, '#ecd2a2']]); c.fill(); c.strokeStyle = 'rgba(150,110,60,.3)'; c.lineWidth = 1; c.stroke();
+        c.strokeStyle = '#b9bfcf'; c.lineWidth = 3; c.lineCap = 'round'; c.beginPath(); c.moveTo(vp.X(xA), vp.Y(yW)); c.lineTo(vp.X(xB), vp.Y(yW)); c.stroke();
+        c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1; c.stroke();
+        if (!p.invalid && p.Iwire > 0) KIT.charges(c, [[7.2, 8], [xA, 8], [xA, yW], [xB, yW], [xB, 8], [8.8, 8]].map(Pw), KIT.t() * 70 * U.clamp(p.Iwire / Math.max(v.E0 / v.Rw, 1e-12), 0, 1), null, 18);
+      } else { c.strokeStyle = col.s4; c.lineWidth = 4; c.beginPath(); c.moveTo(vp.X(xA), vp.Y(yW)); c.lineTo(vp.X(xB), vp.Y(yW)); c.stroke(); }
       c.lineWidth = 1; c.strokeStyle = col.muted;
       for (var cm = 0; cm <= Lc + 1e-9; cm += 10) { c.beginPath(); c.moveTo(vp.X(X(cm)), vp.Y(yW) + 5); c.lineTo(vp.X(X(cm)), vp.Y(yW) + (cm % 50 === 0 ? 13 : 9)); c.stroke(); if (cm % 50 === 0) D.label(c, cm + ' cm', vp.X(X(cm)), vp.Y(yW) + 22, col.muted, { size: 10 }); }
       D.label(c, 'A', vp.X(xA) - 12, vp.Y(yW), col.ink, { bold: true }); D.label(c, 'B', vp.X(xB) + 12, vp.Y(yW), col.ink, { bold: true });
@@ -177,15 +354,45 @@
       var xj = X(U.clamp(v.xc, 0, Lc));
       wire([[xA, yW], [xA, 1.5], [4.6, 1.5]]); wire([[5.4, 1.5], [7.4, 1.5]]); wire([[8.6, 1.5], [xj, 1.5], [xj, yW - 0.6]]);
       cellSym(c, vp.X(5), vp.Y(1.5), false, col, 'E_x = ' + U.sf(v.Ex) + ' V');
-      c.strokeStyle = L; c.lineWidth = 2; c.fillStyle = col.panel; c.beginPath(); c.arc(vp.X(8), vp.Y(1.5), 0.6 * s, 0, 7); c.fill(); c.stroke();
-      D.label(c, 'G', vp.X(8), vp.Y(1.5) + 0.32 * s, col.ink, { size: 11, bold: true });
       var ig = p.Ig || 0, needle = U.clamp(ig / 0.005, -1, 1) * 1.1;
-      c.strokeStyle = col.s2; c.lineWidth = 2; c.beginPath(); c.moveTo(vp.X(8), vp.Y(1.5) + 0.2 * s); c.lineTo(vp.X(8) + Math.sin(needle) * 0.5 * s, vp.Y(1.5) + 0.2 * s - Math.cos(needle) * 0.5 * s); c.stroke();
-      D.arrow(c, vp.X(xj), vp.Y(yW - 0.6), vp.X(xj), vp.Y(yW) + 3, L, { head: 8, width: 2 });
+      if (real) {   // centre-zero galvanometer and a jockey with a handle
+        KIT.meter(c, vp.X(8), vp.Y(1.5), Math.max(13, 0.55 * s), 'G', ig / 0.005, true);
+        D.arrow(c, vp.X(xj), vp.Y(yW - 0.6), vp.X(xj), vp.Y(yW) + 3, '#c9a27a', { head: 8, width: 2.5 });
+        KIT.rrect(c, vp.X(xj) - 6, vp.Y(yW - 0.6) - 4, 12, 16, 6); c.fillStyle = '#ef9f9f'; c.fill(); c.strokeStyle = KIT.edge(); c.lineWidth = 1; c.stroke();
+      } else {
+        c.strokeStyle = L; c.lineWidth = 2; c.fillStyle = col.panel; c.beginPath(); c.arc(vp.X(8), vp.Y(1.5), 0.6 * s, 0, 7); c.fill(); c.stroke();
+        D.label(c, 'G', vp.X(8), vp.Y(1.5) + 0.32 * s, col.ink, { size: 11, bold: true });
+        c.strokeStyle = col.s2; c.lineWidth = 2; c.beginPath(); c.moveTo(vp.X(8), vp.Y(1.5) + 0.2 * s); c.lineTo(vp.X(8) + Math.sin(needle) * 0.5 * s, vp.Y(1.5) + 0.2 * s - Math.cos(needle) * 0.5 * s); c.stroke();
+        D.arrow(c, vp.X(xj), vp.Y(yW - 0.6), vp.X(xj), vp.Y(yW) + 3, L, { head: 8, width: 2 });
+      }
       D.label(c, 'jockey  l = ' + U.sf(v.xc) + ' cm', vp.X(xj), vp.Y(yW - 1.0), col.ink, { size: 11, bg: true });
       if (p.invalid) { D.label(c, p.invalid, vp.w / 2, 14, col.warn, { bold: true, bg: true }); return; }
       if (p.hasBalance) { var xb = vp.X(X(p.balance * 100)); c.save(); c.setLineDash([4, 3]); c.strokeStyle = col.s1; c.beginPath(); c.moveTo(xb, vp.Y(yW + 0.9)); c.lineTo(xb, vp.Y(yW - 0.2)); c.stroke(); c.restore(); D.label(c, 'balance ' + U.sf(p.balance * 100) + ' cm', xb, vp.Y(yW + 1.2), col.s1, { size: 11, bg: true }); }
       D.label(c, p.galvError ? '' : 'I_G = ' + (Math.abs(ig) < 1e-9 ? '0' : U.sf(ig * 1e3) + ' mA'), vp.X(8), vp.Y(0.45), col.s2, { size: 12, bold: true, bg: true });
+    }
+  }
+
+  /** real-life look around a sensor: a desk lamp shining on the LDR, or the thermistor in a beaker of water at T */
+  function realSensor(c, sn, top, s) {
+    if (sn === 'none') return;
+    var v = prm.values, x = vp.X(7), y = vp.Y(top ? 6 : 2);
+    if (sn === 'ldr') {
+      var k = U.clamp(v.Lx / 100, 0, 1), lx = x - 2.3 * s, ly = y - 0.9 * s;
+      c.save();
+      if (k > 0.01) { c.globalAlpha = 0.12 + 0.45 * k; c.fillStyle = '#ffe28a'; c.beginPath(); c.moveTo(lx + 0.3 * s, ly - 0.15 * s); c.lineTo(x + 0.5 * s, y - 0.9 * s); c.lineTo(x + 0.5 * s, y + 0.9 * s); c.lineTo(lx + 0.3 * s, ly + 0.35 * s); c.closePath(); c.fill(); c.globalAlpha = 1; }
+      c.strokeStyle = '#b7bdd0'; c.lineWidth = 3; c.lineCap = 'round'; c.beginPath(); c.moveTo(lx - 0.5 * s, ly + 1.8 * s); c.lineTo(lx - 0.5 * s, ly + 0.5 * s); c.lineTo(lx - 0.05 * s, ly + 0.1 * s); c.stroke();   // lamp arm
+      c.translate(lx, ly); c.rotate(0.35); KIT.rrect(c, -0.45 * s, -0.3 * s, 0.8 * s, 0.6 * s, 0.25 * s); c.fillStyle = '#f2a7a7'; c.fill(); c.strokeStyle = KIT.edge(); c.lineWidth = 1; c.stroke();
+      c.restore();
+      KIT.glow(c, lx + 0.35 * s, ly + 0.15 * s, 0.6 * s, '255,220,120', 0.3 + 0.6 * k);
+    } else {
+      var t = U.clamp((v.T + 10) / 110, 0, 1), bw = 1.5 * s, bh = 1.7 * s, bx = x - bw / 2, by = y - bh * 0.42;
+      c.save();
+      c.fillStyle = 'rgba(' + Math.round(150 + 100 * t) + ',' + Math.round(200 - 40 * t) + ',' + Math.round(245 - 120 * t) + ',.35)'; KIT.rrect(c, bx, by + bh * 0.2, bw, bh * 0.8, 6); c.fill();   // water, cool blue → warm orange
+      c.strokeStyle = 'rgba(150,170,210,.7)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(bx, by); c.lineTo(bx, by + bh - 6); c.quadraticCurveTo(bx, by + bh, bx + 6, by + bh); c.lineTo(bx + bw - 6, by + bh); c.quadraticCurveTo(bx + bw, by + bh, bx + bw, by + bh - 6); c.lineTo(bx + bw, by); c.stroke();
+      var tx = bx + bw * 0.18, t0 = by - 0.35 * s, t1 = by + bh * 0.9;   // thermometer
+      KIT.rrect(c, tx - 3, t0, 6, t1 - t0, 3); c.fillStyle = 'rgba(255,255,255,.85)'; c.fill(); c.strokeStyle = KIT.edge(); c.lineWidth = 1; c.stroke();
+      c.fillStyle = '#ef8f8f'; c.fillRect(tx - 1.5, t1 - (t1 - t0) * (0.1 + 0.85 * t), 3, (t1 - t0) * (0.1 + 0.85 * t)); c.beginPath(); c.arc(tx, t1, 4, 0, 2 * Math.PI); c.fill();
+      c.restore();
     }
   }
 
@@ -219,14 +426,14 @@
       if (d.invalid) { R.badge(d.invalid, 'warn').render(); return; }
       if (sn !== 'none') {
         R.badge('Sensor resistance from an illustrative model curve', 'info');
-        R.eq(sn === 'th' ? 'R<sub>thermistor</sub>' : 'R<sub>LDR</sub>', 'at ' + (sn === 'th' ? U.num(v.T, 3) + ' °C' : U.num(v.Lx, 3) + ' a.u.'), sn === 'th' ? IV.thermistorR(v.T, DEF.thermistor) : IV.ldrR(v.Lx, DEF.ldr), 'Ω');
+        R.eq(sn === 'th' ? 'R<sub>thermistor</sub>' : 'R<sub>LDR</sub>', 'at ' + (sn === 'th' ? U.num(v.T, 3) + ' °C' : U.num(v.Lx, 3) + ' a.u.'), sn === 'th' ? IV.thermistorR(v.T, DEF.thermistor) : IV.ldrR(v.Lx, DEF.ldr), 'Ω', 'Read the sensor’s resistance at this temperature / light intensity from its characteristic (here a model curve).');
       }
       R.head('Potential divider (output across the bottom resistor)');
-      if (load.get()) R.eq('R<sub>bottom</sub> ∥ R<sub>L</sub>', '(1/' + s3(dv.bot) + ' + 1/' + s3(v.RL * 1e3) + ')<sup>−1</sup>', d.R2eff, 'Ω');
-      R.eq('I', 'V<sub>in</sub> ÷ (R<sub>top</sub> + R<sub>bottom</sub>) = ' + s3(v.Vin) + ' ÷ (' + s3(dv.top) + ' + ' + s3(d.R2eff) + ')', d.I, 'A');
-      R.eq('V<sub>out</sub>', 'V<sub>in</sub> × R<sub>bottom</sub> ÷ (R<sub>top</sub> + R<sub>bottom</sub>) = ' + s3(v.Vin) + ' × ' + s3(d.R2eff) + ' ÷ ' + s3(dv.top + d.R2eff), d.Vout, 'V');
-      R.eq('p.d. across top', 'V<sub>in</sub> − V<sub>out</sub>', d.V1, 'V');
-      if (load.get()) { var nl = CI.divider(v.Vin, dv.top, dv.bot); R.eq('without load', 'V<sub>in</sub> R<sub>bottom</sub>/(R<sub>top</sub> + R<sub>bottom</sub>)', nl.Vout, 'V'); }
+      if (load.get()) R.eq('R<sub>bottom</sub> ∥ R<sub>L</sub>', '(1/' + s3(dv.bot) + ' + 1/' + s3(v.RL * 1e3) + ')<sup>−1</sup>', d.R2eff, 'Ω', 'The load is in parallel with the bottom resistor, so combine them first: 1/R = 1/R₂ + 1/R<sub>L</sub>.');
+      R.eq('I', 'V<sub>in</sub> ÷ (R<sub>top</sub> + R<sub>bottom</sub>) = ' + s3(v.Vin) + ' ÷ (' + s3(dv.top) + ' + ' + s3(d.R2eff) + ')', d.I, 'A', 'The two parts are in series, so the same current flows through both: I = V<sub>in</sub> ÷ total resistance.');
+      R.eq('V<sub>out</sub>', 'V<sub>in</sub> × R<sub>bottom</sub> ÷ (R<sub>top</sub> + R<sub>bottom</sub>) = ' + s3(v.Vin) + ' × ' + s3(d.R2eff) + ' ÷ ' + s3(dv.top + d.R2eff), d.Vout, 'V', 'The supply p.d. is shared in the ratio of the resistances, so the bottom part gets the fraction R<sub>bottom</sub> ÷ (R<sub>top</sub> + R<sub>bottom</sub>).');
+      R.eq('p.d. across top', 'V<sub>in</sub> − V<sub>out</sub>', d.V1, 'V', 'Kirchhoff’s second law: the p.d.s across the two parts add up to the supply e.m.f.');
+      if (load.get()) { var nl = CI.divider(v.Vin, dv.top, dv.bot); R.eq('without load', 'V<sub>in</sub> R<sub>bottom</sub>/(R<sub>top</sub> + R<sub>bottom</sub>)', nl.Vout, 'V', 'Without the load the bottom resistor alone is across the output, so V<sub>out</sub> is larger: the load lowers it.'); }
       if (sn !== 'none') {
         R.head('As the ' + (sn === 'th' ? 'temperature' : 'light intensity') + ' increases');
         R.html('<div class="eq">R<sub>' + (sn === 'th' ? 'thermistor' : 'LDR') + '</sub> decreases, so the p.d. across it decreases. The output is across the ' + (top ? 'fixed resistor' : (sn === 'th' ? 'thermistor' : 'LDR')) + ', so V<sub>out</sub> <b>' + (top ? 'increases' : 'decreases') + '</b>.</div>');
@@ -236,22 +443,22 @@
     var p = M.pot, st = M.std;
     if (p.invalid) { R.badge(p.invalid, 'warn').render(); return; }
     R.head('Driver circuit: potential gradient along AB');
-    R.eq('I<sub>wire</sub>', 'E₀ ÷ (r₀ + R<sub>s</sub> + R<sub>w</sub>) = ' + s3(v.E0) + ' ÷ (' + s3(v.r0) + ' + ' + s3(v.Rs) + ' + ' + s3(v.Rw) + ')', p.Iwire, 'A');
-    R.eq('V<sub>AB</sub>', 'I<sub>wire</sub> R<sub>w</sub>', p.Vwire, 'V');
-    R.eq('potential gradient', 'V<sub>AB</sub> ÷ L = ' + s3(p.Vwire) + ' ÷ ' + U.num(v.Lc, 4) + ' cm', p.k / 100, 'V cm<sup>−1</sup>');
+    R.eq('I<sub>wire</sub>', 'E₀ ÷ (r₀ + R<sub>s</sub> + R<sub>w</sub>) = ' + s3(v.E0) + ' ÷ (' + s3(v.r0) + ' + ' + s3(v.Rs) + ' + ' + s3(v.Rw) + ')', p.Iwire, 'A', 'The driver cell, its internal resistance, the series resistor and the whole wire are all in series.');
+    R.eq('V<sub>AB</sub>', 'I<sub>wire</sub> R<sub>w</sub>', p.Vwire, 'V', 'V = IR for the uniform wire: this is the total p.d. available along AB.');
+    R.eq('potential gradient', 'V<sub>AB</sub> ÷ L = ' + s3(p.Vwire) + ' ÷ ' + U.num(v.Lc, 4) + ' cm', p.k / 100, 'V cm<sup>−1</sup>', 'The wire is uniform, so the p.d. along it is shared equally per centimetre: p.d. ∝ length.');
     R.head('Balance point for the test cell (nu&#8203;ll method: galvanometer reads zero)');
-    if (p.hasBalance) R.eq('l<sub>x</sub>', 'E<sub>x</sub> ÷ gradient = ' + s3(v.Ex) + ' ÷ ' + s3(p.k / 100), p.balance * 100, 'cm');
+    if (p.hasBalance) R.eq('l<sub>x</sub>', 'E<sub>x</sub> ÷ gradient = ' + s3(v.Ex) + ' ÷ ' + s3(p.k / 100), p.balance * 100, 'cm', 'At balance the p.d. across AJ equals E<sub>x</sub>, so the balance length is E<sub>x</sub> ÷ (p.d. per cm).');
     else R.badge('No balance point: E_x is more than the p.d. across the whole wire (' + s3(p.Vwire) + ' V)', 'warn');
     if (p.galvError) R.badge(p.galvError, 'warn');
     else {
       var bal = p.hasBalance && Math.abs(v.xc / 100 - p.balance) < 1e-6;
-      R.eq('I<sub>G</sub> at l = ' + s3(v.xc) + ' cm', bal ? 'balanced: no current in the test cell' : 'p.d. across AJ = ' + s3(p.VAJ) + ' V ≠ E<sub>x</sub>', Math.abs(p.Ig) < 1e-12 ? 0 : p.Ig * 1e3, 'mA');
-      if (!bal && Math.abs(p.Ig) > 1e-12) R.eq('terminal p.d. of test cell', 'E<sub>x</sub> − I r<sub>x</sub> = ' + s3(v.Ex) + ' − ' + s3(p.Itest) + ' × ' + s3(v.rx) + ' (not the e.m.f. while current flows)', v.Ex - p.Itest * v.rx, 'V');
+      R.eq('I<sub>G</sub> at l = ' + s3(v.xc) + ' cm', bal ? 'balanced: no current in the test cell' : 'p.d. across AJ = ' + s3(p.VAJ) + ' V ≠ E<sub>x</sub>', Math.abs(p.Ig) < 1e-12 ? 0 : p.Ig * 1e3, 'mA', 'The galvanometer current is zero only when the p.d. across AJ exactly equals the e.m.f. of the test cell.');
+      if (!bal && Math.abs(p.Ig) > 1e-12) R.eq('terminal p.d. of test cell', 'E<sub>x</sub> − I r<sub>x</sub> = ' + s3(v.Ex) + ' − ' + s3(p.Itest) + ' × ' + s3(v.rx) + ' (not the e.m.f. while current flows)', v.Ex - p.Itest * v.rx, 'V', 'Away from balance a current flows in the test cell, so its terminal p.d. is less than its e.m.f. (lost volts Ir).');
     }
     R.head('Comparing e.m.f.s: E<sub>x</sub>/E<sub>s</sub> = l<sub>x</sub>/l<sub>s</sub>');
     if (st.hasBalance && p.hasBalance) {
-      R.eq('l<sub>s</sub>', 'standard cell balance = ' + s3(v.Es) + ' ÷ ' + s3(p.k / 100), st.balance * 100, 'cm');
-      R.eq('E<sub>x</sub>', 'E<sub>s</sub> × l<sub>x</sub> ÷ l<sub>s</sub> = ' + s3(v.Es) + ' × ' + s3(p.balance * 100) + ' ÷ ' + s3(st.balance * 100), CI.compareEmf(v.Es, st.balance, p.balance), 'V');
+      R.eq('l<sub>s</sub>', 'standard cell balance = ' + s3(v.Es) + ' ÷ ' + s3(p.k / 100), st.balance * 100, 'cm', 'With the same driver circuit (same potential gradient), find the balance length for the standard cell too.');
+      R.eq('E<sub>x</sub>', 'E<sub>s</sub> × l<sub>x</sub> ÷ l<sub>s</sub> = ' + s3(v.Es) + ' × ' + s3(p.balance * 100) + ' ÷ ' + s3(st.balance * 100), CI.compareEmf(v.Es, st.balance, p.balance), 'V', 'Balance length ∝ e.m.f. for the same potential gradient, so E<sub>x</sub> ÷ E<sub>s</sub> = l<sub>x</sub> ÷ l<sub>s</sub>.');
     } else R.html('<div class="eq">Both cells need a balance point on the wire to compare them.</div>');
     R.render();
   }

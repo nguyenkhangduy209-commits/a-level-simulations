@@ -71,7 +71,7 @@
     document.body.appendChild(h('main', { class: 'sim' }, [left, right, bottom]));
     function card(where, title) {
       // "Live working" sits under the scene and graphs, full width, so the working is big enough to read
-      var working = where === 'right' && /^live working/i.test(title || '');
+      var working = where === 'right' && /^(live working|how to calculate it)/i.test(title || '');
       var c = h('div', { class: 'card' + (working ? ' working' : '') }, title ? [h('h2', { text: title })] : []);
       (working ? bottom : where === 'left' ? left : where === 'right' ? right : where).appendChild(c);
       return c;
@@ -474,7 +474,9 @@
     [/^(PE|GPE|ΔGPE|gravitational potential energy)/i, 'Change in gravitational potential energy = mgh, with h the vertical height change.'],
     [/^(WD|work done|work)/i, 'Work done = force × distance moved in the direction of the force.']
   ];
-  function autoWhy(lhs) { var k = stripTags(String(lhs || '')).trim(); for (var i = 0; i < WHY.length; i++) if (WHY[i][0].test(k)) return WHY[i][1]; return ''; }
+  // the fallback hints are mechanics wording, so only use them on mechanics pages (9709, and 9702 topics 2–5): "R" in a circuit is a resistance
+  function mechanicsPage() { try { return /\/9709\/|\/9702\/p[2-5]-/.test(root.location.pathname); } catch (e) { return false; } }
+  function autoWhy(lhs) { if (!mechanicsPage()) return ''; var k = stripTags(String(lhs || '')).trim(); for (var i = 0; i < WHY.length; i++) if (WHY[i][0].test(k)) return WHY[i][1]; return ''; }
 
   function Readout(container) {
     var buf = [], el = h('div', { class: 'readout' }), page = 0, showAll = false, lastTitles = '', onDiagram = true, lastFocus = '', shownPage = -1;

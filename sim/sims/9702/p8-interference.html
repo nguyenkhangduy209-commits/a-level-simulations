@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-superposition.js"></script>
@@ -138,8 +139,9 @@
   }
   var off = document.createElement('canvas'), offCtx = off.getContext('2d');
   /** render fn(x, y) ∈ [−1, 1] (or [0,1] in intensity mode) over a world box into the viewport */
-  function field(c, x0, x1, y0, y1, fn, intensityMode) {
+  function field(c, x0, x1, y0, y1, fn, intensityMode, pal) {
     var col = ui.colors(), bg = rgb(col.panel), cp = rgb(col.s1), cn = rgb(col.s2), ink = rgb(col.ink);
+    if (pal) { bg = pal.bg; cp = pal.pos; cn = pal.neg; ink = pal.pos; }
     var px0 = vp.X(x0), px1 = vp.X(x1), py0 = vp.Y(y1), py1 = vp.Y(y0);
     var W = Math.max(8, Math.min(220, Math.round((px1 - px0) / 3))), H = Math.max(8, Math.min(160, Math.round((py1 - py0) / 3)));
     off.width = W; off.height = H;
@@ -166,32 +168,37 @@
     var c = vp.begin();
     var ph = G.phase, A2 = prm.values.A2, coh = coherent.get();
     if (!coh) ph = (Math.sin(Math.floor(clock.t * 5) * 12.9898) * 43758.5453 % 1) * 2 * Math.PI; // jumps randomly
-    var kD = 2 * Math.PI / lamD;
+    var kD = 2 * Math.PI / lamD, RL = real(), wty = wtype.get(), pal = RL && wty === 'water' ? waterPal() : null;
     if (avgView.get()) {
       field(c, 0, DD, -YD, YD, function (x, y) {
         var dl = Math.hypot(x, y + 0.5) - Math.hypot(x, y - 0.5);
         return SP.intensity(dl, lamD, G.phase, 1, A2, coh) / Math.pow(1 + A2, 2);   // display units (a = 1)
-      }, true);
+      }, true, pal);
     } else {
       field(c, 0, DD, -YD, YD, function (x, y) {
         var r1 = Math.hypot(x, y - 0.5), r2 = Math.hypot(x, y + 0.5);
         return (Math.cos(kD * r1 - wt) + A2 * Math.cos(kD * r2 - wt + ph)) / (1 + A2);
-      }, false);
+      }, false, pal);
+    if (RL) apparatus(c, wty, YD);
     }
     // barrier / sources
     c.fillStyle = col['object-line'];
     if (wtype.get() === 'light' || wtype.get() === 'micro') {
       c.fillRect(vp.X(0) - 3, vp.Y(YD), 6, vp.Y(0.5) - vp.Y(YD) - 3); c.fillRect(vp.X(0) - 3, vp.Y(0.5) + 3, 6, vp.Y(-0.5) - vp.Y(0.5) - 6); c.fillRect(vp.X(0) - 3, vp.Y(-0.5) + 3, 6, vp.Y(-YD) - vp.Y(-0.5) - 3);
     }
-    D.particle(c, vp.X(0), vp.Y(0.5), 5, { label: '' }); D.particle(c, vp.X(0), vp.Y(-0.5), 5, {});
+    if (!RL || wty === 'light' || wty === 'micro') { D.particle(c, vp.X(0), vp.Y(0.5), 5, { label: '' }); D.particle(c, vp.X(0), vp.Y(-0.5), 5, {}); }
+    else sources(c, wty);
     D.label(c, 'S₁', vp.X(0) - 14, vp.Y(0.5), col.ink, { size: 12, bold: true }); D.label(c, 'S₂', vp.X(0) - 14, vp.Y(-0.5), col.ink, { size: 12, bold: true });
     // display screen and P
     var yPd = G.trueScale ? G.yP / G.a : YD * prm.values.yP / 100;
     D.line(c, [vp.P(DD, -YD), vp.P(DD, YD)], col.ink, { width: 2 });
     D.line(c, [vp.P(0, 0.5), vp.P(DD, yPd)], col.s4, { width: 1.6 }); D.line(c, [vp.P(0, -0.5), vp.P(DD, yPd)], col.s4, { width: 1.6 });
-    c.fillStyle = col.s4; c.beginPath(); c.arc(vp.X(DD), vp.Y(yPd), 5, 0, 7); c.fill(); D.label(c, 'P', vp.X(DD) - 10, vp.Y(yPd) - 10, col.s4, { bold: true });
+    c.fillStyle = col.s4; c.beginPath(); c.arc(vp.X(DD), vp.Y(yPd), 5, 0, 7); c.fill();
+    if (RL) listener(c, wty, vp.X(DD), vp.Y(yPd), coh ? SP.intensity(SP.pathDiff(G.yP, G.a, G.D), G.lam, G.phase, 1, A2, coh) / Math.pow(1 + A2, 2) : 0.5);
+    D.label(c, 'P', vp.X(DD) - 10, vp.Y(yPd) - 10, col.s4, { bold: true, bg: RL });
     // real-scale fringe strip
     var sx = vp.X(DD + stripW * 0.9), sw = vp.X(DD + stripW * 2.0) - sx, top = vp.Y(YD), bot = vp.Y(-YD), n = 120, inkc = rgb(col.ink), bg = rgb(col.panel);
+    if (RL && wty === 'light') { inkc = laserRGB(prm.values.lamN); bg = SC.dark() ? [24, 22, 38] : [58, 54, 82]; }   // fringes glowing on a screen in a dimmed room
     for (var i = 0; i < n; i++) {
       var y = G.Y * (1 - 2 * (i + 0.5) / n), I = SP.intensity(SP.pathDiff(y, G.a, G.D), G.lam, G.phase, 1, A2, coh) / Math.pow(1 + A2, 2), w = U.clamp(I, 0, 1);
       c.fillStyle = 'rgb(' + Math.round(bg[0] + (inkc[0] - bg[0]) * w) + ',' + Math.round(bg[1] + (inkc[1] - bg[1]) * w) + ',' + Math.round(bg[2] + (inkc[2] - bg[2]) * w) + ')';
@@ -215,9 +222,10 @@
     var Y = Math.max(7, b * 0.8 + 3), X1 = 2 * Y * 1.3, X0 = -4;
     if (!(ix && ix.isDragging())) vp.fit(X0, X1, -Y, Y);
     var c = vp.begin();
-    field(c, X0, 0, -Y, Y, function (x, y) { return Math.cos(2 * Math.PI * x / lam - wt) * 0.9; }, false);
-    field(c, 0, X1, -Y, Y, function (x, y) { return SP.gapField(x, y, wt / (2 * Math.PI), lam, b, Math.max(4, Math.min(24, Math.round(b * 2.5))), 1); }, false);
-    c.fillStyle = col['object-line'];
+    var pal = real() ? waterPal() : null;   // real look: a ripple tank
+    field(c, X0, 0, -Y, Y, function (x, y) { return Math.cos(2 * Math.PI * x / lam - wt) * 0.9; }, false, pal);
+    field(c, 0, X1, -Y, Y, function (x, y) { return SP.gapField(x, y, wt / (2 * Math.PI), lam, b, Math.max(4, Math.min(24, Math.round(b * 2.5))), 1); }, false, pal);
+    c.fillStyle = pal ? (SC.dark() ? '#7d74a8' : '#c9bfe8') : col['object-line'];
     c.fillRect(vp.X(0) - 4, vp.Y(Y), 8, vp.Y(b / 2) - vp.Y(Y)); c.fillRect(vp.X(0) - 4, vp.Y(-b / 2), 8, vp.Y(-Y) - vp.Y(-b / 2));
     // edges of the geometric shadow
     D.line(c, [vp.P(0, b / 2), vp.P(X1, b / 2)], col.muted, { dash: [5, 5], width: 1.2 });
@@ -226,6 +234,71 @@
     D.label(c, 'gap', vp.X(0) + 18, vp.Y(b / 2) - 10, col.ink, { size: 11, bg: true });
     scene = { two: false, b: b };
     if (ix) ix.paint(c);
+  }
+
+  /* ---------- real-life look: laser + double slit, microwave horns, two loudspeakers and a listener, a ripple tank ---------- */
+  var SC = SIM.scene;
+  function real() { return !!(SC && SC.real && SC.real()); }
+  function rr(c, x, y, w, h, rad) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, rad); else c.rect(x, y, w, h); }
+  function waterPal() { return SC.dark() ? { bg: [38, 70, 104], pos: [150, 200, 235], neg: [16, 34, 58] } : { bg: [128, 186, 226], pos: [226, 244, 255], neg: [62, 120, 176] }; }
+  function laserRGB(nm) {
+    var r = 0, g = 0, b = 0;
+    if (nm < 440) { r = (440 - nm) / 60; b = 1; } else if (nm < 490) { g = (nm - 440) / 50; b = 1; } else if (nm < 510) { g = 1; b = (510 - nm) / 20; }
+    else if (nm < 580) { r = (nm - 510) / 70; g = 1; } else if (nm < 645) { r = 1; g = (645 - nm) / 65; } else r = 1;
+    return [r, g, b].map(function (k) { return Math.round(110 + 145 * U.clamp(k, 0, 1)); });   // softened towards pastel
+  }
+  function boxPx() { return Math.max(8, Math.min(20, vp.scale * 0.32)); }
+  function apparatus(c, wty, YD) {
+    var dk = SC.dark(), x0 = vp.X(-0.85), x1 = vp.X(-0.12), y = vp.Y(0), h = Math.max(8, Math.min(16, vp.scale * 0.3));
+    c.save(); c.strokeStyle = 'rgba(90,80,140,.3)'; c.lineWidth = 1;
+    if (wty === 'light') {
+      c.fillStyle = dk ? '#6d7493' : '#f4f1fb'; rr(c, x0, y - h / 2, x1 - x0 - 4, h, h * 0.35); c.fill(); c.stroke();
+      var lc = laserRGB(prm.values.lamN);
+      c.strokeStyle = 'rgb(' + lc.join(',') + ')'; c.lineWidth = 2; c.beginPath(); c.moveTo(x1 - 4, y); c.lineTo(vp.X(0) - 3, y); c.stroke();
+      c.restore(); D.label(c, 'laser', (x0 + x1) / 2, y - h / 2 - 8, dk ? '#c9d0e0' : '#6f6a8a', { size: 10, bold: true }); return;
+    }
+    if (wty === 'micro') {
+      c.fillStyle = dk ? '#7d86a8' : '#dcd4f0'; rr(c, x0, y - h * 0.7, (x1 - x0) * 0.55, h * 1.4, 4); c.fill(); c.stroke();
+      c.beginPath(); c.moveTo(x0 + (x1 - x0) * 0.55, y - h * 0.5); c.lineTo(x1, y - h * 1.1); c.lineTo(x1, y + h * 1.1); c.lineTo(x0 + (x1 - x0) * 0.55, y + h * 0.5); c.closePath(); c.fill(); c.stroke();
+      c.restore(); D.label(c, 'transmitter', (x0 + x1) / 2, y - h * 1.1 - 8, dk ? '#c9d0e0' : '#6f6a8a', { size: 10, bold: true }); return;
+    }
+    if (wty === 'water') {   // vibrating bar carrying the two dippers
+      var bx = vp.X(-0.4);
+      c.fillStyle = dk ? '#8f84b8' : '#cbbdf0'; rr(c, bx - 4, vp.Y(0.9), 8, vp.Y(-0.9) - vp.Y(0.9), 4); c.fill(); c.stroke();
+      c.fillStyle = dk ? '#6d7493' : '#e6e0f4'; rr(c, bx - 10, vp.Y(0.25), 20, vp.Y(-0.25) - vp.Y(0.25), 5); c.fill(); c.stroke();
+      c.strokeStyle = dk ? '#b3a6dc' : '#a597d6'; c.lineWidth = 2;
+      [0.5, -0.5].forEach(function (yy) { c.beginPath(); c.moveTo(bx, vp.Y(yy)); c.lineTo(vp.X(0), vp.Y(yy)); c.stroke(); });
+    }
+    c.restore();
+  }
+  function sources(c, wty) {
+    var dk = SC.dark(), s = boxPx();
+    [0.5, -0.5].forEach(function (yy) {
+      var x = vp.X(0), y = vp.Y(yy);
+      c.save(); c.strokeStyle = 'rgba(90,80,140,.35)'; c.lineWidth = 1;
+      if (wty === 'sound') {   // a loudspeaker cabinet facing the listening line
+        c.fillStyle = dk ? '#5d6579' : '#e6e0f4'; rr(c, x - s * 1.4, y - s * 0.8, s * 1.2, s * 1.6, 4); c.fill(); c.stroke();
+        c.fillStyle = dk ? '#8a93b4' : '#fbf9ff'; c.beginPath(); c.moveTo(x - s * 0.2, y - s * 0.6); c.lineTo(x + s * 0.15, y - s * 0.75); c.lineTo(x + s * 0.15, y + s * 0.75); c.lineTo(x - s * 0.2, y + s * 0.6); c.closePath(); c.fill(); c.stroke();
+      } else {   // a dipper touching the water
+        c.fillStyle = dk ? '#d9d1f5' : '#ffffff'; c.beginPath(); c.arc(x, y, 4, 0, 2 * Math.PI); c.fill(); c.stroke();
+      }
+      c.restore();
+    });
+  }
+  /** something at P that responds to the waves: a person hearing loud / quiet, a microwave detector, a glowing spot */
+  function listener(c, wty, x, y, I) {
+    var dk = SC.dark();
+    if (wty === 'sound') {
+      SC.person(c, x + 12, y + 16, 32, { color: '#a9b8e8', facing: -1 });
+      c.save(); c.strokeStyle = dk ? '#ffd98f' : '#e0a24a'; c.lineWidth = 1.6; c.lineCap = 'round';
+      for (var k = 0; k < 3; k++) { c.globalAlpha = U.clamp(I, 0, 1) * (1 - k * 0.25); c.beginPath(); c.arc(x + 12, y - 12, 6 + k * 5, -2.4, -0.7); c.stroke(); }
+      c.restore();
+      D.label(c, I > 0.7 ? 'loud' : I < 0.15 ? 'quiet' : 'medium', x + 14, y - 32, dk ? '#ffd98f' : '#b8772a', { size: 10, bold: true, bg: true });
+    } else if (wty === 'micro') {
+      c.save(); c.fillStyle = dk ? '#7d86a8' : '#dcd4f0'; c.strokeStyle = 'rgba(90,80,140,.35)';
+      c.beginPath(); c.moveTo(x + 3, y); c.lineTo(x + 14, y - 8); c.lineTo(x + 14, y + 8); c.closePath(); c.fill(); c.stroke();
+      rr(c, x + 14, y - 5, 14, 10, 3); c.fill(); c.stroke(); c.restore();
+    }
   }
 
   /* ---------- plots ---------- */
@@ -254,30 +327,30 @@
       R.render(); return;
     }
     var s3 = U.sf, k = G.kY, u = G.unitY;
-    if (wtype.get() === 'sound') R.eq('λ', 'v ÷ f = ' + U.num(prm.values.vS, 4) + ' ÷ ' + U.num(prm.values.fS, 5), G.lam, 'm');
+    if (wtype.get() === 'sound') R.eq('λ', 'v ÷ f = ' + U.num(prm.values.vS, 4) + ' ÷ ' + U.num(prm.values.fS, 5), G.lam, 'm', 'The wave equation v = fλ gives the wavelength of the sound from the loudspeakers.');
     R.head('Fringe separation: λ = ax/D ⇒ x = λD/a');
-    R.eq('x', 'λD ÷ a = ' + s3(G.lam) + ' m × ' + s3(G.D) + ' m ÷ ' + s3(G.a) + ' m = ' + s3(G.x) + ' m', G.x * k, u);
+    R.eq('x', 'λD ÷ a = ' + s3(G.lam) + ' m × ' + s3(G.D) + ' m ÷ ' + s3(G.a) + ' m = ' + s3(G.x) + ' m', G.x * k, u, 'Double-slit formula λ = ax/D rearranged for the fringe separation x (all lengths in metres).');
     var b1 = G.fr.bright.filter(function (b) { return b.n > 0; })[0];
     var approxOK = G.a / G.D <= 0.05 && G.x / G.D <= 0.05;
     if (approxOK) R.badge('D ≫ a and x ≪ D: λ = ax/D applies', 'ok');
     else R.badge('x or a is not small compared with D: λ = ax/D is only approximate here — compare the exact positions', 'warn');
     if (G.phase === 0) R.head('Exact bright fringes (path difference nλ)'); else R.head('Exact bright fringes (antiphase: path difference (n + ½)λ)');
     G.fr.bright.filter(function (b) { return b.n > 0; }).slice(0, 3).forEach(function (b) {
-      R.eq('Δ = ' + U.num(b.n, 2) + 'λ', 'exact y (formula ΔD/a = ' + s3(b.yApprox * k) + ' ' + u + ')', b.y * k, u);
+      R.eq('Δ = ' + U.num(b.n, 2) + 'λ', 'exact y (formula ΔD/a = ' + s3(b.yApprox * k) + ' ' + u + ')', b.y * k, u, 'Exact position where the path difference S₂P − S₁P gives constructive interference, compared with the λ = ax/D estimate.');
     });
     if (!b1) R.html('<div class="eq">No bright fringe other than the centre within the screen shown.</div>');
     var nMaxPossible = Math.floor(G.a / G.lam - 1e-12);
-    if (!approxOK) R.eq('largest order', 'path difference cannot exceed a: n &lt; a/λ = ' + s3(G.a / G.lam), String(nMaxPossible));
+    if (!approxOK) R.eq('largest order', 'path difference cannot exceed a: n &lt; a/λ = ' + s3(G.a / G.lam), String(nMaxPossible), '', 'The path difference between two sources can never be more than their separation a, so nλ must be less than a.');
     R.head('At point P');
     var dl = SP.pathDiff(G.yP, G.a, G.D), ratio = dl / G.lam, coh = coherent.get(), A2 = prm.values.A2;
-    R.eq('y<sub>P</sub>', 'distance from the centre line', G.yP * k, u);
-    R.eq('Δ', 'S₂P − S₁P (exact geometry)', dl * G.kL, G.uL);
-    R.eq('Δ ÷ λ', '', U.num(ratio, 3));
+    R.eq('y<sub>P</sub>', 'distance from the centre line', G.yP * k, u, 'How far P is from the centre line, where both paths are equal.');
+    R.eq('Δ', 'S₂P − S₁P (exact geometry)', dl * G.kL, G.uL, 'Path difference: the extra distance the wave from the further source travels to reach P.');
+    R.eq('Δ ÷ λ', '', U.num(ratio, 3), '', 'A whole number of wavelengths means the waves arrive in step (for in-phase sources); a half-odd number means they arrive in antiphase.');
     var frac = ratio - Math.floor(ratio), eff = G.phase ? (frac + 0.5) % 1 : frac;
     var kind = Math.abs(eff) < 0.02 || Math.abs(eff - 1) < 0.02 ? 'constructive (bright / loud)' : Math.abs(eff - 0.5) < 0.02 ? 'destructive (dark / quiet)' : 'in between';
     if (!coh) R.badge('Not coherent: the phase difference changes randomly, so no fixed bright or dark points', 'warn');
-    else R.eq('interference', G.phase ? 'antiphase sources: bright when Δ = (n + ½)λ' : 'in-phase sources: bright when Δ = nλ', kind);
-    R.eq('intensity', 'relative to one source alone', SP.intensity(dl, G.lam, G.phase, 1, A2, coh), '');
+    else R.eq('interference', G.phase ? 'antiphase sources: bright when Δ = (n + ½)λ' : 'in-phase sources: bright when Δ = nλ', kind, '', 'Constructive interference gives maximum intensity; destructive gives minimum. Antiphase sources swap the two conditions.');
+    R.eq('intensity', 'relative to one source alone', SP.intensity(dl, G.lam, G.phase, 1, A2, coh), '', 'Amplitudes add (superposition) and intensity ∝ amplitude²: two equal waves in step give 4 times the intensity of one.');
     R.head('Conditions for observable fringes');
     R.html('<div class="eq">' + (coh ? '✓ coherent sources (constant phase difference)' : '✗ sources not coherent') + '</div>');
     R.html('<div class="eq">' + (A2 >= 0.8 ? '✓ similar amplitudes — dark fringes almost completely dark' : A2 > 0 ? '△ unequal amplitudes — fringes visible but poor contrast' : '✗ only one source — no interference') + '</div>');

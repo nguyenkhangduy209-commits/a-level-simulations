@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-superposition.js"></script>
@@ -109,14 +110,17 @@
     c = vp.begin();
     scene = null;
     if (M.g.invalid || !isFinite(M.lam) || !isFinite(M.d)) { D.label(c, M.g.invalid || 'No solution: check n and θ', vp.w / 2, vp.h / 2, col.warn, { bold: true }); return; }
-    var Rr = 1, O = vp.P(0, 0), isFlat = flat.get();
+    var Rr = 1, O = vp.P(0, 0), isFlat = flat.get(), RL = real();
     // incident beam and grating
     var lc = white.get() ? col.ink : lamColor(M.lam * 1e9);
-    for (var k = -2; k <= 2; k++) D.arrow(c, vp.X(-0.7), vp.Y(k * 0.06), vp.X(-0.03), vp.Y(k * 0.06), lc, { head: 6, width: 1.4 });
+    if (RL) bench(c, O, isFlat, white.get() ? '#fffbe8' : lc);
+    else for (var k = -2; k <= 2; k++) D.arrow(c, vp.X(-0.7), vp.Y(k * 0.06), vp.X(-0.03), vp.Y(k * 0.06), lc, { head: 6, width: 1.4 });
     c.strokeStyle = col['object-line']; c.lineWidth = 3; c.beginPath(); c.moveTo(O[0], vp.Y(0.45)); c.lineTo(O[0], vp.Y(-0.45)); c.stroke();
-    D.label(c, 'grating', O[0], vp.Y(0.52), col.muted, { size: 11 });
+    D.label(c, 'grating', O[0], vp.Y(0.52), col.muted, { size: 11, bg: RL });
     // screen
-    if (isFlat) { D.line(c, [vp.P(Rr, -1.05), vp.P(Rr, 1.05)], col['object-line'], { width: 2 }); D.label(c, 'screen, D = ' + U.num(prm.values.Dm, 3) + ' m', vp.X(Rr), vp.Y(-1.08), col.muted, { size: 11 }); }
+    if (RL) {}
+    else if (isFlat) { D.line(c, [vp.P(Rr, -1.05), vp.P(Rr, 1.05)], col['object-line'], { width: 2 }); D.label(c, 'screen, D = ' + U.num(prm.values.Dm, 3) + ' m', vp.X(Rr), vp.Y(-1.08), col.muted, { size: 11 }); }
+    if (RL && isFlat) D.label(c, 'screen, D = ' + U.num(prm.values.Dm, 3) + ' m', vp.X(Rr), vp.Y(-1.08), col.ink, { size: 11, bg: true });
     else { c.strokeStyle = col['object-line']; c.lineWidth = 2; c.beginPath(); c.arc(O[0], O[1], vp.scale * Rr, -Math.PI / 2, Math.PI / 2); c.stroke(); }
     D.line(c, [O, vp.P(Rr, 0)], col.muted, { dash: [3, 4], width: 1 });
     function rayEnd(thDeg) {
@@ -127,7 +131,9 @@
     }
     function ray(thDeg, color, label, w) {
       var e = rayEnd(thDeg);
+      if (RL) { c.save(); c.globalAlpha = 0.22; D.line(c, [O, vp.P(e[0], e[1])], color, { width: 7 }); c.restore(); }
       D.line(c, [O, vp.P(e[0], e[1])], color, { width: w || 2 });
+      if (e[2] && RL) spot(c, vp.X(e[0]), vp.Y(e[1]), color, 11);
       if (e[2]) { c.fillStyle = color; c.beginPath(); c.arc(vp.X(e[0]), vp.Y(e[1]), 4, 0, 7); c.fill(); }
       if (label) D.label(c, label + (e[2] ? '' : ' (misses screen)'), vp.X(e[0]) + 8, vp.Y(e[1]) + (thDeg >= 0 ? -10 : 10), color, { align: 'left', size: 11, bg: true });
     }
@@ -155,6 +161,44 @@
     }
     scene = { O: O, rayEnd: rayEnd, flat: isFlat };
     if (ix) ix.paint(c);
+  }
+
+  /* ---------- real-life look (top view of the bench): laser or lamp, grating in a holder, white screen with bright spots ---------- */
+  var SC = SIM.scene;
+  function real() { return !!(SC && SC.real && SC.real()); }
+  function rr(c, x, y, w, h, rad) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, rad); else c.rect(x, y, w, h); }
+  function spot(c, x, y, color, r) {
+    var g = c.createRadialGradient && c.createRadialGradient(x, y, 0, x, y, r);
+    c.save();
+    if (g) { g.addColorStop(0, 'rgba(255,255,255,.95)'); g.addColorStop(0.3, color); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; }
+    else { c.globalAlpha = 0.5; c.fillStyle = color; }
+    c.beginPath(); c.arc(x, y, r, 0, 2 * Math.PI); c.fill(); c.restore();
+  }
+  function bench(c, O, isFlat, beam) {
+    var dk = SC.dark(), W = vp.w, H = vp.h;
+    c.save();
+    var g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, dk ? '#23263a' : '#dcd6ec'); g.addColorStop(1, dk ? '#1b1e2e' : '#cdc6e2');
+    c.fillStyle = g; c.fillRect(0, 0, W, H);   // a dimmed lab, seen from above
+    c.fillStyle = dk ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.35)'; rr(c, vp.X(-0.74), vp.Y(0.1), O[0] - vp.X(-0.74) + 14, vp.Y(-0.1) - vp.Y(0.1), 6); c.fill();   // bench rail
+    // the source: a laser (or a lamp for white light)
+    var lx0 = vp.X(-0.72), lx1 = vp.X(-0.4), ly = O[1], lh = Math.max(14, vp.scale * 0.14);
+    c.fillStyle = dk ? '#6d7493' : '#f4f1fb'; rr(c, lx0, ly - lh / 2, lx1 - lx0, lh, lh * 0.35); c.fill();
+    c.strokeStyle = 'rgba(90,80,140,.3)'; c.lineWidth = 1; c.stroke();
+    c.fillStyle = white.get() ? '#ffe7a6' : '#ffd7a0'; c.beginPath(); c.moveTo(lx0 + 10, ly + lh * 0.3); c.lineTo(lx0 + 16, ly - lh * 0.3); c.lineTo(lx0 + 22, ly + lh * 0.3); c.closePath(); c.fill();
+    // beam to the grating: a soft glow with a bright core
+    c.globalAlpha = 0.25; c.strokeStyle = beam; c.lineWidth = 9; c.lineCap = 'round'; c.beginPath(); c.moveTo(lx1, ly); c.lineTo(O[0], ly); c.stroke();
+    c.globalAlpha = 1; c.lineWidth = 2.4; c.beginPath(); c.moveTo(lx1, ly); c.lineTo(O[0], ly); c.stroke();
+    // grating slide in its holder
+    c.fillStyle = dk ? '#7d86a8' : '#d3cbea'; rr(c, O[0] - 7, vp.Y(0.5), 14, vp.Y(-0.5) - vp.Y(0.5), 5); c.fill(); c.strokeStyle = 'rgba(90,80,140,.3)'; c.stroke();
+    c.fillStyle = dk ? 'rgba(200,220,255,.25)' : 'rgba(255,255,255,.75)'; rr(c, O[0] - 4, vp.Y(0.44), 8, vp.Y(-0.44) - vp.Y(0.44), 3); c.fill();
+    // white screen
+    c.strokeStyle = dk ? '#cfd3e6' : '#fffdf8'; c.lineWidth = 10; c.lineCap = 'round';
+    c.beginPath();
+    if (isFlat) { c.moveTo(vp.X(1) + 5, vp.Y(1.05)); c.lineTo(vp.X(1) + 5, vp.Y(-1.05)); }
+    else c.arc(O[0], O[1], vp.scale + 5, -Math.PI / 2, Math.PI / 2);
+    c.stroke();
+    c.restore();
+    D.label(c, white.get() ? 'white-light source' : 'laser', (lx0 + lx1) / 2, ly - lh / 2 - 9, dk ? '#c9d0e0' : '#6f6a8a', { size: 10, bold: true });
   }
 
   /* ---------- plots ---------- */
@@ -186,43 +230,43 @@
     R.clear();
     if (M.mode === 'd') {
       R.head('Find d from one order: d sin θ = nλ');
-      R.eq('d', 'nλ ÷ sin θ = ' + v.n + ' × ' + s3(lam) + ' ÷ sin ' + U.num(v.th, 2) + '°', d, 'm');
-      R.eq('lines per metre', '1 ÷ d', 1 / d, 'm<sup>−1</sup>');
-      R.eq('lines per mm', '1 ÷ d ÷ 1000', 1e-3 / d, 'mm<sup>−1</sup>');
+      R.eq('d', 'nλ ÷ sin θ = ' + v.n + ' × ' + s3(lam) + ' ÷ sin ' + U.num(v.th, 2) + '°', d, 'm', 'Rearrange the grating equation d sin θ = nλ for d.');
+      R.eq('lines per metre', '1 ÷ d', 1 / d, 'm<sup>−1</sup>', 'The number of lines per metre is 1/d.');
+      R.eq('lines per mm', '1 ÷ d ÷ 1000', 1e-3 / d, 'mm<sup>−1</sup>', 'There are 1000 mm in a metre, so divide lines per metre by 1000.');
     } else {
-      if (spec.get() === 'N') R.eq('d', '1 ÷ N = 1 ÷ (' + U.num(v.N, 5) + ' × 10<sup>3</sup> m<sup>−1</sup>)', d, 'm');
-      else R.eq('d', 'given', d, 'm');
+      if (spec.get() === 'N') R.eq('d', '1 ÷ N = 1 ÷ (' + U.num(v.N, 5) + ' × 10<sup>3</sup> m<sup>−1</sup>)', d, 'm', 'The line spacing is the reciprocal of the number of lines per metre. Convert lines per mm to lines per m first (× 1000).');
+      else R.eq('d', 'given', d, 'm', 'd is the distance between neighbouring lines (slits) of the grating, in metres.');
     }
     if (M.mode === 'lambda') {
       R.head('Find λ from one order: d sin θ = nλ');
-      R.eq('λ', 'd sin θ ÷ n = ' + s3(d) + ' × sin ' + U.num(v.th, 2) + '° ÷ ' + v.n, lam, 'm');
-      R.eq('λ', 'in nanometres', lam * 1e9, 'nm');
+      R.eq('λ', 'd sin θ ÷ n = ' + s3(d) + ' × sin ' + U.num(v.th, 2) + '° ÷ ' + v.n, lam, 'm', 'Rearrange the grating equation d sin θ = nλ for λ.');
+      R.eq('λ', 'in nanometres', lam * 1e9, 'nm', '1 nm = 10<sup>−9</sup> m. Visible light is roughly 400–700 nm.');
       if (!(lam >= 400e-9 && lam <= 700e-9)) R.badge('This wavelength is outside the visible range 400–700 nm', 'warn');
     }
     if (g.invalid || !isFinite(lam) || !isFinite(d)) { R.badge(g.invalid || 'No valid grating for these values', 'warn').render(); return; }
     if (M.mode !== 'angles' && v.n > g.nmax) R.badge('Order n = ' + v.n + ' cannot exist for this d and λ (n_max = ' + g.nmax + ')', 'warn');
     if (M.wl) {
       R.head('White light (400–700 nm)');
-      R.eq('n = 0', 'all wavelengths at θ = 0', 'white');
+      R.eq('n = 0', 'all wavelengths at θ = 0', 'white', '', 'For the zero order the path difference is zero for every wavelength, so all colours overlap and it stays white.');
       M.wl.forEach(function (o) {
         R.eq('n = ' + o.n, 'violet ' + U.dp(o.violet, 1) + '° → red ' + (o.complete ? U.dp(o.red, 1) + '°' : 'cut off at 90°'),
-          o.overlapsNext ? 'overlaps order ' + (o.n + 1) : (o.complete ? 'complete' : 'incomplete'));
+          o.overlapsNext ? 'overlaps order ' + (o.n + 1) : (o.complete ? 'complete' : 'incomplete'), '', 'sin θ = nλ/d: violet (smallest λ) is deviated least and red most, so each order is a spectrum.');
       });
       R.render(); return;
     }
     R.head('Orders: sin θ = nλ/d');
-    R.eq('d ÷ λ', s3(d) + ' ÷ ' + s3(lam), g.ratio);
-    R.eq('n<sub>max</sub>', g.atNinety ? 'd/λ is a whole number: that order is at 90° and not observed' : 'largest whole number below d/λ', String(g.nmax));
-    R.eq('bright maxima', '2n<sub>max</sub> + 1', String(g.count));
+    R.eq('d ÷ λ', s3(d) + ' ÷ ' + s3(lam), g.ratio, '', 'sin θ = nλ/d cannot be more than 1, so n can be at most d/λ.');
+    R.eq('n<sub>max</sub>', g.atNinety ? 'd/λ is a whole number: that order is at 90° and not observed' : 'largest whole number below d/λ', String(g.nmax), '', 'Round down, never up: the next order would need sin θ greater than 1 (or exactly 90°, which is not observed).');
+    R.eq('bright maxima', '2n<sub>max</sub> + 1', String(g.count), '', 'There are n<sub>max</sub> orders on each side plus the central zero order.');
     g.orders.slice(1, 7).forEach(function (o) {
-      R.eq('θ<sub>' + o.n + '</sub>', 'sin<sup>−1</sup>(' + o.n + ' × ' + s3(lam) + ' ÷ ' + s3(d) + ') = sin<sup>−1</sup> ' + U.num(o.sin, 4), U.dp(o.deg, 1), '°');
+      R.eq('θ<sub>' + o.n + '</sub>', 'sin<sup>−1</sup>(' + o.n + ' × ' + s3(lam) + ' ÷ ' + s3(d) + ') = sin<sup>−1</sup> ' + U.num(o.sin, 4), U.dp(o.deg, 1), '°', 'Grating equation d sin θ = nλ, with θ measured from the straight-through direction.');
     });
     if (g.orders.length > 7) R.html('<div class="eq">… up to n = ' + g.nmax + '</div>');
-    if (g.orders[1]) R.eq('2θ₁', 'angle between the two first orders', U.dp(2 * g.orders[1].deg, 1), '°');
+    if (g.orders[1]) R.eq('2θ₁', 'angle between the two first orders', U.dp(2 * g.orders[1].deg, 1), '°', 'The first orders appear on both sides of the zero order, each at θ₁.');
     if (flat.get()) {
       R.head('Positions on a flat screen: y = D tan θ');
       g.orders.slice(1, 5).forEach(function (o) {
-        R.eq('y<sub>' + o.n + '</sub>', U.num(v.Dm, 3) + ' × tan ' + U.dp(o.deg, 1) + '°', SP.screenPos(v.Dm, o.deg), 'm');
+        R.eq('y<sub>' + o.n + '</sub>', U.num(v.Dm, 3) + ' × tan ' + U.dp(o.deg, 1) + '°', SP.screenPos(v.Dm, o.deg), 'm', 'Distance from the central spot on a flat screen: y = D tan θ (the angles are large, so the small-angle formula does not apply).');
       });
     }
     R.render();

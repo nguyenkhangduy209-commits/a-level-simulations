@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-waves.js"></script>
@@ -119,21 +120,25 @@
     // while the amplitude is being dragged, keep the vertical scale fixed so the crest stays under the pointer
     if (ampRef) amp = Math.min(H * 0.46, amp * v.A / ampRef);
     scene = { padL: padL, wpx: wpx, midY: midY, amp: amp, amp0: H * 0.28, W: W, H: H, top: midY - H * 0.28, tooMany: nWaves > 60 };
+    var RL = real(), kindR = RL ? realKind() : '';
+    if (RL) backdrop(c, W, H, midY, amp, kindR);
     D.arrow(c, padL, 18, padL + 90, 18, col.velocity, { label: 'v = ' + U.sf(v.f * v.lam) + ' m/s' });
-    D.label(c, 'f = ' + U.sf(v.f) + ' Hz', padL + 240, 18, col.ink, { size: 12 });
+    D.label(c, 'f = ' + U.sf(v.f) + ' Hz', padL + 240, 18, col.ink, { size: 12, bg: RL });
     if (nWaves > 60) { D.label(c, 'Too many wavelengths in view to draw (' + U.sf(nWaves) + '): reduce the length shown or increase λ', W / 2, midY, col.warn, { bold: true, size: 12 }); if (ix) ix.paint(c); return; }
     if (type.get() === 'T') {
       D.line(c, [[padL, midY], [padL + wpx, midY]], col.muted, { dash: [4, 4], width: 1 });
       var pts = [];
       for (var i = 0; i <= 600; i++) { var x = v.Lw * i / 600; pts.push([X(x), midY - yAt(x, t) / v.A * amp]); }
-      D.line(c, pts, col.s1, { width: 2.2 });
+      if (kindR === 'water') waterSurface(c, pts, H, midY, amp);
+      else if (kindR === 'rope') { SC.rope(c, pts, { width: 4.5, color: SC.dark() ? '#d9c6a2' : '#c79f72' }); hand(c, pts[0][0], pts[0][1], false); }
+      else D.line(c, pts, col.s1, { width: 2.2 });
       var nP = Math.min(80, Math.max(20, Math.round(nWaves * 12)));
-      for (var j = 0; j <= nP; j++) { var xp = v.Lw * j / nP; c.save(); c.fillStyle = col.s1; c.beginPath(); c.arc(X(xp), midY - yAt(xp, t) / v.A * amp, 2.6, 0, 2 * Math.PI); c.fill(); c.restore(); }
+      for (var j = 0; j <= nP; j++) { var xp = v.Lw * j / nP; c.save(); c.fillStyle = RL ? (j % 2 ? '#f6b7c6' : '#fdf3c4') : col.s1; c.beginPath(); c.arc(X(xp), midY - yAt(xp, t) / v.A * amp, RL ? 3 : 2.6, 0, 2 * Math.PI); c.fill(); if (RL) { c.strokeStyle = 'rgba(90,80,140,.35)'; c.lineWidth = 0.8; c.stroke(); } c.restore(); }
       [[v.x1, col.s2, 'P'], [v.x2, col.s3, 'Q']].forEach(function (pr) {
         var yy = midY - yAt(pr[0], t) / v.A * amp;
         D.line(c, [[X(pr[0]), midY - amp - 12], [X(pr[0]), midY + amp + 12]], pr[1], { dash: [2, 4], width: 1 });
         c.save(); c.fillStyle = pr[1]; c.beginPath(); c.arc(X(pr[0]), yy, 6, 0, 2 * Math.PI); c.fill(); c.restore();
-        D.label(c, pr[2], X(pr[0]), midY + amp + 22, pr[1], { bold: true });
+        D.label(c, pr[2], X(pr[0]), midY + amp + 22, pr[1], { bold: true, bg: RL });
       });
       D.label(c, 'vertical scale: A = ' + U.sf(v.A) + ' cm (not to the same scale as x)', W - padR, H - 10, col.muted, { align: 'right', size: 10 });
     } else {
@@ -141,6 +146,11 @@
       var spacing = v.Lw / Math.min(140, Math.max(40, Math.round(nWaves * 24)));
       var ex = Math.min(0.18 * v.lam, 2.5 * spacing) / v.A;   // world metres of drawn shift per cm of displacement
       var rows = 6, top = midY - amp, rowH = 2 * amp / (rows - 1);
+      if (kindR === 'slinky') {   // a slinky: each coil is pushed to and fro along the spring
+        hand(c, X(yAt(0, t) * ex) - 4, midY, true);
+        for (var xc = 0; xc <= v.Lw + 1e-12; xc += spacing) slinkyCoil(c, X(xc + yAt(xc, t) * ex), midY, amp * 0.8);
+        rows = 0;
+      } else if (kindR === 'speaker') speaker(c, X(yAt(0, t) * ex), midY, amp);
       for (var r = 0; r < rows; r++) {
         var yy = top + r * rowH;
         for (var x0 = 0; x0 <= v.Lw + 1e-12; x0 += spacing) {
@@ -156,7 +166,7 @@
         var xd = pr[0] + yAt(pr[0], t) * ex;
         D.line(c, [[X(pr[0]), top - 14], [X(pr[0]), top + 2 * amp + 4]], pr[1], { dash: [2, 4], width: 1 });
         c.save(); c.fillStyle = pr[1]; c.beginPath(); c.arc(X(xd), midY, 6, 0, 2 * Math.PI); c.fill(); c.restore();
-        D.label(c, pr[2], X(pr[0]), top - 22, pr[1], { bold: true });
+        D.label(c, pr[2], X(pr[0]), top - 22, pr[1], { bold: true, bg: RL });
       });
       D.label(c, 'C = compression, R = rarefaction; particle displacements exaggerated', W - padR, H - 8, col.muted, { align: 'right', size: 10 });
     }
@@ -186,33 +196,95 @@
       cursor: (t % span) * unit, title: 'P solid, Q dashed' });
   }
 
+  /* ---------- real-life look: a rope shaken by a hand, a ripple tank, a slinky, a loudspeaker ---------- */
+  var SC = SIM.scene;
+  function real() { return !!(SC && SC.real && SC.real()); }
+  /** which apparatus fits the preset: ripple-tank sizes → water; slow longitudinal → slinky; audible → loudspeaker */
+  function realKind() {
+    var v = prm.values;
+    if (type.get() === 'T') return v.Lw <= 0.1 ? 'water' : 'rope';
+    return v.f <= 20 ? 'slinky' : 'speaker';
+  }
+  function rr(c, x, y, w, h, rad) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, rad); else c.rect(x, y, w, h); }
+  function backdrop(c, W, H, midY, amp, kind) {
+    var dk = SC.dark();
+    if (kind === 'rope') {
+      var gy = Math.min(H - 4, midY + amp + 40);
+      SC.sky(c, 0, 0, W, gy, { horizon: gy }); SC.ground(c, 0, W, gy, { kind: 'grass', depth: Math.max(4, H - gy) });
+      SC.tree(c, W * 0.9, gy, 60);
+    } else {
+      c.save(); c.fillStyle = dk ? '#2c3040' : '#f5f1fb'; c.fillRect(0, 0, W, H);   // a soft lab wall
+      c.fillStyle = dk ? '#353a4d' : '#ebe5f6'; c.fillRect(0, H * 0.82, W, H * 0.18); c.restore();
+    }
+  }
+  function hand(c, x, y, push) {
+    var skin = '#f3c9ab';
+    c.save(); c.lineCap = 'round';
+    c.strokeStyle = SC.dark() ? '#7d86b8' : '#a9b8e8'; c.lineWidth = 11;   // sleeve
+    c.beginPath(); c.moveTo(-10, y + (push ? 0 : 22)); c.lineTo(x - 14, y + (push ? 0 : 6)); c.stroke();
+    c.strokeStyle = skin; c.lineWidth = 7; c.beginPath(); c.moveTo(x - 14, y + (push ? 0 : 6)); c.lineTo(x - 4, y + (push ? 0 : 2)); c.stroke();
+    c.fillStyle = skin; c.beginPath(); c.arc(x - 2, y, 7, 0, 2 * Math.PI); c.fill();
+    c.strokeStyle = 'rgba(160,100,80,.35)'; c.lineWidth = 1; c.stroke();
+    c.restore();
+  }
+  function waterSurface(c, pts, H, midY, amp) {
+    var dk = SC.dark(), bot = Math.min(H - 6, midY + amp + 34), x0 = pts[0][0], x1 = pts[pts.length - 1][0];
+    c.save();
+    c.beginPath(); c.moveTo(x0, bot); pts.forEach(function (p) { c.lineTo(p[0], p[1]); }); c.lineTo(x1, bot); c.closePath();
+    var g = c.createLinearGradient(0, midY - amp, 0, bot); g.addColorStop(0, dk ? '#3d6f99' : '#a9d6f2'); g.addColorStop(1, dk ? '#22415e' : '#79b4dc');
+    c.fillStyle = g; c.fill();
+    c.strokeStyle = dk ? 'rgba(200,230,255,.6)' : 'rgba(255,255,255,.9)'; c.lineWidth = 2; c.beginPath(); pts.forEach(function (p, i) { if (i) c.lineTo(p[0], p[1]); else c.moveTo(p[0], p[1]); }); c.stroke();
+    // glass tank walls and floor
+    c.strokeStyle = dk ? 'rgba(200,210,240,.45)' : 'rgba(110,100,170,.35)'; c.lineWidth = 3; c.lineJoin = 'round';
+    c.beginPath(); c.moveTo(x0 - 6, midY - amp - 14); c.lineTo(x0 - 6, bot + 3); c.lineTo(x1 + 6, bot + 3); c.lineTo(x1 + 6, midY - amp - 14); c.stroke();
+    // the dipper: a small bar riding on the surface at the left end
+    c.fillStyle = dk ? '#b7a6e0' : '#cbbdf0'; rr(c, x0 + 2, pts[0][1] - 26, 9, 30, 4); c.fill();
+    c.fillStyle = dk ? '#8f84b8' : '#b3a6dc'; rr(c, x0 - 4, pts[0][1] - 32, 40, 8, 4); c.fill();
+    c.restore();
+  }
+  function slinkyCoil(c, x, y, ry) {
+    c.save(); c.strokeStyle = SC.dark() ? '#b9c3e6' : '#9aa6d6'; c.lineWidth = 1.6;
+    c.beginPath(); if (c.ellipse) c.ellipse(x, y, 3.2, Math.max(1, ry), 0, 0, 2 * Math.PI); else c.rect(x - 3, y - ry, 6, 2 * ry); c.stroke();
+    c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = 0.8; c.beginPath(); c.moveTo(x - 1, y - ry * 0.8); c.lineTo(x - 1, y - ry * 0.2); c.stroke();
+    c.restore();
+  }
+  function speaker(c, xCone, y, amp) {
+    var dk = SC.dark(), h = Math.min(amp * 2.1, 120);
+    c.save();
+    c.fillStyle = dk ? '#4c5266' : '#d8d1ec'; rr(c, 2, y - h / 2, Math.max(8, xCone - 8), h, 8); c.fill();
+    c.strokeStyle = 'rgba(90,80,140,.3)'; c.lineWidth = 1; c.stroke();
+    c.fillStyle = dk ? '#8a93b4' : '#f4f1fb'; c.beginPath(); c.moveTo(xCone - 10, y - h * 0.32); c.quadraticCurveTo(xCone + 2, y, xCone - 10, y + h * 0.32); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = dk ? '#6d7488' : '#c4bce0'; c.beginPath(); c.arc(xCone - 8, y, 5, 0, 2 * Math.PI); c.fill();
+    c.restore();
+  }
+
   /* ---------- working ---------- */
   function readout() {
     var v = prm.values, s3 = U.sf, t = tPhys(), speed = WV.speed(v.f, v.lam), dx = Math.abs(v.x2 - v.x1), ph = WV.phaseDiff(dx, v.lam);
     R.clear();
     R.head('Speed, period');
-    R.eq('v', 'fλ = ' + s3(v.f) + ' × ' + s3(v.lam), speed, 'm s<sup>−1</sup>');
-    R.eq('T', '1 ÷ f = 1 ÷ ' + s3(v.f), WV.period(v.f), 's');
+    R.eq('v', 'fλ = ' + s3(v.f) + ' × ' + s3(v.lam), speed, 'm s<sup>−1</sup>', 'The wave equation v = fλ: in one period the wave moves forward one wavelength.');
+    R.eq('T', '1 ÷ f = 1 ÷ ' + s3(v.f), WV.period(v.f), 's', 'The period is the time for one complete oscillation, T = 1/f.');
     R.html('<div class="head">Derivation: in one period T the wave moves one wavelength λ, so v = λ/T = fλ.</div>');
     R.head('Phase difference between P and Q');
-    R.eq('Δx', '|x<sub>2</sub> − x<sub>1</sub>| = |' + s3(v.x2) + ' − ' + s3(v.x1) + '|', dx, 'm');
-    R.eq('Δx ÷ λ', s3(dx) + ' ÷ ' + s3(v.lam), dx / v.lam, 'wavelengths');
-    R.eq('Δφ', '360° × Δx/λ', U.dp(ph.deg, 1) + '°');
-    if (ph.deg >= 360 - 1e-9) R.eq('Δφ (0–360°)', 'subtract whole cycles', U.dp(ph.mod, 1) + '°');
-    R.eq('Δφ', 'in radians (0 to 2π): 2π × Δx/λ', s3(ph.modRad) + ' rad');
+    R.eq('Δx', '|x<sub>2</sub> − x<sub>1</sub>| = |' + s3(v.x2) + ' − ' + s3(v.x1) + '|', dx, 'm', 'Phase difference depends only on how far apart the two points are along the direction of travel.');
+    R.eq('Δx ÷ λ', s3(dx) + ' ÷ ' + s3(v.lam), dx / v.lam, 'wavelengths', 'Express the separation as a fraction of a wavelength: one whole wavelength is one whole cycle (360°).');
+    R.eq('Δφ', '360° × Δx/λ', U.dp(ph.deg, 1) + '°', '', 'Phase difference = (Δx/λ) × 360°.');
+    if (ph.deg >= 360 - 1e-9) R.eq('Δφ (0–360°)', 'subtract whole cycles', U.dp(ph.mod, 1) + '°', '', 'Whole cycles (360° each) do not change the phase relationship, so take away multiples of 360°.');
+    R.eq('Δφ', 'in radians (0 to 2π): 2π × Δx/λ', s3(ph.modRad) + ' rad', '', '360° = 2π rad. Always state whether your answer is in degrees or radians.');
     if (ph.inPhase) R.badge('In phase (Δx is a whole number of wavelengths)', 'ok');
     else if (ph.anti) R.badge('Antiphase: Δφ = 180° (π rad)', 'warn');
     else if (dx > 1e-12) R.badge((v.x2 > v.x1 ? 'Q' : 'P') + ' lags behind ' + (v.x2 > v.x1 ? 'P' : 'Q') + ' by ' + U.dp(ph.mod, 1) + '° (equivalently leads by ' + U.dp(360 - ph.mod, 1) + '°)', 'info');
-    R.eq('time lag', 'Δt = Δx ÷ v = ' + s3(dx) + ' ÷ ' + s3(speed), dx / speed, 's');
+    R.eq('time lag', 'Δt = Δx ÷ v = ' + s3(dx) + ' ÷ ' + s3(speed), dx / speed, 's', 'The wave takes Δx/v to travel from one point to the other, so the further point repeats the motion this much later.');
     R.head('Displacements now (t = ' + fmtT(t) + ')');
-    R.eq('y<sub>P</sub>', 'A sin 2π(ft − x₁/λ)', yAt(v.x1, t), 'cm');
-    R.eq('y<sub>Q</sub>', 'A sin 2π(ft − x₂/λ)', yAt(v.x2, t), 'cm');
+    R.eq('y<sub>P</sub>', 'A sin 2π(ft − x₁/λ)', yAt(v.x1, t), 'cm', 'Each particle oscillates about its equilibrium position with the same amplitude and frequency, but a different phase.');
+    R.eq('y<sub>Q</sub>', 'A sin 2π(ft − x₂/λ)', yAt(v.x2, t), 'cm', 'Q is further along, so it lags P by the phase difference above.');
     R.head('Intensity');
     var area = areaMode.get() === 'sphere' ? 4 * Math.PI * v.r * v.r : v.S, I = WV.intensity(v.P, area);
-    if (areaMode.get() === 'sphere') R.eq('area', '4πr² = 4π × ' + s3(v.r) + '²', area, 'm<sup>2</sup>');
-    R.eq('I', 'P ÷ area = ' + s3(v.P) + ' ÷ ' + s3(area), I, 'W m<sup>−2</sup>');
-    R.eq('I<sub>2</sub> ÷ I', '(A<sub>2</sub> ÷ A)² = (' + s3(v.A2) + ' ÷ ' + s3(v.A) + ')²', WV.intensityScale(1, v.A, v.A2));
-    R.eq('I<sub>2</sub>', 'I × (A<sub>2</sub>/A)²', WV.intensityScale(I, v.A, v.A2), 'W m<sup>−2</sup>');
+    if (areaMode.get() === 'sphere') R.eq('area', '4πr² = 4π × ' + s3(v.r) + '²', area, 'm<sup>2</sup>', 'From a point source the power spreads out uniformly over the surface of a sphere of radius r.');
+    R.eq('I', 'P ÷ area = ' + s3(v.P) + ' ÷ ' + s3(area), I, 'W m<sup>−2</sup>', 'Intensity is the power transmitted per unit area (normal to the direction of travel).');
+    R.eq('I<sub>2</sub> ÷ I', '(A<sub>2</sub> ÷ A)² = (' + s3(v.A2) + ' ÷ ' + s3(v.A) + ')²', WV.intensityScale(1, v.A, v.A2), '', 'Intensity is proportional to amplitude squared, so square the ratio of the amplitudes.');
+    R.eq('I<sub>2</sub>', 'I × (A<sub>2</sub>/A)²', WV.intensityScale(I, v.A, v.A2), 'W m<sup>−2</sup>', 'Multiply the first intensity by the ratio found above.');
     R.html('<div class="head">' + (type.get() === 'T' ? 'Transverse: particles oscillate perpendicular to the direction of energy transfer (can be polarised).' : 'Longitudinal: particles oscillate parallel to the direction of energy transfer (compressions and rarefactions; cannot be polarised).') + '</div>');
     R.render();
   }

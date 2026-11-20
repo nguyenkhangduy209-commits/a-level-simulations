@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-superposition.js"></script>
@@ -110,7 +111,10 @@
     var wt = 2 * Math.PI * clock.t / PERIOD, S = SP.shapeFn(med, st.lambda, L), tp = SP.travellingPair(med, st.lambda, L);
     var y0 = vp.Y(0), sc = vp.scale * amp;
     // apparatus
-    if (med === 'string') {
+    var RL = real();
+    if (RL) realApparatus(c, med, X, L, y0, sc, wt);
+    if (RL && (med === 'string' || med === 'microwave')) { /* drawn above */ }
+    else if (med === 'string') {
       c.fillStyle = col.surface; c.strokeStyle = col['object-line'];
       c.fillRect(X(0) - 34, y0 - 22, 28, 44); c.strokeRect(X(0) - 34, y0 - 22, 28, 44);
       D.label(c, 'vibrator', X(0) - 20, y0 + 34, col.muted, { size: 11 });
@@ -122,6 +126,7 @@
       c.fillStyle = col['object-line']; c.fillRect(X(L) + 2, y0 - sc - 18, 7, 2 * sc + 36); D.label(c, 'metal plate', X(L) + 6, y0 + sc + 30, col.muted, { size: 11 });
     } else {
       var top = y0 - sc - 10, bot = y0 + sc + 10;
+      if (!RL) {
       c.strokeStyle = col['object-line']; c.lineWidth = 2;
       c.beginPath(); c.moveTo(X(0), top); c.lineTo(X(L), top); c.moveTo(X(0), bot); c.lineTo(X(L), bot); c.stroke();
       if (med === 'closed') { c.fillStyle = col['object-line']; c.fillRect(X(L), top - 4, 7, bot - top + 8); D.label(c, 'closed end', X(L) + 4, bot + 16, col.muted, { size: 11 }); }
@@ -130,6 +135,7 @@
       c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
       c.beginPath(); c.moveTo(X(0) - 12, y0 - 10); c.lineTo(X(0) - 30, y0 - 22); c.lineTo(X(0) - 30, y0 + 22); c.lineTo(X(0) - 12, y0 + 10); c.closePath(); c.fill(); c.stroke();
       D.label(c, 'loudspeaker', X(0) - 26, y0 - 32, col.muted, { size: 11 });
+      }
       // air particles (longitudinal): displaced along the tube
       var nP = 46;
       for (var j = 0; j <= nP; j++) {
@@ -172,6 +178,58 @@
     if (ix) ix.paint(c);
   }
 
+  /* ---------- real-life look: vibration generator + pulley + hanging mass, resonance tube + tuning fork, microwave kit ---------- */
+  var SC = SIM.scene;
+  function real() { return !!(SC && SC.real && SC.real()); }
+  function rr(c, x, y, w, h, rad) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, rad); else c.rect(x, y, w, h); }
+  function realApparatus(c, med, X, L, y0, sc, wt) {
+    var dk = SC.dark(), line = dk ? 'rgba(255,255,255,.18)' : 'rgba(90,80,140,.28)', soft = dk ? '#5d6579' : '#e6e0f4', soft2 = dk ? '#7d86a8' : '#d3cbea', txt = dk ? '#c9d0e0' : '#6f6a8a';
+    c.save(); c.strokeStyle = line; c.lineWidth = 1;
+    if (med === 'string') {
+      var yb = vp.Y(-0.52), r = 9;
+      c.fillStyle = dk ? '#4a4f63' : '#eadfce'; rr(c, X(0) - 52, yb, X(L) - X(0) + 58, 8, 4); c.fill(); c.stroke();   // bench
+      // vibration generator with a shaking drive pin
+      c.fillStyle = soft; rr(c, X(0) - 44, y0 + 4, 36, yb - y0 - 4, 7); c.fill(); c.stroke();
+      c.fillStyle = soft2; c.beginPath(); c.arc(X(0) - 26, (y0 + yb) / 2 + 2, Math.max(4, (yb - y0) * 0.22), 0, 2 * Math.PI); c.fill();
+      var shake = 1.6 * Math.cos(wt);
+      c.strokeStyle = dk ? '#b3a6dc' : '#a597d6'; c.lineWidth = 3; c.lineCap = 'round'; c.beginPath(); c.moveTo(X(0) - 6, y0 + 8 + shake); c.lineTo(X(0), y0 + shake * 0.3); c.stroke();
+      // clamp + pulley at the far end, string over it to a hanging mass
+      c.strokeStyle = line; c.lineWidth = 1;
+      c.fillStyle = soft2; rr(c, X(L) - 6, y0 + r, 12, yb - y0 - r, 4); c.fill(); c.stroke();
+      c.strokeStyle = dk ? '#d9c6a2' : '#b48a5c'; c.lineWidth = 1.4; c.beginPath(); c.moveTo(X(L) + r, y0 + r); c.lineTo(X(L) + r, y0 + sc * 0.5); c.stroke();
+      SC.pulley(c, X(L), y0 + r, r, 0);
+      var my = y0 + sc * 0.5;
+      for (var k = 0; k < 3; k++) { c.fillStyle = k % 2 ? soft2 : (dk ? '#8a93a6' : '#c4bce0'); rr(c, X(L) + r - 9, my + k * 7, 18, 7, 3); c.fill(); c.strokeStyle = line; c.stroke(); }
+      c.restore();
+      D.label(c, 'vibration generator', X(0) - 26, yb + 16, txt, { size: 10, bold: true });
+      D.label(c, 'pulley + masses', X(L) + 6, yb + 16, txt, { size: 10, bold: true });
+      return;
+    }
+    if (med === 'microwave') {
+      c.fillStyle = soft; rr(c, X(0) - 46, y0 - 14, 30, 28, 5); c.fill(); c.stroke();
+      c.fillStyle = soft2; c.beginPath(); c.moveTo(X(0) - 16, y0 - 10); c.lineTo(X(0), y0 - 24); c.lineTo(X(0), y0 + 24); c.lineTo(X(0) - 16, y0 + 10); c.closePath(); c.fill(); c.stroke();
+      var g = c.createLinearGradient(X(L), 0, X(L) + 9, 0); g.addColorStop(0, dk ? '#9aa3bd' : '#e9ecf6'); g.addColorStop(0.5, dk ? '#c9d0e6' : '#ffffff'); g.addColorStop(1, dk ? '#7d86a8' : '#cfd4e6');
+      c.fillStyle = g; rr(c, X(L) + 2, y0 - sc - 18, 8, 2 * sc + 36, 3); c.fill(); c.stroke();
+      c.restore();
+      D.label(c, 'transmitter', X(0) - 22, y0 + 40, txt, { size: 10, bold: true });
+      D.label(c, 'metal plate', X(L) + 6, y0 + sc + 30, txt, { size: 10, bold: true });
+      return;
+    }
+    // resonance tube (glass) with a tuning fork at the open end; a piston closes the far end of a closed tube
+    var top = y0 - sc - 10, bot = y0 + sc + 10;
+    c.fillStyle = dk ? 'rgba(170,200,240,.12)' : 'rgba(200,225,250,.45)'; rr(c, X(0), top, X(L) - X(0), bot - top, 6); c.fill();
+    c.strokeStyle = dk ? 'rgba(200,220,255,.5)' : 'rgba(120,140,200,.55)'; c.lineWidth = 2; c.beginPath(); c.moveTo(X(0), top); c.lineTo(X(L), top); c.moveTo(X(0), bot); c.lineTo(X(L), bot); c.stroke();
+    c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 2; c.beginPath(); c.moveTo(X(0) + 6, top + 4); c.lineTo(X(L) - 6, top + 4); c.stroke();
+    if (med === 'closed') { c.fillStyle = soft2; c.strokeStyle = line; c.lineWidth = 1; rr(c, X(L), top - 4, 9, bot - top + 8, 3); c.fill(); c.stroke(); rr(c, X(L) + 9, y0 - 3, 24, 6, 3); c.fill(); c.stroke(); }
+    var fx = X(0) - 22, sp = 4 + 1.5 * Math.cos(wt * 1.0);
+    c.strokeStyle = dk ? '#b9c3e6' : '#9aa6d6'; c.lineWidth = 3; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(fx - sp, y0 - 24); c.lineTo(fx - sp, y0 + 4); c.quadraticCurveTo(fx, y0 + 10, fx + sp, y0 + 4); c.lineTo(fx + sp, y0 - 24); c.moveTo(fx, y0 + 8); c.lineTo(fx, y0 + 26); c.stroke();
+    c.restore();
+    D.label(c, 'tuning fork', fx, y0 - 34, txt, { size: 10, bold: true });
+    D.label(c, med === 'closed' ? 'closed end' : 'open end', X(L), bot + 16, txt, { size: 10, bold: true });
+    D.label(c, 'open end', X(0), bot + 16, txt, { size: 10, bold: true });
+  }
+
   /* ---------- plots ---------- */
   function drawPlots() {
     if (!st || st.invalid) return;
@@ -195,35 +253,35 @@
     if (st.invalid) { R.badge(st.invalid, 'warn').render(); return; }
     if (med === 'microwave') {
       R.head('Microwaves reflected by a metal plate');
-      R.eq('λ', 'c ÷ f = 3.00 × 10<sup>8</sup> ÷ (' + U.num(prm.values.fG, 3) + ' × 10<sup>9</sup>)', st.lambda, 'm');
-      R.eq('node spacing', 'λ ÷ 2', st.spacing, 'm');
-      R.eq('nodes between source and plate', 'counted from the plate (a node)', String(st.nodes.length));
+      R.eq('λ', 'c ÷ f = 3.00 × 10<sup>8</sup> ÷ (' + U.num(prm.values.fG, 3) + ' × 10<sup>9</sup>)', st.lambda, 'm', 'All electromagnetic waves travel at c in a vacuum (and almost exactly in air): λ = c/f.');
+      R.eq('node spacing', 'λ ÷ 2', st.spacing, 'm', 'Adjacent nodes of a stationary wave are half a wavelength apart.');
+      R.eq('nodes between source and plate', 'counted from the plate (a node)', String(st.nodes.length), '', 'The metal plate reflects the microwaves and is a node; nodes repeat every λ/2 back towards the transmitter.');
       var m = prm.values.m, d = m * st.lambda / 2;
       R.head('Measuring λ (8.1.4)');
-      R.eq('d', 'distance moved across m = ' + m + ' node spacings = m × λ/2', d, 'm');
-      R.eq('λ', '2d ÷ m = 2 × ' + s3(d) + ' ÷ ' + m, SP.lambdaFromNodes(d, m), 'm');
+      R.eq('d', 'distance moved across m = ' + m + ' node spacings = m × λ/2', d, 'm', 'The detector reading drops to a minimum at each node; count several node spacings to reduce the uncertainty.');
+      R.eq('λ', '2d ÷ m = 2 × ' + s3(d) + ' ÷ ' + m, SP.lambdaFromNodes(d, m), 'm', 'Each node spacing is λ/2, so λ = 2d/m.');
     } else {
       var k = g.k, h = st.harmonic;
       R.badge(med === 'closed' ? 'Closed at one end: node at the closed end, antinode at the open end' : med === 'open' ? 'Open at both ends: antinodes at both ends' : 'Fixed at both ends: nodes at both ends', 'info');
       R.head('Pattern ' + k + (med === 'closed' ? ' → harmonic number 2k − 1 = ' + h : ' → harmonic number n = ' + h));
-      if (med === 'closed') R.eq('λ', 'L = (2k − 1)λ/4 ⇒ λ = 4L ÷ ' + h + ' = 4 × ' + U.num(g.L, 4) + ' ÷ ' + h, st.lambda, 'm');
-      else R.eq('λ', 'L = nλ/2 ⇒ λ = 2L ÷ ' + h + ' = 2 × ' + U.num(g.L, 4) + ' ÷ ' + h, st.lambda, 'm');
-      R.eq('f', 'v ÷ λ = ' + U.num(g.v, 4) + ' ÷ ' + s3(st.lambda), st.f, 'Hz');
-      R.eq('f₁', med === 'closed' ? 'v ÷ 4L (fundamental)' : 'v ÷ 2L (fundamental)', st.f1, 'Hz');
-      R.eq('f ÷ f₁', med === 'closed' ? 'odd whole number' : 'whole number', U.num(st.f / st.f1, 6));
-      R.eq('node spacing', 'λ ÷ 2', st.spacing, 'm');
-      R.eq('node → antinode', 'λ ÷ 4', st.lambda / 4, 'm');
-      R.eq('nodes / antinodes', 'counted along L (ends included)', st.nodes.length + ' N, ' + st.antinodes.length + ' A');
+      if (med === 'closed') R.eq('λ', 'L = (2k − 1)λ/4 ⇒ λ = 4L ÷ ' + h + ' = 4 × ' + U.num(g.L, 4) + ' ÷ ' + h, st.lambda, 'm', 'Node at the closed end, antinode at the open end: the length fits an odd number of quarter-wavelengths.');
+      else R.eq('λ', 'L = nλ/2 ⇒ λ = 2L ÷ ' + h + ' = 2 × ' + U.num(g.L, 4) + ' ÷ ' + h, st.lambda, 'm', med === 'string' ? 'Nodes at both fixed ends: a whole number of loops fits, each loop λ/2 long.' : 'Antinodes at both open ends: a whole number of half-wavelengths fits in the tube.');
+      R.eq('f', 'v ÷ λ = ' + U.num(g.v, 4) + ' ÷ ' + s3(st.lambda), st.f, 'Hz', 'The wave equation v = fλ: the source must vibrate at this frequency to set up this pattern (resonance).');
+      R.eq('f₁', med === 'closed' ? 'v ÷ 4L (fundamental)' : 'v ÷ 2L (fundamental)', st.f1, 'Hz', 'The fundamental is the simplest pattern: ' + (med === 'closed' ? 'L = λ/4.' : 'L = λ/2.'));
+      R.eq('f ÷ f₁', med === 'closed' ? 'odd whole number' : 'whole number', U.num(st.f / st.f1, 6), '', med === 'closed' ? 'A tube closed at one end only has odd harmonics: f₁, 3f₁, 5f₁ …' : 'Every whole-number multiple of f₁ is possible.');
+      R.eq('node spacing', 'λ ÷ 2', st.spacing, 'm', 'Adjacent nodes (or adjacent antinodes) are λ/2 apart.');
+      R.eq('node → antinode', 'λ ÷ 4', st.lambda / 4, 'm', 'A node and the next antinode are a quarter of a wavelength apart.');
+      R.eq('nodes / antinodes', 'counted along L (ends included)', st.nodes.length + ' N, ' + st.antinodes.length + ' A', '', 'Count along the length: nodes are points of zero amplitude, antinodes of maximum amplitude.');
       R.head('Allowed frequencies');
-      R.eq('f', 'first five', SP.allowedFrequencies(med, g.L, g.v, 5).map(function (o) { return s3(o.f); }).join(', '), 'Hz');
+      R.eq('f', 'first five', SP.allowedFrequencies(med, g.L, g.v, 5).map(function (o) { return s3(o.f); }).join(', '), 'Hz', 'Only frequencies whose pattern fits the boundary conditions at both ends give a stationary wave.');
     }
     R.head('Probes P and Q');
     var xP = g.L * prm.values.pP / 100, xQ = g.L * prm.values.pQ / 100, rel = SP.phaseRelation(med, st.lambda, g.L, xP, xQ);
     var S = SP.shapeFn(med, st.lambda, g.L);
-    R.eq('x<sub>P</sub>, x<sub>Q</sub>', '', s3(xP) + ' m, ' + s3(xQ) + ' m');
-    R.eq('amplitude ratio', 'A<sub>P</sub> ÷ A<sub>Q</sub>', Math.abs(S(xQ)) > 1e-9 ? s3(Math.abs(S(xP)) / Math.abs(S(xQ))) : 'Q is at a node');
+    R.eq('x<sub>P</sub>, x<sub>Q</sub>', '', s3(xP) + ' m, ' + s3(xQ) + ' m', '', 'Distances of the two probe points from the left-hand end.');
+    R.eq('amplitude ratio', 'A<sub>P</sub> ÷ A<sub>Q</sub>', Math.abs(S(xQ)) > 1e-9 ? s3(Math.abs(S(xP)) / Math.abs(S(xQ))) : 'Q is at a node', '', 'In a stationary wave the amplitude varies with position: zero at nodes, largest at antinodes.');
     R.eq('phase', rel.rel === 'node' ? 'a probe is at a node (does not move)' : (rel.rel === 'in phase' ? 'same loop or an even number of nodes between' : 'an odd number of nodes between'),
-      rel.rel === 'node' ? '—' : rel.rel + ' (' + rel.deg + '°)');
+      rel.rel === 'node' ? '—' : rel.rel + ' (' + rel.deg + '°)', '', 'All points between two adjacent nodes move in phase; crossing a node reverses the phase (180°).');
     R.render();
   }
 

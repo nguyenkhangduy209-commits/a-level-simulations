@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-projectile.js"></script>
@@ -144,13 +145,15 @@
     vp.fit(view[0], view[1], view[2], view[3]); c = vp.begin();
     var t = clock.t, st = sol.stateAt(t);
     // ground at y = 0 with a cliff under the launch point when h0 > 0
-    var gx0 = view[0], gx1 = view[1];
-    if (p.h0 > 0) {
+    var gx0 = view[0], gx1 = view[1], REAL = SIM.scene.real(), SC = SIM.scene;
+    if (REAL) realBackdrop(c, p, t);
+    else if (p.h0 > 0) {
       c.save(); c.fillStyle = col.surface; c.fillRect(vp.X(gx0), vp.Y(p.h0), vp.X(0) - vp.X(gx0), vp.Y(Math.min(0, p.yL)) - vp.Y(p.h0)); c.restore();
       D.line(c, [vp.P(gx0, p.h0), vp.P(0, p.h0), vp.P(0, Math.min(0, p.yL))], col['object-line'], { width: 1.6 });
       D.label(c, 'h = ' + U.sf(p.h0) + ' m', vp.X(0) - 6, vp.Y(p.h0 / 2), col.muted, { align: 'right', size: 12, bg: true });
     }
-    D.ground(c, vp.X(p.h0 > 0 ? 0 : gx0), vp.Y(0), vp.X(gx1), vp.Y(0));
+    if (REAL) { if (p.h0 > 0) D.label(c, 'h = ' + U.sf(p.h0) + ' m', vp.X(0) - 6, vp.Y(p.h0 / 2), col.muted, { align: 'right', size: 12, bg: true }); }
+    else D.ground(c, vp.X(p.h0 > 0 ? 0 : gx0), vp.Y(0), vp.X(gx1), vp.Y(0));
     if (Math.abs(p.yL) > 1e-9) {
       D.line(c, [vp.P(gx0, p.yL), vp.P(gx1, p.yL)], col.accent, { dash: [6, 5], width: 1.2 });
       D.label(c, 'landing level y = ' + U.sf(p.yL) + ' m', vp.X(gx1) - 4, vp.Y(p.yL) - 9, col.accent, { align: 'right', size: 11 });
@@ -159,7 +162,8 @@
       var wx = prm.values.wx, wh = prm.values.wh;
       c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.4;
       var wpx = Math.max(4, vp.scale * 0.4);
-      c.fillRect(vp.X(wx) - wpx / 2, vp.Y(wh), wpx, vp.Y(0) - vp.Y(wh)); c.strokeRect(vp.X(wx) - wpx / 2, vp.Y(wh), wpx, vp.Y(0) - vp.Y(wh)); c.restore();
+      if (REAL) { c.restore(); SC.wall(c, vp.X(wx) - Math.max(8, wpx) / 2, vp.Y(wh), Math.max(8, wpx), vp.Y(0) - vp.Y(wh), { kind: 'brick' }); c.save(); }
+      else c.fillRect(vp.X(wx) - wpx / 2, vp.Y(wh), wpx, vp.Y(0) - vp.Y(wh)); if (!REAL) c.strokeRect(vp.X(wx) - wpx / 2, vp.Y(wh), wpx, vp.Y(0) - vp.Y(wh)); c.restore();
     }
     // predicted path (dashed) and travelled path (solid)
     var pred = [], done = [];
@@ -197,7 +201,13 @@
     }
     // projectile + velocity vector and components
     var px = vp.X(st.x), py = vp.Y(st.y);
-    D.particle(c, px, py, 8, { fill: col.velocity, stroke: col['object-line'] });
+    if (REAL) {
+      var landed = sol.land && t >= sol.land.t - 1e-6;
+      if (!landed && st.speed > 1e-9) SC.motionLines(c, px, py, st.vx, -st.vy, Math.min(45, st.speed * 2), null, 8);
+      // the football spins as it flies (turned by the distance from the launch point, so scrubbing is exact)
+      SC.ball(c, px, py, 8, { kind: 'football', spin: (st.x >= 0 ? 1 : -1) * Math.hypot(st.x, st.y - p.h0) * vp.scale / 8 });
+      if (landed) { if (splashy(p)) SC.impact(c, px, py + 6, 18, 0.35); else SC.dust(c, px, py + 8, 0.35); }
+    } else D.particle(c, px, py, 8, { fill: col.velocity, stroke: col['object-line'] });
     var vs = Math.max(Math.abs(sol.ux), Math.abs(sol.uy), Math.abs(sol.uy - p.g * tEnd), 1e-9), kpx = Math.min(90, vp.h * 0.22) / vs;
     if (showComp.get()) {
       if (Math.abs(st.vx) > 1e-9) D.arrow(c, px, py, px + st.vx * kpx, py, col.s1, { label: 'vₓ = ' + U.sf(st.vx), width: 2, ly: 13 });
@@ -213,6 +223,35 @@
     if (p.u > 1e-9) D.arrow(c, lo.x, lo.y, lt.x, lt.y, col.accent, { width: 2, dash: [6, 4], label: launchDragging ? null : 'u', ly: -12 });
     if (launchDragging) D.label(c, 'u = ' + U.num(p.u, 1) + ' m s⁻¹ at ' + U.num(p.theta, 1) + '°', lt.x, lt.y - 22, col.accent, { bold: true, size: 12, bg: true });
     if (ix) ix.paint(c);
+  }
+
+  /* ---------- real-life look: sky, grass or sea, a cliff under a raised launch point, a roof for a raised landing level, a kicker ---------- */
+  /** lands in the sea: launched from a cliff at least 8 m above the landing level, landing level not raised */
+  function splashy(p) { return p.yL <= 0 && p.h0 - p.yL >= 8; }
+  function realBackdrop(c, p, t) {
+    var SC = SIM.scene, W = vp.w, H = vp.h, x0 = vp.X(0), base = Math.min(0, p.yL), yb = vp.Y(base);
+    SC.sky(c, 0, 0, W, H, { horizon: H });
+    if (p.h0 > base + 1e-9) {
+      // launch point on the edge of a cliff (or a raised bank); the ground or sea to the right is at the landing level
+      var yRight = vp.Y(p.yL > 0 ? 0 : p.yL);
+      if (splashy(p)) SC.water(c, x0, yRight, W - x0, H - yRight + 2, t);
+      else SC.ground(c, x0, W, yRight, { kind: 'grass', depth: H - yRight + 2 });
+      SC.cliff(c, x0, vp.Y(p.h0), H + 2, 'left', -4);
+    } else SC.ground(c, 0, W, vp.Y(0), { kind: 'grass', depth: H - vp.Y(0) + 2 });
+    if (p.yL > 1e-9 && sol.land) {
+      // a building whose flat roof is the landing level: its edge is between where the ball rises past y_L and where it lands
+      var ux = sol.ux, uy = sol.uy, disc = uy * uy - 2 * p.g * (p.yL - p.h0);
+      var t1 = disc >= 0 ? (uy - Math.sqrt(disc)) / p.g : 0, xa = Math.max(0, ux * t1), xe = xa + 0.6 * (sol.land.x - xa);
+      var bx = vp.X(xe), by = vp.Y(p.yL), dk = SC.dark(), col0 = dk ? '#5d5a72' : '#efe2d0';
+      c.save(); c.fillStyle = col0; c.strokeStyle = 'rgba(80,70,60,.25)'; c.lineWidth = 1;
+      c.beginPath(); if (c.roundRect) c.roundRect(bx, by, W - bx + 4, vp.Y(0) - by, [5, 0, 0, 0]); else c.rect(bx, by, W - bx + 4, vp.Y(0) - by); c.fill(); c.stroke();
+      c.fillStyle = SC.shade(col0, dk ? 0.12 : -0.14); c.fillRect(bx - 2, by - 3, W - bx + 6, 5);   // roof edge
+      c.fillStyle = dk ? 'rgba(255,240,190,.25)' : 'rgba(150,190,225,.55)';
+      for (var wy = by + 12; wy < vp.Y(0) - 16; wy += 24) for (var wx = bx + 12; wx < W - 10; wx += 22) { c.beginPath(); if (c.roundRect) c.roundRect(wx, wy, 10, 13, 3); else c.rect(wx, wy, 10, 13); c.fill(); }
+      c.restore();
+    }
+    // the kicker stands just behind the launch point, only around the moment of the kick
+    if (t < 0.3) SC.person(c, x0 - 16, vp.Y(p.h0), Math.max(26, Math.min(44, vp.h * 0.14)), { pose: 'stand', color: '#8fb3e0' });
   }
 
   /* ---------- plots ---------- */
@@ -234,47 +273,47 @@
     R.clear();
     if (isComp()) {
       R.head('1. Launch velocity from its components');
-      R.eq('u<sub>x</sub>', 'given (horizontal, constant throughout)', sol.ux, 'm s<sup>−1</sup>');
-      R.eq('u<sub>y</sub>', 'given (vertical, up +)', sol.uy, 'm s<sup>−1</sup>');
-      R.eq('u', '√(u<sub>x</sub>² + u<sub>y</sub>²) = √(' + s3(sol.ux) + '² + ' + s3(sol.uy) + '²)', p.u, 'm s<sup>−1</sup>');
-      R.eq('θ', 'tan⁻¹(u<sub>y</sub> ÷ u<sub>x</sub>) above horizontal', Math.abs(sol.ux) < 1e-12 ? (sol.uy >= 0 ? '90.0°' : '−90.0°') : U.dp(p.theta, 1) + '°');
+      R.eq('u<sub>x</sub>', 'given (horizontal, constant throughout)', sol.ux, 'm s<sup>−1</sup>', 'No horizontal force acts (air resistance ignored), so the horizontal component never changes.');
+      R.eq('u<sub>y</sub>', 'given (vertical, up +)', sol.uy, 'm s<sup>−1</sup>', 'The vertical component is the starting value for the vertical motion, where a = −g.');
+      R.eq('u', '√(u<sub>x</sub>² + u<sub>y</sub>²) = √(' + s3(sol.ux) + '² + ' + s3(sol.uy) + '²)', p.u, 'm s<sup>−1</sup>', 'The two components are at right angles, so combine them with Pythagoras.');
+      R.eq('θ', 'tan⁻¹(u<sub>y</sub> ÷ u<sub>x</sub>) above horizontal', Math.abs(sol.ux) < 1e-12 ? (sol.uy >= 0 ? '90.0°' : '−90.0°') : U.dp(p.theta, 1) + '°', '', 'The angle above the horizontal from the right-angled triangle of components: tan θ = u_y ÷ u_x.');
     } else {
       R.head('1. Resolve the launch velocity');
-      R.eq('u<sub>x</sub>', 'u cos θ = ' + U.num(p.u, 3) + ' × cos ' + U.num(p.theta, 2) + '°', sol.ux, 'm s<sup>−1</sup>');
-      R.eq('u<sub>y</sub>', 'u sin θ = ' + U.num(p.u, 3) + ' × sin ' + U.num(p.theta, 2) + '°', sol.uy, 'm s<sup>−1</sup>');
+      R.eq('u<sub>x</sub>', 'u cos θ = ' + U.num(p.u, 3) + ' × cos ' + U.num(p.theta, 2) + '°', sol.ux, 'm s<sup>−1</sup>', 'Resolve the launch velocity: the horizontal component is the adjacent side, u cos θ.');
+      R.eq('u<sub>y</sub>', 'u sin θ = ' + U.num(p.u, 3) + ' × sin ' + U.num(p.theta, 2) + '°', sol.uy, 'm s<sup>−1</sup>', 'The vertical component is the opposite side, u sin θ (negative if thrown downwards).');
     }
     R.head('2. Vertical motion (a = −g, up +)');
     if (sol.apex) {
-      R.eq('t<sub>top</sub>', 'v<sub>y</sub> = 0 ⇒ t = u<sub>y</sub> ÷ g = ' + s3(sol.uy) + ' ÷ ' + U.num(p.g, 3), sol.apex.t, 's');
-      R.eq('H<sub>max</sub>', 'h + u<sub>y</sub>² ÷ 2g = ' + s3(p.h0) + ' + ' + s3(sol.uy) + '² ÷ ' + s3(2 * p.g), sol.apex.H, 'm');
-    } else R.eq('max height', 'u<sub>y</sub> ≤ 0, so the launch point is the highest point', p.h0, 'm');
+      R.eq('t<sub>top</sub>', 'v<sub>y</sub> = 0 ⇒ t = u<sub>y</sub> ÷ g = ' + s3(sol.uy) + ' ÷ ' + U.num(p.g, 3), sol.apex.t, 's', 'At the highest point only the vertical velocity is zero: v_y = u_y − gt = 0.');
+      R.eq('H<sub>max</sub>', 'h + u<sub>y</sub>² ÷ 2g = ' + s3(p.h0) + ' + ' + s3(sol.uy) + '² ÷ ' + s3(2 * p.g), sol.apex.H, 'm', 'v_y² = u_y² − 2gs with v_y = 0 gives the rise above the launch point; add the launch height.');
+    } else R.eq('max height', 'u<sub>y</sub> ≤ 0, so the launch point is the highest point', p.h0, 'm', 'It starts moving horizontally or downwards, so it never rises above the launch point.');
     if (sol.land) {
       var dy = p.yL - p.h0;
-      R.eq('time of flight', 'solve ' + s3(dy) + ' = ' + s3(sol.uy) + 't − ½(' + U.num(p.g, 3) + ')t²', sol.land.t, 's');
-      if (sol.levelTime !== null) R.eq('check', 'level ground: T = 2u sin θ ÷ g', sol.levelTime, 's');
+      R.eq('time of flight', 'solve ' + s3(dy) + ' = ' + s3(sol.uy) + 't − ½(' + U.num(p.g, 3) + ')t²', sol.land.t, 's', 'Vertical motion only: s = ut + ½at² with s = landing level − launch height and a = −g. Take the positive root.');
+      if (sol.levelTime !== null) R.eq('check', 'level ground: T = 2u sin θ ÷ g', sol.levelTime, 's', 'Only when it lands at its launch height: put s = 0 in the vertical equation.');
       R.head('3. Horizontal motion (a = 0)');
-      R.eq('range', 'x = u<sub>x</sub>t = ' + s3(sol.ux) + ' × ' + s3(sol.land.t), sol.land.x, 'm');
-      if (sol.levelRange !== null) R.eq('check', 'level ground: R = u² sin 2θ ÷ g', sol.levelRange, 'm');
+      R.eq('range', 'x = u<sub>x</sub>t = ' + s3(sol.ux) + ' × ' + s3(sol.land.t), sol.land.x, 'm', 'Horizontal motion has no acceleration, so distance = constant horizontal speed × time of flight.');
+      if (sol.levelRange !== null) R.eq('check', 'level ground: R = u² sin 2θ ÷ g', sol.levelRange, 'm', 'Only for landing at the launch height: R = u_x × T with T = 2u sin θ ÷ g.');
       R.head('4. Velocity on landing');
-      R.eq('v<sub>y</sub>', 'u<sub>y</sub> − gt = ' + s3(sol.uy) + ' − ' + U.num(p.g, 3) + ' × ' + s3(sol.land.t), sol.land.vy, 'm s<sup>−1</sup>');
-      R.eq('speed', '√(v<sub>x</sub>² + v<sub>y</sub>²) = √(' + s3(sol.ux) + '² + ' + s3(sol.land.vy) + '²)', sol.land.speed, 'm s<sup>−1</sup>');
-      R.eq('direction', 'tan⁻¹(|v<sub>y</sub>| ÷ v<sub>x</sub>) below horizontal', Math.abs(sol.ux) < 1e-9 ? 'vertical' : U.dp(sol.land.angleBelow, 1) + '°');
-      R.eq('energy check', '√(u² + 2g(h − y<sub>L</sub>)) (topic 5)', sol.impactSpeedEnergy, 'm s<sup>−1</sup>');
+      R.eq('v<sub>y</sub>', 'u<sub>y</sub> − gt = ' + s3(sol.uy) + ' − ' + U.num(p.g, 3) + ' × ' + s3(sol.land.t), sol.land.vy, 'm s<sup>−1</sup>', 'Vertical velocity on landing from v = u + at with a = −g.');
+      R.eq('speed', '√(v<sub>x</sub>² + v<sub>y</sub>²) = √(' + s3(sol.ux) + '² + ' + s3(sol.land.vy) + '²)', sol.land.speed, 'm s<sup>−1</sup>', 'The landing velocity has both components at right angles: combine them with Pythagoras.');
+      R.eq('direction', 'tan⁻¹(|v<sub>y</sub>| ÷ v<sub>x</sub>) below horizontal', Math.abs(sol.ux) < 1e-9 ? 'vertical' : U.dp(sol.land.angleBelow, 1) + '°', '', 'The angle below the horizontal from the velocity triangle: tan φ = |v_y| ÷ v_x.');
+      R.eq('energy check', '√(u² + 2g(h − y<sub>L</sub>)) (topic 5)', sol.impactSpeedEnergy, 'm s<sup>−1</sup>', 'Conservation of energy, ½mv² = ½mu² + mgΔh, gives the same speed without using the components.');
     } else R.badge('No landing: ' + sol.reason, 'warn');
     if (showWall.get()) {
       var w = PJ.heightAt(sol, prm.values.wx);
       R.head('Wall at X = ' + s3(prm.values.wx) + ' m');
       if (!isFinite(w.t) || (sol.land && w.t > sol.land.t)) R.badge('Lands before reaching the wall', 'info');
       else {
-        R.eq('t at wall', 'X ÷ u<sub>x</sub> = ' + s3(prm.values.wx) + ' ÷ ' + s3(sol.ux), w.t, 's');
-        R.eq('y at wall', 'h + u<sub>y</sub>t − ½gt²', w.y, 'm');
+        R.eq('t at wall', 'X ÷ u<sub>x</sub> = ' + s3(prm.values.wx) + ' ÷ ' + s3(sol.ux), w.t, 's', 'Horizontal motion: the time to cover the horizontal distance X at constant speed u_x.');
+        R.eq('y at wall', 'h + u<sub>y</sub>t − ½gt²', w.y, 'm', 'Put that time into the vertical equation to find the height when the ball reaches the wall.');
         R.badge(w.y > prm.values.wh ? 'Clears the wall by ' + s3(w.y - prm.values.wh) + ' m' : 'Hits the wall (' + s3(prm.values.wh - w.y) + ' m too low)', w.y > prm.values.wh ? 'ok' : 'warn');
       }
     }
     R.head('At t = ' + t.toFixed(2) + ' s');
-    R.eq('x, y', 'position', s3(st.x) + ', ' + s3(st.y), 'm');
-    R.eq('v<sub>x</sub>, v<sub>y</sub>', 'components', s3(st.vx) + ', ' + s3(st.vy), 'm s<sup>−1</sup>');
-    R.eq('speed', 'direction ' + U.dp(st.dir, 1) + '° to horizontal', st.speed, 'm s<sup>−1</sup>');
+    R.eq('x, y', 'position', s3(st.x) + ', ' + s3(st.y), 'm', 'Horizontal: x = u_x t. Vertical: y = h + u_y t − ½gt².');
+    R.eq('v<sub>x</sub>, v<sub>y</sub>', 'components', s3(st.vx) + ', ' + s3(st.vy), 'm s<sup>−1</sup>', 'v_x stays equal to u_x; v_y = u_y − gt.');
+    R.eq('speed', 'direction ' + U.dp(st.dir, 1) + '° to horizontal', st.speed, 'm s<sup>−1</sup>', 'Speed from Pythagoras; the direction is tan⁻¹(v_y ÷ v_x).');
     R.render();
   }
 

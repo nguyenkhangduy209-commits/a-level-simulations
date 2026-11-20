@@ -233,12 +233,14 @@
     if (!M) return;
     var col = ui.colors(), c;
     vp.fit(-1.25, 1.25, -1.25, 1.25); c = vp.begin();
-    var ox = vp.X(0), oy = vp.Y(0), L = Math.min(vp.w, vp.h) * 0.4;
-    D.line(c, [[vp.X(-1.25) - 200, oy], [vp.X(1.25) + 200, oy]], col.grid, { dash: [4, 4] });
-    D.line(c, [[ox, vp.Y(1.25) - 50], [ox, vp.Y(-1.25) + 50]], col.grid, { dash: [4, 4] });
-    D.label(c, '+x', Math.min(vp.w - 14, ox + L + 30), oy - 10, col.muted, { size: 11 });
-    D.label(c, '+y', ox + 14, Math.max(10, oy - L - 22), col.muted, { size: 11 });
-    var fl = drawList(), mags = fl.map(function (x) { return x.mag; });
+    var ox = vp.X(0), oy = vp.Y(0), L = Math.min(vp.w, vp.h) * 0.4, real = SC.real();
+    var fl = drawList();
+    if (real) realScene(c, col, ox, oy, L, fl);
+    D.line(c, [[vp.X(-1.25) - 200, oy], [vp.X(1.25) + 200, oy]], real ? 'rgba(255,255,255,.75)' : col.grid, { dash: [4, 4] });
+    D.line(c, [[ox, vp.Y(1.25) - 50], [ox, vp.Y(-1.25) + 50]], real ? 'rgba(255,255,255,.75)' : col.grid, { dash: [4, 4] });
+    D.label(c, '+x', Math.min(vp.w - 14, ox + L + 30), oy - 10, real ? col.ink : col.muted, { size: 11, bg: real });
+    D.label(c, '+y', ox + 14, Math.max(10, oy - L - 22), real ? col.ink : col.muted, { size: 11, bg: real });
+    var mags = fl.map(function (x) { return x.mag; });
     if (M.res && M.res.R > 0) mags.push(M.res.R);
     var k = SIM.view.forceScale(mags, L);
     fl.forEach(function (fd, idx) {
@@ -263,7 +265,7 @@
       D.arrowPolar(c, ox, oy, U.rad(M.res.dir), M.res.R * k, col.resultant, { width: 3.4, label: exam.get() ? 'R' : 'R = ' + U.num(M.res.R, 3) + ' N' });
       arcFor(c, ox, oy, 16 + 9 * fl.length + 10, M.res.dir, col.resultant, exam.get() ? 'β' : null);
     }
-    D.particle(c, ox, oy, 4, {});
+    if (!real) D.particle(c, ox, oy, 4, {});
     scene = { ox: ox, oy: oy, k: k, list: fl };
     if (preview) {   // a force being drawn
       var pl = Math.hypot(preview.x - ox, preview.y - oy);
@@ -276,7 +278,58 @@
     else if (!M.eff) msg = { t: 'No valid solution: unknown force not drawn', col: col.warn };
     else if (M.res && M.res.nearEquilibrium) msg = { t: 'R is under 0.5% of ΣF: approximately in equilibrium', col: col.ok };
     if (msg) D.label(c, msg.t, vp.w / 2, 14, msg.col, { bold: true, bg: true });
-    D.label(c, 'angles anticlockwise from +x', 8, vp.h - 10, col.muted, { align: 'left', size: 11 });
+    D.label(c, real ? 'seen from above · angles anticlockwise from +x' : 'angles anticlockwise from +x', 8, vp.h - 10, real ? col.ink : col.muted, { align: 'left', size: 11, bg: real });
+  }
+
+  /* ---------- real-life look (soft pastel, seen from above): a ring on a lawn, pulled by ropes held by people ---------- */
+  var SC = SIM.scene;
+  function lawn(c) {
+    var dk = SC.dark(), w = vp.w, h = vp.h, i;
+    c.save();
+    var g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, dk ? '#3d5c48' : '#bfe3b4'); g.addColorStop(1, dk ? '#35513f' : '#a9d8a0');
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+    c.fillStyle = dk ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.18)';   // soft mowing stripes
+    for (i = -h; i < w; i += 64) { c.beginPath(); c.moveTo(i, 0); c.lineTo(i + 32, 0); c.lineTo(i + 32 + h * 0.5, h); c.lineTo(i + h * 0.5, h); c.closePath(); c.fill(); }
+    var s = 7;   // a few seeded daisies (no flicker between frames)
+    for (i = 0; i < Math.round(w * h / 9000); i++) {
+      s = (s * 1664525 + 1013904223) >>> 0; var fx = (s / 4294967296) * w; s = (s * 1664525 + 1013904223) >>> 0; var fy = (s / 4294967296) * h;
+      c.fillStyle = dk ? 'rgba(230,230,210,.35)' : 'rgba(255,255,255,.85)'; c.beginPath(); c.arc(fx, fy, 1.8, 0, 2 * Math.PI); c.fill();
+      c.fillStyle = dk ? 'rgba(220,190,110,.5)' : '#f6d77a'; c.beginPath(); c.arc(fx, fy, 0.8, 0, 2 * Math.PI); c.fill();
+    }
+    c.restore();
+  }
+  /** a person seen from above at (x, y), facing the ring along screen direction (-ux, -uy), leaning back on the rope; returns the hands point */
+  function topPerson(c, x, y, ux, uy, s, shirt) {
+    var px = -uy, py = ux, hx = x - ux * s * 0.85, hy = y - uy * s * 0.85;
+    c.save(); c.lineCap = 'round';
+    c.fillStyle = 'rgba(60,50,80,.12)'; c.beginPath(); if (c.ellipse) c.ellipse(x + 3, y + 4, s * 0.7, s * 0.7, 0, 0, 2 * Math.PI); c.fill();
+    c.fillStyle = '#6a7090'; [-1, 1].forEach(function (k) { c.beginPath(); c.arc(x + ux * s * 0.5 + px * k * s * 0.24, y + uy * s * 0.5 + py * k * s * 0.24, s * 0.15, 0, 2 * Math.PI); c.fill(); });   // feet braced behind
+    c.strokeStyle = '#f1c7a6'; c.lineWidth = Math.max(2, s * 0.16);   // arms to the rope
+    [-1, 1].forEach(function (k) { c.beginPath(); c.moveTo(x + px * k * s * 0.5, y + py * k * s * 0.5); c.lineTo(hx + px * k * s * 0.08, hy + py * k * s * 0.08); c.stroke(); });
+    c.fillStyle = shirt; c.strokeStyle = 'rgba(60,60,90,.22)'; c.lineWidth = 1;   // shoulders
+    c.beginPath(); if (c.ellipse) c.ellipse(x, y, s * 0.6, s * 0.3, Math.atan2(py, px), 0, 2 * Math.PI); c.fill(); c.stroke();
+    c.fillStyle = '#f1c7a6'; c.beginPath(); c.arc(x - ux * s * 0.06, y - uy * s * 0.06, s * 0.27, 0, 2 * Math.PI); c.fill();   // head
+    c.fillStyle = '#9a7660'; c.beginPath(); c.arc(x + ux * s * 0.02, y + uy * s * 0.02, s * 0.22, 0, 2 * Math.PI); c.fill();   // hair (back of the head)
+    c.restore();
+    return [hx, hy];
+  }
+  function realScene(c, col, ox, oy, L, fl) {
+    lawn(c);
+    var s = U.clamp(Math.min(vp.w, vp.h) * 0.07, 12, 22), m = s + 8;
+    fl.forEach(function (fd) {
+      if (!(Math.abs(fd.mag) > 1e-9)) return;
+      var a = U.rad(fd.th) + (fd.mag < 0 ? Math.PI : 0), ux = Math.cos(a), uy = -Math.sin(a);
+      // as far out as fits on the canvas, a little beyond the longest arrow
+      var tE = Infinity;
+      if (ux > 1e-9) tE = Math.min(tE, (vp.w - m - ox) / ux); if (ux < -1e-9) tE = Math.min(tE, (m - ox) / ux);
+      if (uy > 1e-9) tE = Math.min(tE, (vp.h - m - oy) / uy); if (uy < -1e-9) tE = Math.min(tE, (m - oy) / uy);
+      var R = Math.max(s * 2, Math.min(tE, L + 34)), x = ox + ux * R, y = oy + uy * R;
+      SC.rope(c, [[ox + ux * 8, oy + uy * 8], [x - ux * s * 0.85, y - uy * s * 0.85]], { width: 2.6 });   // rope first, so the hands hold it
+      topPerson(c, x, y, ux, uy, s, SC.shade(forceColor(col, fd.j), SC.dark() ? -0.25 : 0.45));
+    });
+    // the steel ring the ropes are tied to
+    c.save(); c.strokeStyle = SC.dark() ? '#aeb4c6' : '#9aa1b5'; c.lineWidth = 3.5; c.beginPath(); c.arc(ox, oy, 8, 0, 2 * Math.PI); c.stroke();
+    c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.2; c.beginPath(); c.arc(ox, oy, 8, Math.PI * 1.05, Math.PI * 1.6); c.stroke(); c.restore();
   }
 
   /* ---------- force polygon (tip to tail) ---------- */
@@ -350,16 +403,17 @@
     var effList = M.eff.list;
     var saveUnk = M.unk; M.unk = [];               // show substituted numbers for solved unknowns
     var saveK = M.k; M.k = M.eff.k;
-    R.eq('X', 'ΣF cos θ = ' + axisLine(effList, 'x', false) + ' = ' + joinNums(nx), res.X, 'N');
-    R.eq('Y', 'ΣF sin θ = ' + axisLine(effList, 'y', false) + ' = ' + joinNums(ny), res.Y, 'N');
+    R.eq('X', 'ΣF cos θ = ' + axisLine(effList, 'x', false) + ' = ' + joinNums(nx), res.X, 'N', 'Resolve every force horizontally (F cos θ) and add, giving each component a sign: right is positive.');
+    R.eq('Y', 'ΣF sin θ = ' + axisLine(effList, 'y', false) + ' = ' + joinNums(ny), res.Y, 'N', 'Resolve every force vertically (F sin θ) and add, with up positive.');
     M.unk = saveUnk; M.k = saveK;
-    R.eq('R', '√(X² + Y²) = √(' + sq(res.X) + ' + ' + sq(res.Y) + ')', res.R, 'N');
+    R.head('Combine the components: size and direction of R');
+    R.eq('R', '√(X² + Y²) = √(' + sq(res.X) + ' + ' + sq(res.Y) + ')', res.R, 'N', 'X and Y are perpendicular, so the size of the resultant comes from Pythagoras.');
     if (res.R > 0) {
       var d = FO.dirInfo(res.dir);
-      if (d.ref === 'up' || d.ref === 'down') R.eq('direction', 'X = 0', d.text);
-      else if (Math.abs(res.Y) === 0) R.eq('direction', 'Y = 0', d.text);
-      else R.eq('β', 'tan⁻¹(|Y| ÷ |X|) = tan⁻¹(' + U.sf(Math.abs(res.Y)) + ' ÷ ' + U.sf(Math.abs(res.X)) + ')', U.dp(d.beta, 1) + '°', d.side + ' the ' + d.ref + ' direction');
-      R.eq('θ<sub>R</sub>', 'anticlockwise from +x', U.dp(res.dir, 1) + '°');
+      if (d.ref === 'up' || d.ref === 'down') R.eq('direction', 'X = 0', d.text, '', 'There is no horizontal component, so the resultant acts straight up or straight down.');
+      else if (Math.abs(res.Y) === 0) R.eq('direction', 'Y = 0', d.text, '', 'There is no vertical component, so the resultant acts along the x-direction.');
+      else R.eq('β', 'tan⁻¹(|Y| ÷ |X|) = tan⁻¹(' + U.sf(Math.abs(res.Y)) + ' ÷ ' + U.sf(Math.abs(res.X)) + ')', U.dp(d.beta, 1) + '°', d.side + ' the ' + d.ref + ' direction', 'tan β = opposite ÷ adjacent = |Y| ÷ |X| gives the acute angle; the signs of X and Y say which quadrant it points into.');
+      R.eq('θ<sub>R</sub>', 'anticlockwise from +x', U.dp(res.dir, 1) + '°', '', 'The same direction written as one angle measured anticlockwise from the positive x-axis.');
     }
   }
 
@@ -377,31 +431,31 @@
       var sol = M.sol;
       R.head('Equilibrium: each component sum is zero');
       if (sol.status === 'invalid') { R.badge(sol.message, 'warn').render(); return; }
-      R.eq('→', axisLine(M.list, 'x', kUnk) + ' = 0', '');
-      R.eq('↑', axisLine(M.list, 'y', kUnk) + ' = 0', '');
+      R.eq('→', axisLine(M.list, 'x', kUnk) + ' = 0', '', '', 'In equilibrium the resultant is zero, so the horizontal components add to zero.');
+      R.eq('↑', axisLine(M.list, 'y', kUnk) + ' = 0', '', '', 'Likewise the vertical components add to zero. Two equations, so two unknowns can be found.');
       var u = M.unk;
       if (sol.method === 'magdir') {
         var j = u[0].kind === 'F' ? u[0].i : u[1].i;
         R.head('The unknown force must cancel the resultant of the others');
-        R.eq('F' + HSUB(j) + ' cos θ' + HSUB(j), '−(x-components of the known forces)', sol.Xp, 'N');
-        R.eq('F' + HSUB(j) + ' sin θ' + HSUB(j), '−(y-components of the known forces)', sol.Yp, 'N');
+        R.eq('F' + HSUB(j) + ' cos θ' + HSUB(j), '−(x-components of the known forces)', sol.Xp, 'N', 'Rearrange the → equation: the unknown force must cancel the x-components of all the others.');
+        R.eq('F' + HSUB(j) + ' sin θ' + HSUB(j), '−(y-components of the known forces)', sol.Yp, 'N', 'Rearrange the ↑ equation in the same way for the y-components.');
         if (sol.status === 'zero') { R.badge(sol.message, 'warn'); }
         else {
           var vs = sol.solutions[0].vals, P = u[0].kind === 'F' ? vs[0] : vs[1], th = u[0].kind === 'F' ? vs[1] : vs[0];
-          R.eq('F' + HSUB(j), 'square and add: √(' + sq(sol.Xp) + ' + ' + sq(sol.Yp) + ')', P, 'N');
+          R.eq('F' + HSUB(j), 'square and add: √(' + sq(sol.Xp) + ' + ' + sq(sol.Yp) + ')', P, 'N', 'Square and add: (F cos θ)² + (F sin θ)² = F² because cos²θ + sin²θ = 1.');
           var di = FO.dirInfo(th);
-          R.eq('θ' + HSUB(j), (di.ref === 'up' || di.ref === 'down' || Math.abs(sol.Yp) === 0 ? 'one component is zero' : 'divide: tan⁻¹(' + U.sf(Math.abs(sol.Yp)) + ' ÷ ' + U.sf(Math.abs(sol.Xp)) + ') = ' + U.dp(di.beta, 1) + '°, then use the signs'), angleText(th));
+          R.eq('θ' + HSUB(j), (di.ref === 'up' || di.ref === 'down' || Math.abs(sol.Yp) === 0 ? 'one component is zero' : 'divide: tan⁻¹(' + U.sf(Math.abs(sol.Yp)) + ' ÷ ' + U.sf(Math.abs(sol.Xp)) + ') = ' + U.dp(di.beta, 1) + '°, then use the signs'), angleText(th), '', 'Divide: F sin θ ÷ F cos θ = tan θ. The signs of the two components fix the quadrant.');
           R.badge('Solved: the force polygon closes', 'ok');
         }
       } else if (sol.method === 'cramer') {
         var twoMags = u[0].kind === 'F' && u[1].kind === 'F';
-        if (twoMags) R.eq('det', 'sin(θ' + HSUB(u[1].i) + ' − θ' + HSUB(u[0].i) + ') = sin(' + U.num(M.list[u[1].i].th, 2) + '° − ' + U.num(M.list[u[0].i].th, 2) + '°)', sol.det);
-        else R.eq('det', 'a₁b₂ − a₂b₁ of the coefficients of the unknowns = ' + U.sf(sol.c1[0]) + ' × ' + U.sf(sol.c2[1]) + ' − ' + U.sf(sol.c2[0]) + ' × ' + U.sf(sol.c1[1]), sol.det);
+        if (twoMags) R.eq('det', 'sin(θ' + HSUB(u[1].i) + ' − θ' + HSUB(u[0].i) + ') = sin(' + U.num(M.list[u[1].i].th, 2) + '° − ' + U.num(M.list[u[0].i].th, 2) + '°)', sol.det, '', 'The two equations are linear in the unknown magnitudes. If this determinant is zero the two unknown forces are parallel and cannot balance the others.');
+        else R.eq('det', 'a₁b₂ − a₂b₁ of the coefficients of the unknowns = ' + U.sf(sol.c1[0]) + ' × ' + U.sf(sol.c2[1]) + ' − ' + U.sf(sol.c2[0]) + ' × ' + U.sf(sol.c1[1]), sol.det, '', 'The two equations are linear in the unknowns. A zero determinant means there is no unique solution.');
         if (/parallel/.test(sol.status)) R.badge(sol.message, 'warn');
         else {
           var s0 = sol.solutions[0];
-          R.eq(unkLabel(u[0]), 'solve simultaneously (Cramer’s rule)', s0.vals[0], 'N');
-          R.eq(unkLabel(u[1]), 'solve simultaneously (Cramer’s rule)', s0.vals[1], 'N');
+          R.eq(unkLabel(u[0]), 'solve simultaneously (Cramer’s rule)', s0.vals[0], 'N', 'Solve the → and ↑ equations simultaneously (elimination or substitution gives the same result).');
+          R.eq(unkLabel(u[1]), 'solve simultaneously (Cramer’s rule)', s0.vals[1], 'N', 'Substitute back or use the second equation to find the other unknown.');
           if (sol.status === 'negative') R.badge('A magnitude came out negative: that force would have to act in the opposite direction. No equilibrium with the directions as given.', 'warn');
           else R.badge('Solved: the force polygon closes', 'ok');
         }
@@ -410,7 +464,7 @@
         if (sol.status === 'none' || sol.status === 'many') R.badge(sol.message, 'warn');
         sol.solutions.forEach(function (s, q) {
           if (sol.solutions.length > 1) R.head('Solution ' + (q + 1) + (q === M.solIdx ? ' (drawn)' : ''));
-          s.vals.forEach(function (v, qq) { R.eq(unkLabel(u[qq]), u[qq].kind === 'th' ? 'direction' : 'magnitude', u[qq].kind === 'th' ? angleText(v) : v, u[qq].kind === 'th' ? '' : 'N'); });
+          s.vals.forEach(function (v, qq) { R.eq(unkLabel(u[qq]), u[qq].kind === 'th' ? 'direction' : 'magnitude', u[qq].kind === 'th' ? angleText(v) : v, u[qq].kind === 'th' ? '' : 'N', u[qq].kind === 'th' ? 'A direction that makes both component equations true at once.' : 'A magnitude that makes both component equations true at once.'); });
         });
         if (sol.status === 'ok') R.badge(sol.solutions.length > 1 ? 'Two solutions: both close the polygon (use “Show solution”)' : 'Solved: the force polygon closes', 'ok');
       }
@@ -419,9 +473,9 @@
       var con = M.con, ax = axisSel.get(), uu = M.unk[0];
       R.head('Condition: ' + (ax === 'y' ? 'Y' : 'X') + ' = 0');
       if (con.status === 'invalid') { R.badge(con.message, 'warn').render(); return; }
-      R.eq(ax === 'y' ? 'Y' : 'X', axisLine(M.list, ax, kUnk) + ' = 0', '');
+      R.eq(ax === 'y' ? 'Y' : 'X', axisLine(M.list, ax, kUnk) + ' = 0', '', '', 'The resultant has no component in this direction, so the components of all the forces this way add to zero.');
       if (con.status === 'impossible' || con.status === 'any') { R.badge(con.message, 'warn').render(); return; }
-      R.eq(unkLabel(uu), '−(' + (ax === 'y' ? 'y' : 'x') + '-components of the others) ÷ ' + (ax === 'y' ? 'sin' : 'cos') + ' θ = −(' + U.sf(con.known) + ') ÷ ' + U.sf(con.col), con.value, 'N');
+      R.eq(unkLabel(uu), '−(' + (ax === 'y' ? 'y' : 'x') + '-components of the others) ÷ ' + (ax === 'y' ? 'sin' : 'cos') + ' θ = −(' + U.sf(con.known) + ') ÷ ' + U.sf(con.col), con.value, 'N', 'Only one unknown appears in this equation, so rearrange it for that unknown.');
       if (con.status === 'negative') R.badge('Negative: the force would have to act in the opposite direction', 'warn');
       if (M.eff) resultantBlock(res, 'Resultant with this value');
     }

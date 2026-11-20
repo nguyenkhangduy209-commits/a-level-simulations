@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/mech-dynamics.js"></script>
@@ -17,7 +18,7 @@
 <script>
 (function () {
   'use strict';
-  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, DY = SIM.dyn;
+  var U = SIM.util, ui = SIM.ui, D = SIM.view.draw, DY = SIM.dyn, SC = SIM.scene;
   var course = ui.course('9709'), g = ui.gFor(course);
   var pg = ui.page({ title: 'Connected particles: strings over smooth pulleys', g: g,
     tags: ['9709 4.4 Newton’s laws (connected particles)', '9709 4.1 Friction', '9709 4.2 suvat follow-on'] });
@@ -72,7 +73,7 @@
 
   var exam = ui.examToggle(outCard, outCard);
   var R = ui.Readout(outCard);
-  var eq0 = R.eq; R.eq = function (l, w, v, u) { return eq0(l, w, typeof v === 'number' ? fmtX(v) : v, u); };
+  var eq0 = R.eq; R.eq = function (l, w, v, u, why) { return eq0(l, w, typeof v === 'number' ? fmtX(v) : v, u, why); };
   /* exact values (e.g. 172.5) are shown in full; others to 3 s.f. */
   function fmtX(x) {
     if (typeof x !== 'number' || !isFinite(x)) return U.sf(x);
@@ -275,6 +276,35 @@
     return G;
   }
 
+  /* ---------- real-life look helpers (soft pastel: a workshop with wooden ramps, a table and turning pulleys) ---------- */
+  function rr(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
+  function crateCol(hex) { return /^#[0-9a-f]{6}$/i.test(hex) ? SC.shade(hex, SC.dark() ? -0.25 : 0.5) : undefined; }
+  function sagRope(c, p, q) { var L = Math.hypot(q[0] - p[0], q[1] - p[1]), pts = []; for (var i = 0; i <= 14; i++) { var f = i / 14; pts.push([p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f + 0.15 * L * 4 * f * (1 - f)]); } SC.rope(c, pts, { width: 2 }); }
+  function realBackdrop(c, G) {
+    var dk = SC.dark(), fy = vp.Y(G.floors[0][1]), g = c.createLinearGradient(0, 0, 0, fy);
+    g.addColorStop(0, dk ? '#2b2e3d' : '#f6f1e8'); g.addColorStop(1, dk ? '#252836' : '#ece4d6');
+    c.save(); c.fillStyle = g; c.fillRect(0, 0, vp.w, fy); c.restore();
+    SC.ground(c, 0, vp.w, fy, { kind: 'floor', depth: Math.max(4, vp.h - fy + 2) });
+    var cfg = cfgSel.get();
+    if (cfg === 'atwood') {   // a ceiling beam holding the pulley
+      var p = G.pulleys[0], px = vp.X(p[0]), py = vp.Y(p[1]), base = dk ? '#7a5e46' : '#e2bf94';
+      c.save(); c.fillStyle = base; rr(c, px - 70, py - 34, 140, 13, 4); c.fill(); c.strokeStyle = 'rgba(110,80,50,.25)'; c.stroke();
+      c.strokeStyle = dk ? '#8c93a8' : '#b3b9c9'; c.lineWidth = 3; c.beginPath(); c.moveTo(px, py - 21); c.lineTo(px, py); c.stroke(); c.restore();
+    }
+    G.polys.forEach(function (pl) {
+      var pts = pl.map(function (q) { return [vp.X(q[0]), vp.Y(q[1])]; });
+      if (cfg === 'table') { SC.table(c, pts[0][0], pts[1][0], pts[0][1], Math.max(10, fy - pts[0][1])); return; }
+      // start the polygon on its longest edge so the wood grain runs along the sloping face
+      var best = 0, bl = -1;
+      for (var i = 0; i < pts.length; i++) { var a = pts[i], b = pts[(i + 1) % pts.length], l = Math.hypot(b[0] - a[0], b[1] - a[1]) * (Math.abs(b[1] - a[1]) > 1 ? 1.5 : 1); if (l > bl) { bl = l; best = i; } }
+      SC.ramp(c, pts.slice(best).concat(pts.slice(0, best)), { kind: 'wood' });
+    });
+    G.floors.slice(1).forEach(function (f) {   // a low platform the hanging particle lands on
+      var top = vp.Y(f[1]); if (fy - top < 2) return;
+      c.save(); c.fillStyle = dk ? '#4d5163' : '#d9d4e6'; rr(c, vp.X(f[0]), top, vp.X(f[2]) - vp.X(f[0]), fy - top, 4); c.fill(); c.strokeStyle = 'rgba(120,110,140,.25)'; c.stroke(); c.restore();
+    });
+  }
+
   /* ---------- scene ---------- */
   var COLS = ['s1', 's2', 's3'];
   function pos(G, i, x) { var tr = G.tracks[i]; return [tr.p0[0] + tr.e[0] * x * G.ks, tr.p0[1] + tr.e[1] * x * G.ks]; }
@@ -283,11 +313,13 @@
     var col = ui.colors(), G = geometry(), c;
     vp.fit(G.bounds[0], G.bounds[1], G.bounds[2], G.bounds[3]);
     c = vp.begin();
-    G.polys.forEach(function (pl) {
+    var real = SC.real();
+    if (real) realBackdrop(c, G);
+    else G.polys.forEach(function (pl) {
       c.save(); c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.6; c.beginPath();
       pl.forEach(function (p, i) { if (i) c.lineTo(vp.X(p[0]), vp.Y(p[1])); else c.moveTo(vp.X(p[0]), vp.Y(p[1])); }); c.closePath(); c.fill(); c.stroke(); c.restore();
     });
-    G.floors.forEach(function (f) { D.ground(c, vp.X(f[0]), vp.Y(f[1]), vp.X(f[2]), vp.Y(f[3])); });
+    if (!real) G.floors.forEach(function (f) { D.ground(c, vp.X(f[0]), vp.Y(f[1]), vp.X(f[2]), vp.Y(f[3])); });
     G.lines.forEach(function (l) { D.label(c, l.t, vp.X(l.p[0]) - 10, vp.Y(l.p[1]) - 10, col.muted, { size: 12, bold: true }); });
     scene = { slopes: G.slopes.map(function (sl) { return { key: sl.key, px: vp.X(sl.pivot[0]), py: vp.Y(sl.pivot[1]), x: vp.X(sl.end[0]), y: vp.Y(sl.end[1]), ux: sl.ux, uy: sl.uy }; }), parts: [], mus: [] };
     if (sim.invalid) { D.label(c, sim.invalid, vp.w / 2, 18, col.warn, { bold: true }); if (ix) ix.paint(c); return; }
@@ -304,6 +336,10 @@
       var sState = st.strings[k] ? st.strings[k].state : 'taut';
       if (sState === 'broken') { D.label(c, 'string ' + (k + 1) + ' broken', attach[k][0], attach[k][1] - 26, col.warn, { size: 11 }); continue; }
       var pts = [attach[k]].concat((G.strings[k] || []).map(function (p) { return [vp.X(p[0]), vp.Y(p[1])]; })).concat([attach[k + 1]]);
+      if (real) {
+        if (sState === 'slack') { for (var sg = 0; sg < pts.length - 1; sg++) sagRope(c, pts[sg], pts[sg + 1]); }
+        else SC.rope(c, pts, { width: 2.2 });
+      } else
       D.line(c, pts, sState === 'slack' ? col.muted : col.tension, { width: 1.8, dash: sState === 'slack' ? [4, 4] : null });
       if (sState === 'taut') {
         var T = st.strings[k], mid = pts[Math.floor(pts.length / 2)], mid0 = pts[Math.floor(pts.length / 2) - 1] || pts[0];
@@ -311,11 +347,24 @@
         D.label(c, lbl, (mid[0] + mid0[0]) / 2, (mid[1] + mid0[1]) / 2 - 12, col.tension, { size: 11, bg: true });
       } else D.label(c, 'slack', (attach[k][0] + attach[k + 1][0]) / 2, (attach[k][1] + attach[k + 1][1]) / 2 - 10, col.muted, { size: 11, bg: true });
     }
-    G.pulleys.forEach(function (p) { D.pulley(c, vp.X(p[0]), vp.Y(p[1]), 9); });
+    // pulleys turn with the string: angle = distance the string has moved ÷ radius (the particle after each pulley)
+    G.pulleys.forEach(function (p, k) {
+      var jn = Math.min(k + 1, N - 1), turn = (cfgSel.get() === 'step' ? 1 : -1) * st.x[jn] * G.ks * vp.scale / 9;
+      D.pulley(c, vp.X(p[0]), vp.Y(p[1]), 9, real && isFinite(turn) ? turn : 0);
+    });
+    if (real) sim.log.forEach(function (l) {   // a puff of dust when a particle lands, a burst when a string snaps
+      var kq = (clock.t - l.t) / 0.4;
+      if (!(kq >= 0 && kq <= 1)) return;
+      if (l.p !== undefined && scr[l.p]) SC.dust(c, scr[l.p][0], scr[l.p][1] + 12, kq);
+      else if (/breaks/.test(l.text)) { for (var kb = 0; kb < N - 1; kb++) if (st.strings[kb] && st.strings[kb].state === 'broken') SC.impact(c, attach[kb][0], attach[kb][1], 26, kq); }
+    });
     // particles
     for (var j = 0; j < N; j++) {
       var tr2 = G.tracks[j], fill = col[COLS[j]];
-      if (tr2.hang) D.particle(c, scr[j][0], scr[j][1], 12, { fill: fill });
+      if (real) {
+        if (tr2.hang) { SC.crate(c, scr[j][0], scr[j][1] + 11, 19, 22, 0, { color: crateCol(fill) }); c.save(); c.strokeStyle = SC.dark() ? '#aab1c4' : '#9aa1b5'; c.lineWidth = 2; c.beginPath(); c.arc(scr[j][0], scr[j][1] - 13, 3, 0, 2 * Math.PI); c.stroke(); c.restore(); }
+        else SC.crate(c, scr[j][0], scr[j][1], 34, 24, U.rad(tr2.angle || 0), { color: crateCol(fill) });
+      } else if (tr2.hang) D.particle(c, scr[j][0], scr[j][1], 12, { fill: fill });
       else D.block(c, scr[j][0], scr[j][1], 34, 24, U.rad(tr2.angle || 0), { fill: fill });
       var mk = MKEY ? MKEY[P[j].name] : null, uk = muKey(P[j].name), nAn = U.rad(tr2.angle || 0), nx = -Math.sin(nAn), ny = -Math.cos(nAn);
       if (mk) scene.parts.push({ key: mk, name: P[j].name, x: tr2.hang ? scr[j][0] : scr[j][0] + nx * 12, y: tr2.hang ? scr[j][1] : scr[j][1] + ny * 12, color: fill });
@@ -415,33 +464,33 @@
       var q = fs[i], al = p.alpha;
       var gTxt = p.track === 'hang' ? (al < 0 ? '+mg (hanging, moving down)' : '−mg (hanging, moving up)') :
         (Math.abs(al) < 1e-9 ? '0 (horizontal)' : (al > 0 ? '−mg sin θ (moving up the slope)' : '+mg sin θ (moving down the slope)'));
-      R.eq(p.name + ': weight component', gTxt + ' = ' + (p.track === 'hang' ? s3(q.W) : s3(q.W) + ' × sin ' + U.num(Math.abs(al), 2) + '°'), q.G, 'N');
+      R.eq(p.name + ': weight component', gTxt + ' = ' + (p.track === 'hang' ? s3(q.W) : s3(q.W) + ' × sin ' + U.num(Math.abs(al), 2) + '°'), q.G, 'N', p.track === 'hang' ? 'A hanging particle moves vertically, so all of its weight acts along its line of motion.' : 'Only the part of the weight along the particle’s own line of motion counts: mg sin θ on a slope, nothing on a horizontal table.');
       if (p.track !== 'hang') {
-        R.eq(p.name + ': R', 'mg cos θ = ' + s3(q.W) + ' × cos ' + U.num(Math.abs(al), 2) + '°', q.R, 'N');
-        if (q.mu > 0) R.eq(p.name + ': μR', U.num(q.mu, 4) + ' × ' + s3(q.R), q.F, 'N');
+        R.eq(p.name + ': R', 'mg cos θ = ' + s3(q.W) + ' × cos ' + U.num(Math.abs(al), 2) + '°', q.R, 'N', 'Nothing accelerates perpendicular to the surface, so R balances the perpendicular part of the weight.');
+        if (q.mu > 0) R.eq(p.name + ': μR', U.num(q.mu, 4) + ' × ' + s3(q.R), q.F, 'N', 'The most friction this contact can give. It is used in full only if the particle moves or is about to move.');
       }
-      if (Math.abs(q.P) > 0) R.eq(p.name + ': applied', 'along its line of motion', q.P, 'N');
+      if (Math.abs(q.P) > 0) R.eq(p.name + ': applied', 'along its line of motion', q.P, 'N', 'The applied force acts along the line of motion, so all of it counts (sign gives its direction).');
     });
-    R.eq('D', 'net driving force without friction = Σ(weight components + applied)', f0.D, 'N');
-    R.eq('total μR', 'friction available', f0.Fmax, 'N');
-    R.eq('M', 'total mass', f0.M, 'kg');
+    R.eq('D', 'net driving force without friction = Σ(weight components + applied)', f0.D, 'N', 'The tensions are internal to the system: each one pulls the two particles equally and oppositely, so they cancel when you add.');
+    R.eq('total μR', 'friction available', f0.Fmax, 'N', 'Add the limiting friction at every rough contact: the most friction the system can supply.');
+    R.eq('M', 'total mass', f0.M, 'kg', 'With taut strings all the particles share one speed and one acceleration, so they move like a single mass.');
     R.head('At release' + (Math.abs(v.u) > 0 ? ' (moving at u = ' + s3(v.u) + ' m s⁻¹)' : ' (from rest)'));
     if (f0.static) {
       R.badge(f0.limiting ? 'Limiting equilibrium: on the point of moving (friction = μR)' : 'Does not move: |D| = ' + s3(Math.abs(f0.D)) + ' N ≤ total μR = ' + s3(f0.Fmax) + ' N', f0.limiting ? 'warn' : 'ok');
       f0.T.forEach(function (T, k) {
-        if (f0.indeterminate && f0.Thi[k] - f0.Tlo[k] > 1e-9) R.eq('T' + (k + 1), 'statically indeterminate: friction can be shared between the rough contacts in many ways', s3(f0.Tlo[k]) + ' ≤ T ≤ ' + s3(f0.Thi[k]), 'N');
-        else R.eq('T' + (k + 1), 'from equilibrium of the particles on one side', T, 'N');
+        if (f0.indeterminate && f0.Thi[k] - f0.Tlo[k] > 1e-9) R.eq('T' + (k + 1), 'statically indeterminate: friction can be shared between the rough contacts in many ways', s3(f0.Tlo[k]) + ' ≤ T ≤ ' + s3(f0.Thi[k]), 'N', 'With two rough contacts at rest the friction can be shared in many ways, so the equations do not fix T.');
+        else R.eq('T' + (k + 1), 'from equilibrium of the particles on one side', T, 'N', 'Nothing accelerates, so the forces on the particle(s) on one side of the string balance.');
       });
       if (f0.indeterminate) R.badge('Statically indeterminate: tension not fixed by the equations (exam questions avoid this).', 'info');
-      f0.leastMu.forEach(function (m, i) { if (m !== null) R.eq('least μ for ' + P[i].name, '(|D| − μR of the others) ÷ R<sub>' + P[i].name + '</sub>', isFinite(m) ? m : '∞', ''); });
+      f0.leastMu.forEach(function (m, i) { if (m !== null) R.eq('least μ for ' + P[i].name, '(|D| − μR of the others) ÷ R<sub>' + P[i].name + '</sub>', isFinite(m) ? m : '∞', '', 'For rest, the friction needed must not exceed μR, so μ ≥ friction needed ÷ R.'); });
     } else if (f0.ok) {
       var sg = f0.sigma > 0 ? '−' : '+';
-      R.eq('a', '(D ' + sg + ' total μR) ÷ M = (' + s3(f0.D) + ' ' + sg + ' ' + s3(f0.Fmax) + ') ÷ ' + s3(f0.M), f0.a, 'm s<sup>−2</sup>');
+      R.eq('a', '(D ' + sg + ' total μR) ÷ M = (' + s3(f0.D) + ' ' + sg + ' ' + s3(f0.Fmax) + ') ÷ ' + s3(f0.M), f0.a, 'm s<sup>−2</sup>', 'Newton’s second law for the whole system: resultant force ÷ total mass. Friction μR opposes the motion.');
       f0.T.forEach(function (T, k) {
         var q = fs[k];
-        R.eq('T' + (k + 1), 'from ' + P[k].name + ': T = m a − (weight comp.) − P ' + (q.F > 0 ? (f0.sigma > 0 ? '+ μR' : '− μR') : '') + (k ? ' + T' + k : ''), T, 'N');
+        R.eq('T' + (k + 1), 'from ' + P[k].name + ': T = m a − (weight comp.) − P ' + (q.F > 0 ? (f0.sigma > 0 ? '+ μR' : '− μR') : '') + (k ? ' + T' + k : ''), T, 'N', 'Now write F = ma for ONE particle; its equation contains the tension, so it gives T.');
       });
-      R.eq('check (' + P[N - 1].name + ')', 'last particle’s equation, residual', Math.abs(f0.residual) < 1e-9 * (1 + f0.M * g) ? 0 : f0.residual, 'N ✓');
+      R.eq('check (' + P[N - 1].name + ')', 'last particle’s equation, residual', Math.abs(f0.residual) < 1e-9 * (1 + f0.M * g) ? 0 : f0.residual, 'N ✓', 'The last particle’s own equation was not used, so it is a check: it should balance exactly.');
     } else {
       if (f0.T && f0.T.length) R.badge('Treating the particles as one system gives a NEGATIVE tension (T = ' + f0.T.map(function (t) { return s3(t); }).join(', ') + ' N): a string cannot push, so it is slack and the particles move independently.', 'warn');
       else R.badge('The particles cannot stay together as one system: holding them would need a string to push. The string is slack and each particle moves (or rests) on its own — see below.', 'warn');
@@ -467,12 +516,12 @@
     var st = sim.stateAt(clock.t);
     R.head('At t = ' + clock.t.toFixed(2) + ' s' + (st.stopped ? ' (model stopped at ' + s3(sim.tStop) + ' s)' : ''));
     P.forEach(function (p, i) {
-      R.eq(p.name, 'displacement along its positive direction; velocity', s3(st.x[i]) + ' m, ' + s3(st.v[i]) + ' m s⁻¹', '');
+      R.eq(p.name, 'displacement along its positive direction; velocity', s3(st.x[i]) + ' m, ' + s3(st.v[i]) + ' m s⁻¹', '', 'From suvat in each stage, measured along the particle’s own line of motion.');
     });
     var e = sim.energyAt(clock.t);
     if (e) {
       R.eq('energy check', 'ΔKE + ΔGPE + W<sub>friction</sub> + KE lost on landing − W<sub>applied</sub> = ' + s3(e.KE - e.KE0) + ' + ' + s3(e.GPE) + ' + ' + s3(e.Wfric) + ' + ' + s3(e.impact) + ' − ' + s3(e.Wapp) +
-        (e.carried ? ' + (energy carried off by the detached mass ' + s3(e.carried) + ')' : ''), Math.abs(e.balance) < 1e-9 * (1 + Math.abs(e.KE) + Math.abs(e.GPE)) ? 0 : e.balance, 'J');
+        (e.carried ? ' + (energy carried off by the detached mass ' + s3(e.carried) + ')' : ''), Math.abs(e.balance) < 1e-9 * (1 + Math.abs(e.KE) + Math.abs(e.GPE)) ? 0 : e.balance, 'J', 'Energy is conserved overall: what the applied force puts in goes into KE, PE, work against friction and energy lost on landing, so this should be 0.');
     }
     R.render();
   }

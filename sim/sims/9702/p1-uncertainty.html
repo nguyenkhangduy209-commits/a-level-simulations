@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-measure.js"></script>
@@ -138,14 +139,14 @@
     shots = M.targetShots(v.bias + v.zero - zc, v.sigma, n, seed);
     var sysLeft = v.bias + v.zero - zc, offset = st.mean - v.X0;
     R.head('Model of each reading');
-    R.eq('reading', 'X<sub>true</sub> + z + b + random', '', '');
-    if (corr.get()) R.eq('corrected', 'reading − z = reading − (' + U.num(v.zero, 3) + ')', '', '');
+    R.eq('reading', 'X<sub>true</sub> + z + b + random', '', '', 'Every reading is the true value shifted by the systematic errors (zero error z and other bias b) plus a random scatter.');
+    if (corr.get()) R.eq('corrected', 'reading − z = reading − (' + U.num(v.zero, 3) + ')', '', '', 'A zero error is corrected by subtracting it from every reading (a negative zero error is added).');
     R.head('Results of ' + n + ' readings');
-    R.eq('mean', 'Σx ÷ n', st.mean);
-    R.eq('half range', '(max − min) ÷ 2 = (' + U.sf(st.max, 4) + ' − ' + U.sf(st.min, 4) + ') ÷ 2', st.halfRange);
-    R.eq('result', 'mean ± half range', U.sf(st.mean, 4) + ' ± ' + U.sf(st.halfRange, 2), '');
-    R.eq('mean − true', U.sf(st.mean, 4) + ' − ' + U.num(v.X0, 3), offset);
-    R.eq('systematic error left', (corr.get() ? 'b (zero error removed)' : 'b + z = ' + U.num(v.bias, 3) + ' + ' + U.num(v.zero, 3)), sysLeft);
+    R.eq('mean', 'Σx ÷ n', st.mean, '', 'Averaging repeated readings reduces the effect of random errors (it cannot remove a systematic error).');
+    R.eq('half range', '(max − min) ÷ 2 = (' + U.sf(st.max, 4) + ' − ' + U.sf(st.min, 4) + ') ÷ 2', st.halfRange, '', 'A simple estimate of the uncertainty from repeat readings is half the range of the readings.');
+    R.eq('result', 'mean ± half range', U.sf(st.mean, 4) + ' ± ' + U.sf(st.halfRange, 2), '', 'Quote the mean with its uncertainty: value ± absolute uncertainty.');
+    R.eq('mean − true', U.sf(st.mean, 4) + ' − ' + U.num(v.X0, 3), offset, '', 'Accuracy is how close the mean is to the true value, so compare the two.');
+    R.eq('systematic error left', (corr.get() ? 'b (zero error removed)' : 'b + z = ' + U.num(v.bias, 3) + ' + ' + U.num(v.zero, 3)), sysLeft, '', 'Systematic errors shift every reading the same way, so the mean is still off by this amount however many readings you take.');
     var precise = st.halfRange <= 0.03 * v.X0, accurate = Math.abs(offset) <= Math.max(st.halfRange, 0.005 * v.X0);
     R.head('Verdict (criteria used here: precise if half range ≤ 3% of the value; accurate if the true value lies within mean ± half range)');
     R.badge(precise ? 'Precise: readings agree closely' : 'Not precise: readings are scattered (random error)', precise ? 'ok' : 'warn');
@@ -168,27 +169,27 @@
       if (res.invalid) { R.badge(res.invalid, 'warn'); res = null; dataEl.innerHTML = ''; return; }
       var form = 'Q = ' + (Math.abs(v.k - 1) > 1e-12 ? U.num(v.k, 4) + ' × ' : '') + ins.map(function (i) { return i.k + (i.n === 1 ? '' : '<sup>' + M.fracStr(i.n) + '</sup>'); }).join(' × ');
       R.head(form);
-      R.eq('Q', (Math.abs(v.k - 1) > 1e-12 ? U.num(v.k, 4) + ' × ' : '') + ins.map(function (i) { return U.num(i.x, 4) + (i.n === 1 ? '' : '<sup>' + M.fracStr(i.n) + '</sup>'); }).join(' × '), res.Q, '');
+      R.eq('Q', (Math.abs(v.k - 1) > 1e-12 ? U.num(v.k, 4) + ' × ' : '') + ins.map(function (i) { return U.num(i.x, 4) + (i.n === 1 ? '' : '<sup>' + M.fracStr(i.n) + '</sup>'); }).join(' × '), res.Q, '', 'Substitute the measured values into the formula to get the value of Q.');
       R.head('Percentage uncertainties (powers multiply them)');
       ins.forEach(function (i, j) {
-        R.eq('%' + i.k, pct ? 'given' : 'Δ' + i.k + ' ÷ ' + i.k + ' × 100 = ' + U.sf(i.d, 3) + ' ÷ ' + U.num(i.x, 4) + ' × 100', U.sf(100 * res.terms[j].frac, 3), '%');
-        if (Math.abs(i.n) !== 1) R.eq('|' + M.fracStr(i.n) + '| × %' + i.k, M.fracStr(Math.abs(i.n)) + ' × ' + U.sf(100 * res.terms[j].frac, 3), U.sf(100 * res.terms[j].contrib, 3), '%');
+        R.eq('%' + i.k, pct ? 'given' : 'Δ' + i.k + ' ÷ ' + i.k + ' × 100 = ' + U.sf(i.d, 3) + ' ÷ ' + U.num(i.x, 4) + ' × 100', U.sf(100 * res.terms[j].frac, 3), '%', 'Percentage uncertainty = absolute uncertainty ÷ value × 100.');
+        if (Math.abs(i.n) !== 1) R.eq('|' + M.fracStr(i.n) + '| × %' + i.k, M.fracStr(Math.abs(i.n)) + ' × ' + U.sf(100 * res.terms[j].frac, 3), U.sf(100 * res.terms[j].contrib, 3), '%', 'A quantity raised to a power n contributes |n| times its percentage uncertainty.');
       });
-      R.eq('%Q', ins.map(function (i, j) { return U.sf(100 * res.terms[j].contrib, 3); }).join(' + '), U.sf(res.pct, 3), '%');
-      R.eq('ΔQ', U.sf(res.pct, 3) + '% × ' + U.sf(res.Q, 4), res.dQ, '');
+      R.eq('%Q', ins.map(function (i, j) { return U.sf(100 * res.terms[j].contrib, 3); }).join(' + '), U.sf(res.pct, 3), '%', 'For a product or quotient the percentage (fractional) uncertainties add; exact constants add nothing.');
+      R.eq('ΔQ', U.sf(res.pct, 3) + '% × ' + U.sf(res.Q, 4), res.dQ, '', 'Convert back to an absolute uncertainty: ΔQ = (%Q ÷ 100) × Q.');
     } else {
       res = M.uncSum(ins);
       R.head('Q = ' + ins.map(function (i, j) { return (j ? (i.s < 0 ? ' − ' : ' + ') : '') + i.k; }).join(''));
-      R.eq('Q', ins.map(function (i, j) { return (j ? (i.s < 0 ? ' − ' : ' + ') : '') + U.num(i.x, 4); }).join(''), res.Q, '');
+      R.eq('Q', ins.map(function (i, j) { return (j ? (i.s < 0 ? ' − ' : ' + ') : '') + U.num(i.x, 4); }).join(''), res.Q, '', 'Add or subtract the measured values to get Q.');
       R.head('Absolute uncertainties add (even for a difference)');
-      R.eq('ΔQ', ins.map(function (i) { return U.sf(i.d, 3); }).join(' + '), res.dQ, '');
-      if (Math.abs(res.Q) > 1e-12) R.eq('%Q', 'ΔQ ÷ |Q| × 100 = ' + U.sf(res.dQ, 3) + ' ÷ ' + U.sf(Math.abs(res.Q), 4) + ' × 100', U.sf(res.pct, 3), '%');
+      R.eq('ΔQ', ins.map(function (i) { return U.sf(i.d, 3); }).join(' + '), res.dQ, '', 'For a sum or a difference the absolute uncertainties always add.');
+      if (Math.abs(res.Q) > 1e-12) R.eq('%Q', 'ΔQ ÷ |Q| × 100 = ' + U.sf(res.dQ, 3) + ' ÷ ' + U.sf(Math.abs(res.Q), 4) + ' × 100', U.sf(res.pct, 3), '%', 'Percentage uncertainty in Q = ΔQ ÷ Q × 100: large when Q is a small difference of two close values.');
       else R.badge('Q = 0: a percentage uncertainty cannot be calculated', 'warn');
     }
     var r1 = M.roundWithUnc(res.Q, res.dQ, 1), r2 = M.roundWithUnc(res.Q, res.dQ, 2);
     R.head('Final answer');
-    if (r1) { R.eq('Q (1 s.f. uncertainty)', '', r1.value + ' ± ' + r1.unc, ''); R.eq('Q (2 s.f. uncertainty)', '', r2.value + ' ± ' + r2.unc, ''); }
-    else R.eq('Q', 'no uncertainty (all uncertainties zero)', res.Q, '');
+    if (r1) { R.eq('Q (1 s.f. uncertainty)', '', r1.value + ' ± ' + r1.unc, '', 'Round the uncertainty to 1 significant figure and give the value to the same decimal place.'); R.eq('Q (2 s.f. uncertainty)', '', r2.value + ' ± ' + r2.unc, '', 'Some mark schemes accept the uncertainty to 2 significant figures, with the value to match.'); }
+    else R.eq('Q', 'no uncertainty (all uncertainties zero)', res.Q, '', 'With no uncertainty in any measurement, Q is exact.');
     if (!prod && res.pct > 20 && isFinite(res.pct)) R.badge('Subtracting nearly equal values makes the percentage uncertainty large', 'warn');
     dataEl.innerHTML = '<table class="tbl"><tr><th>quantity</th><th>value</th><th>absolute unc.</th><th>% unc.</th>' + (prod ? '<th>power</th><th>% contribution</th>' : '') + '</tr>' +
       ins.map(function (i, j) { return '<tr><td>' + i.k + '</td><td>' + U.sf(i.x, 4) + '</td><td>' + U.sf(i.d, 3) + '</td><td>' + U.sf(100 * i.d / i.x, 3) + '</td>' + (prod ? '<td>' + M.fracStr(i.n) + '</td><td>' + U.sf(100 * res.terms[j].contrib, 3) + '</td>' : '') + '</tr>'; }).join('') + '</table>';
@@ -203,15 +204,21 @@
       var v = prm.values, size = Math.min(H - 30, W * 0.45), cx = 15 + size / 2, cy = H / 2;
       var span = Math.max(4, Math.abs(v.bias + v.zero) + 3 * v.sigma), k = (size / 2 - 6) / span;
       if (frozen && frozen.k) k = frozen.k;   // keep the scale still while a handle is dragged
-      for (var r = 5; r >= 1; r--) { c.beginPath(); c.arc(cx, cy, (size / 2 - 6) * r / 5, 0, 2 * Math.PI); c.fillStyle = r % 2 ? col.surface : col.panel; c.fill(); c.strokeStyle = col.line; c.lineWidth = 1; c.stroke(); }
+      var real = SIM.scene.real();
+      if (real) { paper(c, W, H); target(c, cx, cy, size / 2 - 6); }
+      else for (var r = 5; r >= 1; r--) { c.beginPath(); c.arc(cx, cy, (size / 2 - 6) * r / 5, 0, 2 * Math.PI); c.fillStyle = r % 2 ? col.surface : col.panel; c.fill(); c.strokeStyle = col.line; c.lineWidth = 1; c.stroke(); }
       c.strokeStyle = col.ok; c.lineWidth = 2; c.beginPath(); c.moveTo(cx - 8, cy); c.lineTo(cx + 8, cy); c.moveTo(cx, cy - 8); c.lineTo(cx, cy + 8); c.stroke();
-      shots.forEach(function (s) { var x = cx + s[0] * k, y = cy - s[1] * k; if (Math.abs(x - cx) < size / 2 + 4 && Math.abs(y - cy) < size / 2 + 4) { c.fillStyle = col.s2; c.beginPath(); c.arc(x, y, 4, 0, 2 * Math.PI); c.fill(); } });
+      shots.forEach(function (s) { var x = cx + s[0] * k, y = cy - s[1] * k; if (Math.abs(x - cx) < size / 2 + 4 && Math.abs(y - cy) < size / 2 + 4) {
+        if (real) { c.fillStyle = 'rgba(70,60,110,.18)'; c.beginPath(); c.arc(x + 1.5, y + 2, 4.5, 0, 2 * Math.PI); c.fill(); }   // a dart hole with a soft shadow
+        c.fillStyle = col.s2; c.beginPath(); c.arc(x, y, 4, 0, 2 * Math.PI); c.fill();
+        if (real) { c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = 1.5; c.stroke(); } } });
       D.label(c, 'target: centre = true value', cx, 10, col.muted, { size: 11 });
       // number line
       var x0 = cx + size / 2 + 30, x1 = W - 20, yl = H * 0.55, st = rd.cst, lo = Math.min(st.min, v.X0), hi = Math.max(st.max, v.X0), pad = Math.max((hi - lo) * 0.15, 0.05 * v.X0, 1e-3);
       lo -= pad; hi += pad;
       if (frozen && frozen.lo !== undefined) { lo = frozen.lo; hi = frozen.hi; }
       var X = function (x) { return x0 + (x - lo) / (hi - lo) * (x1 - x0); };
+      if (real) { rule(c, x0 - 10, yl - 3, x1 - x0 + 20, 28); instrument(c, (x0 + x1) / 2, 58, yl - 136, v.X0, rd.xs[rd.xs.length - 1]); }
       c.strokeStyle = col.muted; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x0, yl); c.lineTo(x1, yl); c.stroke();
       U.niceTicks(lo, hi, 5).ticks.forEach(function (t) { if (t < lo || t > hi) return; c.beginPath(); c.moveTo(X(t), yl); c.lineTo(X(t), yl + 5); c.stroke(); D.label(c, U.num(t, 4), X(t), yl + 16, col.muted, { size: 10 }); });
       rd.cx.forEach(function (x, i) { c.fillStyle = col.s2; c.beginPath(); c.arc(X(x), yl - 12 - (i % 4) * 9, 3.5, 0, 2 * Math.PI); c.fill(); });
@@ -227,13 +234,16 @@
       if (!res || !absU) { scene = null; return; }
       var prod = kind.get() === 'product', vals = absU.map(function (i, j) { return prod ? 100 * res.terms[j].contrib : i.d; });
       var tot = vals.reduce(function (a, b) { return a + b; }, 0), cols = [col.s1, col.s2, col.s3];
-      var L = 60, Rr = 20, y = H * 0.42, bh = 40, w = W - L - Rr;
+      var L = 60, Rr = 20, y = H * 0.42, bh = 40, w = W - L - Rr, realC = SIM.scene.real();
+      if (realC) paper(c, W, H);
       D.label(c, prod ? 'total % uncertainty in Q = ' + U.sf(tot, 3) + '%' : 'total absolute uncertainty ΔQ = ' + U.sf(tot, 3), W / 2, 22, col.ink, { bold: true });
       if (!(tot > 0)) { D.label(c, 'all uncertainties are zero', W / 2, y + bh / 2, col.muted); return; }
       var x = L;
       scene = { md: 'combine', segs: [] };
       absU.forEach(function (i, j) {
-        var bw = w * vals[j] / tot; c.fillStyle = cols[j]; c.globalAlpha = 0.8; c.fillRect(x, y, bw, bh); c.globalAlpha = 1;
+        var bw = w * vals[j] / tot; c.fillStyle = cols[j]; c.globalAlpha = 0.8;
+        if (realC && bw > 2) { c.beginPath(); if (c.roundRect) c.roundRect(x + 1, y, bw - 2, bh, Math.min(10, bw / 2)); else c.rect(x + 1, y, bw - 2, bh); c.fill(); } else c.fillRect(x, y, bw, bh);
+        c.globalAlpha = 1;
         if (bw > 30) D.label(c, i.k, x + bw / 2, y + bh / 2, col.panel, { bold: true });
         scene.segs.push({ k: i.k, cx: x + bw / 2, bw: bw, cy: y + bh / 2, lx: L + j * (w / 3) + 10, ly: y + bh + 22, color: cols[j] });
         D.label(c, i.k + ': ' + U.sf(vals[j], 3) + (prod ? '%' : '') + (prod && Math.abs(i.n) !== 1 ? ' (× ' + M.fracStr(Math.abs(i.n)) + ')' : ''), L + j * (w / 3), y + bh + 22, cols[j], { align: 'left', size: 12 });
@@ -242,6 +252,62 @@
       D.label(c, prod ? '%Q' : 'ΔQ', L - 8, y + bh / 2, col.ink, { align: 'right' });
     }
     if (ix) ix.paint(c);
+  }
+
+  /* ---------- real-life look helpers (soft illustrated style, screen pixels) ---------- */
+  function rr(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, Math.max(0, Math.min(r, w / 2, h / 2))); else c.rect(x, y, w, h); }
+  function soft() { return SIM.scene.dark() ? 'rgba(255,255,255,.2)' : 'rgba(70,60,110,.2)'; }
+  /** a lab notebook page: pale paper with faint ruled lines */
+  function paper(c, W, H) {
+    var dk = SIM.scene.dark();
+    c.save(); c.fillStyle = dk ? '#232838' : '#fbf8f1'; c.fillRect(0, 0, W, H);
+    c.strokeStyle = dk ? 'rgba(140,160,220,.08)' : 'rgba(120,150,210,.14)'; c.lineWidth = 1;
+    for (var y = 30; y < H; y += 24) { c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+    c.strokeStyle = dk ? 'rgba(240,140,140,.15)' : 'rgba(235,130,130,.25)'; c.beginPath(); c.moveTo(40, 0); c.lineTo(40, H); c.stroke();
+    c.restore();
+  }
+  /** an archery-style target on a little stand; rings in soft pastels, centre = true value */
+  function target(c, cx, cy, R) {
+    if (!(R > 4)) return;
+    var dk = SIM.scene.dark(), ring = ['#f7d983', '#f2a7a7', '#a9c6ef', dk ? '#6f7493' : '#9a9eb5', dk ? '#cfccc3' : '#f8f6f0'];
+    c.save();
+    c.strokeStyle = '#d8b48c'; c.lineWidth = 5; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(cx - R * 0.5, cy + R * 0.6); c.lineTo(cx - R * 0.75, cy + R * 1.05); c.moveTo(cx + R * 0.5, cy + R * 0.6); c.lineTo(cx + R * 0.75, cy + R * 1.05); c.stroke();
+    c.fillStyle = 'rgba(70,60,110,.12)'; c.beginPath(); c.arc(cx + 4, cy + 6, R + 2, 0, 2 * Math.PI); c.fill();
+    for (var r = 5; r >= 1; r--) { c.beginPath(); c.arc(cx, cy, R * r / 5, 0, 2 * Math.PI); c.fillStyle = ring[r - 1]; c.fill(); c.strokeStyle = 'rgba(255,255,255,.65)'; c.lineWidth = 1.2; c.stroke(); }
+    c.fillStyle = 'rgba(255,255,255,.18)'; c.beginPath(); c.arc(cx - R * 0.3, cy - R * 0.35, R * 0.45, 0, 2 * Math.PI); c.fill();
+    c.restore();
+  }
+  /** a wooden rule behind the number line */
+  function rule(c, x, y, w, h) {
+    c.save(); rr(c, x, y, w, h, 5);
+    var g = c.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, '#f6e3bf'); g.addColorStop(1, '#ecd2a2'); c.fillStyle = g; c.fill();
+    c.strokeStyle = 'rgba(150,110,60,.3)'; c.lineWidth = 1; c.stroke(); c.restore();
+  }
+  /** the measuring instrument: a micrometer for small (mm-sized) values, otherwise a stopwatch showing the latest reading */
+  function instrument(c, x, top, hAvail, X0, last) {
+    if (!(hAvail > 46) || !isFinite(last)) return;
+    var h = Math.min(hAvail, 90), dk = SIM.scene.dark(), txt = last.toFixed(2);
+    c.save(); c.translate(x, top + h / 2);
+    if (X0 < 5) {   // micrometer: C-frame, anvil, spindle, sleeve and thimble
+      var u = h / 60;
+      c.strokeStyle = '#9fb3e6'; c.lineWidth = 9 * u; c.lineCap = 'round'; c.beginPath(); c.moveTo(-42 * u, -14 * u); c.lineTo(-42 * u, 14 * u); c.quadraticCurveTo(-42 * u, 26 * u, -20 * u, 26 * u); c.lineTo(0, 26 * u); c.stroke();
+      c.fillStyle = '#d9dce6'; rr(c, -40 * u, -20 * u, 14 * u, 12 * u, 2); c.fill(); rr(c, -22 * u, -19 * u, 24 * u, 10 * u, 2); c.fill();   // anvil and spindle
+      c.fillStyle = '#e9edf8'; rr(c, 0, -21 * u, 34 * u, 14 * u, 3); c.fill(); c.strokeStyle = soft(); c.lineWidth = 1; c.stroke();   // sleeve
+      c.strokeStyle = 'rgba(80,80,120,.5)'; for (var i = 0; i < 7; i++) { c.beginPath(); c.moveTo(3 * u + i * 4.5 * u, -14 * u); c.lineTo(3 * u + i * 4.5 * u, -14 * u - (i % 2 ? 3 : 5) * u); c.stroke(); }
+      c.fillStyle = '#f2a7a7'; rr(c, 30 * u, -24 * u, 24 * u, 20 * u, 5 * u); c.fill(); c.strokeStyle = soft(); c.stroke();   // thimble
+      c.fillStyle = '#f2a7a7'; rr(c, 54 * u, -20 * u, 8 * u, 12 * u, 3 * u); c.fill();   // ratchet
+      c.fillStyle = dk ? '#e8e8f2' : '#4c4966'; c.font = '600 11px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('micrometer reading ' + txt, 8 * u, 40 * u);
+    } else {   // digital stopwatch
+      var r = h * 0.38;
+      c.fillStyle = '#c7cbe0'; rr(c, -r * 0.2, -r * 1.32, r * 0.4, r * 0.3, 3); c.fill();
+      c.fillStyle = 'rgba(70,60,110,.12)'; c.beginPath(); c.arc(3, 4, r, 0, 2 * Math.PI); c.fill();
+      c.fillStyle = '#a9c6ef'; c.beginPath(); c.arc(0, 0, r, 0, 2 * Math.PI); c.fill(); c.strokeStyle = soft(); c.lineWidth = 1; c.stroke();
+      c.fillStyle = '#eef6e8'; rr(c, -r * 0.72, -r * 0.3, r * 1.44, r * 0.6, 5); c.fill();
+      c.fillStyle = '#3f4a3a'; c.font = '700 ' + Math.round(Math.max(9, r * 0.42)) + 'px ui-monospace, monospace'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(txt, 0, 1);
+      c.fillStyle = dk ? '#e8e8f2' : '#4c4966'; c.font = '600 11px system-ui, sans-serif'; c.fillText('latest reading', 0, r + 12);
+    }
+    c.restore();
   }
 
   /* ---------- direct manipulation: drag the cluster / readings, tap to type ---------- */

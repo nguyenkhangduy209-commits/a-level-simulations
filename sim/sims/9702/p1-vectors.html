@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-dynamics.js"></script>
@@ -35,9 +36,10 @@
   var noteCard = pg.card('right', 'Common traps');
 
   var QTY = { gen: { u: 'units', n: 'vector' }, disp: { u: 'm', n: 'displacement' }, vel: { u: 'm s<sup>−1</sup>', n: 'velocity' }, force: { u: 'N', n: 'force' } };
-  var qty = ui.select(paramCard, { label: 'Quantity', value: 'vel', options: [{ value: 'vel', label: 'velocity (m s⁻¹)' }, { value: 'disp', label: 'displacement (m)' }, { value: 'force', label: 'force (N)' }, { value: 'gen', label: 'any vector' }] }, update);
+  var look = null;   // real-life scene chosen by the preset (null = pick from quantity / operation)
+  var qty = ui.select(paramCard, { label: 'Quantity', value: 'vel', options: [{ value: 'vel', label: 'velocity (m s⁻¹)' }, { value: 'disp', label: 'displacement (m)' }, { value: 'force', label: 'force (N)' }, { value: 'gen', label: 'any vector' }] }, function () { look = null; update(); });
   var op = ui.select(paramCard, { label: 'Operation', value: 'add', options: [{ value: 'add', label: 'R = A + B' }, { value: 'sub', label: 'R = A − B' },
-    { value: 'dv', label: 'R = B − A  (change Δv = v₂ − v₁, with v₁ = A, v₂ = B)' }, { value: 'res', label: 'Resolve A into two perpendicular components' }] }, update);
+    { value: 'dv', label: 'R = B − A  (change Δv = v₂ − v₁, with v₁ = A, v₂ = B)' }, { value: 'res', label: 'Resolve A into two perpendicular components' }] }, function () { look = null; update(); });
   var prm = ui.params(paramCard, [
     { key: 'A', label: 'Magnitude of A', sym: '|A|', unit: '', min: 0, max: 300, step: 0.1, value: 4 },
     { key: 'tA', label: 'Direction of A (anticlockwise from +x)', sym: 'θ<sub>A</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: 90 },
@@ -80,7 +82,10 @@
     { name: 'Resolve a 20 N force at 30° above the horizontal', q: 'force', op: 'res', v: { A: 20, tA: 30, B: 0, tB: 0, phi: 0, psi: 0 }, note: 'Horizontal 20 cos 30° = 17.3 N, vertical 20 sin 30° = 10.0 N.' },
     { name: 'Resolve a weight of 50 N along and perpendicular to a 30° slope', q: 'force', op: 'res', v: { A: 50, tA: -90, B: 0, tB: 0, phi: 30, psi: 0 }, note: 'Along the slope: 50 sin 30° = 25 N (down the slope). Perpendicular: 50 cos 30° = 43.3 N (into the slope).' },
     { name: 'Displacement: 3.0 km east then 4.0 km north', q: 'disp', op: 'add', v: { A: 3, tA: 0, B: 4, tB: 90, phi: 0, psi: 0 }, note: 'Distance travelled 7.0 km (scalar); displacement 5.0 km at 53.1° north of east (vector). Units here are km.' }
-  ], function (p) { qty.set(p.q, true); op.set(p.op, true); aimMsg = ''; prm.set(p.v); });
+  ], function (p) {
+    look = /Boat/.test(p.name) ? 'river' : /Plane/.test(p.name) ? 'plane' : /rebounds/.test(p.name) ? 'wall' : /corner/.test(p.name) ? 'corner' : /slope/.test(p.name) ? 'slope' : /Displacement/.test(p.name) ? 'map' : 'crate';
+    qty.set(p.q, true); op.set(p.op, true); aimMsg = ''; prm.set(p.v);
+  });
 
   ui.notes(noteCard, [
     '<b>Scalars</b> have magnitude only (distance, speed, mass, time, energy, power, pressure). <b>Vectors</b> have magnitude and direction (displacement, velocity, acceleration, force, weight, momentum).',
@@ -117,30 +122,30 @@
     if (aimMsg) R.badge(aimMsg, 'warn');
     R.badge('Angles measured anticlockwise from the +x axis' + (Math.abs(v.phi) > 1e-9 ? '; components along x′ at ' + ang(v.phi) + ' and y′ perpendicular' : ''), 'info');
     R.head('Components (x, y)');
-    R.eq('A<sub>x</sub>', U.num(v.A, 4) + ' cos ' + ang(v.tA), A[0], u); R.eq('A<sub>y</sub>', U.num(v.A, 4) + ' sin ' + ang(v.tA), A[1], u);
+    R.eq('A<sub>x</sub>', U.num(v.A, 4) + ' cos ' + ang(v.tA), A[0], u, 'The component of a vector along an axis is its magnitude × cos(angle to that axis).'); R.eq('A<sub>y</sub>', U.num(v.A, 4) + ' sin ' + ang(v.tA), A[1], u, 'Perpendicular to the x axis the component is magnitude × sin(angle from +x).');
     if (!resolving) {
-      R.eq('B<sub>x</sub>', U.num(v.B, 4) + ' cos ' + ang(v.tB), B[0], u); R.eq('B<sub>y</sub>', U.num(v.B, 4) + ' sin ' + ang(v.tB), B[1], u);
+      R.eq('B<sub>x</sub>', U.num(v.B, 4) + ' cos ' + ang(v.tB), B[0], u, 'Resolve B the same way: magnitude × cos(angle from +x).'); R.eq('B<sub>y</sub>', U.num(v.B, 4) + ' sin ' + ang(v.tB), B[1], u, '…and magnitude × sin(angle from +x) for the y component.');
       var sx = o === 'add' ? ' + ' : ' − ', a1 = o === 'dv' ? 'B' : 'A', a2 = o === 'dv' ? 'A' : 'B', p1 = o === 'dv' ? B : A, p2 = o === 'dv' ? A : B;
       R.head('Result R = ' + a1 + sx + a2 + (o === 'dv' ? ' (Δv)' : ''));
-      R.eq('R<sub>x</sub>', a1 + '<sub>x</sub>' + sx + a2 + '<sub>x</sub> = ' + U.sf(p1[0]) + sx + '(' + U.sf(p2[0]) + ')', Rv[0], u);
-      R.eq('R<sub>y</sub>', a1 + '<sub>y</sub>' + sx + a2 + '<sub>y</sub> = ' + U.sf(p1[1]) + sx + '(' + U.sf(p2[1]) + ')', Rv[1], u);
-      R.eq('|R|', '√(R<sub>x</sub>² + R<sub>y</sub>²) = √(' + sq(Rv[0]) + ' + ' + sq(Rv[1]) + ')', ma.mag, u);
-      if (ma.mag > 1e-9) R.eq('direction', 'tan⁻¹(R<sub>y</sub> ÷ R<sub>x</sub>), quadrant from the signs', ang(ma.ang), '');
+      R.eq('R<sub>x</sub>', a1 + '<sub>x</sub>' + sx + a2 + '<sub>x</sub> = ' + U.sf(p1[0]) + sx + '(' + U.sf(p2[0]) + ')', Rv[0], u, 'Vectors add (or subtract) component by component: x components combine on their own.');
+      R.eq('R<sub>y</sub>', a1 + '<sub>y</sub>' + sx + a2 + '<sub>y</sub> = ' + U.sf(p1[1]) + sx + '(' + U.sf(p2[1]) + ')', Rv[1], u, 'The y components combine on their own too, independently of x.');
+      R.eq('|R|', '√(R<sub>x</sub>² + R<sub>y</sub>²) = √(' + sq(Rv[0]) + ' + ' + sq(Rv[1]) + ')', ma.mag, u, 'The two components are perpendicular, so Pythagoras gives the magnitude of the result.');
+      if (ma.mag > 1e-9) R.eq('direction', 'tan⁻¹(R<sub>y</sub> ÷ R<sub>x</sub>), quadrant from the signs', ang(ma.ang), '', 'The angle comes from tan θ = R<sub>y</sub>/R<sub>x</sub>; the signs of the components tell you the quadrant.');
       else R.badge('The result is zero: the vectors cancel, so it has no direction', 'ok');
       var pv = first.v, qv = second.v, mp = Math.hypot(pv[0], pv[1]), mq = Math.hypot(qv[0], qv[1]);
       if (mp > 1e-12 && mq > 1e-12) {
         var between = U.deg(Math.acos(U.clamp((pv[0] * qv[0] + pv[1] * qv[1]) / (mp * mq), -1, 1)));
         R.head('Check with the cosine rule: angle between ' + first.n + ' and ' + second.n + ' (tail to tail) = ' + ang(between));
-        R.eq('|R|', '√(' + U.sf(mp) + '² + ' + U.sf(mq) + '² + 2(' + U.sf(mp) + ')(' + U.sf(mq) + ') cos ' + ang(between) + ')', Math.sqrt(Math.max(0, mp * mp + mq * mq + 2 * mp * mq * Math.cos(U.rad(between)))), u);
+        R.eq('|R|', '√(' + U.sf(mp) + '² + ' + U.sf(mq) + '² + 2(' + U.sf(mp) + ')(' + U.sf(mq) + ') cos ' + ang(between) + ')', Math.sqrt(Math.max(0, mp * mp + mq * mq + 2 * mp * mq * Math.cos(U.rad(between)))), u, 'Same result from the triangle of vectors: the cosine rule with the angle between the two vectors placed tail to tail.');
       }
     } else {
       R.head('Resolve A along x′ (at ' + ang(v.phi) + ') and y′ (at ' + ang(v.phi + 90) + ')');
       var rel = v.tA - v.phi;
-      R.eq('A<sub>x′</sub>', U.num(v.A, 4) + ' cos(' + ang(v.tA) + ' − ' + ang(v.phi) + ') = ' + U.num(v.A, 4) + ' cos ' + ang(rel), Rx, u);
-      R.eq('A<sub>y′</sub>', U.num(v.A, 4) + ' sin ' + ang(rel), Ry, u);
-      R.eq('check', '√(A<sub>x′</sub>² + A<sub>y′</sub>²)', Math.hypot(Rx, Ry), u);
+      R.eq('A<sub>x′</sub>', U.num(v.A, 4) + ' cos(' + ang(v.tA) + ' − ' + ang(v.phi) + ') = ' + U.num(v.A, 4) + ' cos ' + ang(rel), Rx, u, 'Along the chosen axis x′ the component is A cos(angle between A and x′).');
+      R.eq('A<sub>y′</sub>', U.num(v.A, 4) + ' sin ' + ang(rel), Ry, u, 'Perpendicular to x′ the component is A sin(angle between A and x′).');
+      R.eq('check', '√(A<sub>x′</sub>² + A<sub>y′</sub>²)', Math.hypot(Rx, Ry), u, 'Perpendicular components must combine back to the original magnitude.');
     }
-    if (!resolving && Math.abs(v.phi) > 1e-9) { R.head('Components of R along the rotated axes'); R.eq('R<sub>x′</sub>', 'R · x̂′', Rx, u); R.eq('R<sub>y′</sub>', 'R · ŷ′', Ry, u); }
+    if (!resolving && Math.abs(v.phi) > 1e-9) { R.head('Components of R along the rotated axes'); R.eq('R<sub>x′</sub>', 'R · x̂′', Rx, u, 'The component of R along x′: its projection on that axis.'); R.eq('R<sub>y′</sub>', 'R · ŷ′', Ry, u, 'The component of R perpendicular to x′.'); }
     if (nm === 'velocity' && o === 'dv') R.badge('Δv is a vector: an object at constant speed that changes direction has a non-zero Δv', 'info');
     R.render();
     var rows = [['A', A]].concat(resolving ? [] : [['B', B]]).concat([['R', Rv]]);
@@ -160,6 +165,7 @@
     else vp.fit(x0 - m, x1 + m, y0 - m, y1 + m);
     c = vp.begin();
     var O = vp.P(0, 0), P = function (v) { return vp.P(v[0], v[1]); };
+    if (SIM.scene.real()) realBack(c, O);
     // axes through origin
     c.strokeStyle = col.grid; c.lineWidth = 1; c.beginPath(); c.moveTo(0, O[1]); c.lineTo(vp.w, O[1]); c.moveTo(O[0], 0); c.lineTo(O[0], vp.h); c.stroke();
     D.label(c, '+x', vp.w - 14, O[1] - 10, col.muted, { size: 11 }); D.label(c, '+y', O[0] + 12, 10, col.muted, { size: 11 });
@@ -191,6 +197,108 @@
     lastSpan = span;
     if (dragInfo) D.label(c, dragInfo.text, dragInfo.x, dragInfo.y - 24, col.ink, { bold: true, size: 12, bg: true });
     if (ix) ix.paint(c);
+  }
+
+  /* ---------- real-life look: the situation behind the vector diagram (soft illustrated style, screen pixels) ---------- */
+  function sceneLook() {
+    if (look) return look;
+    var q = qty.get(), o = op.get();
+    return q === 'vel' ? (o === 'add' ? 'river' : 'wall') : q === 'force' ? (o === 'res' ? 'crate' : 'crate') : q === 'disp' ? 'map' : o === 'add' ? 'plane' : 'map';
+  }
+  function rr(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, Math.max(0, Math.min(r, w / 2, h / 2))); else c.rect(x, y, w, h); }
+  function dirOf(v) { return Math.atan2(v[1], v[0]); }   // math angle of a world vector
+  function realBack(c, O) {
+    var S = SIM.scene, W = vp.w, H = vp.h, dk = S.dark(), lk = sceneLook(), v = prm.values, hA = U.rad(v.tA), seed = 3;
+    function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+    c.save();
+    if (lk === 'river') {   // river flowing along +x between two grassy banks; the boat heads along A
+      c.fillStyle = dk ? '#2b4a6b' : '#a9d3ee'; c.fillRect(0, 0, W, H);
+      c.strokeStyle = dk ? 'rgba(200,225,255,.18)' : 'rgba(255,255,255,.6)'; c.lineWidth = 2; c.lineCap = 'round';
+      for (var i = 0; i < 26; i++) { var x = rnd() * W, y = rnd() * H, L = 14 + rnd() * 24; c.beginPath(); c.moveTo(x, y); c.lineTo(x + L, y); c.stroke(); }
+      c.restore(); S.ground(c, 0, W, Math.min(H - 6, O[1] + 26), { kind: 'grass', depth: H }); c.save();
+      c.fillStyle = dk ? '#3d5a3f' : '#a8d59a'; rr(c, -10, -10, W + 20, 26, 10); c.fill();
+      boat(c, O[0], O[1], hA, dk);
+    } else if (lk === 'plane') {   // sky with clouds, the plane points along its heading A, wind streaks along B
+      S.sky(c, 0, 0, W, H, { horizon: H });
+      var bA = dirOf(res.B || [1, 0]);
+      c.strokeStyle = 'rgba(255,255,255,.55)'; c.lineWidth = 2; c.lineCap = 'round';
+      if (v.B > 0) for (var j = 0; j < 14; j++) { var x2 = rnd() * W, y2 = rnd() * H; c.beginPath(); c.moveTo(x2, y2); c.lineTo(x2 + Math.cos(bA) * 30, y2 - Math.sin(bA) * 30); c.stroke(); }
+      plane(c, O[0], O[1], hA);
+      compass(c, W - 34, H - 40);
+    } else if (lk === 'wall') {   // ball heading to a wall on the right and bouncing back
+      c.restore(); S.sky(c, 0, 0, W, H * 0.75, { horizon: H * 0.75 }); S.ground(c, 0, W, H * 0.75, { kind: 'floor', depth: H * 0.25 }); S.wall(c, W - 34, 0, 34, H * 0.75, { kind: 'brick' }); c.save();
+      S.ball(c, O[0], O[1], 11, { kind: 'football', spin: 0.6 });
+    } else if (lk === 'corner') {   // a car turning a corner (seen from above)
+      c.fillStyle = dk ? '#2f4a33' : '#bfe3b0'; c.fillRect(0, 0, W, H);
+      c.fillStyle = dk ? '#3c4150' : '#d6d8e0'; c.fillRect(0, O[1] - 22, O[0] + 22, 44); c.fillRect(O[0] - 22, 0, 44, O[1] + 22);
+      c.strokeStyle = 'rgba(255,255,255,.75)'; c.lineWidth = 2; c.setLineDash([10, 10]); c.beginPath(); c.moveTo(0, O[1]); c.lineTo(O[0], O[1]); c.lineTo(O[0], 0); c.stroke(); c.setLineDash([]);
+      topCar(c, O[0] - 40, O[1], 0);
+    } else if (lk === 'slope') {   // a crate on a wooden ramp at φ; its weight is resolved along and perpendicular to the ramp
+      c.restore(); S.sky(c, 0, 0, W, H, { horizon: H });
+      var ph = U.rad(v.phi), ux = Math.cos(ph), uy = -Math.sin(ph), nx = -Math.sin(ph), ny = -Math.cos(ph), bx = O[0] - nx * 22, by = O[1] - ny * 22, Lr = Math.max(W, H) * 1.5;
+      S.ramp(c, [[bx - ux * Lr, by - uy * Lr], [bx + ux * Lr, by + uy * Lr], [bx + ux * Lr, H + Lr], [bx - ux * Lr, H + Lr]], { kind: 'wood' });
+      S.crate(c, bx, by, 46, 44, ph, {}); c.save();
+    } else if (lk === 'map') {   // a walk on a map: footpath along the first vector then the second
+      c.fillStyle = dk ? '#2a3a2c' : '#e3f1d6'; c.fillRect(0, 0, W, H);
+      c.strokeStyle = dk ? 'rgba(255,255,255,.06)' : 'rgba(90,130,90,.12)'; c.lineWidth = 1;
+      for (var gx = O[0] % 40; gx < W; gx += 40) { c.beginPath(); c.moveTo(gx, 0); c.lineTo(gx, H); c.stroke(); }
+      for (var gy = O[1] % 40; gy < H; gy += 40) { c.beginPath(); c.moveTo(0, gy); c.lineTo(W, gy); c.stroke(); }
+      if (res.second) { var f1 = vp.P(res.first.v[0], res.first.v[1]), t2 = vp.P(res.first.v[0] + res.second.v[0], res.first.v[1] + res.second.v[1]);
+        c.strokeStyle = dk ? 'rgba(230,200,150,.45)' : 'rgba(205,165,110,.7)'; c.lineWidth = 9; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath(); c.moveTo(O[0], O[1]); c.lineTo(f1[0], f1[1]); c.lineTo(t2[0], t2[1]); c.stroke();
+        c.fillStyle = '#ef8f8f'; c.beginPath(); c.moveTo(t2[0], t2[1]); c.lineTo(t2[0], t2[1] - 22); c.lineTo(t2[0] + 14, t2[1] - 17); c.lineTo(t2[0], t2[1] - 12); c.fill(); }
+      c.restore(); S.tree(c, 30, H - 10, 50); S.tree(c, W - 40, 70, 40); S.person(c, O[0] - 10, O[1], 34, {}); c.save();
+      compass(c, W - 34, H - 40);
+    } else {   // forces on a crate on the floor, seen from above: ropes pull along A and B
+      c.fillStyle = dk ? '#3a3330' : '#f1e3cc'; c.fillRect(0, 0, W, H);
+      c.strokeStyle = dk ? 'rgba(255,255,255,.05)' : 'rgba(150,110,70,.12)'; c.lineWidth = 1; for (var py = 0; py < H; py += 26) { c.beginPath(); c.moveTo(0, py); c.lineTo(W, py); c.stroke(); }
+      var ropes = [res.A].concat(op.get() === 'res' ? [] : [res.B]);
+      c.restore();
+      ropes.forEach(function (rv) { if (Math.hypot(rv[0], rv[1]) > 1e-9) { var a = dirOf(rv); S.rope(c, [[O[0], O[1]], [O[0] + Math.cos(a) * 1500, O[1] - Math.sin(a) * 1500]], { width: 3 }); } });
+      S.shadow(c, O[0] + 3, O[1] + 4, 26, 26);
+      c.save(); rr(c, O[0] - 22, O[1] - 22, 44, 44, 7); c.fillStyle = '#f3c995'; c.fill(); c.strokeStyle = 'rgba(150,100,60,.35)'; c.lineWidth = 1.2; c.stroke();
+      c.strokeStyle = 'rgba(150,100,60,.25)'; c.lineWidth = 4; c.beginPath(); c.moveTo(O[0] - 14, O[1] - 14); c.lineTo(O[0] + 14, O[1] + 14); c.stroke();
+    }
+    c.restore();
+  }
+  /** a rowing boat seen from above, nose along math angle a */
+  function boat(c, x, y, a, dk) {
+    c.save(); c.translate(x, y); c.rotate(-a);
+    c.strokeStyle = dk ? 'rgba(220,235,255,.25)' : 'rgba(255,255,255,.75)'; c.lineWidth = 2; c.beginPath(); c.moveTo(-26, -9); c.lineTo(-50, -18); c.moveTo(-26, 9); c.lineTo(-50, 18); c.stroke();   // wake
+    c.fillStyle = 'rgba(40,60,100,.15)'; c.beginPath(); if (c.ellipse) c.ellipse(2, 3, 28, 11, 0, 0, 2 * Math.PI); c.fill();
+    c.beginPath(); c.moveTo(28, 0); c.quadraticCurveTo(10, -13, -24, -10); c.lineTo(-24, 10); c.quadraticCurveTo(10, 13, 28, 0); c.closePath();
+    c.fillStyle = '#f2b98a'; c.fill(); c.strokeStyle = 'rgba(150,100,60,.4)'; c.lineWidth = 1.2; c.stroke();
+    c.fillStyle = '#fbe3c8'; c.beginPath(); c.moveTo(20, 0); c.quadraticCurveTo(6, -8, -19, -6); c.lineTo(-19, 6); c.quadraticCurveTo(6, 8, 20, 0); c.fill();
+    c.fillStyle = '#c99a6a'; c.fillRect(-4, -7, 4, 14); c.fillRect(-14, -6, 3, 12);
+    c.restore();
+  }
+  /** a small aeroplane seen from above, nose along math angle a */
+  function plane(c, x, y, a) {
+    c.save(); c.translate(x, y); c.rotate(-a); c.fillStyle = 'rgba(40,60,100,.12)'; c.translate(3, 5);
+    var draw = function (fill) { c.fillStyle = fill; c.beginPath(); if (c.ellipse) c.ellipse(0, 0, 26, 5, 0, 0, 2 * Math.PI); else c.rect(-26, -5, 52, 10); c.fill();
+      c.beginPath(); c.moveTo(4, -2); c.lineTo(-6, -26); c.lineTo(-12, -26); c.lineTo(-6, -2); c.lineTo(-6, 2); c.lineTo(-12, 26); c.lineTo(-6, 26); c.lineTo(4, 2); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(-18, -1); c.lineTo(-25, -10); c.lineTo(-28, -10); c.lineTo(-24, 0); c.lineTo(-28, 10); c.lineTo(-25, 10); c.lineTo(-18, 1); c.closePath(); c.fill(); };
+    draw('rgba(40,60,100,.14)'); c.translate(-3, -5); draw('#f4f5fa');
+    c.strokeStyle = 'rgba(80,90,130,.3)'; c.lineWidth = 1; c.beginPath(); if (c.ellipse) c.ellipse(0, 0, 26, 5, 0, 0, 2 * Math.PI); c.stroke();
+    c.fillStyle = '#8fb6ee'; c.beginPath(); if (c.ellipse) c.ellipse(15, 0, 5, 2.6, 0, 0, 2 * Math.PI); c.fill();
+    c.fillStyle = '#ef8f8f'; c.fillRect(-27, -1, 3, 2);
+    c.restore();
+  }
+  /** a car seen from above, pointing along math angle a */
+  function topCar(c, x, y, a) {
+    c.save(); c.translate(x, y); c.rotate(-a);
+    c.fillStyle = 'rgba(40,40,70,.15)'; rr(c, -18, -9, 40, 22, 7); c.fill();
+    c.fillStyle = '#f39a86'; rr(c, -20, -11, 40, 22, 7); c.fill(); c.strokeStyle = 'rgba(150,70,60,.35)'; c.lineWidth = 1; c.stroke();
+    c.fillStyle = 'rgba(200,230,250,.95)'; rr(c, 2, -8, 8, 16, 3); c.fill(); rr(c, -14, -8, 6, 16, 3); c.fill();
+    c.restore();
+  }
+  /** a compass rose: north is +y on these diagrams */
+  function compass(c, x, y) {
+    var dk = SIM.scene.dark();
+    c.save(); c.fillStyle = dk ? 'rgba(30,35,55,.6)' : 'rgba(255,255,255,.75)'; c.beginPath(); c.arc(x, y, 18, 0, 2 * Math.PI); c.fill();
+    c.fillStyle = '#ef8f8f'; c.beginPath(); c.moveTo(x, y - 14); c.lineTo(x + 5, y); c.lineTo(x - 5, y); c.fill();
+    c.fillStyle = '#b7bdd0'; c.beginPath(); c.moveTo(x, y + 14); c.lineTo(x + 5, y); c.lineTo(x - 5, y); c.fill();
+    c.fillStyle = dk ? '#e8e8f2' : '#4c4966'; c.font = '700 10px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('N', x, y - 24);
+    c.restore();
   }
 
   /* ---------- direct manipulation: drag a vector's tip to set its size and direction, tap it to type the size ---------- */

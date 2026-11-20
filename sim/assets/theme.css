@@ -344,3 +344,5 @@ main.sim > .bottom:empty { display: none; }
 .look-switch { position: absolute; right: 10px; top: 10px; z-index: 4; display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: color-mix(in srgb, var(--panel) 88%, transparent); border: 1px solid var(--line); backdrop-filter: blur(6px); }
 .look-switch button { font: 600 12px var(--sans); color: var(--muted); background: transparent; border: 0; border-radius: 999px; padding: 6px 11px; min-height: 30px; cursor: pointer; }
 .look-switch button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.sim-stage .stage-tip { max-width: calc(100% - 200px); }
+@media (max-width: 1000px) { .sim-stage .stage-tip { max-width: none; } .look-switch { top: 8px; right: 8px; } }

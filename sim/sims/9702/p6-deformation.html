@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-materials.js"></script>
@@ -148,24 +149,25 @@
     vp.fit(-1, 9, -0.5, 6.2);
     var c = vp.begin();
     // support
-    var topY = comp ? 0.4 : 5.8;
-    D.ground(c, vp.X(0.6), vp.Y(topY), vp.X(3.4), vp.Y(topY), { flip: !comp });
+    var topY = comp ? 0.4 : 5.8, real = SIM.scene.real();
+    if (!real) D.ground(c, vp.X(0.6), vp.Y(topY), vp.X(3.4), vp.Y(topY), { flip: !comp });
     var L0 = 2.4;   // natural length drawn
     var xs = xMaxPlot > 0 ? st.x / xMaxPlot * 1.8 : 0;   // drawn extension (scaled)
     var endY = comp ? topY + (L0 - xs) : topY - (L0 + xs);
-    D.spring(c, vp.X(2), vp.Y(topY), vp.X(2), vp.Y(endY), 12, 10);
+    if (real) springRig(c, comp, topY, endY, 0.5, lu.F > 0 ? st.F / lu.F : 0);
+    else D.spring(c, vp.X(2), vp.Y(topY), vp.X(2), vp.Y(endY), 12, 10);
     // natural length marker
     var natY = comp ? topY + L0 : topY - L0;
     D.line(c, [vp.P(1.1, natY), vp.P(2.9, natY)], col.muted, { dash: [4, 4], width: 1 });
     D.label(c, 'natural length', vp.X(1.05), vp.Y(natY), col.muted, { align: 'right', size: 10 });
-    c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
     var bh = 0.5, by0 = comp ? endY : endY - bh;
-    c.beginPath(); c.rect(vp.X(1.5), vp.Y(by0 + bh), vp.X(2.5) - vp.X(1.5), vp.Y(by0) - vp.Y(by0 + bh)); c.fill(); c.stroke(); c.restore();
+    if (!real) { c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
+      c.beginPath(); c.rect(vp.X(1.5), vp.Y(by0 + bh), vp.X(2.5) - vp.X(1.5), vp.Y(by0) - vp.Y(by0 + bh)); c.fill(); c.stroke(); c.restore(); }
     if (st.F > 1e-9) {
       var ax = vp.X(2), ay = comp ? vp.Y(endY + bh) : vp.Y(endY - bh);
       D.arrow(c, ax, comp ? ay - 46 : ay, ax, comp ? ay : ay + 46, col.applied, { label: 'F = ' + U.sf(st.F) + ' N' });
     }
-    D.label(c, (comp ? 'compression' : 'extension') + ' x = ' + U.sf(st.x) + ' m (drawing scaled)', vp.X(4), vp.Y(3.4), col.ink, { align: 'left', size: 11 });
+    D.label(c, supTxt((comp ? 'compression' : 'extension') + ' x = ' + U.sf(st.x) + ' m (drawing scaled)'), vp.X(4), vp.Y(3.4), col.ink, { align: 'left', size: 11 });
     D.label(c, st.loading ? 'loading' : 'unloading', vp.X(4), vp.Y(2.8), col.muted, { align: 'left', size: 11 });
     var stateTxt = lu.withinLoP ? 'within the limit of proportionality (Hooke’s law)' : lu.plastic ? 'beyond the elastic limit: plastic' : 'beyond the limit of proportionality but elastic';
     D.label(c, stateTxt, vp.X(4), vp.Y(2.2), lu.plastic ? col.warn : lu.withinLoP ? col.ok : col.ink, { align: 'left', size: 11, bold: true });
@@ -188,24 +190,108 @@
     if (!wr) return;
     var col = ui.colors(), v = prm.values;
     vp.fit(-1, 9, -0.5, 6.2);
-    var c = vp.begin();
-    D.ground(c, vp.X(0.8), vp.Y(5.8), vp.X(3.2), vp.Y(5.8), { flip: true });
-    var xs = Math.min(1.2, 0.6 + 0.6 * Math.min(1, wr.strain / 0.005));
-    D.line(c, [vp.P(2, 5.8), vp.P(2, 1.6 - (xs - 0.6))], col['object-line'], { width: Math.max(1, Math.min(6, v.d * 3)) });
-    c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5; var yb = 1.6 - (xs - 0.6);
-    c.beginPath(); c.rect(vp.X(1.5), vp.Y(yb), vp.X(2.5) - vp.X(1.5), vp.Y(yb - 0.6) - vp.Y(yb)); c.fill(); c.stroke(); c.restore();
-    D.label(c, 'L = ' + U.sf(v.L) + ' m', vp.X(2.3), vp.Y(4), col.ink, { align: 'left', size: 12 });
-    D.label(c, 'd = ' + U.sf(v.d) + ' mm (micrometer)', vp.X(2.3), vp.Y(3.5), col.ink, { align: 'left', size: 12 });
-    if (solve.get() === 'x') D.label(c, 'E = ' + U.sf(v.E) + ' GPa (given)', vp.X(2.3), vp.Y(3.0), col.ink, { align: 'left', size: 12 });
+    var c = vp.begin(), real = SIM.scene.real();
+    var xs = Math.min(1.2, 0.6 + 0.6 * Math.min(1, wr.strain / 0.005)), yb = 1.6 - (xs - 0.6);
+    if (real) wireRig(c, yb, v.d, v.Fw);
+    else {
+      D.ground(c, vp.X(0.8), vp.Y(5.8), vp.X(3.2), vp.Y(5.8), { flip: true });
+      D.line(c, [vp.P(2, 5.8), vp.P(2, 1.6 - (xs - 0.6))], col['object-line'], { width: Math.max(1, Math.min(6, v.d * 3)) });
+      c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
+      c.beginPath(); c.rect(vp.X(1.5), vp.Y(yb), vp.X(2.5) - vp.X(1.5), vp.Y(yb - 0.6) - vp.Y(yb)); c.fill(); c.stroke(); c.restore();
+    }
+    D.label(c, supTxt('L = ' + U.sf(v.L) + ' m'), vp.X(2.3), vp.Y(4), col.ink, { align: 'left', size: 12 });
+    D.label(c, supTxt('d = ' + U.sf(v.d) + ' mm (micrometer)'), vp.X(2.3), vp.Y(3.5), col.ink, { align: 'left', size: 12 });
+    if (solve.get() === 'x') D.label(c, supTxt('E = ' + U.sf(v.E) + ' GPa (given)'), vp.X(2.3), vp.Y(3.0), col.ink, { align: 'left', size: 12 });
     D.arrow(c, vp.X(2), vp.Y(yb - 0.6), vp.X(2), vp.Y(yb - 0.6) + 40, col.applied, { label: 'F = ' + U.sf(v.Fw) + ' N' });
-    D.label(c, 'x = ' + U.sf(wr.strain * v.L * 1000) + ' mm (exaggerated)', vp.X(4.2), vp.Y(2.4), col.ink, { align: 'left', size: 12 });
-    D.label(c, 'strain = x/L = ' + U.sf(wr.strain) + ' (no unit)', vp.X(4.2), vp.Y(1.9), col.ink, { align: 'left', size: 12 });
-    D.label(c, 'stress = F/A = ' + U.sf(wr.stress) + ' Pa', vp.X(4.2), vp.Y(1.4), col.ink, { align: 'left', size: 12 });
+    D.label(c, supTxt('x = ' + U.sf(wr.strain * v.L * 1000) + ' mm (exaggerated)'), vp.X(4.2), vp.Y(2.4), col.ink, { align: 'left', size: 12 });
+    D.label(c, supTxt('strain = x/L = ' + U.sf(wr.strain) + ' (no unit)'), vp.X(4.2), vp.Y(1.9), col.ink, { align: 'left', size: 12 });
+    D.label(c, supTxt('stress = F/A = ' + U.sf(wr.stress) + ' Pa'), vp.X(4.2), vp.Y(1.4), col.ink, { align: 'left', size: 12 });
     // stress–strain line through the origin with gradient E
     var e = wr.strain, smax = Math.max(e * 1.4, 1e-6), Ep = wr.E;
     pS.draw({ x: [0, smax], series: [{ fn: function (s) { return Ep * s / 1e6; }, color: col.s1 }], markers: [{ x: e, y: wr.stress / 1e6, label: 'gradient = E', color: col.applied }], xLabel: 'strain', yLabel: 'stress / MPa' });
     var xm = wr.strain * v.L;
     pF.draw({ x: [0, Math.max(xm * 1.4, 1e-9)], series: [{ fn: function (x) { return xm > 0 ? v.Fw * x / xm : 0; }, color: col.s1 }], markers: [{ x: xm, y: v.Fw, label: 'gradient = EA/L', color: col.applied }], xLabel: 'x / m', yLabel: 'F / N' });
+  }
+
+  /** canvas text cannot show <sup>: turn "10<sup>8</sup>" into "10⁸" */
+  function supTxt(t) { var m = { '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '−': '⁻', '-': '⁻' };
+    return String(t).replace(/<sup>(.*?)<\/sup>/g, function (x, y) { return y.split('').map(function (ch) { return m[ch] || ch; }).join(''); }).replace(/<[^>]+>/g, ''); }
+
+  /* ---------- real-life look: lab apparatus (soft illustrated style, screen pixels from world points) ---------- */
+  function rr(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, Math.max(0, Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2))); else c.rect(x, y, w, h); }
+  function soft() { return SIM.scene.dark() ? 'rgba(255,255,255,.22)' : 'rgba(70,60,110,.25)'; }
+  function labBack(c, benchY) {
+    var dk = SIM.scene.dark();
+    c.save(); c.fillStyle = dk ? '#23283a' : '#f4f1ea'; c.fillRect(0, 0, vp.w, vp.h);
+    c.fillStyle = dk ? '#2e3346' : '#ece4d4'; c.fillRect(0, benchY, vp.w, vp.h - benchY);
+    c.fillStyle = dk ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.6)'; c.fillRect(0, benchY, vp.w, 3); c.restore();
+  }
+  /** a coiled spring seen from the side, from (x, y1) to (x, y2) in screen px */
+  function coil(c, x, y1, y2, r, turns) {
+    var n = turns, dy = (y2 - y1) / n;
+    c.save(); c.lineCap = 'round';
+    c.strokeStyle = '#9aa3bb'; c.lineWidth = 2.6;
+    for (var i = 0; i < n; i++) { var y = y1 + dy * (i + 0.5); c.beginPath(); c.moveTo(x - r, y - dy * 0.25); c.quadraticCurveTo(x, y + dy * 0.75, x + r, y + dy * 0.25); c.stroke(); }   // back of each turn
+    c.strokeStyle = '#c9d0e2'; c.lineWidth = 3;
+    for (var j = 0; j < n; j++) { var yj = y1 + dy * (j + 0.5); c.beginPath(); c.moveTo(x - r, yj - dy * 0.25); c.quadraticCurveTo(x, yj - dy * 1.25, x + r, yj + dy * 0.25); c.stroke(); }   // front
+    c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1;
+    for (var k = 0; k < n; k++) { var yk = y1 + dy * (k + 0.5); c.beginPath(); c.moveTo(x - r * 0.6, yk - dy * 0.45); c.quadraticCurveTo(x, yk - dy * 1.0, x + r * 0.4, yk - dy * 0.2); c.stroke(); }
+    c.beginPath(); c.strokeStyle = '#c9d0e2'; c.lineWidth = 3; c.moveTo(x, y1); c.lineTo(x - r, y1 + dy * 0.25); c.moveTo(x, y2); c.lineTo(x + r, y2 - dy * 0.25); c.stroke();
+    c.restore();
+  }
+  /** a mass hanger (or a loading platform) carrying slotted masses; n masses, top at y (screen), height h */
+  function slotted(c, cx, yTop, w, h, n, platform) {
+    c.save();
+    if (!platform) { c.strokeStyle = '#b9bfcf'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(cx, yTop); c.lineTo(cx, yTop + h); c.stroke(); }
+    var base = platform ? yTop : yTop + h - 4;
+    rr(c, cx - w * 0.5, base, w, 5, 2); c.fillStyle = '#b9bfcf'; c.fill();
+    var dh = Math.max(3, Math.min(9, (h - 8) / Math.max(n, 1)));
+    for (var i = 0; i < n; i++) { var y = platform ? base - (i + 1) * (dh + 1) : base - (i + 1) * (dh + 1);
+      rr(c, cx - w * 0.42, y, w * 0.84, dh, 3); c.fillStyle = i % 2 ? '#c3cbe0' : '#d6dcec'; c.fill(); c.strokeStyle = soft(); c.lineWidth = 1; c.stroke(); }
+    c.restore();
+  }
+  /** a vertical metre rule with a pointer level with yPtr (screen) */
+  function metreRule(c, x, y1, y2, yPtr, xFrom) {
+    var top = Math.min(y1, y2), bot = Math.max(y1, y2);
+    c.save(); rr(c, x, top, 16, bot - top, 4); c.fillStyle = '#f3dfb6'; c.fill(); c.strokeStyle = 'rgba(150,110,60,.3)'; c.lineWidth = 1; c.stroke();
+    c.strokeStyle = 'rgba(110,80,50,.5)'; for (var y = top + 4, i = 0; y < bot - 2; y += 6, i++) { c.beginPath(); c.moveTo(x, y); c.lineTo(x + (i % 5 ? 4 : 8), y); c.stroke(); }
+    if (isFinite(yPtr)) { c.strokeStyle = '#ef8f8f'; c.lineWidth = 2; c.beginPath(); c.moveTo(xFrom, yPtr); c.lineTo(x + 2, yPtr); c.stroke(); c.fillStyle = '#ef8f8f'; c.beginPath(); c.moveTo(x + 2, yPtr); c.lineTo(x - 5, yPtr - 4); c.lineTo(x - 5, yPtr + 4); c.closePath(); c.fill(); }
+    c.restore();
+  }
+  /** spring in a clamp stand (tension) or standing on the bench under a loading platform (compression); load fraction k sets the number of slotted masses */
+  function springRig(c, comp, topY, endY, bh, k) {
+    var X = function (x) { return vp.X(x); }, Y = function (y) { return vp.Y(y); }, u = vp.scale, n = Math.round(U.clamp(k, 0, 1) * 5);
+    if (!comp) {
+      labBack(c, Y(-0.2));
+      c.save(); c.fillStyle = '#9fb3e6'; rr(c, X(-0.3), Y(-0.05), X(1.3) - X(-0.3), Y(-0.2) - Y(-0.05), 4); c.fill();   // stand base
+      c.strokeStyle = '#c3c8d8'; c.lineWidth = 6; c.lineCap = 'round'; c.beginPath(); c.moveTo(X(0.3), Y(-0.05)); c.lineTo(X(0.3), Y(topY + 0.3)); c.stroke();   // rod
+      c.lineWidth = 5; c.beginPath(); c.moveTo(X(0.3), Y(topY)); c.lineTo(X(2.2), Y(topY)); c.stroke();   // clamp arm
+      c.fillStyle = '#f2a7a7'; rr(c, X(0.3) - 8, Y(topY) - 7, 16, 14, 4); c.fill(); c.restore();   // boss
+      coil(c, X(2), Y(topY), Y(endY), Math.max(7, 0.22 * u), 10);
+      slotted(c, X(2), Y(endY), Math.max(26, 0.9 * u), Y(endY - bh) - Y(endY), n, false);
+      metreRule(c, X(3.0), Y(topY - 0.1), Y(0.1), Y(endY), X(2) + 4);
+    } else {
+      labBack(c, Y(topY));
+      c.save(); c.fillStyle = '#c3c8d8'; rr(c, X(1.55), Y(topY) - 5, X(2.45) - X(1.55), 5, 2); c.fill(); c.restore();   // base plate
+      coil(c, X(2), Y(endY), Y(topY), Math.max(8, 0.26 * u), 9);
+      slotted(c, X(2), Y(endY) - 5, Math.max(30, X(2.5) - X(1.5)), Y(endY) - Y(endY + bh), n, true);
+      metreRule(c, X(3.0), Y(topY + 3.2), Y(topY), Y(endY), X(2.5));
+    }
+  }
+  /** Searle-style set-up: test wire and reference wire hanging from a beam, a vernier at the bottom, slotted masses on the hanger */
+  function wireRig(c, yb, dmm, F) {
+    var X = function (x) { return vp.X(x); }, Y = function (y) { return vp.Y(y); }, u = vp.scale;
+    labBack(c, Y(-0.2));
+    c.save(); c.fillStyle = '#e9c493'; rr(c, X(0.6), Y(6.1), X(3.4) - X(0.6), Y(5.8) - Y(6.1), 5); c.fill(); c.strokeStyle = 'rgba(150,100,60,.3)'; c.lineWidth = 1; c.stroke();   // beam
+    c.strokeStyle = '#c9cfdf'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(X(1.2), Y(5.8)); c.lineTo(X(1.2), Y(1.0)); c.stroke();   // reference wire
+    c.strokeStyle = '#b8a37e'; c.lineWidth = Math.max(1.2, Math.min(5, dmm * 3)); c.beginPath(); c.moveTo(X(2), Y(5.8)); c.lineTo(X(2), Y(yb)); c.stroke();   // test wire
+    rr(c, X(1.1), Y(2.4), X(1.35) - X(1.1), Y(1.4) - Y(2.4), 3); c.fillStyle = '#f3dfb6'; c.fill();   // main scale on the reference wire
+    c.strokeStyle = 'rgba(110,80,50,.5)'; c.lineWidth = 1; for (var i = 0; i < 10; i++) { var yy = Y(2.35) + i * (Y(1.45) - Y(2.35)) / 9; c.beginPath(); c.moveTo(X(1.35), yy); c.lineTo(X(1.35) - (i % 5 ? 4 : 7), yy); c.stroke(); }
+    var vy = Y(yb + 0.65);   // vernier fixed to the test wire, moves down as it stretches
+    rr(c, X(1.35), vy - 10, X(2) - X(1.35), 20, 3); c.fillStyle = '#9fb3e6'; c.fill(); c.strokeStyle = soft(); c.stroke();
+    c.restore();
+    var n = Math.round(U.clamp(F / 20, 0, 6));
+    slotted(c, X(2), Y(yb), Math.max(28, X(2.5) - X(1.5)), Y(yb - 0.6) - Y(yb), n, false);
   }
 
   /* ---------- working ---------- */
@@ -218,54 +304,54 @@
       R.head('Loaded with F = ' + s3(v.F) + ' N (' + (comp ? 'compressive' : 'tensile') + ')');
       if (lu.withinLoP) {
         R.badge('F ≤ F<sub>P</sub>: Hooke’s law applies', 'ok');
-        R.eq(xw + ' x', 'F ÷ k = ' + s3(v.F) + ' ÷ ' + s3(v.k), lu.x, 'm');
-        R.eq('E<sub>P</sub>', '½Fx = ½ × ' + s3(v.F) + ' × ' + s3(lu.x), lu.epe, 'J');
-        R.eq('check', '½kx² = ½ × ' + s3(v.k) + ' × ' + s3(lu.x) + '²', MT.epeK(v.k, lu.x), 'J');
+        R.eq(xw + ' x', 'F ÷ k = ' + s3(v.F) + ' ÷ ' + s3(v.k), lu.x, 'm', 'Below the limit of proportionality Hooke’s law applies: F = kx, so x = F/k.');
+        R.eq('E<sub>P</sub>', '½Fx = ½ × ' + s3(v.F) + ' × ' + s3(lu.x), lu.epe, 'J', 'Elastic potential energy = area under the force–extension line = ½Fx (straight line through the origin).');
+        R.eq('check', '½kx² = ½ × ' + s3(v.k) + ' × ' + s3(lu.x) + '²', MT.epeK(v.k, lu.x), 'J', 'Substituting F = kx into ½Fx gives ½kx² — the same energy.');
       } else {
         R.badge('F > F<sub>P</sub>: beyond the limit of proportionality — F = kx and ½Fx no longer apply', 'warn');
-        R.eq('x at the limit', 'x<sub>P</sub> = F<sub>P</sub> ÷ k = ' + s3(v.FP) + ' ÷ ' + s3(v.k), lu.curve.xP, 'm');
-        R.eq(xw + ' x', 'x<sub>P</sub> + (F − F<sub>P</sub>) ÷ (rk) (model) = ' + s3(lu.curve.xP) + ' + ' + s3(v.F - v.FP) + ' ÷ ' + s3(v.r * v.k), lu.x, 'm');
+        R.eq('x at the limit', 'x<sub>P</sub> = F<sub>P</sub> ÷ k = ' + s3(v.FP) + ' ÷ ' + s3(v.k), lu.curve.xP, 'm', 'Up to the limit of proportionality F = kx, so this is where the straight line ends.');
+        R.eq(xw + ' x', 'x<sub>P</sub> + (F − F<sub>P</sub>) ÷ (rk) (model) = ' + s3(lu.curve.xP) + ' + ' + s3(v.F - v.FP) + ' ÷ ' + s3(v.r * v.k), lu.x, 'm', 'Beyond the limit the line is less steep (gradient rk in this model), so each extra newton gives more extension.');
       }
-      R.eq('work done (area)', lu.withinLoP ? 'triangle ½Fx' : 'triangle + trapezium = ½F<sub>P</sub>x<sub>P</sub> + ½(F<sub>P</sub> + F)(x − x<sub>P</sub>)', lu.work, 'J');
+      R.eq('work done (area)', lu.withinLoP ? 'triangle ½Fx' : 'triangle + trapezium = ½F<sub>P</sub>x<sub>P</sub> + ½(F<sub>P</sub> + F)(x − x<sub>P</sub>)', lu.work, 'J', 'Work done in stretching = area under the force–extension graph, whatever its shape.');
       R.head('After the load is removed');
       if (lu.plastic) {
         R.badge('F > elastic limit: plastic deformation', 'warn');
-        R.eq('permanent ' + xw, 'x − F ÷ k = ' + s3(lu.x) + ' − ' + s3(v.F) + ' ÷ ' + s3(v.k) + ' (unloads parallel to the initial line)', lu.xPerm, 'm');
-        R.eq('energy released on unloading', 'area under unloading line = ½ × ' + s3(v.F) + ' × ' + s3(lu.x - lu.xPerm), lu.recovered, 'J');
-        R.eq('energy not recovered', 'work done − released', lu.notRecovered, 'J');
+        R.eq('permanent ' + xw, 'x − F ÷ k = ' + s3(lu.x) + ' − ' + s3(v.F) + ' ÷ ' + s3(v.k) + ' (unloads parallel to the initial line)', lu.xPerm, 'm', 'Beyond the elastic limit it unloads along a line parallel to the initial line, so it does not return to zero extension.');
+        R.eq('energy released on unloading', 'area under unloading line = ½ × ' + s3(v.F) + ' × ' + s3(lu.x - lu.xPerm), lu.recovered, 'J', 'Energy given back on unloading = area under the unloading line.');
+        R.eq('energy not recovered', 'work done − released', lu.notRecovered, 'J', 'The rest of the work done is dissipated (as thermal energy) in the plastic deformation.');
       } else {
         R.badge('Elastic: returns to its original length (permanent ' + xw + ' = 0)', 'ok');
-        R.eq('energy released on unloading', 'equals the work done (same curve back)', lu.recovered, 'J');
+        R.eq('energy released on unloading', 'equals the work done (same curve back)', lu.recovered, 'J', 'Elastic deformation: it unloads along the same curve, so all the stored energy is released.');
       }
       var st = animState();
       R.head('Animation: ' + (st.loading ? 'loading' : 'unloading'));
-      R.eq('F', '', st.F, 'N'); R.eq('x', '', st.x, 'm');
+      R.eq('F', '', st.F, 'N', 'Load at this instant of the loading / unloading animation.'); R.eq('x', '', st.x, 'm', 'Extension at this instant, read from the loading or unloading line.');
     } else {
       var dm = v.d * 1e-3, sp = function (x) { var a = Math.abs(x); return a !== 0 && (a >= 1e6 || a < 1e-3) ? '(' + s3(x) + ')' : s3(x); };
       R.head('Wire');
-      R.eq('A', 'πd²/4 = π × ' + sp(dm) + '² ÷ 4', wr.A, 'm<sup>2</sup>');
-      R.eq('stress', 'F ÷ A = ' + s3(v.Fw) + ' ÷ ' + sp(wr.A), wr.stress, 'Pa');
+      R.eq('A', 'πd²/4 = π × ' + sp(dm) + '² ÷ 4', wr.A, 'm<sup>2</sup>', 'The wire has a circular cross-section: A = πd²/4 (d converted from mm to m).');
+      R.eq('stress', 'F ÷ A = ' + s3(v.Fw) + ' ÷ ' + sp(wr.A), wr.stress, 'Pa', 'Tensile stress is force per unit cross-sectional area: σ = F/A.');
       if (solve.get() === 'E') {
-        R.eq('strain', 'x ÷ L = ' + sp(v.x * 1e-3) + ' ÷ ' + s3(v.L), wr.strain, '(no unit)');
-        R.eq('E', 'stress ÷ strain = ' + sp(wr.stress) + ' ÷ ' + sp(wr.strain), wr.E, 'Pa');
-        R.eq('E', 'in GPa', wr.E / 1e9, 'GPa');
+        R.eq('strain', 'x ÷ L = ' + sp(v.x * 1e-3) + ' ÷ ' + s3(v.L), wr.strain, '(no unit)', 'Tensile strain is extension ÷ original length (a ratio, so no unit).');
+        R.eq('E', 'stress ÷ strain = ' + sp(wr.stress) + ' ÷ ' + sp(wr.strain), wr.E, 'Pa', 'The Young modulus is defined as stress ÷ strain (within the limit of proportionality).');
+        R.eq('E', 'in GPa', wr.E / 1e9, 'GPa', '1 GPa = 10<sup>9</sup> Pa.');
       } else {
-        R.eq('strain', 'stress ÷ E = ' + sp(wr.stress) + ' ÷ ' + sp(v.E * 1e9), wr.strain, '(no unit)');
-        R.eq('x', 'strain × L = FL/(AE) = ' + sp(wr.strain) + ' × ' + s3(v.L), wr.strain * v.L, 'm');
+        R.eq('strain', 'stress ÷ E = ' + sp(wr.stress) + ' ÷ ' + sp(v.E * 1e9), wr.strain, '(no unit)', 'Rearrange E = stress ÷ strain to get the strain.');
+        R.eq('x', 'strain × L = FL/(AE) = ' + sp(wr.strain) + ' × ' + s3(v.L), wr.strain * v.L, 'm', 'Strain = x/L, so the extension is strain × original length.');
         if (wr.strain * v.L * 1000 > 30) R.badge('Extension is beyond the slider range (30 mm)', 'warn');
       }
       var xm = solve.get() === 'E' ? v.x * 1e-3 : wr.strain * v.L;
-      R.eq('energy stored', '½Fx = ½ × ' + s3(v.Fw) + ' × ' + s3(xm) + ' (if within the limit of proportionality)', 0.5 * v.Fw * xm, 'J');
+      R.eq('energy stored', '½Fx = ½ × ' + s3(v.Fw) + ' × ' + s3(xm) + ' (if within the limit of proportionality)', 0.5 * v.Fw * xm, 'J', 'Strain energy = area under the force–extension line = ½Fx while F ∝ x.');
       if (solve.get() === 'E') {
         var un = MT.youngUncertainty(v.Fw, v.dF, v.L, v.dL * 1e-3, dm, v.dd * 1e-3, v.x * 1e-3, v.dx * 1e-3);
         R.head('Experiment: uncertainty in E = FL/(Ax) = 4FL/(πd²x)');
         if (v.Fw > 0) {
-          R.eq('%F', '100 × ' + s3(v.dF) + ' ÷ ' + s3(v.Fw), un.pF, '%');
-          R.eq('%L', '100 × ' + s3(v.dL * 1e-3) + ' ÷ ' + s3(v.L), un.pL, '%');
-          R.eq('%d', '100 × ' + s3(v.dd) + ' ÷ ' + s3(v.d), un.pd, '%');
-          R.eq('%x', '100 × ' + s3(v.dx) + ' ÷ ' + s3(v.x), un.px, '%');
-          R.eq('%E', '%F + %L + 2 × %d + %x', un.pE, '%');
-          R.eq('ΔE', s3(un.pE) + '% of ' + s3(wr.E), wr.E * un.pE / 100, 'Pa');
+          R.eq('%F', '100 × ' + s3(v.dF) + ' ÷ ' + s3(v.Fw), un.pF, '%', 'Percentage uncertainty = absolute uncertainty ÷ value × 100.');
+          R.eq('%L', '100 × ' + s3(v.dL * 1e-3) + ' ÷ ' + s3(v.L), un.pL, '%', 'Same for the length (ΔL converted from mm to m).');
+          R.eq('%d', '100 × ' + s3(v.dd) + ' ÷ ' + s3(v.d), un.pd, '%', 'The diameter is small, so its percentage uncertainty is usually the largest.');
+          R.eq('%x', '100 × ' + s3(v.dx) + ' ÷ ' + s3(v.x), un.px, '%', 'Percentage uncertainty in the measured extension.');
+          R.eq('%E', '%F + %L + 2 × %d + %x', un.pE, '%', 'E = 4FL/(πd²x): percentage uncertainties add, and d is squared so its percentage counts twice.');
+          R.eq('ΔE', s3(un.pE) + '% of ' + s3(wr.E), wr.E * un.pE / 100, 'Pa', 'Absolute uncertainty = percentage uncertainty × value.');
         } else R.badge('Apply a load to estimate uncertainties', 'info');
         R.html('<div class="head">Method: long wire fixed at one end over a pulley (or vertical, with a reference wire), measure L with a metre rule, d with a micrometer in several places, add loads and read x from a scale/vernier; E = gradient of stress–strain (or FL/(Ax) from the F–x gradient).</div>');
       }

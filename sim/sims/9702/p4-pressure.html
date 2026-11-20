@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-statics.js"></script>
@@ -121,17 +122,23 @@
     if (hold) vp.fit.apply(vp, hold.fit); else vp.fit(-halfW, halfW, -depthMax * 1.04, top);   // frozen while dragging
     var c = vp.begin();
     // tank
-    c.save(); c.fillStyle = col.s1; c.globalAlpha = 0.16; c.fillRect(vp.X(-halfW), vp.Y(0), vp.X(halfW) - vp.X(-halfW), vp.Y(-depthMax) - vp.Y(0)); c.restore();
-    D.line(c, [vp.P(-halfW, 0), vp.P(halfW, 0)], col.s1, { width: 2 });
-    D.ground(c, vp.X(-halfW), vp.Y(-depthMax), vp.X(halfW), vp.Y(-depthMax));
+    var real = SIM.scene.real();
+    if (real) realTank(c, halfW, depthMax);
+    else {
+      c.save(); c.fillStyle = col.s1; c.globalAlpha = 0.16; c.fillRect(vp.X(-halfW), vp.Y(0), vp.X(halfW) - vp.X(-halfW), vp.Y(-depthMax) - vp.Y(0)); c.restore();
+      D.line(c, [vp.P(-halfW, 0), vp.P(halfW, 0)], col.s1, { width: 2 });
+      D.ground(c, vp.X(-halfW), vp.Y(-depthMax), vp.X(halfW), vp.Y(-depthMax));
+    }
     D.label(c, 'surface (p = ' + (useP0.get() ? 'p₀' : '0 gauge') + ')', vp.X(-halfW) + 6, vp.Y(0) - 10, col.s1, { align: 'left', size: 11 });
     // object
     var x0 = -w / 2, yTop = -o.d, yBot = -o.d - v.H;
-    c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
-    c.beginPath(); c.rect(vp.X(x0), vp.Y(yTop), vp.X(w / 2) - vp.X(x0), vp.Y(yBot) - vp.Y(yTop)); c.fill(); c.stroke(); c.restore();
+    if (md === 'held' && real && Math.abs(o.apparent) > 1e-9) realSupport(c, o.apparent > 0, vp.X(0), vp.Y(yTop), vp.Y(yBot), vp.Y(-depthMax));
+    if (real) realObject(c, vp.X(x0), vp.Y(yTop), vp.X(w / 2) - vp.X(x0), vp.Y(yBot) - vp.Y(yTop), v.rhoO);
+    else { c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
+      c.beginPath(); c.rect(vp.X(x0), vp.Y(yTop), vp.X(w / 2) - vp.X(x0), vp.Y(yBot) - vp.Y(yTop)); c.fill(); c.stroke(); c.restore(); }
     if (w !== wTrue) D.label(c, 'width not to scale', vp.X(w / 2) + 6, vp.Y(yTop) + 8, col.muted, { align: 'left', size: 10 });
     // string / balance for held
-    if (md === 'held' && Math.abs(o.apparent) > 1e-9) {
+    if (md === 'held' && !real && Math.abs(o.apparent) > 1e-9) {
       if (o.apparent > 0) { D.line(c, [vp.P(0, yTop), [vp.X(0), 4]], col['object-line'], { width: 1.5 }); }
       else { D.line(c, [vp.P(0, yBot), vp.P(0, -depthMax)], col['object-line'], { width: 1.5 }); }
     }
@@ -158,6 +165,8 @@
     }
     // probe
     var py = vp.Y(-v.h), px = vp.X(halfW) - 26;
+    if (real) { c.save(); c.strokeStyle = '#b9bfcf'; c.lineWidth = 3; c.lineCap = 'round'; c.beginPath(); c.moveTo(px, Math.min(vp.Y(0), py) - 30); c.lineTo(px, py); c.stroke();   // probe tube and a funnel with a membrane
+      c.fillStyle = '#e9edf8'; c.beginPath(); c.moveTo(px - 9, py + 5); c.lineTo(px + 9, py + 5); c.lineTo(px + 3, py - 4); c.lineTo(px - 3, py - 4); c.closePath(); c.fill(); c.strokeStyle = 'rgba(70,60,110,.3)'; c.lineWidth = 1; c.stroke(); c.restore(); }
     c.save(); c.fillStyle = col.accent; c.beginPath(); c.arc(px, py, 5, 0, 2 * Math.PI); c.fill(); c.restore();
     D.line(c, [[px, vp.Y(0)], [px, py]], col.accent, { dash: [3, 3], width: 1 });
     D.label(c, 'h = ' + U.sf(v.h) + ' m', px - 8, py, col.accent, { align: 'right', size: 11, bg: true });
@@ -174,6 +183,65 @@
     if (ix) ix.paint(c);
     drawPlot();
   }
+  /* ---------- real-life look (soft illustrated style, screen pixels) ---------- */
+  function rr(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, Math.max(0, Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2))); else c.rect(x, y, w, h); }
+  /** liquid tint from its density: oil amber, water blue, sea water teal-blue, mercury silver */
+  function liquidRGB(rho) {
+    if (rho >= 3000) return [200, 206, 218];
+    if (rho > 1100) { var k = (rho - 1100) / 1900; return [Math.round(150 + 50 * k), Math.round(205 + k), Math.round(235 - 17 * k)]; }
+    if (rho >= 1010) return [140, 205, 222];
+    if (rho >= 950) return [150, 205, 240];
+    return [242, 214, 140];
+  }
+  /** a glass tank on a lab bench, with depth marks and a few bubbles */
+  function realTank(c, halfW, depthMax) {
+    var S = SIM.scene, dk = S.dark(), xl = vp.X(-halfW), xr = vp.X(halfW), ys = vp.Y(0), yb = vp.Y(-depthMax), g = liquidRGB(prm.values.rhoF);
+    c.save(); c.fillStyle = dk ? '#23283a' : '#f4f1ea'; c.fillRect(0, 0, vp.w, vp.h);   // lab wall
+    c.fillStyle = dk ? '#2e3346' : '#ece4d4'; c.fillRect(0, yb + 6, vp.w, vp.h - yb);   // bench
+    c.fillStyle = 'rgba(' + g.join(',') + ',' + (dk ? 0.42 : 0.55) + ')'; c.fillRect(xl, ys, xr - xl, yb - ys);
+    c.fillStyle = 'rgba(255,255,255,.18)'; c.fillRect(xl, ys, xr - xl, Math.min(10, (yb - ys) * 0.1));
+    c.strokeStyle = 'rgba(255,255,255,.75)'; c.lineWidth = 1.5;   // gentle surface ripples
+    c.beginPath(); for (var x = xl; x <= xr; x += 6) { var yy = ys + Math.sin(x * 0.12) * 1.2; if (x === xl) c.moveTo(x, yy); else c.lineTo(x, yy); } c.stroke();
+    var seed = 11; function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+    c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1;
+    if (yb - ys > 30) for (var i = 0; i < 9; i++) { var bx = xl + 14 + rnd() * (xr - xl - 60), by = ys + 10 + rnd() * (yb - ys - 20); c.beginPath(); c.arc(bx, by, 2 + rnd() * 3, 0, 2 * Math.PI); c.stroke(); }
+    var top = Math.max(4, ys - Math.max(24, (yb - ys) * 0.08));   // glass walls and base
+    c.strokeStyle = dk ? 'rgba(190,210,255,.5)' : 'rgba(130,160,210,.55)'; c.lineWidth = 3; c.lineJoin = 'round';
+    c.beginPath(); c.moveTo(xl, top); c.lineTo(xl, yb); c.lineTo(xr, yb); c.lineTo(xr, top); c.stroke();
+    c.fillStyle = 'rgba(255,255,255,.25)'; c.fillRect(xl + 5, top + 6, 4, yb - top - 12);
+    var sc = U.niceTicks(0, depthMax, 6).ticks;   // depth marks on the glass
+    c.strokeStyle = dk ? 'rgba(220,230,255,.45)' : 'rgba(80,90,130,.4)'; c.fillStyle = dk ? 'rgba(220,230,255,.6)' : 'rgba(80,90,130,.65)'; c.font = '10px system-ui, sans-serif'; c.textAlign = 'left'; c.textBaseline = 'middle';
+    sc.forEach(function (d) { if (d <= 0 || d > depthMax) return; var y = vp.Y(-d); c.beginPath(); c.moveTo(xl, y); c.lineTo(xl + 8, y); c.stroke(); if (yb - ys > 120) c.fillText(U.num(d, 3) + ' m', xl + 11, y); });
+    c.restore();
+  }
+  /** the object, drawn in a material that matches its density */
+  function realObject(c, x, y, w, h, rho) {
+    var base = rho < 880 ? '#e9c493' : rho < 960 ? '#e6f4fb' : rho < 1300 ? '#f2a7a7' : rho < 4000 ? '#d9dee8' : rho < 12000 ? '#b9c0ce' : '#f1d58a';
+    c.save(); rr(c, x, y, w, h, Math.min(8, Math.abs(w) * 0.15, Math.abs(h) * 0.15));
+    var g = c.createLinearGradient(x, y, x + w, y + h); g.addColorStop(0, SIM.scene.shade(base, 0.3)); g.addColorStop(1, SIM.scene.shade(base, -0.08)); c.fillStyle = g; c.fill();
+    c.strokeStyle = 'rgba(70,60,110,.28)'; c.lineWidth = 1.2; c.stroke();
+    c.clip();
+    if (rho < 880) { c.strokeStyle = 'rgba(160,110,60,.25)'; c.lineWidth = 1; for (var gy = y + 6; gy < y + h; gy += 7) { c.beginPath(); c.moveTo(x, gy); c.quadraticCurveTo(x + w / 2, gy + 3, x + w, gy); c.stroke(); } }
+    else { c.fillStyle = 'rgba(255,255,255,.35)'; c.beginPath(); c.moveTo(x + w * 0.1, y); c.lineTo(x + w * 0.35, y); c.lineTo(x + w * 0.1, y + h * 0.6); c.closePath(); c.fill(); }
+    c.restore();
+  }
+  /** a spring balance holding the object from above, or a string tying it to the floor */
+  function realSupport(c, fromAbove, x, yTop, yBot, yFloor) {
+    c.save(); c.lineCap = 'round';
+    if (fromAbove) {
+      var bh = 46, by = Math.max(4, Math.min(yTop - bh - 14, vp.Y(0) - bh - 10));   // hangs above the liquid surface
+      c.strokeStyle = '#b9a07e'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(x, by + bh); c.lineTo(x, yTop); c.stroke();
+      rr(c, x - 9, by, 18, bh, 7); c.fillStyle = '#9fb3e6'; c.fill(); c.strokeStyle = 'rgba(70,60,110,.3)'; c.lineWidth = 1; c.stroke();
+      c.fillStyle = '#fffdf6'; rr(c, x - 4, by + 5, 8, bh - 10, 3); c.fill();
+      c.strokeStyle = 'rgba(80,80,120,.5)'; for (var i = 0; i < 6; i++) { c.beginPath(); c.moveTo(x - 3, by + 8 + i * (bh - 16) / 5); c.lineTo(x + 1, by + 8 + i * (bh - 16) / 5); c.stroke(); }
+      c.strokeStyle = '#b9bfcf'; c.lineWidth = 2; c.beginPath(); c.moveTo(x, by); c.lineTo(x, Math.max(0, by - 8)); c.stroke();
+    } else {
+      c.strokeStyle = '#b9a07e'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(x, yBot); c.lineTo(x, yFloor - 4); c.stroke();
+      c.fillStyle = '#b9bfcf'; rr(c, x - 7, yFloor - 6, 14, 6, 2); c.fill();
+    }
+    c.restore();
+  }
+
   function drawPlot() {
     var col = ui.colors(), v = prm.values, p0 = useP0.get() ? v.p0 * 1000 : 0;
     var mk = [];
@@ -189,40 +257,40 @@
     var v = prm.values, md = mode.get(), s3 = U.sf, abs = useP0.get(), p0 = abs ? v.p0 * 1000 : 0;
     R.clear();
     R.head('Object');
-    R.eq('A', 'V ÷ H = ' + s3(v.V) + ' ÷ ' + s3(v.H), o.A, 'm<sup>2</sup>');
-    R.eq('m', 'ρ<sub>o</sub>V = ' + s3(v.rhoO) + ' × ' + s3(v.V), o.mass, 'kg');
-    R.eq('W', 'mg = ' + s3(o.mass) + ' × ' + g, o.W, 'N');
+    R.eq('A', 'V ÷ H = ' + s3(v.V) + ' ÷ ' + s3(v.H), o.A, 'm<sup>2</sup>', 'The object has vertical sides, so its cross-sectional area is volume ÷ height.');
+    R.eq('m', 'ρ<sub>o</sub>V = ' + s3(v.rhoO) + ' × ' + s3(v.V), o.mass, 'kg', 'Density = mass ÷ volume, so mass = density of the object × its volume.');
+    R.eq('W', 'mg = ' + s3(o.mass) + ' × ' + g, o.W, 'N', 'Weight is the gravitational force on the mass: W = mg.');
     R.head('Pressure on the faces' + (abs ? ' (absolute, p₀ = ' + s3(p0) + ' Pa)' : ' (due to the fluid only)'));
     if (o.sub <= 0) R.badge('The object is above the surface: no upthrust', 'warn');
     else {
-      R.eq('p<sub>top</sub>', o.d > 0 ? (abs ? 'p₀ + ' : '') + 'ρ<sub>f</sub>gd = ' + (abs ? s3(p0) + ' + ' : '') + s3(v.rhoF) + ' × ' + g + ' × ' + s3(o.d) : (abs ? 'p₀ (top face in air)' : '0 (top face in air)'), o.pTop, 'Pa');
-      R.eq('p<sub>bottom</sub>', (abs ? 'p₀ + ' : '') + 'ρ<sub>f</sub>g(d + H) = ' + (abs ? s3(p0) + ' + ' : '') + s3(v.rhoF) + ' × ' + g + ' × ' + s3(o.depthBottom), o.pBottom, 'Pa');
-      R.eq('Δp', 'p<sub>bottom</sub> − p<sub>top</sub> = ρ<sub>f</sub>g × ' + s3(o.sub), o.pBottom - o.pTop, 'Pa');
-      R.eq('U', 'Δp × A = ' + s3(o.pBottom - o.pTop) + ' × ' + s3(o.A), o.U, 'N');
-      R.eq('check: ρ<sub>f</sub>gV<sub>sub</sub>', s3(v.rhoF) + ' × ' + g + ' × ' + s3(o.Vsub), o.Uarch, 'N');
+      R.eq('p<sub>top</sub>', o.d > 0 ? (abs ? 'p₀ + ' : '') + 'ρ<sub>f</sub>gd = ' + (abs ? s3(p0) + ' + ' : '') + s3(v.rhoF) + ' × ' + g + ' × ' + s3(o.d) : (abs ? 'p₀ (top face in air)' : '0 (top face in air)'), o.pTop, 'Pa', 'Pressure in a fluid increases with depth: Δp = ρgh, using the density of the fluid and the depth of the top face.');
+      R.eq('p<sub>bottom</sub>', (abs ? 'p₀ + ' : '') + 'ρ<sub>f</sub>g(d + H) = ' + (abs ? s3(p0) + ' + ' : '') + s3(v.rhoF) + ' × ' + g + ' × ' + s3(o.depthBottom), o.pBottom, 'Pa', 'The bottom face is deeper by H, so the fluid pressure on it is larger.');
+      R.eq('Δp', 'p<sub>bottom</sub> − p<sub>top</sub> = ρ<sub>f</sub>g × ' + s3(o.sub), o.pBottom - o.pTop, 'Pa', 'Only the difference in pressure between the faces matters for upthrust (atmospheric pressure cancels).');
+      R.eq('U', 'Δp × A = ' + s3(o.pBottom - o.pTop) + ' × ' + s3(o.A), o.U, 'N', 'Force = pressure × area: the extra upward push on the bottom face is the upthrust.');
+      R.eq('check: ρ<sub>f</sub>gV<sub>sub</sub>', s3(v.rhoF) + ' × ' + g + ' × ' + s3(o.Vsub), o.Uarch, 'N', 'Same answer from upthrust = weight of fluid displaced = ρ<sub>f</sub>gV<sub>sub</sub>.');
     }
     R.head(md === 'free' ? 'Released: float or sink?' : md === 'released' ? 'At the instant of release' : 'Support needed to hold it');
     if (md === 'free') {
       if (o.state === 'floats') {
         R.badge('ρ<sub>o</sub> &lt; ρ<sub>f</sub> ⇒ floats: U = W', 'ok');
-        R.eq('V<sub>sub</sub> ÷ V', 'ρ<sub>o</sub> ÷ ρ<sub>f</sub> = ' + s3(v.rhoO) + ' ÷ ' + s3(v.rhoF), o.fraction);
-        R.eq('depth submerged', 'H × ρ<sub>o</sub>/ρ<sub>f</sub>', o.sub, 'm');
+        R.eq('V<sub>sub</sub> ÷ V', 'ρ<sub>o</sub> ÷ ρ<sub>f</sub> = ' + s3(v.rhoO) + ' ÷ ' + s3(v.rhoF), o.fraction, '', 'Floating means upthrust = weight: ρ<sub>f</sub>gV<sub>sub</sub> = ρ<sub>o</sub>gV, so the fraction submerged is ρ<sub>o</sub>/ρ<sub>f</sub>.');
+        R.eq('depth submerged', 'H × ρ<sub>o</sub>/ρ<sub>f</sub>', o.sub, 'm', 'Vertical sides: the submerged depth is the same fraction of the height.');
       } else if (o.state === 'sinks') {
         R.badge('ρ<sub>o</sub> > ρ<sub>f</sub> ⇒ sinks' + (v.Dl < v.H ? ' (liquid shallower than the object: only partly covered)' : ''), 'warn');
-        R.eq('floor reaction', 'W − U = ' + s3(o.W) + ' − ' + s3(o.U), o.apparent, 'N');
+        R.eq('floor reaction', 'W − U = ' + s3(o.W) + ' − ' + s3(o.U), o.apparent, 'N', 'The object is in equilibrium on the floor: upthrust + reaction = weight.');
       } else R.badge('ρ<sub>o</sub> = ρ<sub>f</sub> ⇒ U = W at any depth', 'info');
     } else if (md === 'released') {
       var Fr = o.U - o.W;
-      R.eq('resultant force', 'U − W = ' + s3(o.U) + ' − ' + s3(o.W), Math.abs(Fr) < 1e-12 ? 0 : s3(Math.abs(Fr)) + (Fr > 0 ? ' upwards' : ' downwards'), 'N');
-      R.eq('initial acceleration', '|U − W| ÷ m = ' + s3(Math.abs(Fr)) + ' ÷ ' + s3(o.mass), Math.abs(Fr) / o.mass, 'm s<sup>−2</sup>');
+      R.eq('resultant force', 'U − W = ' + s3(o.U) + ' − ' + s3(o.W), Math.abs(Fr) < 1e-12 ? 0 : s3(Math.abs(Fr)) + (Fr > 0 ? ' upwards' : ' downwards'), 'N', 'Just released, only weight and upthrust act (no drag yet), so the resultant is their difference.');
+      R.eq('initial acceleration', '|U − W| ÷ m = ' + s3(Math.abs(Fr)) + ' ÷ ' + s3(o.mass), Math.abs(Fr) / o.mass, 'm s<sup>−2</sup>', 'Newton’s second law: a = resultant force ÷ mass.');
       R.html('<div class="head">Once it moves, drag also acts (topic 3) — not modelled here.</div>');
     } else {
-      if (o.apparent >= 0) R.eq('balance reading', 'W − U = ' + s3(o.W) + ' − ' + s3(o.U), o.apparent, 'N');
-      else { R.eq('downward pull needed', 'U − W = ' + s3(o.U) + ' − ' + s3(o.W), -o.apparent, 'N'); R.badge('U > W: a spring balance would go slack; a string from below must pull down', 'warn'); }
+      if (o.apparent >= 0) R.eq('balance reading', 'W − U = ' + s3(o.W) + ' − ' + s3(o.U), o.apparent, 'N', 'In equilibrium the balance supports what the upthrust does not: T + U = W.');
+      else { R.eq('downward pull needed', 'U − W = ' + s3(o.U) + ' − ' + s3(o.W), -o.apparent, 'N', 'Upthrust is larger than the weight, so a downward pull is needed for equilibrium: T + W = U.'); R.badge('U > W: a spring balance would go slack; a string from below must pull down', 'warn'); }
     }
     R.head('Pressure probe at depth h');
-    R.eq('Δp', 'ρ<sub>f</sub>gh = ' + s3(v.rhoF) + ' × ' + g + ' × ' + s3(v.h), ST.hydro(v.rhoF, g, v.h), 'Pa');
-    if (abs) R.eq('p', 'p₀ + ρ<sub>f</sub>gh = ' + s3(p0) + ' + ' + s3(ST.hydro(v.rhoF, g, v.h)), p0 + ST.hydro(v.rhoF, g, v.h), 'Pa');
+    R.eq('Δp', 'ρ<sub>f</sub>gh = ' + s3(v.rhoF) + ' × ' + g + ' × ' + s3(v.h), ST.hydro(v.rhoF, g, v.h), 'Pa', 'Pressure difference due to a column of fluid of height h: Δp = ρgh (gauge pressure).');
+    if (abs) R.eq('p', 'p₀ + ρ<sub>f</sub>gh = ' + s3(p0) + ' + ' + s3(ST.hydro(v.rhoF, g, v.h)), p0 + ST.hydro(v.rhoF, g, v.h), 'Pa', 'The absolute pressure adds the atmospheric pressure acting on the surface.');
     R.render();
     // derivation panel
     var A = o.A, dh = v.H;

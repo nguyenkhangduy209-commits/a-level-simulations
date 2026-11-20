@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-waves.js"></script>
@@ -115,6 +116,8 @@
     // polarisation beam
     var y0 = H * 0.68, n = ch.steps.length, segs = n + 1, sx = 40, sw = W - 80, seg = sw / segs, amp0 = Math.min(42, H * 0.15);
     scene = { BX: BX, bx: bx, bw: bw, by: by, bh: bh, L0: L0, L1: L1, y0: y0, sx: sx, seg: seg, amp0: amp0 };
+    var RL = real();
+    if (RL) polBench(c, v, y0, sx, sw, seg, amp0);
     D.arrow(c, sx - 20, y0, sx + sw + 20, y0, col.muted, { width: 1, head: 8 });
     function eVec(xc, angDeg, I, color) {
       var a = Math.sqrt(Math.max(0, I) / Math.max(v.I0, 1e-12)) * amp0, r = U.rad(angDeg);
@@ -126,15 +129,71 @@
     D.label(c, 'I₀ = ' + U.sf(v.I0).replace(/<[^>]+>/g, ''), sx + seg / 2, y0 + amp0 + 14, col.ink, { size: 11 });
     ch.steps.forEach(function (st, i) {
       var fx = sx + seg * (i + 1);
-      c.save(); c.strokeStyle = col['object-line']; c.fillStyle = col.surface; c.globalAlpha = 0.9; c.lineWidth = 1.2;
-      c.beginPath(); c.rect(fx - 6, y0 - amp0 - 10, 12, 2 * amp0 + 20); c.fill(); c.stroke(); c.restore();
       var r = U.rad(st.axis), L = amp0 + 6;
+      if (RL) polaroid(c, fx, y0, amp0, r);
+      else { c.save(); c.strokeStyle = col['object-line']; c.fillStyle = col.surface; c.globalAlpha = 0.9; c.lineWidth = 1.2;
+      c.beginPath(); c.rect(fx - 6, y0 - amp0 - 10, 12, 2 * amp0 + 20); c.fill(); c.stroke(); c.restore(); }
       D.line(c, [[fx - Math.sin(r) * L * 0.5, y0 + Math.cos(r) * L], [fx + Math.sin(r) * L * 0.5, y0 - Math.cos(r) * L]], col.s3, { width: 2.4 });
       D.label(c, 'filter ' + (i + 1) + ': ' + U.dp(st.axis, 1) + '°', fx, y0 - amp0 - 22, col.s3, { size: 11 });
       eVec(fx + seg / 2, st.axis, st.Iout, col.s1);
       D.label(c, 'I = ' + U.sf(st.Iout).replace(/<[^>]+>/g, ''), fx + seg / 2, y0 + amp0 + 14, col.ink, { size: 11 });
     });
     if (ix) ix.paint(c);
+  }
+
+  /* ---------- real-life look: lamp, Polaroid discs in holders on a bench, the beam dimming, a light meter ---------- */
+  var SC = SIM.scene;
+  function real() { return !!(SC && SC.real && SC.real()); }
+  function rr(c, x, y, w, h, rad) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, rad); else c.rect(x, y, w, h); }
+  function beamColour(v) {
+    var nm = Math.pow(10, v.logL) * 1e9;
+    if (!(nm >= 400 && nm <= 700)) return '#ffe3a3';   // invisible radiation: drawn as a soft warm beam
+    var stops = [[400, [190, 160, 255]], [470, [150, 190, 255]], [520, [150, 230, 170]], [580, [255, 230, 140]], [620, [255, 190, 140]], [700, [255, 160, 160]]];
+    for (var i = 1; i < stops.length; i++) if (nm <= stops[i][0]) { var a = stops[i - 1], b = stops[i], k = (nm - a[0]) / (b[0] - a[0]); return 'rgb(' + [0, 1, 2].map(function (j) { return Math.round(a[1][j] + (b[1][j] - a[1][j]) * k); }).join(',') + ')'; }
+    return '#ffb0b0';
+  }
+  function polBench(c, v, y0, sx, sw, seg, amp0) {
+    var dk = SC.dark(), rail = y0 + amp0 + 26, W = vp.w, bc = beamColour(v), I0 = Math.max(v.I0, 1e-12);
+    c.save();
+    c.fillStyle = dk ? '#4a4f63' : '#ddd6ee'; rr(c, 6, rail, W - 12, 7, 4); c.fill();   // optical bench rail
+    c.strokeStyle = 'rgba(90,80,140,.2)'; c.lineWidth = 1; c.stroke();
+    // the beam: brightness ∝ intensity in each gap
+    var xs = [sx - 6].concat(ch.steps.map(function (st, i) { return sx + seg * (i + 1); })).concat([W - 36]);
+    var Is = [v.I0].concat(ch.steps.map(function (st) { return st.Iout; }));
+    for (var i = 0; i < Is.length; i++) {
+      var fr = U.clamp(Is[i] / I0, 0, 1);
+      c.globalAlpha = 0.08 + 0.5 * fr; c.fillStyle = bc; rr(c, xs[i], y0 - 6, xs[i + 1] - xs[i], 12, 6); c.fill();
+      c.globalAlpha = 0.6 * fr; rr(c, xs[i], y0 - 2, xs[i + 1] - xs[i], 4, 2); c.fill();
+    }
+    c.globalAlpha = 1;
+    // lamp housing
+    c.fillStyle = dk ? '#6d7488' : '#c9c2e3'; rr(c, 6, y0 - 16, sx - 12, 32, 8); c.fill(); c.strokeStyle = 'rgba(90,80,140,.25)'; c.stroke();
+    c.fillStyle = bc; c.beginPath(); c.arc(sx - 8, y0, 6, 0, 2 * Math.PI); c.fill();
+    c.fillStyle = dk ? '#6d7488' : '#c9c2e3'; c.fillRect(sx / 2 - 3, y0 + 16, 6, rail - y0 - 16);
+    // light meter with a needle showing the fraction transmitted
+    var mx = W - 34, fr2 = U.clamp(ch.I / I0, 0, 1);
+    c.fillStyle = dk ? '#5d6579' : '#f2eefb'; rr(c, mx, y0 - 22, 28, 44, 7); c.fill(); c.strokeStyle = 'rgba(90,80,140,.3)'; c.stroke();
+    c.fillStyle = dk ? '#2d3242' : '#ffffff'; rr(c, mx + 4, y0 - 17, 20, 13, 4); c.fill();
+    c.strokeStyle = '#e88a8a'; c.lineWidth = 1.6; var na = Math.PI * (1.15 + 0.7 * fr2);
+    c.beginPath(); c.moveTo(mx + 14, y0 - 5); c.lineTo(mx + 14 + Math.cos(na) * 10, y0 - 5 + Math.sin(na) * 10); c.stroke();
+    c.fillStyle = dk ? '#8a93a6' : '#c9c2e3'; c.beginPath(); c.arc(mx + 14, y0 + 9, 6, 0, 2 * Math.PI); c.fill();   // sensor window
+    c.fillStyle = dk ? '#5d6579' : '#e6e0f4'; c.fillRect(mx + 11, y0 + 22, 6, rail - y0 - 22);
+    c.restore();
+    D.label(c, 'light meter', mx + 14, rail + 16, dk ? '#c9d0e0' : '#7b7894', { size: 9, bold: true });
+  }
+  /** a Polaroid filter: a tinted disc seen at an angle (squashed sideways), fine lines along its transmission axis */
+  function polaroid(c, fx, y0, amp0, r) {
+    var dk = SC.dark(), ry = amp0 + 10, rx = ry * 0.5, rail = y0 + amp0 + 26;
+    c.save();
+    c.fillStyle = dk ? '#6d7488' : '#cfc8e6'; c.fillRect(fx - 2.5, y0 + ry - 2, 5, rail - y0 - ry + 2);   // holder post
+    c.beginPath(); if (c.ellipse) c.ellipse(fx, y0, rx, ry, 0, 0, 2 * Math.PI); else c.rect(fx - rx, y0 - ry, 2 * rx, 2 * ry);
+    c.fillStyle = dk ? 'rgba(120,110,170,.45)' : 'rgba(150,140,200,.32)'; c.fill();
+    c.strokeStyle = dk ? 'rgba(220,215,255,.5)' : 'rgba(110,100,170,.5)'; c.lineWidth = 3; c.stroke();
+    c.clip();
+    var dx = Math.sin(r) * 0.5, dy = -Math.cos(r), L = Math.hypot(dx, dy) || 1; dx /= L; dy /= L;
+    c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 1;
+    for (var k = -8; k <= 8; k++) { var ox = fx - dy * k * 5, oy = y0 + dx * k * 5; c.beginPath(); c.moveTo(ox - dx * 80, oy - dy * 80); c.lineTo(ox + dx * 80, oy + dy * 80); c.stroke(); }
+    c.restore();
   }
 
   /* ---------- working ---------- */
@@ -153,19 +212,19 @@
     R.clear();
     R.head('Malus’s law through ' + ch.steps.length + ' filter' + (ch.steps.length > 1 ? 's' : '') + ' (plane-polarised light in)');
     ch.steps.forEach(function (st, i) {
-      R.eq('θ<sub>' + (i + 1) + '</sub>', 'α<sub>' + (i + 1) + '</sub> − (plane arriving) = ' + U.dp(st.axis, 1) + '° − ' + U.dp(st.from, 1) + '°', U.dp(st.rel, 1) + '°');
-      R.eq('I<sub>' + (i + 1) + '</sub>', 'I cos²θ = ' + s3(st.Iin) + ' × cos²(' + U.dp(st.rel, 1) + '°) = ' + s3(st.Iin) + ' × ' + s3(Math.pow(Math.cos(U.rad(st.rel)), 2)), st.Iout, 'W m<sup>−2</sup>');
+      R.eq('θ<sub>' + (i + 1) + '</sub>', 'α<sub>' + (i + 1) + '</sub> − (plane arriving) = ' + U.dp(st.axis, 1) + '° − ' + U.dp(st.from, 1) + '°', U.dp(st.rel, 1) + '°', '', 'Malus’s law needs the angle between the transmission axis and the plane of polarisation of the light arriving at this filter.');
+      R.eq('I<sub>' + (i + 1) + '</sub>', 'I cos²θ = ' + s3(st.Iin) + ' × cos²(' + U.dp(st.rel, 1) + '°) = ' + s3(st.Iin) + ' × ' + s3(Math.pow(Math.cos(U.rad(st.rel)), 2)), st.Iout, 'W m<sup>−2</sup>', 'Malus’s law: the transmitted intensity is I cos²θ. The light leaving is now polarised along this filter’s axis.');
     });
-    R.eq('fraction transmitted', 'I ÷ I₀', v.I0 > 0 ? ch.I / v.I0 : 0);
+    R.eq('fraction transmitted', 'I ÷ I₀', v.I0 > 0 ? ch.I / v.I0 : 0, '', 'Final intensity divided by the intensity of the beam arriving at the first filter.');
     if (v.I0 > 0 && ch.I < 1e-12 * v.I0) R.badge('No light: an axis is perpendicular to the plane of polarisation reaching it', 'warn');
     if (findAng.get()) {
       var last = ch.steps[ch.steps.length - 1], Iin = last.Iin, th = WV.malusAngle(Iin, v.It);
       R.head('Angle of the last filter for I<sub>t</sub> = ' + s3(v.It) + ' W m<sup>−2</sup>');
       if (!isFinite(th)) R.badge('Not possible: I<sub>t</sub> must be between 0 and the intensity reaching the last filter (' + s3(Iin) + ' W m<sup>−2</sup>)', 'warn');
       else {
-        R.eq('cos²θ', 'I<sub>t</sub> ÷ I = ' + s3(v.It) + ' ÷ ' + s3(Iin), v.It / Iin);
-        R.eq('θ', 'cos⁻¹√(' + s3(v.It / Iin) + ')', U.dp(th, 1) + '°');
-        R.eq('axis of last filter', U.dp(last.from, 1) + '° ± ' + U.dp(th, 1) + '°', U.dp(last.from + th, 1) + '° or ' + U.dp(last.from - th, 1) + '°');
+        R.eq('cos²θ', 'I<sub>t</sub> ÷ I = ' + s3(v.It) + ' ÷ ' + s3(Iin), v.It / Iin, '', 'Rearrange I<sub>t</sub> = I cos²θ, where I is the intensity reaching the last filter.');
+        R.eq('θ', 'cos⁻¹√(' + s3(v.It / Iin) + ')', U.dp(th, 1) + '°', '', 'Take the square root first, then the inverse cosine.');
+        R.eq('axis of last filter', U.dp(last.from, 1) + '° ± ' + U.dp(th, 1) + '°', U.dp(last.from + th, 1) + '° or ' + U.dp(last.from - th, 1) + '°', '', 'θ is measured from the plane of the light arriving, which is the axis of the previous filter, so the axis can be either side of it.');
       }
     }
     R.render();

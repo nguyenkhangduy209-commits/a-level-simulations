@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-energy.js"></script>
@@ -141,10 +142,16 @@
     var col = ui.colors(), v = prm.values, th = U.rad(v.theta), ct = Math.cos(th), st = Math.sin(th);
     var Ls = 10, W = Ls * ct, Hh = Ls * st;
     if (hold) vp.fit.apply(vp, hold.fit); else vp.fit(-1, Math.max(W, 3) + 1 + 9, -1.2, Math.max(Hh, 3) + 2.5);   // frozen while the slope is dragged
-    var c = vp.begin();
-    D.ground(c, vp.X(-1), vp.Y(0), vp.X(Math.max(W, 3) + 1), vp.Y(0));
-    c.save(); c.fillStyle = col.surface; c.beginPath(); c.moveTo(vp.X(0), vp.Y(0)); c.lineTo(vp.X(W), vp.Y(Hh)); c.lineTo(vp.X(W), vp.Y(0)); c.closePath(); c.fill();
-    c.strokeStyle = col['object-line']; c.lineWidth = 1.5; c.stroke(); c.restore();
+    var c = vp.begin(), real = SIM.scene.real(), SC = SIM.scene;
+    if (real) {
+      SC.sky(c, 0, 0, vp.w, vp.h, { horizon: vp.Y(0) }); SC.ground(c, 0, vp.w, vp.Y(0), { kind: 'grass', depth: vp.h - vp.Y(0) + 2 });
+      if (v.theta >= 85) SC.wall(c, vp.X(W) + 2, vp.Y(Hh), Math.max(30, vp.scale * 1.2), vp.Y(0) - vp.Y(Hh), { kind: 'concrete' });   // a tower to drop from
+      else if (v.theta > 0) SC.ramp(c, [[vp.X(0), vp.Y(0)], [vp.X(W), vp.Y(Hh)], [vp.X(W), vp.Y(0)]], { kind: v.m >= 40 && !(v.Fd > 0) ? 'concrete' : 'wood' });
+    } else {
+      D.ground(c, vp.X(-1), vp.Y(0), vp.X(Math.max(W, 3) + 1), vp.Y(0));
+      c.save(); c.fillStyle = col.surface; c.beginPath(); c.moveTo(vp.X(0), vp.Y(0)); c.lineTo(vp.X(W), vp.Y(Hh)); c.lineTo(vp.X(W), vp.Y(0)); c.closePath(); c.fill();
+      c.strokeStyle = col['object-line']; c.lineWidth = 1.5; c.stroke(); c.restore();
+    }
     if (v.theta > 0 && v.theta < 90) D.arc(c, vp.X(0), vp.Y(0), 30, 0, th, col.muted, 'θ');
     var stt = sl.stateAt(clock.t), frac = sl.dEnd > 0 ? stt.d / Math.max(v.s, 1e-9) : 0;
     // map position along the slope: going down starts at the top
@@ -153,8 +160,10 @@
     var bx = vp.X(pos * ct), by = vp.Y(pos * st);
     var endPos = U.clamp(startF + sgn * 0.84, 0, 1) * Ls;
     D.line(c, [[vp.X(startF * Ls * ct), vp.Y(startF * Ls * st)], [vp.X(endPos * ct), vp.Y(endPos * st)]], col.accent, { dash: [4, 4], width: 1.2 });
-    D.block(c, bx, by, 38, 24, th, { label: U.num(v.m, 2) + ' kg' });
     var cx = bx - st * 12, cy = by - ct * 12;
+    var mdir0 = dir.get() === 'down' ? th + Math.PI : th;
+    if (real) realSlopeBody(c, bx, by, cx, cy, th, mdir0, stt, Math.abs(pos - startF * Ls) * vp.scale);
+    else D.block(c, bx, by, 38, 24, th, { label: U.num(v.m, 2) + ' kg' });
     var k = SIM.view.forceScale([v.m * g, v.Fr, v.Fd], 70);
     D.arrowPolar(c, cx, cy, -Math.PI / 2, v.m * g * k, col.weight, { label: 'mg' });
     var mdir = dir.get() === 'down' ? th + Math.PI : th;
@@ -197,12 +206,15 @@
     if (!mo) return;
     var col = ui.colors(), v = prm.values, t = clock.t, y = Math.min(v.h, v.v * t);
     vp.fit(-3, 12, -0.8, 7);
-    var c = vp.begin();
-    D.ground(c, vp.X(-3), vp.Y(0), vp.X(4), vp.Y(0));
-    c.save(); c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.5; c.beginPath(); c.rect(vp.X(-1), vp.Y(6.6), vp.X(1) - vp.X(-1), vp.Y(5.8) - vp.Y(6.6)); c.fill(); c.stroke(); c.restore();
-    D.label(c, 'motor', vp.X(0), vp.Y(6.2), col.ink, { size: 11, bold: true });
+    var c = vp.begin(), real = SIM.scene.real();
     var yy = 0.6 + 4.6 * (v.h > 0 ? y / v.h : 0);
-    D.line(c, [vp.P(0, 5.8), vp.P(0, yy + 0.6)], col['object-line'], { width: 1.5 });
+    if (real) realMotor(c, yy);
+    else {
+      D.ground(c, vp.X(-3), vp.Y(0), vp.X(4), vp.Y(0));
+      c.save(); c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.5; c.beginPath(); c.rect(vp.X(-1), vp.Y(6.6), vp.X(1) - vp.X(-1), vp.Y(5.8) - vp.Y(6.6)); c.fill(); c.stroke(); c.restore();
+      D.line(c, [vp.P(0, 5.8), vp.P(0, yy + 0.6)], col['object-line'], { width: 1.5 });
+    }
+    D.label(c, 'motor', vp.X(0), vp.Y(6.2), col.ink, { size: 11, bold: true, bg: real });
     D.block(c, vp.X(0), vp.Y(yy - 0.0), 44, 30, 0, { label: U.num(v.m, 2) + ' kg' });
     D.label(c, 'h = ' + U.sf(y) + ' m of ' + U.sf(v.h) + ' m', vp.X(1.6), vp.Y(yy), col.muted, { align: 'left', size: 11 });
     var vax = vp.X(-1.4), vay = vp.Y(yy), vlen = 20 + Math.min(40, v.v * 20);
@@ -224,11 +236,18 @@
     if (!ve) return;
     var col = ui.colors(), v = prm.values, th = U.rad(v.theta), ct = Math.cos(th), st = Math.sin(th);
     if (hold) vp.fit.apply(vp, hold.fit); else vp.fit(-1, 11, -1, Math.max(10 * st, 2) + 2.5);
-    var c = vp.begin();
-    D.ground(c, vp.X(-1), vp.Y(0), vp.X(11), vp.Y(0));
-    c.save(); c.fillStyle = col.surface; c.beginPath(); c.moveTo(vp.X(0), vp.Y(0)); c.lineTo(vp.X(10 * ct), vp.Y(10 * st)); c.lineTo(vp.X(10 * ct), vp.Y(0)); c.closePath(); c.fill(); c.restore();
+    var c = vp.begin(), real = SIM.scene.real();
     var bx = vp.X(5 * ct), by = vp.Y(5 * st);
-    D.block(c, bx, by, 70, 30, th, { label: 'car' });
+    if (real) {   // a car on a road (up a hill when θ > 0)
+      SIM.scene.sky(c, 0, 0, vp.w, vp.h, { horizon: vp.Y(0) }); SIM.scene.ground(c, 0, vp.w, vp.Y(0), { kind: 'road', depth: vp.h - vp.Y(0) + 2, scroll: 0 });
+      if (v.theta > 0) SIM.scene.ramp(c, [[vp.X(0), vp.Y(0)], [vp.X(10 * ct), vp.Y(10 * st)], [vp.X(10 * ct), vp.Y(0)]], { kind: 'concrete' });
+      SIM.scene.car(c, bx, by, 84, th, { kind: 'car', wheel: 0 });
+      if (v.vc > 0) SIM.scene.motionLines(c, bx - Math.cos(th) * 40, by + Math.sin(th) * 40 - 14, Math.cos(th), -Math.sin(th), Math.min(60, v.vc * 2));
+    } else {
+      D.ground(c, vp.X(-1), vp.Y(0), vp.X(11), vp.Y(0));
+      c.save(); c.fillStyle = col.surface; c.beginPath(); c.moveTo(vp.X(0), vp.Y(0)); c.lineTo(vp.X(10 * ct), vp.Y(10 * st)); c.lineTo(vp.X(10 * ct), vp.Y(0)); c.closePath(); c.fill(); c.restore();
+      D.block(c, bx, by, 70, 30, th, { label: 'car' });
+    }
     var cx = bx - st * 15, cy = by - ct * 15;
     var Fd = isFinite(ve.Fdrive) ? ve.Fdrive : 0;
     var k = SIM.view.forceScale([Fd, v.Fr, ve.Wpar, v.m * g], 110);
@@ -251,6 +270,50 @@
     if (ix) ix.paint(c);
   }
 
+  /* ---------- real-life look helpers (soft illustrated style, screen pixels) ---------- */
+  /** the moving body on the slope: a ball (dropped), a cyclist, a crate pulled by a person, or a crate; with speed streaks */
+  function realSlopeBody(c, bx, by, cx, cy, th, mdir, stt, distPx) {
+    var SC = SIM.scene, v = prm.values, ux = Math.cos(mdir), uy = -Math.sin(mdir);
+    if (stt.v > 0.3) SC.motionLines(c, cx, cy, ux, uy, Math.min(60, stt.v * 5), null, 12);
+    if (v.theta >= 85) { SC.ball(c, cx, cy, 12, { kind: 'football', spin: distPx / 12 }); return; }
+    if (v.m >= 40 && !(v.Fd > 0)) {   // a cyclist freewheeling: wheels turn by distance ÷ radius
+      var r = 11, ex = Math.cos(th), ey = -Math.sin(th), nx = -Math.sin(th), ny = -Math.cos(th), w1 = [bx - ex * 17 + nx * r, by - ey * 17 + ny * r], w2 = [bx + ex * 17 + nx * r, by + ey * 17 + ny * r];
+      var sgn = dir.get() === 'down' ? 1 : -1;
+      SC.wheel(c, w1[0], w1[1], r, -sgn * distPx / r); SC.wheel(c, w2[0], w2[1], r, -sgn * distPx / r);
+      var seat = [bx + nx * 30 - ex * 4, by + ny * 30 - ey * 4];
+      c.save(); c.strokeStyle = '#ef8f8f'; c.lineWidth = 3; c.lineCap = 'round'; c.lineJoin = 'round';
+      c.beginPath(); c.moveTo(w1[0], w1[1]); c.lineTo(bx + nx * r, by + ny * r); c.lineTo(seat[0], seat[1]); c.lineTo(w1[0], w1[1]); c.moveTo(bx + nx * r, by + ny * r); c.lineTo(w2[0], w2[1]); c.lineTo(bx + ex * 12 + nx * 32, by + ey * 12 + ny * 32); c.stroke(); c.restore();
+      SC.person(c, seat[0], seat[1] + 2, 40, { pose: 'sit', facing: Math.cos(mdir) >= 0 ? 1 : -1 });
+      return;
+    }
+    D.block(c, bx, by, 38, 24, th, { label: U.num(v.m, 2) + ' kg' });   // a crate in the real look
+    if (v.Fd > 0) {   // someone ahead of the crate pulls it along with a rope
+      var px = bx + ux * 80, py = by + uy * 80, man = SC.person(c, px, py, 46, { pose: 'pull', facing: ux >= 0 ? -1 : 1 });
+      SC.rope(c, [[cx + ux * 19, cy + uy * 19], man.hand], { width: 2 });
+    }
+  }
+  /** a winch: scaffold, a motor that glows with the energy it wastes, a drum that turns as the rope winds on */
+  function realMotor(c, yy) {
+    var SC = SIM.scene, v = prm.values, dk = SC.dark(), u = vp.scale;
+    SC.sky(c, 0, 0, vp.w, vp.h, { horizon: vp.Y(0) }); SC.ground(c, 0, vp.w, vp.Y(0), { kind: 'grass', depth: vp.h - vp.Y(0) + 2 });
+    c.save(); c.strokeStyle = dk ? '#8d93ab' : '#c3c8d8'; c.lineWidth = 5; c.lineCap = 'round';   // scaffold tower
+    [-1.6, 1.6].forEach(function (x) { c.beginPath(); c.moveTo(vp.X(x), vp.Y(0)); c.lineTo(vp.X(x), vp.Y(6.8)); c.stroke(); });
+    c.lineWidth = 2.5; for (var k = 0; k < 6; k++) { c.beginPath(); c.moveTo(vp.X(-1.6), vp.Y(k * 1.1)); c.lineTo(vp.X(1.6), vp.Y((k + 1) * 1.1)); c.stroke(); }
+    c.lineWidth = 5; c.beginPath(); c.moveTo(vp.X(-1.9), vp.Y(5.6)); c.lineTo(vp.X(1.9), vp.Y(5.6)); c.stroke();
+    var waste = mo && !mo.impossible ? U.clamp(1 - mo.eta, 0, 1) : 0, gx = vp.X(0), gy = vp.Y(6.2), gr = 1.6 * u * (0.6 + waste);
+    var gg = c.createRadialGradient ? c.createRadialGradient(gx, gy, 0, gx, gy, gr) : null;   // warm glow: energy wasted as heat
+    if (gg && gg.addColorStop && waste > 0.01) { gg.addColorStop(0, 'rgba(255,150,100,' + (0.6 * waste) + ')'); gg.addColorStop(1, 'rgba(255,150,100,0)'); c.fillStyle = gg; c.beginPath(); c.arc(gx, gy, gr, 0, 2 * Math.PI); c.fill(); }
+    var x0 = vp.X(-1), y0 = vp.Y(6.6), w = vp.X(1) - vp.X(-1), h = vp.Y(5.8) - vp.Y(6.6);
+    c.beginPath(); if (c.roundRect) c.roundRect(x0, y0, w, h, Math.min(10, h / 2)); else c.rect(x0, y0, w, h);
+    c.fillStyle = waste > 0.01 ? 'rgb(' + Math.round(169 + 70 * waste) + ',' + Math.round(182 - 20 * waste) + ',' + Math.round(222 - 90 * waste) + ')' : '#a9b6de'; c.fill();
+    c.strokeStyle = 'rgba(70,60,110,.28)'; c.lineWidth = 1.2; c.stroke();
+    c.strokeStyle = 'rgba(255,255,255,.45)'; c.lineWidth = 1.2; for (var f = 1; f < 6; f++) { c.beginPath(); c.moveTo(x0 + w * f / 6, y0 + 4); c.lineTo(x0 + w * f / 6, y0 + h - 4); c.stroke(); }   // cooling fins
+    var dr = Math.max(6, 0.28 * u), dx = vp.X(0), dy = vp.Y(5.8) + dr * 0.2, ang = (yy - 0.6) * u / dr;   // drum turns by rope length ÷ radius
+    SC.pulley(c, dx, dy, dr, ang);
+    SC.rope(c, [[dx, dy + dr * 0.6], [dx, vp.Y(yy) - 30]], { width: 2 });
+    c.restore();
+  }
+
   /* ---------- working ---------- */
   function readout() {
     var md = mode.get(), v = prm.values, s3 = U.sf;
@@ -260,27 +323,27 @@
       var up = dir.get() === 'up';
       R.html('<div class="head">Energies in J. Motion ' + (up ? 'up' : 'down') + ' the slope; Δh = vertical height gained.</div>');
       R.head('Work done by each force over the whole motion (d = ' + s3(sl.dEnd) + ' m)');
-      R.eq('Δh', (up ? '+' : '−') + 'd sin θ = ' + (up ? '' : '−') + s3(sl.dEnd) + ' × sin ' + U.dp(v.theta, 1) + '°', sl.dh, 'm');
-      R.eq('by weight', '−mgΔh = −' + s3(v.m) + ' × ' + g + ' × ' + (sl.dh < 0 ? '(' + s3(sl.dh) + ')' : s3(sl.dh)), -sl.dGPE, 'J');
-      R.eq('by normal reaction', 'perpendicular to the motion', 0, 'J');
-      R.eq('by resistive force', '−F<sub>r</sub>d = −' + s3(v.Fr) + ' × ' + s3(sl.dEnd), -sl.Wr, 'J');
-      if (v.Fd > 0) R.eq('by driving force', 'F<sub>d</sub>d = ' + s3(v.Fd) + ' × ' + s3(sl.dEnd), sl.Wd, 'J');
+      R.eq('Δh', (up ? '+' : '−') + 'd sin θ = ' + (up ? '' : '−') + s3(sl.dEnd) + ' × sin ' + U.dp(v.theta, 1) + '°', sl.dh, 'm', 'GPE depends on the vertical height change, which is the distance along the slope × sin θ.');
+      R.eq('by weight', '−mgΔh = −' + s3(v.m) + ' × ' + g + ' × ' + (sl.dh < 0 ? '(' + s3(sl.dh) + ')' : s3(sl.dh)), -sl.dGPE, 'J', 'Work done by the weight = mg × vertical displacement downwards; it is minus the change in GPE.');
+      R.eq('by normal reaction', 'perpendicular to the motion', 0, 'J', 'The normal reaction is perpendicular to the motion, so it does no work.');
+      R.eq('by resistive force', '−F<sub>r</sub>d = −' + s3(v.Fr) + ' × ' + s3(sl.dEnd), -sl.Wr, 'J', 'The resistive force acts opposite to the motion, so it does negative work F<sub>r</sub>d (energy dissipated as thermal energy).');
+      if (v.Fd > 0) R.eq('by driving force', 'F<sub>d</sub>d = ' + s3(v.Fd) + ' × ' + s3(sl.dEnd), sl.Wd, 'J', 'Work done = force × distance moved in the direction of the force.');
       R.head('Conservation of energy');
       R.html('<div class="head">½mu² + F<sub>d</sub>d = ½mv² + mgΔh + F<sub>r</sub>d</div>');
-      R.eq('½mu²', '½ × ' + s3(v.m) + ' × ' + s3(v.u) + '²', sl.KE0, 'J');
-      R.eq('½mv²', s3(sl.KE0) + ' + ' + s3(sl.Wd) + ' − ' + (sl.dGPE < 0 ? '(' + s3(sl.dGPE) + ')' : s3(sl.dGPE)) + ' − ' + s3(sl.Wr), sl.KE1, 'J');
+      R.eq('½mu²', '½ × ' + s3(v.m) + ' × ' + s3(v.u) + '²', sl.KE0, 'J', 'Kinetic energy at the start: E<sub>K</sub> = ½mv² with the initial speed.');
+      R.eq('½mv²', s3(sl.KE0) + ' + ' + s3(sl.Wd) + ' − ' + (sl.dGPE < 0 ? '(' + s3(sl.dGPE) + ')' : s3(sl.dGPE)) + ' − ' + s3(sl.Wr), sl.KE1, 'J', 'Conservation of energy: final KE = initial KE + work in − GPE gained − work done against resistance.');
       if (sl.noStart) R.badge('From rest the forces along the slope cannot overcome the resistance: no motion', 'warn');
       else if (sl.stops) {
         R.badge('KE runs out first: stops after ' + s3(sl.dEnd) + ' m', 'warn');
-        R.eq('d<sub>stop</sub>', '½mu² ÷ (F<sub>r</sub> + mg sin θ' + (v.Fd > 0 ? ' − F<sub>d</sub>' : '') + ') = ' + s3(sl.KE0) + ' ÷ ' + s3(-sl.Fnet), sl.dEnd, 'm');
-      } else R.eq('v', '√(2 × ½mv² ÷ m) = √(2 × ' + s3(sl.KE1) + ' ÷ ' + s3(v.m) + ')', sl.v, 'm s<sup>−1</sup>');
+        R.eq('d<sub>stop</sub>', '½mu² ÷ (F<sub>r</sub> + mg sin θ' + (v.Fd > 0 ? ' − F<sub>d</sub>' : '') + ') = ' + s3(sl.KE0) + ' ÷ ' + s3(-sl.Fnet), sl.dEnd, 'm', 'It stops when all the initial KE has been used up against the resistance and the gain in GPE.');
+      } else R.eq('v', '√(2 × ½mv² ÷ m) = √(2 × ' + s3(sl.KE1) + ' ÷ ' + s3(v.m) + ')', sl.v, 'm s<sup>−1</sup>', 'Rearrange E<sub>K</sub> = ½mv² to find the speed.');
       var st0 = sl.stateAt(clock.t);
       R.head('At t = ' + clock.t.toFixed(2) + ' s');
-      R.eq('distance', '', st0.d, 'm'); R.eq('v', '', st0.v, 'm s<sup>−1</sup>'); R.eq('KE', '½mv²', st0.KE, 'J');
-      R.eq('ΔGPE', 'mgΔh', st0.dGPE, 'J'); R.eq('work against resistance', 'F<sub>r</sub> × distance', st0.Wr, 'J');
+      R.eq('distance', '', st0.d, 'm', 'Distance moved so far along the slope at this instant of the animation.'); R.eq('v', '', st0.v, 'm s<sup>−1</sup>', 'Speed at this instant, found from the energy balance at this distance.'); R.eq('KE', '½mv²', st0.KE, 'J', 'Kinetic energy now, from ½mv².');
+      R.eq('ΔGPE', 'mgΔh', st0.dGPE, 'J', 'Change in gravitational potential energy so far: mgΔh (negative when it has moved down).'); R.eq('work against resistance', 'F<sub>r</sub> × distance', st0.Wr, 'J', 'Energy dissipated so far = resistive force × distance moved.');
       if (v.Fd > 0) {
-        R.eq('power of driving force', 'P = F<sub>d</sub>v = ' + s3(v.Fd) + ' × ' + s3(st0.v), v.Fd * st0.v, 'W');
-        if (sl.tEnd > 0 && isFinite(sl.tEnd)) R.eq('average power of F<sub>d</sub>', 'W ÷ t = ' + s3(sl.Wd) + ' ÷ ' + s3(sl.tEnd), sl.Wd / sl.tEnd, 'W');
+        R.eq('power of driving force', 'P = F<sub>d</sub>v = ' + s3(v.Fd) + ' × ' + s3(st0.v), v.Fd * st0.v, 'W', 'Power is the rate of doing work: P = Fv for a force moving at speed v in its own direction.');
+        if (sl.tEnd > 0 && isFinite(sl.tEnd)) R.eq('average power of F<sub>d</sub>', 'W ÷ t = ' + s3(sl.Wd) + ' ÷ ' + s3(sl.tEnd), sl.Wd / sl.tEnd, 'W', 'Average power = total work done ÷ time taken.');
       }
       R.render();
       var h1 = Math.abs(sl.dh), vv = sl.v;
@@ -289,28 +352,28 @@
         '<div class="eq"><span class="lhs">E<sub>K</sub></span><span class="rhs">From rest, constant F: v² = 2as and F = ma ⇒ W = Fs = ma × v²/(2a) = ½mv² = ½ × ' + s3(v.m) + ' × ' + s3(vv) + '² = ' + s3(0.5 * v.m * vv * vv) + ' J</span></div>';
     } else if (md === 'motor') {
       R.head('Power and efficiency');
-      R.eq('useful output power', 'mgv = ' + s3(v.m) + ' × ' + g + ' × ' + s3(v.v), mo.Pout, 'W');
-      R.eq('efficiency', 'useful output ÷ total input = ' + s3(mo.Pout) + ' ÷ ' + s3(v.Pin), mo.eta);
-      R.eq('efficiency (%)', '× 100', 100 * mo.eta, '%');
+      R.eq('useful output power', 'mgv = ' + s3(v.m) + ' × ' + g + ' × ' + s3(v.v), mo.Pout, 'W', 'At constant speed the tension equals mg, so the useful power is P = Fv = mgv.');
+      R.eq('efficiency', 'useful output ÷ total input = ' + s3(mo.Pout) + ' ÷ ' + s3(v.Pin), mo.eta, '', 'Efficiency = useful power output ÷ total power input (a ratio, at most 1).');
+      R.eq('efficiency (%)', '× 100', 100 * mo.eta, '%', 'Multiply the ratio by 100 to express efficiency as a percentage.');
       if (mo.impossible) R.badge('Efficiency cannot exceed 1: increase P<sub>in</sub> or reduce mgv', 'warn');
       R.head('Energy over the whole lift');
-      R.eq('time', 't = h ÷ v = ' + s3(v.h) + ' ÷ ' + s3(v.v), mo.t, 's');
-      R.eq('energy input', 'P<sub>in</sub> t = ' + s3(v.Pin) + ' × ' + s3(mo.t), mo.Ein, 'J');
-      R.eq('useful energy (ΔE<sub>P</sub>)', 'mgh = ' + s3(v.m) + ' × ' + g + ' × ' + s3(v.h), mo.Euseful, 'J');
-      R.eq('energy wasted', 'E<sub>in</sub> − mgh', mo.Ewasted, 'J');
-      R.eq('check: P = W ÷ t', s3(mo.Euseful) + ' ÷ ' + s3(mo.t), mo.Euseful / mo.t, 'W');
+      R.eq('time', 't = h ÷ v = ' + s3(v.h) + ' ÷ ' + s3(v.v), mo.t, 's', 'At constant speed, time = distance ÷ speed.');
+      R.eq('energy input', 'P<sub>in</sub> t = ' + s3(v.Pin) + ' × ' + s3(mo.t), mo.Ein, 'J', 'Energy = power × time.');
+      R.eq('useful energy (ΔE<sub>P</sub>)', 'mgh = ' + s3(v.m) + ' × ' + g + ' × ' + s3(v.h), mo.Euseful, 'J', 'The useful energy is the gain in gravitational potential energy, mgh.');
+      R.eq('energy wasted', 'E<sub>in</sub> − mgh', mo.Ewasted, 'J', 'Energy is conserved: whatever is not useful output is wasted (mostly as thermal energy in the motor).');
+      R.eq('check: P = W ÷ t', s3(mo.Euseful) + ' ÷ ' + s3(mo.t), mo.Euseful / mo.t, 'W', 'Power = work done ÷ time should give mgv again.');
       R.render();
       deriv.innerHTML = '<div class="head">Why the output power is mgv</div><div class="eq"><span class="rhs">At constant speed the tension = mg. P = W/t = (mg × Δh)/t = mg × (Δh/t) = mgv.</span></div>';
     } else {
       R.head('Driving force from power');
-      R.eq('F', 'P ÷ v = ' + s3(v.P) + ' ÷ ' + s3(v.vc), ve.Fdrive, 'N');
-      R.eq('total resistance', 'F<sub>r</sub> + mg sin θ = ' + s3(v.Fr) + ' + ' + s3(ve.Wpar), ve.resist, 'N');
-      R.eq('a', '(F − total resistance) ÷ m = (' + s3(ve.Fdrive) + ' − ' + s3(ve.resist) + ') ÷ ' + s3(v.m), ve.a, 'm s<sup>−2</sup>');
+      R.eq('F', 'P ÷ v = ' + s3(v.P) + ' ÷ ' + s3(v.vc), ve.Fdrive, 'N', 'P = Fv, so the engine’s driving force at this speed is F = P ÷ v.');
+      R.eq('total resistance', 'F<sub>r</sub> + mg sin θ = ' + s3(v.Fr) + ' + ' + s3(ve.Wpar), ve.resist, 'N', 'Uphill the weight has a component mg sin θ down the slope that adds to the resistive force.');
+      R.eq('a', '(F − total resistance) ÷ m = (' + s3(ve.Fdrive) + ' − ' + s3(ve.resist) + ') ÷ ' + s3(v.m), ve.a, 'm s<sup>−2</sup>', 'Newton’s second law: resultant force = ma.');
       if (Math.abs(ve.a) < 1e-9) R.badge('Constant speed: driving force = resistance', 'ok');
       else if (ve.a < 0) R.badge('Decelerating: the power is too small to maintain this speed', 'warn');
       R.head('Constant speed');
-      R.eq('power needed at this v', 'P = (F<sub>r</sub> + mg sin θ) v = ' + s3(ve.resist) + ' × ' + s3(v.vc), ve.Pconst, 'W');
-      if (isFinite(ve.vmax)) R.eq('maximum speed', 'P ÷ (F<sub>r</sub> + mg sin θ) = ' + s3(v.P) + ' ÷ ' + s3(ve.resist), ve.vmax, 'm s<sup>−1</sup>');
+      R.eq('power needed at this v', 'P = (F<sub>r</sub> + mg sin θ) v = ' + s3(ve.resist) + ' × ' + s3(v.vc), ve.Pconst, 'W', 'At constant speed the driving force equals the total resistance, so P = (total resistance) × v.');
+      if (isFinite(ve.vmax)) R.eq('maximum speed', 'P ÷ (F<sub>r</sub> + mg sin θ) = ' + s3(v.P) + ' ÷ ' + s3(ve.resist), ve.vmax, 'm s<sup>−1</sup>', 'Maximum speed is reached when the driving force P/v has fallen to equal the total resistance.');
       else R.badge('No resistance: no maximum speed in this model', 'info');
       R.render();
       deriv.innerHTML = '<div class="head">Derivation of P = Fv</div><div class="eq"><span class="rhs">P = W/t = F × s/t = Fv (force constant, along the motion). Here ' + s3(ve.Fdrive) + ' N × ' + s3(v.vc) + ' m s⁻¹ = ' + s3(v.P) + ' W.</span></div>';

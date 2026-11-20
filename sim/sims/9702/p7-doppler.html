@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-waves.js"></script>
@@ -108,31 +109,70 @@
   /* ---------- drawing ---------- */
   var XA = 0.85, XB = -0.85, XC = 0.25;   // observer positions as fractions of W
   function draw() {
-    var col = ui.colors(), v = prm.values, t = tPhys(), P = p();
+    var col = ui.colors(), v = prm.values, t = tPhys(), P = p(), RL = real();
     vp.fit(-W, W, -0.5 * W, 0.5 * W);
     var c = vp.begin();
-    c.save(); c.beginPath(); c.rect(vp.X(-W), vp.Y(0.5 * W), vp.X(W) - vp.X(-W), vp.Y(-0.5 * W) - vp.Y(0.5 * W)); c.clip();
+    var xs = x0 + v.vs * t, gy = vp.Y(0) + 40;   // real look: road surface 40 px below the siren
+    if (RL) SC.sky(c, 0, 0, vp.w, gy, { horizon: gy });
+    if (RL) street(c, gy, t);
+    c.save(); c.beginPath(); c.rect(vp.X(-W), vp.Y(0.5 * W), vp.X(W) - vp.X(-W), (RL ? gy : vp.Y(-0.5 * W)) - vp.Y(0.5 * W)); c.clip();
     var fronts = WV.wavefronts(P, t, 2.4 * W);
     fronts.forEach(function (fr) {
-      c.save(); c.strokeStyle = col.s1; c.lineWidth = 1.4; c.globalAlpha = Math.max(0.15, 1 - fr.r / (2.4 * W));
+      c.save(); c.strokeStyle = RL ? (SC.dark() ? '#b9c8ff' : '#7f74c9') : col.s1; c.lineWidth = 1.4; c.globalAlpha = Math.max(0.15, 1 - fr.r / (2.4 * W)) * (RL ? 0.8 : 1);
       c.beginPath(); c.arc(vp.X(fr.cx), vp.Y(0), fr.r * vp.scale, 0, 2 * Math.PI); c.stroke(); c.restore();
     });
     c.restore();
+    if (RL) SC.ground(c, 0, vp.w, gy, { kind: 'road', depth: Math.max(10, vp.h - gy) });
     D.line(c, [vp.P(-W, 0), vp.P(W, 0)], col.muted, { dash: [3, 5], width: 1 });
-    var xs = x0 + v.vs * t;
-    D.particle(c, vp.X(xs), vp.Y(0), 8, { fill: col.applied, label: 'S' });
+    if (RL) {
+      ambulance(c, vp.X(xs), gy, v.vs > 0 ? xs * vp.scale : 0);
+      if (v.vs > 0) SC.motionLines(c, vp.X(xs) - 34, gy - 22, 1, 0, Math.min(60, 8 + v.vs * 0.6), null, 12);
+      D.label(c, 'S', vp.X(xs) + 14, vp.Y(0) - 4, col.applied, { bold: true, size: 12 });
+    } else D.particle(c, vp.X(xs), vp.Y(0), 8, { fill: col.applied, label: 'S' });
     // arrow length ∝ v_s, so its tip can be dragged to set the speed
     if (v.vs > 0) D.arrow(c, vp.X(xs), vp.Y(0) - 18, vp.X(xs) + ARR0 + v.vs * arrK(), vp.Y(0) - 18, col.applied, { width: 2, label: 'v_s = ' + U.sf(v.vs).replace(/<[^>]+>/g, '') + ' m/s' });
     function obs(fx, color, name, f) {
-      var x = fx * W; c.save(); c.fillStyle = color; c.beginPath(); c.arc(vp.X(x), vp.Y(0), 7, 0, 2 * Math.PI); c.fill(); c.restore();
-      D.label(c, name, vp.X(x), vp.Y(0) + 18, color, { bold: true });
-      D.label(c, U.sf(f).replace(/<[^>]+>/g, '') + ' Hz', vp.X(x), vp.Y(0) + 34, color, { size: 11, bg: true });
+      var x = fx * W;
+      if (RL) SC.person(c, vp.X(x), gy, 46, { color: color, facing: fx < 0 ? 1 : -1 });
+      else { c.save(); c.fillStyle = color; c.beginPath(); c.arc(vp.X(x), vp.Y(0), 7, 0, 2 * Math.PI); c.fill(); c.restore(); }
+      D.label(c, name, vp.X(x), vp.Y(0) + labOff(), color, { bold: true, bg: RL });
+      D.label(c, U.sf(f).replace(/<[^>]+>/g, '') + ' Hz', vp.X(x), vp.Y(0) + labOff() + 16, color, { size: 11, bg: true });
     }
     obs(XA, col.s2, 'A', fUp); obs(XB, col.s3, 'B', fDown);
     obs(XC, col.s4, 'C', WV.observedAt(P, XC * W, t));
     D.label(c, 'λ ahead = ' + U.sf(WV.dopplerWavelength(v.fs, v.v, v.vs, true)).replace(/<[^>]+>/g, '') + ' m,  λ behind = ' + U.sf(WV.dopplerWavelength(v.fs, v.v, v.vs, false)).replace(/<[^>]+>/g, '') + ' m,  λ (at rest) = ' + U.sf(lam0).replace(/<[^>]+>/g, '') + ' m', vp.w / 2, 12, col.ink, { size: 11, bg: true });
-    if (mode.get() === 'vs' && solved && !solved.ok) D.label(c, 'No valid source speed for this observed frequency (needs v_s < 0.9v here)', vp.w / 2, vp.h - 12, col.warn, { bold: true, size: 12 });
+    if (mode.get() === 'vs' && solved && !solved.ok) D.label(c, 'No valid source speed for this observed frequency (needs v_s < 0.9v here)', vp.w / 2, vp.h - 12, col.warn, { bold: true, size: 12, bg: RL });
     if (ix) ix.paint(c);
+  }
+  /* ---------- real-life look: a street, an ambulance with its siren, people on the pavement ---------- */
+  var SC = SIM.scene;
+  function real() { return !!(SC && SC.real && SC.real()); }
+  function labOff() { return real() ? 58 : 18; }
+  function street(c, gy) {
+    var dk = SC.dark(), base = [0.08, 0.3, 0.55, 0.78], cols = ['#f3c9b7', '#cfe0f5', '#f6e2a8', '#d8ccef'];
+    base.forEach(function (fx, i) {   // soft pastel houses along the far side of the street
+      var hw = 56 + 14 * (i % 2), hh = 44 + 16 * ((i + 1) % 2), x = fx * vp.w - hw / 2;
+      c.save(); c.fillStyle = dk ? SC.shade(cols[i], -0.55) : cols[i]; c.strokeStyle = 'rgba(90,80,140,.18)'; c.lineWidth = 1;
+      c.beginPath(); if (c.roundRect) c.roundRect(x, gy - hh, hw, hh, 5); else c.rect(x, gy - hh, hw, hh); c.fill(); c.stroke();
+      c.fillStyle = dk ? SC.shade('#e7a99c', -0.5) : '#e7a99c'; c.beginPath(); c.moveTo(x - 4, gy - hh + 1); c.lineTo(x + hw / 2, gy - hh - 18); c.lineTo(x + hw + 4, gy - hh + 1); c.closePath(); c.fill();
+      c.fillStyle = dk ? 'rgba(255,230,150,.55)' : 'rgba(255,255,255,.75)';
+      c.fillRect(x + 8, gy - hh + 10, 11, 10); c.fillRect(x + hw - 19, gy - hh + 10, 11, 10);
+      c.restore();
+    });
+    SC.tree(c, vp.w * 0.43, gy, 54); SC.tree(c, vp.w * 0.93, gy, 46);
+  }
+  /** ambulance (a white van with a pastel stripe) whose blue lamp (the siren, point S) sits on the line y = 0 */
+  function ambulance(c, x, gy, dist) {
+    var L = 72, wr = L * 0.1, H = L * 0.42;
+    SC.car(c, x, gy, L, 0, { kind: 'van', color: '#f6f4fb', wheel: dist / wr });
+    var top = gy - wr * 1.1 - H;
+    c.save();
+    c.fillStyle = '#f2a3a3'; c.fillRect(x - L / 2 + 2, top + H * 0.45, L * 0.68, 5);   // red side stripe
+    c.fillStyle = '#e88a8a'; c.fillRect(x - L * 0.22, top + 6, 4, 11); c.fillRect(x - L * 0.22 - 3.5, top + 9.5, 11, 4);   // a cross
+    var on = Math.floor(clock.t * 4) % 2 === 0;
+    c.fillStyle = on ? '#7fb3ff' : '#c7dbff'; c.beginPath(); if (c.roundRect) c.roundRect(x - 6, top - 6, 12, 7, 3); else c.rect(x - 6, top - 6, 12, 7); c.fill();
+    if (on) { c.globalAlpha = 0.3; c.fillStyle = '#9cc4ff'; c.beginPath(); c.arc(x, top - 3, 12, 0, 2 * Math.PI); c.fill(); }
+    c.restore();
   }
   function plots() {
     var col = ui.colors(), v = prm.values, t = tPhys(), P = p();
@@ -150,31 +190,31 @@
   function readout() {
     var v = prm.values, s3 = U.sf;
     R.clear();
-    R.eq('λ at rest', 'v ÷ f<sub>s</sub> = ' + s3(v.v) + ' ÷ ' + s3(v.fs), lam0, 'm');
+    R.eq('λ at rest', 'v ÷ f<sub>s</sub> = ' + s3(v.v) + ' ÷ ' + s3(v.fs), lam0, 'm', 'For a stationary source the wavefronts are evenly spaced: λ = v/f.');
     if (mode.get() === 'vs') {
       R.head('Source speed from f<sub>o</sub> = ' + s3(v.fo) + ' Hz');
       if (!solved || !isFinite(solved.vs)) R.badge('Invalid frequencies', 'warn');
       else if (solved.approaching === null) R.badge('f<sub>o</sub> = f<sub>s</sub>: the source is not moving along the line (v<sub>s</sub> = 0)', 'info');
       else if (solved.approaching) {
         R.badge('f<sub>o</sub> > f<sub>s</sub> ⇒ source approaching (use v − v<sub>s</sub>)', 'info');
-        R.eq('v − v<sub>s</sub>', 'f<sub>s</sub>v ÷ f<sub>o</sub> = ' + s3(v.fs) + ' × ' + s3(v.v) + ' ÷ ' + s3(v.fo), v.fs * v.v / v.fo, 'm s<sup>−1</sup>');
-        R.eq('v<sub>s</sub>', 'v(1 − f<sub>s</sub>/f<sub>o</sub>) = ' + s3(v.v) + ' × (1 − ' + s3(v.fs) + '/' + s3(v.fo) + ')', solved.vs, 'm s<sup>−1</sup> towards the observer');
+        R.eq('v − v<sub>s</sub>', 'f<sub>s</sub>v ÷ f<sub>o</sub> = ' + s3(v.fs) + ' × ' + s3(v.v) + ' ÷ ' + s3(v.fo), v.fs * v.v / v.fo, 'm s<sup>−1</sup>', 'Rearrange f<sub>o</sub> = f<sub>s</sub>v/(v − v<sub>s</sub>) to make (v − v<sub>s</sub>) the subject.');
+        R.eq('v<sub>s</sub>', 'v(1 − f<sub>s</sub>/f<sub>o</sub>) = ' + s3(v.v) + ' × (1 − ' + s3(v.fs) + '/' + s3(v.fo) + ')', solved.vs, 'm s<sup>−1</sup> towards the observer', 'Subtract from the speed of sound. The heard frequency is higher, so the source must be moving towards the observer.');
       } else {
         R.badge('f<sub>o</sub> &lt; f<sub>s</sub> ⇒ source receding (use v + v<sub>s</sub>)', 'info');
-        R.eq('v + v<sub>s</sub>', 'f<sub>s</sub>v ÷ f<sub>o</sub> = ' + s3(v.fs) + ' × ' + s3(v.v) + ' ÷ ' + s3(v.fo), v.fs * v.v / v.fo, 'm s<sup>−1</sup>');
-        R.eq('v<sub>s</sub>', 'v(f<sub>s</sub>/f<sub>o</sub> − 1) = ' + s3(v.v) + ' × (' + s3(v.fs) + '/' + s3(v.fo) + ' − 1)', solved.vs, 'm s<sup>−1</sup> away from the observer');
+        R.eq('v + v<sub>s</sub>', 'f<sub>s</sub>v ÷ f<sub>o</sub> = ' + s3(v.fs) + ' × ' + s3(v.v) + ' ÷ ' + s3(v.fo), v.fs * v.v / v.fo, 'm s<sup>−1</sup>', 'Rearrange f<sub>o</sub> = f<sub>s</sub>v/(v + v<sub>s</sub>) to make (v + v<sub>s</sub>) the subject.');
+        R.eq('v<sub>s</sub>', 'v(f<sub>s</sub>/f<sub>o</sub> − 1) = ' + s3(v.v) + ' × (' + s3(v.fs) + '/' + s3(v.fo) + ' − 1)', solved.vs, 'm s<sup>−1</sup> away from the observer', 'Subtract the speed of sound. The heard frequency is lower, so the source is moving away.');
       }
       if (solved && isFinite(solved.vs) && !solved.ok) { R.badge('That speed is above 0.9v — outside this model’s range', 'warn'); R.render(); return; }
       if (!solved || !isFinite(solved.vs)) { R.render(); return; }
     }
     R.head('Observer A — source approaching');
-    R.eq('f<sub>o</sub>', 'f<sub>s</sub>v ÷ (v − v<sub>s</sub>) = ' + s3(v.fs) + ' × ' + s3(v.v) + ' ÷ (' + s3(v.v) + ' − ' + s3(v.vs) + ')', fUp, 'Hz');
-    R.eq('λ in front', '(v − v<sub>s</sub>) ÷ f<sub>s</sub>', WV.dopplerWavelength(v.fs, v.v, v.vs, true), 'm');
+    R.eq('f<sub>o</sub>', 'f<sub>s</sub>v ÷ (v − v<sub>s</sub>) = ' + s3(v.fs) + ' × ' + s3(v.v) + ' ÷ (' + s3(v.v) + ' − ' + s3(v.vs) + ')', fUp, 'Hz', 'The source moves towards A, so the crests reach A closer together. Use v − v<sub>s</sub>: the observed frequency is higher.');
+    R.eq('λ in front', '(v − v<sub>s</sub>) ÷ f<sub>s</sub>', WV.dopplerWavelength(v.fs, v.v, v.vs, true), 'm', 'In one period the source moves v<sub>s</sub>T forward, so the crests ahead are only (v − v<sub>s</sub>)T apart.');
     R.head('Observer B — source receding');
-    R.eq('f<sub>o</sub>', 'f<sub>s</sub>v ÷ (v + v<sub>s</sub>) = ' + s3(v.fs) + ' × ' + s3(v.v) + ' ÷ (' + s3(v.v) + ' + ' + s3(v.vs) + ')', fDown, 'Hz');
-    R.eq('λ behind', '(v + v<sub>s</sub>) ÷ f<sub>s</sub>', WV.dopplerWavelength(v.fs, v.v, v.vs, false), 'm');
+    R.eq('f<sub>o</sub>', 'f<sub>s</sub>v ÷ (v + v<sub>s</sub>) = ' + s3(v.fs) + ' × ' + s3(v.v) + ' ÷ (' + s3(v.v) + ' + ' + s3(v.vs) + ')', fDown, 'Hz', 'The source moves away from B, so the crests are spread out. Use v + v<sub>s</sub>: the observed frequency is lower.');
+    R.eq('λ behind', '(v + v<sub>s</sub>) ÷ f<sub>s</sub>', WV.dopplerWavelength(v.fs, v.v, v.vs, false), 'm', 'Behind the source each new crest is emitted v<sub>s</sub>T further away, so the spacing is (v + v<sub>s</sub>)T.');
     R.head('Observer C — the source passes');
-    R.eq('change in frequency heard', s3(fUp) + ' − ' + s3(fDown), fUp - fDown, 'Hz');
+    R.eq('change in frequency heard', s3(fUp) + ' − ' + s3(fDown), fUp - fDown, 'Hz', 'C first hears the higher (approaching) frequency, then the lower (receding) one, so the pitch drops as the source passes.');
     R.html('<div class="head">Why: each crest is emitted ' + s3(v.vs / v.fs) + ' m (= v<sub>s</sub>T) further forward, so crests ahead are closer together; the speed of each crest is still ' + s3(v.v) + ' m s<sup>−1</sup>.</div>');
     R.render();
   }
@@ -201,8 +241,8 @@
       if (xs !== null && !locked('fs')) hs.push({ id: 'fs', x: xs, y: vp.Y(0), r: 16, color: col.applied });
       if (xs !== null && !locked('vs')) hs.push({ id: 'vs', x: xs + ARR0 + v.vs * arrK(), y: vp.Y(0) - 18, color: col.applied });
       if (mode.get() === 'vs' && !locked('fo')) {
-        hs.push({ id: 'foA', x: vp.X(XA * W), y: vp.Y(0) + 34, r: 18, color: col.s2 });
-        hs.push({ id: 'foB', x: vp.X(XB * W), y: vp.Y(0) + 34, r: 18, color: col.s3 });
+        hs.push({ id: 'foA', x: vp.X(XA * W), y: vp.Y(0) + labOff() + 16, r: 18, color: col.s2 });
+        hs.push({ id: 'foB', x: vp.X(XB * W), y: vp.Y(0) + labOff() + 16, r: 18, color: col.s3 });
       }
       return hs;
     },

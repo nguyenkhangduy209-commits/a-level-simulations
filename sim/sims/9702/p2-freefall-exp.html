@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-measure.js"></script>
@@ -92,6 +93,11 @@
     // while a height is dragged the frame stays put, so the handle stays under the pointer
     var top = fitTop != null ? fitTop : hi + 0.35;
     vp.fit(-1.2, 1.6, -0.25, top); c = vp.begin();
+    var t = clock.t, tf = Math.sqrt(2 * hi / g), drop = 0.5 * g * Math.min(t, tf) * Math.min(t, tf), yb = hi - drop, real = SIM.scene.real();
+    if (real) {
+      labBackdrop(c, hi, lg);
+      D.label(c, lg ? 'release' : 'electromagnet', vp.X(0.25), vp.Y(hi + 0.13), col.muted, { align: 'left', size: 11 });
+    } else {
     // stand
     D.line(c, [vp.P(-0.9, -0.15), vp.P(-0.9, hi + 0.25)], col['object-line'], { width: 4 });
     D.ground(c, vp.X(-1.2), vp.Y(-0.15), vp.X(1.4), vp.Y(-0.15));
@@ -100,8 +106,20 @@
     c.fillRect(vp.X(-0.2), vp.Y(hi + 0.2), vp.X(0.2) - vp.X(-0.2), vp.Y(hi + 0.05) - vp.Y(hi + 0.2)); c.strokeRect(vp.X(-0.2), vp.Y(hi + 0.2), vp.X(0.2) - vp.X(-0.2), vp.Y(hi + 0.05) - vp.Y(hi + 0.2));
     D.label(c, lg ? 'release' : 'electromagnet', vp.X(0.25), vp.Y(hi + 0.13), col.muted, { align: 'left', size: 11 });
     D.line(c, [vp.P(-0.9, hi + 0.13), vp.P(-0.2, hi + 0.13)], col['object-line'], { width: 2 });
-    var t = clock.t, tf = Math.sqrt(2 * hi / g), drop = 0.5 * g * Math.min(t, tf) * Math.min(t, tf), yb = hi - drop;
-    if (lg) {
+    }
+    if (lg && real) {
+      realGate(c, hi, yb, Math.max(v.L, 0.02), t >= tf);
+      D.label(c, 'card L', vp.X(0.1), vp.Y(yb + Math.max(v.L, 0.02) / 2), col.s1, { align: 'left', size: 11 });
+      D.label(c, 'light gate → timer (Δt)', vp.X(0.45), vp.Y(0), col.muted, { align: 'left', size: 11 });
+    } else if (real) {
+      var rr0 = Math.max(5, vp.scale * 0.04), open = t >= tf, yReal = hi - 0.5 * g * t * t;
+      trapdoor(c, open ? Math.min(1, (t - tf) / 0.12) : 0);
+      var ybs = open ? Math.min(vp.Y(-0.15) - rr0, vp.Y(yReal) - rr0) : vp.Y(yb) - rr0;
+      SIM.scene.shadow(c, vp.X(0), vp.Y(-0.15), rr0 * 1.1, rr0 * 0.3);
+      SIM.scene.ball(c, vp.X(0), ybs, rr0, { kind: 'steel' });
+      timerBox(c, hi, Math.min(t, tf).toFixed(3) + ' s', open);
+      D.label(c, 'trapdoor → stops timer', vp.X(0.35), vp.Y(0) + 3, col.muted, { align: 'left', size: 11 });
+    } else if (lg) {
       // light gate at y = 0, card
       c.fillStyle = col.s1; c.globalAlpha = 0.7;
       var ch = Math.max(v.L, 0.02); c.fillRect(vp.X(-0.06), vp.Y(yb + ch), vp.X(0.06) - vp.X(-0.06), vp.Y(yb) - vp.Y(yb + ch)); c.globalAlpha = 1;
@@ -124,6 +142,88 @@
     hs.forEach(function (h) { D.line(c, [[vp.X(0.8) - 7, vp.Y(h)], [vp.X(0.8) + 7, vp.Y(h)]], col.component, { width: 1.4 }); });
     if (hs.length) D.label(c, 'h min = ' + U.num(Math.min(v.h0, v.h1), 3) + ' m', vp.X(0.8) - 10, vp.Y(Math.min(v.h0, v.h1)), col.component, { align: 'right', size: 11 });
     if (ix) ix.paint(c);
+  }
+
+
+  /* ---------- real-life lab props (soft pastel style; drawn only when SIM.scene.real()) ---------- */
+  function rrect(c, x, y, w, h, r) {
+    if (w < 0) { x += w; w = -w; } if (h < 0) { y += h; h = -h; }
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r); c.lineTo(x + w, y + h - r); c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r); c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y); c.closePath();
+  }
+  function soft(c, fill, x, y, w, h, r) { c.fillStyle = fill; rrect(c, x, y, w, h, r); c.fill(); c.strokeStyle = SIM.scene.dark() ? 'rgba(255,255,255,.14)' : 'rgba(60,70,110,.18)'; c.lineWidth = 1; c.stroke(); }
+  function labBackdrop(c, hi, lg) {
+    var sh = SIM.scene.shade, dk = SIM.scene.dark(), W = vp.w, H = vp.h, yF = vp.Y(-0.15);
+    c.save();
+    c.fillStyle = dk ? '#272b44' : '#eef0f8'; c.fillRect(0, 0, W, H);   // lab wall
+    c.fillStyle = dk ? 'rgba(255,255,255,.03)' : 'rgba(120,130,190,.06)'; for (var i = 0; i < W; i += 46) c.fillRect(i, 0, 23, yF);
+    c.restore();
+    SIM.scene.ground(c, 0, W, yF, { kind: 'floor', depth: Math.max(8, H - yF) });
+    // retort stand: heavy base, rod, boss and clamp arm
+    var metal = dk ? '#7d86a6' : '#c3c9de', xr = vp.X(-0.9);
+    c.save();
+    soft(c, dk ? '#4a5170' : '#a9b2cf', vp.X(-1.12), yF - 9, vp.X(-0.62) - vp.X(-1.12), 10, 4);
+    soft(c, metal, xr - 3, vp.Y(hi + 0.27), 6, yF - 8 - vp.Y(hi + 0.27), 3);
+    var ya = vp.Y(hi + 0.13);
+    soft(c, metal, xr, ya - 3, vp.X(-0.2) - xr, 6, 3);
+    soft(c, dk ? '#5e6788' : '#9aa3c2', xr - 7, ya - 7, 14, 14, 4);
+    // electromagnet: iron core with a pastel copper coil
+    var x0 = vp.X(-0.2), x1 = vp.X(0.2), yt = vp.Y(hi + 0.2), yb = vp.Y(hi + 0.05), cw = x1 - x0, ch = yb - yt;
+    soft(c, dk ? '#6a7090' : '#bfc5d8', x0 + cw * 0.3, yt - 2, cw * 0.4, ch + 6, 3);
+    soft(c, dk ? '#a9764e' : '#f0b98a', x0, yt + ch * 0.1, cw, ch * 0.8, 6);
+    c.strokeStyle = dk ? 'rgba(255,230,200,.25)' : 'rgba(255,255,255,.55)'; c.lineWidth = 1;
+    for (var k = 1; k < 7; k++) { var xx = x0 + cw * k / 7; c.beginPath(); c.moveTo(xx, yt + ch * 0.16); c.lineTo(xx, yt + ch * 0.84); c.stroke(); }
+    // wires from the coil to the timer (soft curves)
+    var tb = timerRect(hi);
+    c.strokeStyle = dk ? '#c98a8a' : '#e7a0a0'; c.lineWidth = 1.6; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(x1, yt + ch * 0.4); c.bezierCurveTo(x1 + 30, yt - 20, tb.x - 30, tb.y + tb.h * 0.3, tb.x, tb.y + tb.h * 0.35); c.stroke();
+    c.strokeStyle = dk ? '#8aa3c9' : '#9fb7e0';
+    c.beginPath(); c.moveTo(x1, yt + ch * 0.6); c.bezierCurveTo(x1 + 40, yt + 10, tb.x - 40, tb.y + tb.h * 0.8, tb.x, tb.y + tb.h * 0.65); c.stroke();
+    // lead from the trapdoor / light gate back to the timer, along the floor and up the right side
+    var xe = Math.min(vp.w - 6, vp.X(1.52)), ys = vp.Y(0) + 4;
+    c.strokeStyle = dk ? '#9a9fb8' : '#b7bdd3'; c.lineWidth = 1.4;
+    c.beginPath(); c.moveTo(vp.X(lg ? 0.4 : 0.36), ys); c.lineTo(xe - 6, ys); c.quadraticCurveTo(xe, ys, xe, ys - 6); c.lineTo(xe, tb.y + tb.h + 4); c.quadraticCurveTo(xe, tb.y + tb.h, xe - 6, tb.y + tb.h); c.lineTo(tb.x + tb.w * 0.8, tb.y + tb.h); c.stroke();
+    c.restore();
+    if (lg) timerBox(c, hi, 'Δt', false);
+  }
+  function timerRect(hi) { var w = 78, h = 38, cx = Math.min(vp.w - w / 2 - 14, vp.X(1.2)); return { x: cx - w / 2, y: Math.max(6, vp.Y(hi + 0.2) - h / 2), w: w, h: h }; }
+  /** digital timer: shows the (true) running time, or just "Δt" for the light gate */
+  function timerBox(c, hi, text, stopped) {
+    var r = timerRect(hi), dk = SIM.scene.dark();
+    c.save();
+    soft(c, dk ? '#3c4262' : '#d9dcec', r.x, r.y, r.w, r.h, 8);
+    soft(c, dk ? '#1f3b33' : '#d8f0e2', r.x + 6, r.y + 6, r.w - 12, r.h - 16, 4);
+    c.fillStyle = dk ? '#9be3c0' : '#2f6b52'; c.font = '600 13px ui-monospace, Menlo, monospace'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(text, r.x + r.w / 2, r.y + 6 + (r.h - 16) / 2);
+    c.fillStyle = stopped ? (dk ? '#e58d8d' : '#e7a0a0') : (dk ? '#7fd1a5' : '#9ad7b4'); c.beginPath(); c.arc(r.x + r.w - 10, r.y + r.h - 5, 2.5, 0, 2 * Math.PI); c.fill();
+    c.restore();
+  }
+  /** trapdoor: two brackets and a flap hinged at its right end; k 0 → 1 swings it down */
+  function trapdoor(c, k) {
+    var dk = SIM.scene.dark(), y0 = vp.Y(0), xl = vp.X(-0.3), xr = vp.X(0.3), L = xr - xl, wood = dk ? '#8a7258' : '#e9c99e';
+    c.save();
+    soft(c, dk ? '#5b6282' : '#b9c0d8', vp.X(-0.42), y0, vp.X(-0.3) - vp.X(-0.42), vp.Y(-0.15) - y0, 3);
+    soft(c, dk ? '#5b6282' : '#b9c0d8', vp.X(0.3), y0, vp.X(0.42) - vp.X(0.3), vp.Y(-0.15) - y0, 3);
+    c.translate(xr, y0 + 3); c.rotate(-1.25 * k);
+    soft(c, wood, -L, -3, L, 6, 3);
+    c.fillStyle = dk ? '#c9cfe0' : '#8f97b3'; c.beginPath(); c.arc(0, 0, 3, 0, 2 * Math.PI); c.fill();
+    c.restore();
+  }
+  /** light gate (two rounded arms with a soft red beam) on a short stand, and the falling card */
+  function realGate(c, hi, yb, ch, passed) {
+    var dk = SIM.scene.dark(), y0 = vp.Y(0), body = dk ? '#4f5675' : '#c7cce0';
+    c.save();
+    soft(c, dk ? '#f2f2f7' : '#ffffff', vp.X(-0.06), vp.Y(yb + ch), vp.X(0.06) - vp.X(-0.06), vp.Y(yb) - vp.Y(yb + ch), 2);   // card
+    c.fillStyle = dk ? 'rgba(120,140,220,.5)' : 'rgba(140,160,230,.45)'; c.fillRect(vp.X(-0.06) + 2, vp.Y(yb + ch) + 2, 3, Math.max(0, vp.Y(yb) - vp.Y(yb + ch) - 4));
+    soft(c, dk ? '#5b6282' : '#b9c0d8', vp.X(0.24), y0 + 8, 6, vp.Y(-0.15) - y0 - 8, 3);   // stand
+    soft(c, body, vp.X(-0.42), y0 - 9, vp.X(-0.15) - vp.X(-0.42), 18, 7);
+    soft(c, body, vp.X(0.15), y0 - 9, vp.X(0.42) - vp.X(0.15), 18, 7);
+    c.globalAlpha = passed ? 0.35 : 0.8; c.strokeStyle = '#f08a8a'; c.lineWidth = 3; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(vp.X(-0.15), y0); c.lineTo(vp.X(0.15), y0); c.stroke();
+    c.globalAlpha = 0.25; c.lineWidth = 7; c.stroke(); c.globalAlpha = 1;
+    c.fillStyle = '#f5a3a3'; c.beginPath(); c.arc(vp.X(-0.15) - 3, y0, 3, 0, 2 * Math.PI); c.fill();
+    c.restore();
   }
 
   /* ---------- direct manipulation: drag the release point (h_max) and the lowest ruler tick (h_min), tap to type ---------- */
@@ -206,23 +306,23 @@
     if (lg) {
       var f = res.fitV2;
       R.head('Theory: v = L ÷ Δt and v² = 2gh, so the gradient of v² against h is 2g');
-      R.eq('gradient', 'best-fit line', f.m, 'm s<sup>−2</sup>');
-      R.eq('g', 'gradient ÷ 2 = ' + U.sf(f.m, 4) + ' ÷ 2', res.gFromV2, 'm s<sup>−2</sup>');
-      R.eq('difference from 9.81', '', pct(res.gFromV2), '');
-      R.eq('intercept', 'v² when h = 0', f.c, 'm<sup>2</sup> s<sup>−2</sup>');
-      R.eq('compare gL', g + ' × ' + U.num(v.L, 3) + ' (card average-speed effect)', g * v.L, 'm<sup>2</sup> s<sup>−2</sup>');
-      if (Math.abs(v.hErr) > 1e-9) R.eq('shift from h error', '−2g × e = −2 × ' + g + ' × ' + U.num(v.hErr, 3), -2 * g * v.hErr, 'm<sup>2</sup> s<sup>−2</sup>');
+      R.eq('gradient', 'best-fit line', f.m, 'm s<sup>−2</sup>', 'Draw the line of best fit through the points and take Δ(v²) ÷ Δh from a large triangle, not from single data points.');
+      R.eq('g', 'gradient ÷ 2 = ' + U.sf(f.m, 4) + ' ÷ 2', res.gFromV2, 'm s<sup>−2</sup>', 'From rest, v² = 2gh: compare with y = mx + c, so the gradient is 2g and g = gradient ÷ 2.');
+      R.eq('difference from 9.81', '', pct(res.gFromV2), '', 'Percentage difference = (experimental − accepted) ÷ accepted × 100%: a check on accuracy.');
+      R.eq('intercept', 'v² when h = 0', f.c, 'm<sup>2</sup> s<sup>−2</sup>', 'A non-zero intercept shows a systematic error: it shifts the line but does not change its gradient.');
+      R.eq('compare gL', g + ' × ' + U.num(v.L, 3) + ' (card average-speed effect)', g * v.L, 'm<sup>2</sup> s<sup>−2</sup>', 'L ÷ Δt is the average speed while the card passes, i.e. roughly the speed half a card length lower, so v² is raised by about 2g × L/2 = gL.');
+      if (Math.abs(v.hErr) > 1e-9) R.eq('shift from h error', '−2g × e = −2 × ' + g + ' × ' + U.num(v.hErr, 3), -2 * g * v.hErr, 'm<sup>2</sup> s<sup>−2</sup>', 'Every recorded h is too large by e, so the true fall is h − e and v² = 2g(h − e): the line moves down by 2ge.');
     } else {
       var fh = res.fitH, ft = res.fitT;
       R.head('Graph 1: h = ½g t² + c (gradient g/2)');
-      R.eq('gradient', 'best-fit line of h against t²', fh.m, 'm s<sup>−2</sup>');
-      R.eq('g', '2 × gradient = 2 × ' + U.sf(fh.m, 4), res.gFromH, 'm s<sup>−2</sup>');
-      R.eq('difference from 9.81', '', pct(res.gFromH), '');
-      R.eq('intercept', 'h when t = 0 (expected: the h error e = ' + U.num(v.hErr, 3) + ' m)', fh.c, 'm');
+      R.eq('gradient', 'best-fit line of h against t²', fh.m, 'm s<sup>−2</sup>', 'Plot h on the y-axis and t² on the x-axis; the gradient of the best-fit line is Δh ÷ Δ(t²).');
+      R.eq('g', '2 × gradient = 2 × ' + U.sf(fh.m, 4), res.gFromH, 'm s<sup>−2</sup>', 'From rest, h = ½gt²: compare with y = mx, so the gradient is g/2 and g = 2 × gradient.');
+      R.eq('difference from 9.81', '', pct(res.gFromH), '', 'Percentage difference = (experimental − accepted) ÷ accepted × 100%: a check on accuracy.');
+      R.eq('intercept', 'h when t = 0 (expected: the h error e = ' + U.num(v.hErr, 3) + ' m)', fh.c, 'm', 'A systematic error in h (the same for every reading) moves the whole line up or down: it appears as an intercept.');
       R.head('Graph 2: t = √(2/g)·√h + δ');
-      R.eq('gradient', 'best-fit line of t against √h', ft.m, 's m<sup>−½</sup>');
-      R.eq('g', '2 ÷ gradient² = 2 ÷ ' + U.sf(ft.m, 4) + '²', res.gFromT, 'm s<sup>−2</sup>');
-      R.eq('intercept', 't when h = 0 (expected: delay δ = ' + U.num(v.delay, 3) + ' s)', ft.c, 's');
+      R.eq('gradient', 'best-fit line of t against √h', ft.m, 's m<sup>−½</sup>', 'Rearranging h = ½gt² gives t = √(2/g) × √h, so t against √h is a straight line of gradient √(2/g).');
+      R.eq('g', '2 ÷ gradient² = 2 ÷ ' + U.sf(ft.m, 4) + '²', res.gFromT, 'm s<sup>−2</sup>', 'Gradient = √(2/g), so gradient² = 2/g and g = 2 ÷ gradient².');
+      R.eq('intercept', 't when h = 0 (expected: delay δ = ' + U.num(v.delay, 3) + ' s)', ft.c, 's', 'A constant delay adds the same δ to every time, so this line is shifted up by δ while its gradient is unchanged.');
       if (v.delay > 0 && Math.abs(v.hErr) < 1e-9) R.badge('A timing delay makes the h–t² graph slightly curved and its gradient wrong; the t–√h graph is straight and its intercept shows the delay', 'warn');
       if (Math.abs(v.hErr) > 1e-9 && v.delay === 0) R.badge('An error in h gives an intercept on the h–t² graph; the gradient (and g) is unaffected', 'ok');
     }
