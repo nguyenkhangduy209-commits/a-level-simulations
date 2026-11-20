@@ -114,6 +114,9 @@
     if (two) D.label(c, 'v₂ = ' + U.sf(M.v2) + ' m s⁻¹', vp.X((xm + 15.5) / 2), vp.Y(-Math.max(h2, 0.5) - 1.6), col.s2, { size: 12, bg: true });
     D.label(c, 'electron drift drawn with relative speeds; real drift speeds are tiny', vp.w / 2, vp.h - 10, col.muted, { size: 11 });
     if (I === 0) D.label(c, 'I = 0: random motion only, no net drift', vp.w / 2, 16, col.muted, { size: 12, bold: true });
+    D.label(c, 'L = ' + U.num(prm.values.L, 4) + ' m', vp.X(15.5), vp.Y(Math.max(h1, h2) + 0.8), col.ink, { size: 12, bg: true, align: 'right' });
+    scene = { h1: h1, h2: h2, xm: xm, two: two, top: Math.max(h1, h2) };
+    if (ix) ix.paint(c);
   }
 
   /* ---------- plots ---------- */
@@ -160,6 +163,68 @@
     R.eq('P = V²/R', s3(M.V) + '² ÷ ' + s3(M.R), M.V * M.V / M.R, 'W');
     R.render();
   }
+
+  /* ---------- direct manipulation: drag the wire's edge (thickness) and end (length), tap to type ---------- */
+  var scene = null, dragRef = null;
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range.disabled); }
+  function decOf(st) { var t = String(st); return t.indexOf('.') < 0 ? 0 : t.length - t.indexOf('.') - 1; }
+  function tidy(v, k) { var st = Number(prm.rows[k].spec.step), s2 = Math.pow(10, Math.floor(Math.log10(Math.abs(v) || 1)) - 1); return Math.max(st, s2); }
+  function setVal(k, val, step) {
+    var sp = prm.rows[k].spec, o = {};
+    val = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (step) val = Number((Math.round(val / step) * step).toFixed(decOf(step)));
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] === prm.values[k]) return;
+    prm.set(o);
+    if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged();
+    if (ui.syncChips) ui.syncChips();
+  }
+  function ask(k, x, y, title, sub, quick) {
+    var sp = prm.rows[k].spec;
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step), decimals: Math.max(decOf(sp.step), 2),
+      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+  }
+  function areaKey() { return byArea.get() === 'A' ? 'A1' : 'd1'; }
+  if (cv.addEventListener) cv.addEventListener('pointerdown', function () { dragRef = null; });
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene) return [];
+      var col = ui.colors(), hs = [], ak = areaKey(), x1 = (0.5 + scene.xm) / 2;
+      if (!locked(ak)) hs.push({ id: 'thk', kind: 'thk', x: vp.X(x1 + 1.5), y: vp.Y(scene.h1), color: col.accent });
+      if (scene.two && !locked('k2')) hs.push({ id: 'thk2', kind: 'thk2', x: vp.X((scene.xm + 15.5) / 2 + 1.5), y: vp.Y(scene.h2), color: col.accent });
+      if (!locked('L')) hs.push({ id: 'L', kind: 'L', x: dragRef && dragRef.id === 'L' ? dragRef.px : vp.X(15.5), y: vp.Y(0), color: col['object-line'] });
+      if (!locked('rho')) hs.push({ id: 'rho', kind: 'rho', x: vp.X(x1 - 1.5), y: vp.Y(0), color: col.muted });
+      if (!locked('I')) hs.push({ id: 'I', kind: 'I', x: vp.X(4), y: vp.Y(scene.top + 0.8), r: 26, hidden: true });
+      if (!locked('n')) hs.push({ id: 'n', kind: 'n', x: vp.X(x1), y: vp.Y(-scene.h1 - 0.8), r: 26, hidden: true });
+      return hs;
+    },
+    onDrag: function (h, x, y) {
+      var w = vp.toWorld(x, y);
+      if (h.kind === 'thk') {
+        // the drawn half-thickness is 1.6 √(d / mm), clamped to 0.5 … 3.4
+        var dmm = Math.pow(U.clamp(Math.abs(w[1]), 0.5, 3.4) / 1.6, 2);
+        if (areaKey() === 'A1') { var A = Math.PI * dmm * dmm / 4; setVal('A1', A, tidy(A, 'A1')); } else setVal('d1', dmm, tidy(dmm, 'd1'));
+      } else if (h.kind === 'thk2') setVal('k2', U.clamp(Math.abs(w[1]), 0.25, 3.8) / scene.h1, 0.05);
+      else if (h.kind === 'L') {
+        // stretch: every 3 units dragged right doubles L, left halves it
+        if (!dragRef || dragRef.id !== 'L') dragRef = { id: 'L', v0: prm.values.L, x0: w[0] };
+        dragRef.px = x;
+        var L = dragRef.v0 * Math.pow(2, (w[0] - dragRef.x0) / 3); setVal('L', L, tidy(L, 'L'));
+        drawScene();
+      }
+    },
+    onDrop: function () { dragRef = null; drawScene(); },
+    onTap: function (h, x, y) {
+      if (h.kind === 'thk') { if (areaKey() === 'A1') ask('A1', x, y, 'Cross-sectional area A', '1 mm² = 10⁻⁶ m²', [0.245, 0.5, 1, 2]); else ask('d1', x, y, 'Wire diameter d', 'A = πd²/4 — remember to square d.', [0.25, 0.5, 1, 2]); }
+      else if (h.kind === 'thk2') ask('k2', x, y, 'Second section: d₂ ÷ d₁', 'Same current: v ∝ 1/A ∝ 1/d².', [0.5, 1, 2]);
+      else if (h.kind === 'L') ask('L', x, y, 'Wire length L', 'R = ρL/A: R ∝ L.', [0.5, 1, 1.5, 2]);
+      else if (h.kind === 'rho') ask('rho', x, y, 'Resistivity ρ (× 10⁻⁸ Ω m)', 'Copper 1.7, aluminium 2.8, nichrome 112.', [1.7, 2.8, 112]);
+      else if (h.kind === 'I') ask('I', x, y, 'Current I', 'Rate of flow of charge: Q = It.', [0.03, 0.5, 1, 2]);
+      else if (h.kind === 'n') ask('n', x, y, 'Charge carriers per m³ n (× 10²⁸)', 'Copper: 8.5 × 10²⁸ m⁻³', [8.5]);
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag the wire’s top edge to change its thickness · drag its end to change L · tap the wire for ρ, the current arrow for I');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

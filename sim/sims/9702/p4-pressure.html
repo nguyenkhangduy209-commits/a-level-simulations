@@ -118,7 +118,7 @@
     var wTrue = Math.sqrt(o.A), w = U.clamp(wTrue, 0.4 * v.H, 3 * v.H);
     var depthMax = Math.max(floor, 1e-3), halfW = Math.max(2.2 * w, 0.9 * depthMax);
     var top = Math.max(0.35 * depthMax, -o.d + 0.6 * v.H, 0.3 * w);
-    vp.fit(-halfW, halfW, -depthMax * 1.04, top);
+    if (hold) vp.fit.apply(vp, hold.fit); else vp.fit(-halfW, halfW, -depthMax * 1.04, top);   // frozen while dragging
     var c = vp.begin();
     // tank
     c.save(); c.fillStyle = col.s1; c.globalAlpha = 0.16; c.fillRect(vp.X(-halfW), vp.Y(0), vp.X(halfW) - vp.X(-halfW), vp.Y(-depthMax) - vp.Y(0)); c.restore();
@@ -167,6 +167,11 @@
     else if (md === 'released') msg = Math.abs(o.U - o.W) < 1e-9 * o.W ? 'no resultant force: stays put' : (o.U > o.W ? 'U > W: rises' : 'W > U: sinks');
     else if (o.state === 'out') msg = 'object is out of the fluid: no upthrust';
     if (msg) D.label(c, msg, vp.w / 2, 14, col.ink, { bold: true, size: 12 });
+    // liquid density label (a tap target)
+    var lx = vp.X(-halfW) + 12, ly = Math.min(vp.Y(-depthMax) - 14, vp.Y(0) + 40);
+    D.label(c, 'ρ_f = ' + U.sf(v.rhoF) + ' kg m⁻³', lx, ly, col.s1, { align: 'left', size: 11, bg: true });
+    geo = { cx: cx, cy: cy, yTop: vp.Y(yTop), xR: vp.X(w / 2), yBot: vp.Y(yBot), px: px, py: py, lx: lx + 40, ly: ly, dlY: vp.Y(-v.Dl), surfY: vp.Y(0), xL: vp.X(-halfW) };
+    if (ix) ix.paint(c);
     drawPlot();
   }
   function drawPlot() {
@@ -226,6 +231,50 @@
       '<div class="eq"><span class="lhs">weight of column</span><span class="rhs">ρAΔh g = ' + s3(v.rhoF * A * dh * g) + ' N</span></div>' +
       '<div class="eq"><span class="lhs">Δp = weight ÷ A</span><span class="rhs">ρAΔhg ÷ A = ρgΔh = ' + s3(v.rhoF * g * dh) + ' Pa</span></div>';
   }
+
+  /* ---------- direct manipulation: drag the object (depth), its bottom corner (height), the probe, the floor; tap to type ---------- */
+  var geo = null, hold = null, ix = null;
+  function editable(k) { var r = prm.rows[k]; return !!r && r.row.style.display !== 'none' && !r.range.disabled; }
+  function lim(k, v) { var sp = prm.rows[k].spec; return U.clamp(v, Number(sp.min), Number(sp.max)); }
+  function setKey(k, v) { var o = {}; o[k] = lim(k, Math.round(v * 100) / 100); prm.set(o); if (ui.syncChips) ui.syncChips(); }
+  function ask(k, title, sub, x, y, opt) {
+    var sp = prm.rows[k].spec;
+    ui.askNumber(Object.assign({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: 0.01, decimals: 2, at: { x: x, y: y },
+      onInput: function (v) { var o = {}; o[k] = lim(k, v); if (k === 'rhoF') fluid.set('custom', true); prm.set(o); if (ui.syncChips) ui.syncChips(); } }, opt));
+  }
+  function worldY(y) { return vp.toWorld(0, y)[1]; }
+  var downY = 0;   // where the pointer went down (the drag keeps that offset from the grabbed edge)
+  if (cv.addEventListener) cv.addEventListener('pointerdown', function (e) { var r = cv.getBoundingClientRect ? cv.getBoundingClientRect() : { top: 0 }; downY = e.clientY - r.top; });
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!geo) return [];
+      var col = ui.colors(), out = [], md = mode.get();
+      out.push({ id: 'obj', x: geo.cx, y: geo.cy, r: Math.max(16, Math.min(30, (geo.yBot - geo.yTop) / 2)), color: col['object-line'] });
+      if (editable('H')) out.push({ id: 'H', x: geo.xR, y: geo.yBot, r: 14, color: col['object-line'] });
+      if (editable('h')) out.push({ id: 'h', x: geo.px, y: geo.py, color: col.accent });
+      if (md === 'free' && editable('Dl')) out.push({ id: 'Dl', x: geo.xL + 26, y: geo.dlY, r: 16, color: col.s1 });
+      if (editable('rhoF')) out.push({ id: 'rhoF', x: geo.lx, y: geo.ly, r: 18, color: col.s1 });
+      return out;
+    },
+    onDrag: function (hd, x, y) {
+      if (!hold) hold = { fit: vp.bounds.slice(), dy: downY - (hd.id === 'obj' ? geo.yTop : hd.y) };   // keep the grab offset
+      var wy = worldY(y - hold.dy);
+      if (hd.id === 'obj') { if (mode.get() !== 'free' && editable('d')) setKey('d', -wy); }
+      else if (hd.id === 'H') setKey('H', Math.max(0.01, -o.d - wy));
+      else if (hd.id === 'h') setKey('h', Math.max(0, -wy));
+      else if (hd.id === 'Dl') setKey('Dl', -wy);
+    },
+    onDrop: function () { if (hold) { hold = null; draw(); } },
+    onTap: function (hd, x, y) {
+      if (hd.id === 'obj') ask('rhoO', 'Density of the object', 'ρ<sub>o</sub> &lt; ρ<sub>f</sub> floats; ρ<sub>o</sub> &gt; ρ<sub>f</sub> sinks. (Volume: tap the bottom-right corner.)', x, y, { unit: 'kg m⁻³', step: 10, decimals: 0, quick: [600, 917, 2700, 7800] });
+      else if (hd.id === 'H') ask('V', 'Volume of the object', 'Convert cm³ → m³ by × 10<sup>−6</sup>. Drag this corner to change the height.', x, y, { unit: 'm³', step: 0.0001, decimals: 5, quick: [0.0001, 0.001, 0.002, 0.075] });
+      else if (hd.id === 'h') ask('h', 'Pressure probe depth', 'Depth below the surface.', x, y, { unit: 'm', quick: [0.5, 1, 2, 10] });
+      else if (hd.id === 'Dl') ask('Dl', 'Depth of liquid in the tank', '', x, y, { unit: 'm', quick: [0.4, 0.5, 1, 5] });
+      else if (hd.id === 'rhoF') ask('rhoF', 'Density of the fluid', 'water 1000, sea water 1030, oil 800, mercury 13 600 kg m⁻³', x, y, { unit: 'kg m⁻³', step: 10, decimals: 0, quick: [800, 1000, 1030, 13600] });
+    },
+    onHover: function () { draw(); }
+  });
+  ui.stageTip('Drag the object up/down to set its depth · drag its bottom corner to change its height · drag the probe · tap the object, corner or ρ_f label to type values');
 
   ui.onTheme(draw);
   vp.onResize = draw;

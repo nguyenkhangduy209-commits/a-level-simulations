@@ -90,7 +90,7 @@
     if (mode === 'lambda') lam = SP.lambdaFromGrating(d, v.n, v.th);
     if (mode === 'd') d = SP.dFromGrating(lam, v.n, v.th);
     M = { d: d, lam: lam, mode: mode, g: SP.grating(d, lam), wl: white.get() ? SP.whiteLight(d) : null };
-    drawScene(); drawPlots(); readout();
+    drawScene(); drawPlots(); readout(); tip();
   }
 
   function lamColor(nm) {
@@ -107,6 +107,7 @@
     var col = ui.colors(), c;
     vp.fit(-0.75, 1.25, -1.1, 1.1);
     c = vp.begin();
+    scene = null;
     if (M.g.invalid || !isFinite(M.lam) || !isFinite(M.d)) { D.label(c, M.g.invalid || 'No solution: check n and θ', vp.w / 2, vp.h / 2, col.warn, { bold: true }); return; }
     var Rr = 1, O = vp.P(0, 0), isFlat = flat.get();
     // incident beam and grating
@@ -152,6 +153,8 @@
       var o1 = M.g.orders[1];
       if (o1) D.arc(c, O[0], O[1], 46, 0, U.rad(o1.deg), col.s4, 'θ₁');
     }
+    scene = { O: O, rayEnd: rayEnd, flat: isFlat };
+    if (ix) ix.paint(c);
   }
 
   /* ---------- plots ---------- */
@@ -223,6 +226,64 @@
       });
     }
     R.render();
+  }
+
+  /* ---------- direct manipulation: drag a bright order to a new angle, tap the grating / beam / screen to type ---------- */
+  var scene = null;
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range.disabled); }
+  function decOf(st) { var t = String(st); return t.indexOf('.') < 0 ? 0 : t.length - t.indexOf('.') - 1; }
+  function setVal(k, val, step) {
+    var sp = prm.rows[k].spec, o = {};
+    val = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (step) val = Number((Math.round(val / step) * step).toFixed(decOf(step)));
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] === prm.values[k]) return;
+    prm.set(o);
+    if (ui.syncChips) ui.syncChips();
+  }
+  function ask(k, x, y, title, sub, quick) {
+    var sp = prm.rows[k].spec;
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step), decimals: Math.max(decOf(sp.step), 1),
+      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+  }
+  /** the order a drag acts on: order n at θ when θ is an input, otherwise the first order (dragging it changes λ) */
+  function dragOrder() {
+    if (!M || M.g.invalid) return null;
+    if (M.mode !== 'angles') return locked('th') ? null : { deg: prm.values.th, key: 'th' };
+    if (M.wl || locked('lam') || !M.g.orders[1]) return null;
+    return { deg: M.g.orders[1].deg, key: 'lam' };
+  }
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene) return [];
+      var col = ui.colors(), hs = [], o = dragOrder();
+      if (o) { var e = scene.rayEnd(o.deg); if (e[2]) hs.push({ id: 'ord', kind: 'ord', x: vp.X(e[0]), y: vp.Y(e[1]), color: col.s4 }); }
+      var gk = M.mode === 'd' ? null : spec.get() === 'N' ? 'N' : 'dU';
+      if (gk && !locked(gk)) hs.push({ id: 'gr', kind: 'gr', key: gk, x: scene.O[0], y: vp.Y(0.3), color: col['object-line'] });
+      if (M.mode !== 'lambda' && !locked('lam')) hs.push({ id: 'lam', kind: 'lam', x: vp.X(-0.4), y: vp.Y(0.12), color: col.accent });
+      if (scene.flat && !locked('Dm')) hs.push({ id: 'scr', kind: 'scr', x: vp.X(1), y: vp.Y(-0.85), color: col['object-line'] });
+      return hs;
+    },
+    onDrag: function (h, x, y) {
+      if (h.kind !== 'ord') return;
+      var o = dragOrder(); if (!o) return;
+      var a = SIM.view.screenAngle(scene.O[0], scene.O[1], x, y); if (a > 180) a -= 360;
+      a = U.clamp(Math.abs(a), 0.1, 89.9);
+      if (o.key === 'th') setVal('th', a, 0.1);
+      else setVal('lam', M.d * Math.sin(U.rad(a)) * 1e9, 1);
+    },
+    onTap: function (h, x, y) {
+      if (h.kind === 'ord') { if (M.mode !== 'angles') ask('th', x, y, 'Angle θ of order n = ' + prm.values.n, 'Measured from the straight-through (zero-order) direction.'); else ask('lam', x, y, 'Wavelength λ', 'Visible light: 400 nm (violet) to 700 nm (red).', [450, 520, 589, 650]); }
+      else if (h.kind === 'gr') { if (h.key === 'N') ask('N', x, y, 'Lines per millimetre N', 'd = 1/N', [100, 300, 600, 1200]); else ask('dU', x, y, 'Line spacing d', 'Distance between adjacent lines of the grating.', [1, 2, 3.8, 5]); }
+      else if (h.kind === 'lam') ask('lam', x, y, 'Wavelength λ', 'Visible light: 400 nm (violet) to 700 nm (red).', [450, 520, 589, 650]);
+      else if (h.kind === 'scr') ask('Dm', x, y, 'Grating to screen distance D', 'Positions on the screen: y = D tan θ.', [0.5, 1, 2]);
+    },
+    onHover: function () { drawScene(); }
+  });
+  function tip() {
+    var m = solveFor.get();
+    ui.stageTip(m === 'angles' ? (white.get() ? 'Tap the grating to type its lines per mm · tap the beam to type λ' : 'Drag the first-order spot to change λ · tap the grating to type N or d · tap the beam to type λ')
+      : 'Drag the order-' + prm.values.n + ' spot to set θ · tap it to type θ' + (m === 'lambda' ? ' · tap the grating to type N or d' : ' · tap the beam to type λ'));
   }
 
   ui.onTheme(function () { drawScene(); drawPlots(); });

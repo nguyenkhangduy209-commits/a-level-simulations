@@ -89,6 +89,7 @@
         if (body.u0link && solveOn && who === 'A') body.u0k = top.values.u0; else body.u0 = top.values.u0;
         autoPick = true; update();
       });
+      body._top = top;
       if (solveOn && who === 'A') ui.toggle(box, { label: 'X appears in u₀ (u₀ = k·X)', value: body.u0link }, function (on) { if (my !== gen) return; body.u0link = on; autoPick = true; render(); update(); });
       body.stages.forEach(function (st, i) {
         var wrap = ui.h('div', { class: 'stage' }); box.appendChild(wrap);
@@ -115,7 +116,7 @@
             if (my !== gen) return; st.link = v; autoPick = true; render(); update();
           });
         }
-        st._el = wrap;
+        st._el = wrap; st._prm = prm;
       });
       var row = ui.h('div', { class: 'row' }); box.appendChild(row);
       if (body.stages.length < MAXST) row.appendChild(ui.h('button', { class: 'btn', text: '＋ Add stage', onclick: function () {
@@ -293,11 +294,13 @@
       D.particle(c, X(sb2.s), yB - 10, 8, { fill: col.s2, label: 'B' });
       if (Math.abs(sb2.v) > 1e-9) D.arrow(c, X(sb2.s), yB - 26, X(sb2.s) + U.sgn(sb2.v) * (14 + Math.min(70, Math.abs(sb2.v) * 3)), yB - 26, col.velocity, { width: 1.6 });
     }
+    lay = { X: X, A: [X(st.s), yA - 12], dots: jA.segs.map(function (g2) { return { i: g2.i, x: X(g2.s1), y: yA }; }) };
+    if (ix) ix.paint(c);
   }
 
   /* ---------- plots ---------- */
   var vSpec = null;
-  pV.draw = function (spec) { SIM.plot.Plot.prototype.draw.call(this, spec); overlayAreas(this); };
+  pV.draw = function (spec) { SIM.plot.Plot.prototype.draw.call(this, spec); overlayAreas(this); if (ixV) ixV.paint(this.ctx); };
   function overlayAreas(P) {
     if (!jA || !P.px) return;
     var c = P.ctx, col = ui.colors(), box = P.box;
@@ -338,7 +341,7 @@
       serA.push({ fn: function (t) { return K.trackAt(PB, t).a; }, color: col.s2, breaks: brB, steps: 600, dash: [6, 4] });
       meet.list.forEach(function (m) { mS.push({ x: m.t, y: m.s, label: 'meet t = ' + U.sf(m.t).replace(/<[^>]+>/g, ''), color: col.ink }); });
     }
-    pV.draw({ x: [0, tMax], series: serV, cursor: clock.t, vlines: vl, markers: mk });
+    pV.draw(vFreeze ? { x: [0, vFreeze.x1], y: [vFreeze.y0, vFreeze.y1], series: serV, cursor: clock.t, vlines: vl, markers: mk } : { x: [0, tMax], series: serV, cursor: clock.t, vlines: vl, markers: mk });
     pS.draw({ x: [0, tMax], series: serS, cursor: clock.t, vlines: vl, markers: mS });
     pA.draw({ x: [0, tMax], series: serA, cursor: clock.t, vlines: vl });
   }
@@ -488,6 +491,116 @@
     }
     R.render();
   }
+
+  /* ---------- direct manipulation ----------
+     main canvas: drag A along the line to move through time, tap A to type u₀, tap a stage mark to type that stage.
+     v–t graph: drag the end of a stage (sideways = its time, up/down = its velocity), drag the start point for u₀, tap to type. */
+  var lay = null, vFreeze = null;
+  function linked(st, f) { return solveOn && st.link === f && TYPES[st.type].fields.indexOf(f) >= 0; }
+  function u0Linked() { return solveOn && A.u0link; }
+  function primary(st) {
+    var fs = TYPES[st.type].fields, order = ['v', 't', 'd', 'T', 'a'];
+    for (var k = 0; k < order.length; k++) if (fs.indexOf(order[k]) >= 0 && !linked(st, order[k])) return order[k];
+    return null;
+  }
+  function editAxes(st) {
+    var fs = TYPES[st.type].fields;
+    return { h: fs.indexOf('t') >= 0 && !linked(st, 't') ? 't' : st.type === 'fill' && !linked(st, 'T') ? 'T' : null,
+      v: fs.indexOf('v') >= 0 && !linked(st, 'v') ? 'v' : st.type === 'ta' && !linked(st, 'a') ? 'a' : null };
+  }
+  function clampF(f, v) { return U.clamp(v, FIELD[f].min, FIELD[f].max); }
+  function setStage(st, obj) {
+    var o = {};
+    Object.keys(obj).forEach(function (f) { var v = Number(clampF(f, obj[f]).toFixed(4)); if (v !== st[f]) { st[f] = v; o[f] = v; } });
+    if (!Object.keys(o).length) return;
+    if (st._prm) st._prm.set(o, true);
+    autoPick = true; update();
+  }
+  function setU0(v) {
+    v = Number(U.clamp(v, -50, 50).toFixed(4)); if (v === A.u0) return;
+    A.u0 = v; if (A._top) A._top.set({ u0: v }, true);
+    autoPick = true; update();
+  }
+  function replay() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); }
+  function stepFor(span, big, mid, small) { return span > 60 ? big : span > 10 ? mid : small; }
+  function stageAt(canvas, x, y) {
+    var sg = ui.stage(); if (!sg || !sg.el || !sg.el.getBoundingClientRect || canvas === cv) return { x: x, y: y };
+    var a = canvas.getBoundingClientRect(), b = sg.el.getBoundingClientRect();
+    return { x: a.left - b.left + x, y: a.top - b.top + y };
+  }
+  var QSTEP = { t: 0.5, a: 0.1, v: 0.5, d: 1, T: 1 }, QUICK = { t: [5, 10, 20, 30], a: [-2, -1, 0.5, 1, 2], v: [0, 5, 10, 20], d: [10, 50, 100], T: [60, 120, 240] };
+  function askStage(i, f, at) {
+    var st = A.stages[i]; if (!st || !f) return;
+    ui.askNumber({ title: 'Stage ' + (i + 1) + ': ' + fieldLabel(st.type, f).toLowerCase(), sub: 'Stage type: ' + TYPES[st.type].label + '. Other values: use the panel.',
+      value: st[f], min: FIELD[f].min, max: FIELD[f].max, step: QSTEP[f], decimals: 2, unit: FIELD[f].unit, at: at, quick: QUICK[f],
+      onInput: function (v) { var o = {}; o[f] = v; setStage(st, o); replay(); } });
+  }
+  function askU0(at) {
+    ui.askNumber({ title: 'Initial velocity u₀ of A', sub: 'Positive = forwards (to the right).', value: A.u0, min: -50, max: 50, step: 0.5, decimals: 2, unit: 'm s<sup>−1</sup>', at: at,
+      quick: [0, 5, 10, 15, 20], onInput: function (v) { setU0(v); replay(); } });
+  }
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!lay) return [];
+      var col = ui.colors(), hs = [{ id: 'A', x: lay.A[0], y: lay.A[1], color: col.s1 }];
+      lay.dots.forEach(function (d) { var st = A.stages[d.i]; if (st && primary(st)) hs.push({ id: 'd' + d.i, i: d.i, x: d.x, y: d.y, r: 10, hidden: true }); });
+      return hs;
+    },
+    onDrag: function (hd, x) {
+      if (hd.id !== 'A' || !PA) return;
+      if (clock.playing) clock.pause();
+      var best = clock.t, bc = Infinity, now = clock.t;
+      for (var i = 0; i <= 800; i++) {
+        var t = tMax * i / 800, cost = Math.abs(lay.X(K.trackAt(PA, t).s) - x) + 25 * Math.abs(t - now) / tMax;
+        if (cost < bc) { bc = cost; best = t; }
+      }
+      clock.seek(best);
+    },
+    onTap: function (hd, x, y) {
+      if (hd.id === 'A') { if (!u0Linked()) askU0({ x: x, y: y }); }
+      else askStage(hd.i, primary(A.stages[hd.i]), { x: x, y: y });
+    },
+    onHover: function () { drawScene(); }
+  });
+  function invX(x) { var a = pV.px(0), b = pV.px(1); return (x - a) / (b - a); }
+  function invY(y) { var a = pV.py(0), b = pV.py(1); return (y - a) / (b - a); }
+  var ixV = SIM.view.interact(pV.canvas, {
+    handles: function () {
+      if (!jA || !pV.px) return [];
+      var col = ui.colors(), hs = [];
+      if (!u0Linked() && jA.resolved) hs.push({ id: 'u0', x: pV.px(0), y: pV.py(jA.resolved.u0), color: col.s1 });
+      jA.segs.forEach(function (g2) {
+        var st = A.stages[g2.i]; if (!st) return;
+        var ax = editAxes(st); if (!ax.h && !ax.v && !primary(st)) return;
+        hs.push({ id: 's' + g2.i, i: g2.i, x: pV.px(g2.t1), y: pV.py(g2.v) });
+      });
+      return hs;
+    },
+    onDrag: function (hd, x, y) {
+      if (!vFreeze) {
+        var bx = pV.box; vFreeze = { x1: invX(bx.L + bx.W), y0: invY(bx.T + bx.H), y1: invY(bx.T) };
+        if (clock.playing) clock.pause();
+      }
+      var t = U.clamp(invX(x), 0, vFreeze.x1), v = U.clamp(invY(y), vFreeze.y0, vFreeze.y1);
+      var vs = stepFor(vFreeze.y1 - vFreeze.y0, 1, 0.5, 0.1), ts = stepFor(vFreeze.x1, 1, 0.5, 0.1);
+      var vr = Math.round(v / vs) * vs;
+      if (hd.id === 'u0') { setU0(vr); return; }
+      var st = A.stages[hd.i], g2 = jA.segs.filter(function (q) { return q.i === hd.i; })[0]; if (!st || !g2) return;
+      var ax = editAxes(st), o = {}, dur = g2.T;
+      if (ax.h === 't') { dur = Math.max(ts, Math.round((t - g2.t0) / ts) * ts); o.t = dur; }
+      else if (ax.h === 'T') o.T = Math.max(0, Math.round(t / ts) * ts);
+      if (ax.v === 'v') o.v = vr;
+      else if (ax.v === 'a' && dur > 1e-9) o.a = Number(((vr - g2.u) / dur).toFixed(3));
+      setStage(st, o);
+    },
+    onDrop: function () { vFreeze = null; drawPlots(); replay(); },
+    onTap: function (hd, x, y) {
+      var at = stageAt(pV.canvas, x, y);
+      if (hd.id === 'u0') askU0(at); else askStage(hd.i, primary(A.stages[hd.i]), at);
+    },
+    onHover: function () { drawPlots(); }
+  });
+  ui.stageTip('Drag A to move through time · tap A for u₀ or a stage mark to type it · on the v–t graph drag a stage’s end point to change its time / velocity');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

@@ -172,15 +172,19 @@
     if (r.invalid) { vp.fit(0, 1, 0, 1); c = vp.begin(); D.label(c, r.invalid, vp.w / 2, vp.h / 2, col.warn, { bold: true }); return; }
     var Lp = r.L, rise = r.rise, W = 10, k = W / Math.max(Lp * Math.sqrt(Math.max(0, 1 - rise * rise)), 1e-9);
     var Hh = Lp * rise; // total rise in the forward direction
-    var ky = k; if (Math.abs(Hh) * ky > 6) ky = 6 / Math.abs(Hh);
-    var X = function (s) { return (s / Lp) * W; };
+    var ky = k, Wd = W;
+    if (Math.abs(Hh) * ky > 6) {
+      ky = 6 / Math.abs(Hh);
+      if (path === 'slope') Wd = W * ky / k;   // keep a steep slope at its true angle (narrower instead of flatter)
+    }
+    var X = function (s) { return (s / Lp) * Wd; };
     var Yf = function (s) {
       var f = s / Lp;
       if (path === 'curve') return Hh * ky * (0.5 - 0.5 * Math.cos(Math.PI * f));
       return Hh * ky * f;
     };
     var ymin = Math.min(0, Hh * ky), ymax = Math.max(0, Hh * ky);
-    vp.fit(-1, W + 1, ymin - 1.5, ymax + 2.5);
+    if (dragFit) vp.fit.apply(vp, dragFit); else vp.fit(-1, W + 1, ymin - 1.5, ymax + 2.5);
     c = vp.begin();
     var pts = []; for (var i = 0; i <= 80; i++) pts.push(vp.P(X(Lp * i / 80), Yf(Lp * i / 80)));
     c.save(); c.fillStyle = col.surface; c.beginPath(); c.moveTo(pts[0][0], vp.Y(ymin - 0.8)); pts.forEach(function (p) { c.lineTo(p[0], p[1]); }); c.lineTo(pts[pts.length - 1][0], vp.Y(ymin - 0.8)); c.closePath(); c.fill(); c.restore();
@@ -190,7 +194,10 @@
     if (path === 'slope' && v.theta > 0) D.label(c, 'θ = ' + U.num(v.theta, 2) + '°, moving ' + dirSel.get(), 10, 14, col.muted, { align: 'left', size: 11 });
     if (path === 'curve') D.label(c, 'curved path: only the vertical drop matters for PE', 10, 14, col.muted, { align: 'left', size: 11 });
     if (path === 'drop') D.label(c, 'vertical drop ' + U.sf(v.h) + ' m over ' + U.sf(Lp) + ' m of path', 10, 14, col.muted, { align: 'left', size: 11 });
-    if (!tl) return;
+    D.label(c, 'u = ' + U.sf(v.u) + ' m/s', pts[0][0], pts[0][1] - 44, col.velocity, { size: 11, bg: true });
+    var mid = pts[40];
+    lay = { start: pts[0], end: pts[pts.length - 1], mid: [mid[0], mid[1] + 16], u: [pts[0][0], pts[0][1] - 44], body: null };
+    if (!tl) { if (ix) ix.paint(c); return; }
     var st = tl.at(clock.t), acc = r.at(st.sig), pos = acc.pos;
     var bx = vp.X(X(pos)), by = vp.Y(Yf(pos));
     D.particle(c, bx, by - 10, 10, { fill: col.s1 });
@@ -204,6 +211,8 @@
       D.arrowPolar(c, bx, by - 24, an, 20 + Math.min(50, Math.abs(st.v) * 4), col.velocity, { width: 2, label: U.sf(Math.abs(st.v)) + ' m/s' });
     }
     D.label(c, 'distance travelled ' + U.sf(st.sig) + ' m', vp.w - 10, 14, col.muted, { align: 'right', size: 11 });
+    lay.body = [bx, by - 10];
+    if (ix) ix.paint(c);
   }
 
   /* ---------- energy account bars ---------- */
@@ -315,6 +324,54 @@
     }
     R.render();
   }
+
+  /* ---------- direct manipulation: drag the end of the slope to set θ, tap the body / u / path to type ---------- */
+  var lay = null, dragFit = null;
+  function locked(k) { var rw = prm.rows[k]; return !rw || rw.range.disabled; }
+  function setP(k, val, step) {
+    var sp = prm.rows[k].spec, lo = Number(sp.min), hi = Number(sp.max), o = {};
+    val = U.clamp(val, lo, hi);
+    if (step) val = Math.round(val / step) * step;
+    o[k] = Number(U.clamp(val, lo, hi).toFixed(6));
+    if (o[k] !== prm.values[k]) { prm.set(o); ui.syncChips(); }
+  }
+  function replay() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); }
+  function ask(k, title, sub, x, y, step, decimals, quick) {
+    var sp = prm.rows[k].spec;
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: step, decimals: decimals, unit: sp.unit, at: { x: x, y: y }, quick: quick,
+      onInput: function (val) { setP(k, val); replay(); } });
+  }
+  function snapAngle(a) { var rr = Math.round(a), near = Math.round(rr / 15) * 15; return Math.abs(a - near) <= 2 ? near : rr; }
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!lay || !r || r.invalid) return [];
+      var col = ui.colors(), hs = [], path = pathSel.get();
+      hs.push({ id: 'end', x: lay.end[0], y: lay.end[1] });
+      if (!locked('L')) hs.push({ id: 'L', x: lay.mid[0], y: lay.mid[1], r: 16 });
+      hs.push({ id: 'u', x: lay.u[0], y: lay.u[1], color: col.velocity, r: 16 });
+      if (lay.body) hs.push({ id: 'm', x: lay.body[0], y: lay.body[1], color: col.s1 });
+      return hs;
+    },
+    onDrag: function (hd, x, y) {
+      if (hd.id !== 'end' || pathSel.get() !== 'slope') return;
+      var down = dirSel.get() === 'down';
+      // freeze the view so the start of the slope (the pivot) stays put; the box holds every angle
+      if (!dragFit) { dragFit = [-1, 11, (down ? -6 : 0) - 1.5, (down ? 0 : 6) + 2.5]; drawScene(); }
+      var a = SIM.view.screenAngle(lay.start[0], lay.start[1], x, y);
+      if (a > 180) a -= 360;
+      setP('theta', snapAngle(U.clamp(down ? -a : a, 0, 80)));
+    },
+    onDrop: function () { dragFit = null; drawScene(); replay(); },
+    onTap: function (hd, x, y) {
+      var path = pathSel.get();
+      if (hd.id === 'end') { if (path === 'slope') ask('theta', 'Slope angle θ', 'Degrees above the horizontal (direction is set in the panel).', x, y, 1, 2, [10, 20, 30, 45]); else ask('h', 'Vertical drop h along the path', 'Metres; negative = the path rises.', x, y, 0.5, 2, [1, 1.6, 5, 12.5]); }
+      else if (hd.id === 'L') ask('L', 'Path length L', 'Distance along the path in metres.', x, y, 1, 2, [5, 10, 20, 25]);
+      else if (hd.id === 'u') ask('u', 'Initial speed u', 'In m s⁻¹ at the start of the path.', x, y, 0.5, 2, [0, 2, 4, 8]);
+      else if (hd.id === 'm') ask('m', 'Mass m', 'In kilograms.', x, y, 1, 2, [1, 3, 10, 15]);
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag the end of the slope to set its angle · tap the end, the path, u or the body to type a value');
 
   ui.onTheme(function () { drawScene(); drawBars(); drawPlots(); });
   vp.onResize = drawScene; bvp.onResize = drawBars;

@@ -205,6 +205,7 @@
 
   /* ---------- scene ---------- */
   function drawScene() {
+    lay = null;
     var col = ui.colors(), c = vp.begin();
     if (!M || !M.ok) { D.label(c, M && M.error ? 'Fix the expression or conditions' : '', vp.w / 2, vp.h / 2, col.warn, { bold: true }); return; }
     var lo = 0, hi = 0;
@@ -223,6 +224,19 @@
     D.particle(c, X(s0), y - 10, 8, { fill: col.s1 });
     if (isFinite(v0) && Math.abs(v0) > 1e-9) D.arrow(c, X(s0), y - 26, X(s0) + U.sgn(v0) * (12 + Math.min(60, Math.abs(v0) * 3)), y - 26, col.velocity, { label: 'v = ' + U.sf(v0) + ' m/s', width: 2 });
     D.label(c, 's / m  (positive →)', x1, 10, col.muted, { size: 10, align: 'right' });
+    // t_a / t_b markers under the line (tap to type) and the layout used by direct manipulation
+    lay = { X: X, y: y, body: [X(s0), y - 10], ta: null, tb: null };
+    if (IA) {
+      var tA = Math.min(U.clamp(wp.values.ta, T0, T1), U.clamp(wp.values.tb, T0, T1)), tB = Math.max(U.clamp(wp.values.ta, T0, T1), U.clamp(wp.values.tb, T0, T1));
+      [['ta', tA, 't_a'], ['tb', tB, 't_b']].forEach(function (q) {
+        var sq = M.s(q[1]); if (!isFinite(sq)) return;
+        var mx = X(sq), my = y + 26;
+        c.save(); c.fillStyle = col.accent; c.beginPath(); c.moveTo(mx, y + 4); c.lineTo(mx - 5, y + 13); c.lineTo(mx + 5, y + 13); c.closePath(); c.fill(); c.restore();
+        D.label(c, q[2], mx, my, col.accent, { size: 10, bold: true });
+        lay[q[0]] = [mx, my - 6];
+      });
+    }
+    if (ix) ix.paint(c);
   }
 
   /* ---------- plots ---------- */
@@ -361,6 +375,77 @@
     R.eq('a', 'acceleration', isFinite(av) ? av : '— (not defined)', isFinite(av) ? 'm s<sup>−2</sup>' : '');
     R.render();
   }
+
+  /* ---------- direct manipulation: drag the particle or the time cursor to scrub, drag t_a / t_b on the graphs, tap to type ---------- */
+  var lay = null;
+  function tStep() { var sp = T1 - T0; return sp > 40 ? 0.5 : 0.1; }
+  function roundT(t) { var st = tStep(); return Number((Math.round(t / st) * st).toFixed(2)); }
+  function setWin(k, t) {
+    var sp = wp.rows[k].spec, o = {};
+    o[k] = U.clamp(roundT(U.clamp(t, T0, T1)), Number(sp.min), Number(sp.max));
+    if (o[k] !== wp.values[k]) { wp.set(o); ui.syncChips(); }
+  }
+  function seekT(t) { if (clock.playing) clock.pause(); clock.seek(U.clamp(t, T0, T1) - T0); }
+  function stageAt(canvas, x, y) {
+    var st = ui.stage(); if (!st || !st.el || !st.el.getBoundingClientRect || canvas === cv) return { x: x, y: y };
+    var a = canvas.getBoundingClientRect(), b = st.el.getBoundingClientRect();
+    return { x: a.left - b.left + x, y: a.top - b.top + y };
+  }
+  function askWin(k, at) {
+    var sp = wp.rows[k].spec;
+    ui.askNumber({ title: k === 'ta' ? 'Interval starts at t<sub>a</sub>' : 'Interval ends at t<sub>b</sub>', sub: 'Distance and displacement are found for t<sub>a</sub> ≤ t ≤ t<sub>b</sub>.',
+      value: wp.values[k], min: Math.max(Number(sp.min), T0), max: Math.min(Number(sp.max), T1), step: tStep(), decimals: 2, unit: 's', at: at,
+      quick: [T0, Math.round((T0 + T1) / 2), T1],
+      onInput: function (v) { setWin(k, v); } });
+  }
+  function askTime(at) {
+    ui.askNumber({ title: 'Time t', sub: 'Move the particle to this time.', value: Number(tNow().toFixed(2)), min: T0, max: T1, step: tStep(), decimals: 2, unit: 's', at: at,
+      onInput: function (v) { seekT(v); } });
+  }
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!lay || !M || !M.ok) return [];
+      var col = ui.colors(), hs = [{ id: 'body', x: lay.body[0], y: lay.body[1], color: col.s1 }];
+      if (lay.ta) hs.push({ id: 'ta', x: lay.ta[0], y: lay.ta[1], r: 14 });
+      if (lay.tb) hs.push({ id: 'tb', x: lay.tb[0], y: lay.tb[1], r: 14 });
+      return hs;
+    },
+    onDrag: function (hd, x) {
+      if (hd.id !== 'body') return;
+      // scrub: the time whose position is nearest the pointer (ties go to the time nearest now)
+      var best = tNow(), bc = Infinity, now = tNow(), span = T1 - T0;
+      for (var i = 0; i <= 600; i++) {
+        var t = T0 + span * i / 600, sx = M.s(t); if (!isFinite(sx)) continue;
+        var cost = Math.abs(lay.X(sx) - x) + 25 * Math.abs(t - now) / span;
+        if (cost < bc) { bc = cost; best = t; }
+      }
+      seekT(best);
+    },
+    onTap: function (hd, x, y) { if (hd.id === 'body') askTime({ x: x, y: y }); else askWin(hd.id, { x: x, y: y }); },
+    onHover: function () { drawScene(); }
+  });
+  // the same gestures on each graph: drag the t_a / t_b lines or the time cursor
+  [[pS, 's'], [pV, 'v'], [pA, 'a']].forEach(function (pp) {
+    var P = pp[0], q = pp[1];
+    P.draw = function (spec) { SIM.plot.Plot.prototype.draw.call(this, spec); if (this._ix) this._ix.paint(this.ctx); };
+    function invX(x) { var a = P.px(0), b = P.px(1); return (x - a) / (b - a); }
+    P._ix = SIM.view.interact(P.canvas, {
+      handles: function () {
+        if (!P.px || !M || !M.ok) return [];
+        var col = ui.colors(), box = P.box, hs = [], cur = tNow(), fy = M[q](cur), yC = isFinite(fy) ? P.py(fy) : box.T + box.H - 10;
+        hs.push({ id: 'cur', x: P.px(cur), y: U.clamp(yC, box.T, box.T + box.H), color: col.accent, r: 16 });
+        if (IA) {
+          hs.push({ id: 'ta', x: P.px(U.clamp(wp.values.ta, T0, T1)), y: box.T + 10, r: 16 });
+          hs.push({ id: 'tb', x: P.px(U.clamp(wp.values.tb, T0, T1)), y: box.T + 10, r: 16 });
+        }
+        return hs;
+      },
+      onDrag: function (hd, x) { var t = invX(x); if (hd.id === 'cur') seekT(t); else setWin(hd.id, t); },
+      onTap: function (hd, x, y) { var at = stageAt(P.canvas, x, y); if (hd.id === 'cur') askTime(at); else askWin(hd.id, at); },
+      onHover: function () { drawPlots(); }
+    });
+  });
+  ui.stageTip('Drag the particle (or the cursor on a graph) to move through time · drag t_a / t_b on a graph to change the interval · tap to type');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

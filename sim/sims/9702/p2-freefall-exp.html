@@ -89,7 +89,9 @@
 
   function drawScene() {
     var c, col = ui.colors(), v = prm.values, hi = Math.max(v.h0, v.h1), lg = method.get() === 'lightgate';
-    vp.fit(-1.2, 1.6, -0.25, hi + 0.35); c = vp.begin();
+    // while a height is dragged the frame stays put, so the handle stays under the pointer
+    var top = fitTop != null ? fitTop : hi + 0.35;
+    vp.fit(-1.2, 1.6, -0.25, top); c = vp.begin();
     // stand
     D.line(c, [vp.P(-0.9, -0.15), vp.P(-0.9, hi + 0.25)], col['object-line'], { width: 4 });
     D.ground(c, vp.X(-1.2), vp.Y(-0.15), vp.X(1.4), vp.Y(-0.15));
@@ -118,7 +120,63 @@
     D.arrow(c, vp.X(0.8), vp.Y(0), vp.X(0.8), vp.Y(hi), col.component, { width: 1.4 });
     D.label(c, 'h = ' + U.num(hi, 3) + ' m', vp.X(0.85), vp.Y(hi / 2), col.component, { align: 'left', size: 12 });
     D.label(c, 't = ' + Math.min(t, tf).toFixed(3) + ' s (true)', vp.X(0.85), vp.Y(hi / 2) + 18, col.muted, { align: 'left', size: 11 });
+    // the heights used in the experiment, as ticks on the ruler
+    hs.forEach(function (h) { D.line(c, [[vp.X(0.8) - 7, vp.Y(h)], [vp.X(0.8) + 7, vp.Y(h)]], col.component, { width: 1.4 }); });
+    if (hs.length) D.label(c, 'h min = ' + U.num(Math.min(v.h0, v.h1), 3) + ' m', vp.X(0.8) - 10, vp.Y(Math.min(v.h0, v.h1)), col.component, { align: 'right', size: 11 });
+    if (ix) ix.paint(c);
   }
+
+  /* ---------- direct manipulation: drag the release point (h_max) and the lowest ruler tick (h_min), tap to type ---------- */
+  var fitTop = null, ix = null;
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range && r.range.disabled); }
+  function spec(k) { return prm.rows[k].spec; }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function setVal(k, val, step) {
+    if (locked(k) || !isFinite(val)) return;
+    var sp = spec(k), o = {};
+    if (step) val = Math.round(val / step) * step;
+    o[k] = Number(U.clamp(val, Number(sp.min), Number(sp.max)).toFixed(4));
+    if (o[k] !== prm.values[k]) { prm.set(o); touched(); }
+  }
+  function ask(k, x, y, title, sub, quick, step, dec) {
+    if (locked(k)) return;
+    var sp = spec(k);
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: step, decimals: dec, unit: sp.unit, at: { x: x, y: y }, quick: quick,
+      onInput: function (val) { setVal(k, val); } });
+  }
+  // the scene shows max(h0, h1) as the drop height and min(h0, h1) as the lowest tick
+  function hiKey() { return prm.values.h1 >= prm.values.h0 ? 'h1' : 'h0'; }
+  function loKey() { return hiKey() === 'h1' ? 'h0' : 'h1'; }
+  if (cv.addEventListener) ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!res) return [];
+      var v = prm.values, col = ui.colors(), lg = method.get() === 'lightgate', hi = Math.max(v.h0, v.h1), lo = Math.min(v.h0, v.h1), hsn = [];
+      if (!locked(hiKey())) hsn.push({ id: 'hi', x: vp.X(0), y: vp.Y(hi + 0.13), color: col.component });
+      if (!locked(loKey())) hsn.push({ id: 'lo', x: vp.X(0.8), y: vp.Y(lo), r: 16, color: col.component });
+      var gk = lg ? 'sigG' : 'sig';
+      if (!locked(gk)) hsn.push({ id: 'gate', x: vp.X(lg ? -0.27 : -0.15), y: vp.Y(0) + (lg ? 0 : 3), r: 16, color: col.muted });
+      if (lg && !locked('L')) hsn.push({ id: 'card', x: vp.X(0), y: vp.Y(hi - 0.5 * g * Math.pow(Math.min(clock.t, Math.sqrt(2 * hi / g)), 2) + Math.max(v.L, 0.02) / 2), r: 16, color: col.s1 });
+      return hsn;
+    },
+    onDrag: function (h, x, y) {
+      if (h.id !== 'hi' && h.id !== 'lo') return;
+      if (fitTop == null) fitTop = Math.max(prm.values.h0, prm.values.h1) + 0.35;
+      clock.pause();
+      var wy = vp.toWorld(x, y)[1];
+      if (h.id === 'hi') setVal(hiKey(), wy - 0.13, 0.01); else setVal(loKey(), wy, 0.01);
+      clock.seek(0);
+    },
+    onDrop: function () { fitTop = null; drawScene(); },
+    onTap: function (h, x, y) {
+      var lg = method.get() === 'lightgate';
+      if (h.id === 'hi') ask(hiKey(), x, y, 'Largest drop height h<sub>max</sub>', 'Distance fallen from the release point to the ' + (lg ? 'light gate' : 'trapdoor') + '.', [1, 1.4, 2], 0.01, 3);
+      else if (h.id === 'lo') ask(loKey(), x, y, 'Smallest drop height h<sub>min</sub>', 'The other heights are spread evenly up to h<sub>max</sub>.', [0.1, 0.2, 0.5], 0.01, 3);
+      else if (h.id === 'gate') { if (lg) ask('sigG', x, y, 'Random error in the light-gate time σ<sub>Δt</sub>', 'Spread of one Δt reading, in milliseconds.', [0, 0.02, 0.5, 2], 0.01, 2); else ask('sig', x, y, 'Random timing error σ<sub>t</sub>', 'Spread of one time reading. A hand-held stopwatch is about 0.05 s.', [0, 0.002, 0.01, 0.05], 0.001, 3); }
+      else if (h.id === 'card') ask('L', x, y, 'Length of the card L', 'v = L ÷ Δt is the average speed while the card passes the gate.', [0.02, 0.05, 0.1], 0.001, 3);
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag the release point to set the largest height · drag the lowest ruler tick to set the smallest · tap the ' + 'trapdoor, light gate or card to type its value');
 
   function drawPlots() {
     if (!res || res.invalid) return;

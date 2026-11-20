@@ -109,7 +109,7 @@
       M.pot = CI.potentiometer(Object.assign({ Ex: v.Ex, x: prm.values.xc / 100 }, base));
       M.std = CI.potentiometer(Object.assign({ Ex: v.Es }, base));
     } else M.div = dividerAt(s !== 'none' ? sensorR() : null);
-    drawScene(); drawPlots(); readout();
+    drawScene(); drawPlots(); readout(); tip();
   }
 
   /* ---------- drawing helpers ---------- */
@@ -137,7 +137,8 @@
   }
 
   /* ---------- scene ---------- */
-  function drawScene() {
+  function drawScene() { sceneBody(); if (ix) ix.paint(vp.ctx); }
+  function sceneBody() {
     if (!M) return;
     var col = ui.colors(), c, L = col['object-line'], s, v = prm.values;
     vp.fit(0, 16, 0, 9); c = vp.begin(); s = vp.scale;
@@ -253,6 +254,84 @@
       R.eq('E<sub>x</sub>', 'E<sub>s</sub> × l<sub>x</sub> ÷ l<sub>s</sub> = ' + s3(v.Es) + ' × ' + s3(p.balance * 100) + ' ÷ ' + s3(st.balance * 100), CI.compareEmf(v.Es, st.balance, p.balance), 'V');
     } else R.html('<div class="eq">Both cells need a balance point on the wire to compare them.</div>');
     R.render();
+  }
+
+  /* ---------- direct manipulation: drag the jockey / sensor / resistors, tap a component to type its value ---------- */
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range.disabled); }
+  function spec(k) { return prm.rows[k].spec; }
+  function decOf(st) { var t = String(st); return t.indexOf('.') < 0 ? 0 : t.length - t.indexOf('.') - 1; }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function setVal(k, val, step) {
+    var sp = spec(k), o = {};
+    if (!isFinite(val)) return;
+    val = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (step) val = Number((Math.round(val / step) * step).toFixed(decOf(step)));
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] !== prm.values[k]) { prm.set(o); touched(); }
+  }
+  function ask(k, x, y, title, sub, quick) {
+    if (locked(k)) return;
+    var sp = spec(k), st = Number(sp.step);
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: st, decimals: Math.max(decOf(st), 2),
+      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+  }
+  /* resistances span decades: dragging up / right multiplies, down / left divides (×2 every 40 px), kept to about 2 s.f. */
+  function niceStep(val, minStep) { return Math.max(minStep, Math.pow(10, Math.floor(Math.log10(Math.max(Math.abs(val), 1e-9))) - 1)); }
+  function logDrag(h, x, y, minStep) { var v0 = Math.max(h.v0, minStep * 10), val = v0 * Math.pow(2, ((x - h.x) - (y - h.y)) / 40); setVal(h.key, val, niceStep(val, minStep)); }
+  var POT = { xA: 2.5, xB: 13.5, yW: 5 };
+  function potX(cm) { return POT.xA + (POT.xB - POT.xA) * cm / prm.values.Lc; }
+  var TITLES = {
+    Vin: ['Supply e.m.f. V<sub>in</sub>', 'Negligible internal resistance.', [3, 6, 9, 12]],
+    R1: ['Top resistor R₁', 'Drag the resistor up / down to scale it, or type a value.', [1, 2, 5, 10]],
+    R2: ['Bottom resistor R₂', 'The output is taken across this resistor.', [1, 2, 5, 10]],
+    RL: ['Load resistance R<sub>L</sub>', 'In parallel with the bottom resistor.', [1, 2, 10, 100]],
+    T: ['Thermistor temperature T', 'Drag the thermistor up to warm it, down to cool it.', [0, 25, 50, 100]],
+    Lx: ['Light intensity on the LDR', 'Drag the LDR up for brighter light, down for darker.', [0, 20, 50, 100]],
+    E0: ['Driver cell e.m.f. E₀', 'Sets the p.d. across the wire.', [1.5, 2, 2.5, 6]],
+    Rs: ['Series resistor R<sub>s</sub>', 'In the driver circuit: a larger R<sub>s</sub> lowers the potential gradient.', [0, 5, 10, 20]],
+    Ex: ['Test cell e.m.f. E<sub>x</sub>', 'The cell being measured.', [0.5, 1.0, 1.2, 1.5]],
+    Rg: ['Galvanometer resistance R<sub>G</sub>', 'Does not change the balance length.', [10, 50, 100]],
+    Lc: ['Length of the wire L', 'Jockey positions stay within 0 to L.', [50, 100, 150, 200]],
+    Rw: ['Resistance of the whole wire R<sub>w</sub>', 'Uniform wire: resistance is proportional to length.', [5, 6.86, 10, 20]]
+  };
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!M) return [];
+      var col = ui.colors(), v = prm.values, hs = [];
+      function add(id, key, wx, wy, extra) { if (locked(key)) return; var o = { id: id, key: key, x: vp.X(wx), y: vp.Y(wy), v0: v[key], color: col['object-line'] }; for (var e in extra || {}) o[e] = extra[e]; hs.push(o); }
+      if (mode.get() === 'div') {
+        var sn = sensor.get(), top = spos.get() === 'top', sk = sn === 'th' ? 'T' : 'Lx';
+        add('Vin', 'Vin', 3, 3.8, { kind: 'tap' });
+        if (sn !== 'none' && top) add('S', sk, 7, 6, { kind: 'sensor', color: col.s1 }); else add('R1', 'R1', 7, 6, { kind: 'R' });
+        if (sn !== 'none' && !top) add('S', sk, 7, 2, { kind: 'sensor', color: col.s1 }); else add('R2', 'R2', 7, 2, { kind: 'R' });
+        if (load.get()) add('RL', 'RL', 9.5, 2.5, { kind: 'R' });
+      } else {
+        add('J', 'xc', potX(U.clamp(v.xc, 0, v.Lc)), POT.yW - 0.6, { kind: 'jockey', color: col.accent });
+        add('E0', 'E0', 8, 8, { kind: 'tap' }); add('Rs', 'Rs', 10.8, 8, { kind: 'tap' });
+        add('Ex', 'Ex', 5, 1.5, { kind: 'tap' }); add('Rg', 'Rg', 8, 1.5, { kind: 'tap' });
+        add('Lc', 'Lc', POT.xB + 0.45, POT.yW, { kind: 'tap' }); add('Rw', 'Rw', POT.xA - 0.45, POT.yW, { kind: 'tap' });
+      }
+      return hs;
+    },
+    onDrag: function (h, x, y) {
+      var v = prm.values;
+      if (h.kind === 'jockey') {
+        var cm = (vp.toWorld(x, y)[0] - POT.xA) / (POT.xB - POT.xA) * v.Lc, p = M && M.pot;
+        // snap onto the balance point when the jockey is within a few pixels of it
+        if (p && p.hasBalance && !p.invalid && Math.abs(vp.X(potX(p.balance * 100)) - x) < 6) { var o = { xc: U.clamp(p.balance * 100, 0, v.Lc) }; if (o.xc !== v.xc) { prm.set(o); touched(); } }
+        else setVal('xc', cm, 0.1);
+      } else if (h.kind === 'sensor') setVal(h.key, h.v0 - (y - h.y) / (h.key === 'T' ? 3 : 2), 0.5);
+      else if (h.kind === 'R') logDrag(h, x, y, 0.01);
+    },
+    onTap: function (h, x, y) { var t = TITLES[h.key === 'xc' ? '' : h.key]; if (h.key === 'xc') ask('xc', x, y, 'Jockey position l', 'Distance from A along the wire.'); else if (t) ask(h.key, x, y, t[0], t[1], t[2]); },
+    onHover: function () { drawScene(); }
+  });
+  var lastTip = null;
+  function tip() {
+    var t = mode.get() === 'pot' ? 'Drag the jockey along the wire to find the balance point · tap a cell, G, R_s or the wire ends to type values'
+      : sensor.get() !== 'none' ? 'Drag the ' + (sensor.get() === 'th' ? 'thermistor up to warm it' : 'LDR up for more light') + ' · drag a resistor up / down · tap a component to type its value'
+      : 'Drag a resistor up / down to change it · tap the cell or a resistor to type its value';
+    if (t !== lastTip) { lastTip = t; ui.stageTip(t); }
   }
 
   ui.onTheme(function () { drawScene(); drawPlots(); });

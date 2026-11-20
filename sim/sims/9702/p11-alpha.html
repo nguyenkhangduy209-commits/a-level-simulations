@@ -106,6 +106,7 @@
     });
     D.label(c, 'α source →', vp.X(-XM) + 8, 14, col.muted, { size: 11, align: 'left' });
     D.label(c, 'QUALITATIVE — scaled units, not to scale', vp.w - 8, 14, col.warn, { size: 11, align: 'right', bold: true });
+    if (ix) ix.paint(c);
   }
   /* deflection distribution for a beam spread over a whole atom (log scale, qualitative) */
   function drawHist() {
@@ -145,6 +146,46 @@
     }
     R.render();
   }
+
+  /* ---------- direct manipulation: drag the beam edge to aim, tap the nucleus / source to type ---------- */
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range.disabled); }
+  function spec(k) { return prm.rows[k].spec; }
+  function decOf(st) { var t = String(st); return t.indexOf('.') < 0 ? 0 : t.length - t.indexOf('.') - 1; }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function setVal(k, val, step) {
+    var sp = spec(k), o = {};
+    if (!isFinite(val)) return;
+    val = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (step) val = Number((Math.round(val / step) * step).toFixed(decOf(step)));
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] !== prm.values[k]) { prm.set(o); touched(); }
+  }
+  function ask(k, x, y, title, sub, quick) {
+    if (locked(k)) return;
+    var sp = spec(k), st = Number(sp.step);
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: st, decimals: Math.max(decOf(st), 2),
+      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+  }
+  var SRCX = -XM + 1.2;
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      var col = ui.colors(), v = prm.values, hs = [];
+      if (!locked('B')) { hs.push({ id: 'Bt', x: vp.X(SRCX), y: vp.Y(v.B), color: col.s4 }); hs.push({ id: 'Bb', x: vp.X(SRCX), y: vp.Y(-v.B), color: col.s4 }); }
+      if (!locked('Ek')) hs.push({ id: 'Ek', x: vp.X(SRCX), y: vp.Y(0), color: col.s4 });
+      if (!locked('K')) hs.push({ id: 'K', x: vp.X(0), y: vp.Y(0), color: col.s2 });
+      return hs;
+    },
+    onDrag: function (h, x, y) {
+      if (h.id === 'Bt' || h.id === 'Bb') setVal('B', Math.abs(vp.toWorld(x, y)[1]), 0.1);
+    },
+    onTap: function (h, x, y) {
+      if (h.id === 'K') ask('K', x, y, 'Charge of the nucleus Q (relative)', 'Larger positive charge ⇒ stronger repulsion ⇒ larger deflections.', [0.5, 1, 1.5, 2]);
+      else if (h.id === 'Ek') ask('Ek', x, y, 'α-particle kinetic energy (relative)', 'Faster α-particles are deflected less at the same distance.', [0.5, 1, 2, 3]);
+      else ask('B', x, y, 'Beam half-width b<sub>max</sub>', 'How far from the line through the nucleus the outermost α-particles are aimed.', [1, 2, 4, 8]);
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag the top or bottom edge of the beam to aim closer to the nucleus · tap the nucleus to type its charge · tap the source to type the α energy');
 
   ui.onTheme(function () { drawScene(); drawHist(); });
   vp.onResize = drawScene; vH.onResize = drawHist;

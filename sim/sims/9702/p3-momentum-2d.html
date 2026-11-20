@@ -157,7 +157,8 @@
   function drawScene() {
     if (!bodiesAt) return;
     var col = ui.colors(), t = clock.t, v = prm.values;
-    vp.fit(view[0], view[1], view[2], view[3]);
+    var vw = hold ? hold.view : view;   // frozen while a velocity arrow is dragged, so the tip stays under the pointer
+    vp.fit(vw[0], vw[1], vw[2], vw[3]);
     var c = vp.begin();
     // surface grid (top view)
     var gt = U.niceTicks(view[0], view[1], 8);
@@ -196,9 +197,11 @@
       D.label(c, 'line of centres at impact', vp.X(cp[0] + n[0] * L), vp.Y(cp[1] + n[1] * L) - 10, col.component, { size: 11 });
     }
     // bodies
-    var ks = 0.22 * Math.min(vp.w, vp.h) / info.vmax;
+    var ks = hold ? hold.ks : 0.22 * Math.min(vp.w, vp.h) / info.vmax;
+    geo = { ks: ks, after: now.after, list: [] };
     now.list.forEach(function (b) {
       var X = vp.X(b.x[0]), Y = vp.Y(b.x[1]), rp = Math.max(3, b.r * vp.scale);
+      geo.list.push({ id: b.id, X: X, Y: Y, rp: rp, v: b.v, c: b.c });
       c.save(); c.fillStyle = b.c; c.globalAlpha = 0.35; c.beginPath(); c.arc(X, Y, rp, 0, 2 * Math.PI); c.fill(); c.globalAlpha = 1;
       c.strokeStyle = b.c; c.lineWidth = 2; c.stroke(); c.restore();
       D.label(c, b.n, X, Y, col.ink, { bold: true, size: 12 });
@@ -208,9 +211,10 @@
     // centre of mass marker
     var cx = vp.X(now.cm[0]), cy = vp.Y(now.cm[1]);
     c.strokeStyle = col.accel; c.lineWidth = 2; c.beginPath(); c.moveTo(cx - 7, cy - 7); c.lineTo(cx + 7, cy + 7); c.moveTo(cx - 7, cy + 7); c.lineTo(cx + 7, cy - 7); c.stroke();
-    D.label(c, now.after ? 'after impact' : 'before impact (t<sub>impact</sub> = ' + tc.toFixed(2) + ' s)'.replace(/<[^>]+>/g, ''), vp.w - 8, 12, now.after ? col.ok : col.muted, { align: 'right', size: 11, bold: true });
+    D.label(c, now.after ? 'after impact' : 'before impact (impact at t = ' + tc.toFixed(2) + ' s)', vp.w - 8, 12, now.after ? col.ok : col.muted, { align: 'right', size: 11, bold: true });
     if (res && (res.noCollision || res.invalid)) D.label(c, res.noCollision || res.invalid, vp.w / 2, vp.h - 14, col.warn, { bold: true, size: 12 });
     else if (info.md === 'one' || info.md === 'dirs') D.label(c, 'Exam mode: impact geometry is schematic (only momentum is used)', vp.w / 2, vp.h - 14, col.muted, { size: 11 });
+    if (ix) ix.paint(c);
   }
 
   /** momentum vectors before/after: [{p, c, n}] */
@@ -343,6 +347,73 @@
       '<tr><th>total before</th><td></td><td></td><td></td><th>' + U.sf(sb[0]) + '</th><th>' + U.sf(sb[1]) + '</th><th>' + U.sf(res.KE0) + '</th></tr>' +
       '<tr><th>total after</th><td></td><td></td><td></td><th>' + U.sf(sa[0]) + '</th><th>' + U.sf(sa[1]) + '</th><th>' + U.sf(res.noCollision ? res.KE0 : res.KE1) + '</th></tr></table>';
   }
+
+  /* ---------- direct manipulation: drag a velocity arrow tip (speed + direction), tap a body to type its mass ---------- */
+  var geo = null, hold = null, ix = null;
+  function editable(k) { var r = prm.rows[k]; return !!r && r.row.style.display !== 'none' && !r.range.disabled; }
+  /** which inputs a drawn body controls right now: { sp: speed key, an: angle key, m: mass key, name } (null keys = solved / not an input) */
+  function keysFor(id, after) {
+    var md = info.md;
+    if (md === 'explode') {
+      if (id === 'w') return { sp: 'u1', an: 'tu1', m: null, name: 'the whole body' };
+      var i = Number(id.slice(1)), tw = three.get();
+      if (i === 0) return { sp: 'v1', an: 'tv1', m: 'm1', name: 'fragment 1' };
+      if (i === 1) return tw ? { sp: 'v2', an: 'tv2', m: 'm2', name: 'fragment 2' } : { sp: null, an: null, m: 'm2', name: 'fragment 2' };
+      return { sp: null, an: null, m: 'm3', name: 'fragment 3' };
+    }
+    var j = id === 'a' ? 1 : 2, o = { sp: null, an: null, m: 'm' + j, name: 'body ' + j };
+    if (!after) { o.sp = 'u' + j; o.an = 'tu' + j; }
+    else if (md === 'one' && j === 1) { o.sp = 'v1'; o.an = 'tv1'; }
+    else if (md === 'dirs') o.an = 'tv' + j;
+    return o;
+  }
+  function snapAng(a) { if (a > 180) a -= 360; var r = Math.round(a), s15 = Math.round(a / 15) * 15; if (Math.abs(a - s15) <= 2) r = s15; return r === -180 ? 180 : r; }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function setKey(k, v) { var r = prm.rows[k], o = {}; o[k] = U.clamp(v, Number(r.spec.min), Number(r.spec.max)); clock.pause(); prm.set(o); }
+  function ask(k, title, sub, x, y, opt) {
+    var r = prm.rows[k];
+    ui.askNumber(Object.assign({ title: title, sub: sub, value: prm.values[k], min: Number(r.spec.min), max: Number(r.spec.max), step: 0.1, decimals: 2, at: { x: x, y: y },
+      onInput: function (v) { setKey(k, v); touched(); } }, opt));
+  }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!geo || !res || res.invalid) return [];
+      var col = ui.colors(), out = [];
+      geo.list.forEach(function (b) {
+        var ks = keysFor(b.id, geo.after);
+        if (ks.m && editable(ks.m)) out.push({ id: 'm:' + b.id, kind: 'm', key: ks.m, name: ks.name, x: b.X, y: b.Y, r: Math.max(14, b.rp * 0.9), color: b.c });
+        var spOk = ks.sp && editable(ks.sp), anOk = ks.an && editable(ks.an);
+        if (!spOk && !anOk) return;
+        var s = Math.hypot(b.v[0], b.v[1]), tx = b.X + b.v[0] * geo.ks, ty = b.Y - b.v[1] * geo.ks;
+        if (s < 1e-9 || Math.hypot(tx - b.X, ty - b.Y) < b.rp + 6) { tx = b.X + b.rp + 16; ty = b.Y; }   // at rest: a grab point just beside the body
+        out.push({ id: 'v:' + b.id, kind: 'v', sp: spOk ? ks.sp : null, an: anOk ? ks.an : null, name: ks.name, bx: b.X, by: b.Y, x: tx, y: ty, color: col.velocity });
+      });
+      if (hold && !out.some(function (h) { return h.id === hold.id; })) out.push(hold.h);   // keep the dragged handle alive
+      return out;
+    },
+    onDrag: function (hd, x, y) {
+      if (hd.kind !== 'v') return;
+      if (!hold) {
+        var before = !geo.after;
+        hold = { id: hd.id, h: hd, view: view.slice(), ks: geo.ks, bx: hd.bx, by: hd.by, before: before };
+        clock.pause(); if (before) clock.seek(0);
+      }
+      var vx = (x - hold.bx) / hold.ks, vy = -(y - hold.by) / hold.ks, o = {};
+      if (hd.sp) { var r = prm.rows[hd.sp]; o[hd.sp] = U.clamp(Math.round(Math.hypot(vx, vy) * 10) / 10, Number(r.spec.min), Number(r.spec.max)); }
+      if (hd.an && Math.hypot(x - hold.bx, y - hold.by) > 8) o[hd.an] = snapAng(SIM.view.screenAngle(hold.bx, hold.by, x, y));
+      hd.x = x; hd.y = y;
+      prm.set(o); if (hold.before) clock.seek(0);
+      if (ui.syncChips) ui.syncChips();
+    },
+    onDrop: function () { if (hold) { hold = null; update(); touched(); } },
+    onTap: function (hd, x, y) {
+      if (hd.kind === 'm') ask(hd.key, 'Mass of ' + hd.name, 'Type the mass in kilograms.', x, y, { unit: 'kg', quick: [0.5, 1, 2, 5] });
+      else if (hd.sp) ask(hd.sp, 'Speed of ' + hd.name, 'Type the speed; drag the arrow tip to change its direction.', x, y, { unit: 'm s⁻¹', quick: [0, 2, 4, 6] });
+      else ask(hd.an, 'Direction of ' + hd.name, 'Angle anticlockwise from +x (negative = clockwise).', x, y, { unit: '°', step: 1, decimals: 1, quick: [-45, 0, 30, 45, 90] });
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag a velocity arrow tip to set speed and direction · tap the tip to type the speed · tap a body to type its mass');
 
   ui.onTheme(drawAll);
   vp.onResize = drawScene; vpM.onResize = drawMomentum; vpK.onResize = drawKE;

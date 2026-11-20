@@ -116,8 +116,12 @@
     function X(x) { return padL + x / v.Lw * wpx; }
     var nWaves = v.Lw / v.lam;
     var midY = H * 0.5, amp = H * 0.28;
+    // while the amplitude is being dragged, keep the vertical scale fixed so the crest stays under the pointer
+    if (ampRef) amp = Math.min(H * 0.46, amp * v.A / ampRef);
+    scene = { padL: padL, wpx: wpx, midY: midY, amp: amp, amp0: H * 0.28, W: W, H: H, top: midY - H * 0.28, tooMany: nWaves > 60 };
     D.arrow(c, padL, 18, padL + 90, 18, col.velocity, { label: 'v = ' + U.sf(v.f * v.lam) + ' m/s' });
-    if (nWaves > 60) { D.label(c, 'Too many wavelengths in view to draw (' + U.sf(nWaves) + '): reduce the length shown or increase λ', W / 2, midY, col.warn, { bold: true, size: 12 }); return; }
+    D.label(c, 'f = ' + U.sf(v.f) + ' Hz', padL + 240, 18, col.ink, { size: 12 });
+    if (nWaves > 60) { D.label(c, 'Too many wavelengths in view to draw (' + U.sf(nWaves) + '): reduce the length shown or increase λ', W / 2, midY, col.warn, { bold: true, size: 12 }); if (ix) ix.paint(c); return; }
     if (type.get() === 'T') {
       D.line(c, [[padL, midY], [padL + wpx, midY]], col.muted, { dash: [4, 4], width: 1 });
       var pts = [];
@@ -156,6 +160,14 @@
       });
       D.label(c, 'C = compression, R = rarefaction; particle displacements exaggerated', W - padR, H - 8, col.muted, { align: 'right', size: 10 });
     }
+    var lh = lamHandle();
+    if (lh && lh.x0 !== undefined) {   // one wavelength, measured back from the λ handle
+      var yb = type.get() === 'T' ? midY - amp - 10 : midY + amp + 32;
+      D.line(c, [[lh.x0, yb], [lh.x, yb]], col.accent, { width: 1.2 });
+      D.line(c, [[lh.x0, yb - 5], [lh.x0, yb + 5]], col.accent, { width: 1.2 });
+      D.label(c, 'λ', (lh.x0 + lh.x) / 2, yb - 9, col.accent, { bold: true, size: 12 });
+    }
+    if (ix) ix.paint(c);
   }
   function plots() {
     var col = ui.colors(), v = prm.values, t = tPhys(), Tp = T();
@@ -204,6 +216,98 @@
     R.html('<div class="head">' + (type.get() === 'T' ? 'Transverse: particles oscillate perpendicular to the direction of energy transfer (can be polarised).' : 'Longitudinal: particles oscillate parallel to the direction of energy transfer (compressions and rarefactions; cannot be polarised).') + '</div>');
     R.render();
   }
+
+  /* ---------- direct manipulation: drag a crest (A) or a crest / compression (λ), drag P and Q, tap labels to type ---------- */
+  var scene = null, ampRef = 0, ix = null;
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range.disabled); }
+  function sx(x) { return scene.padL + x / prm.values.Lw * scene.wpx; }
+  function wx(px) { return (px - scene.padL) / scene.wpx * prm.values.Lw; }
+  function sig3(x) { return Number(x.toPrecision(3)); }
+  function setVal(k, val, round) {
+    var sp = prm.rows[k].spec, o = {};
+    val = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (round) val = U.clamp(round(val), Number(sp.min), Number(sp.max));
+    if (val === prm.values[k]) return;
+    o[k] = val; prm.set(o); if (ui.syncChips) ui.syncChips();
+  }
+  function ask(k, x, y, title, sub, quick) {
+    var sp = prm.rows[k].spec;
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step), decimals: 4, unit: sp.unit,
+      at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); } });
+  }
+  /** wave features (crests, or compressions for a longitudinal wave) in [0, Lw]; at fixed t they all scale with λ about x = 0 */
+  function features() {
+    var v = prm.values, t = tPhys(), out = [];
+    if (type.get() === 'T') { var ph = (((v.f * t - 0.25) % 1) + 1) % 1; for (var k = 0; k < 200; k++) { var x = v.lam * (ph + k); if (x > v.Lw) break; out.push(x); } }
+    else out = WV.compressions(v.lam, v.f, t, 0, v.Lw).C.slice();
+    return out;
+  }
+  /** the λ handle sits on the second feature (or the first if only one is in view) away from x = 0 */
+  function lamHandle() {
+    if (!scene || scene.tooMany || locked('lam')) return null;
+    var fs = features().filter(function (x) { return x > 0.04 * prm.values.Lw; }), lam = prm.values.lam;
+    if (!fs.length) return null;
+    var xw = fs.length > 1 ? fs[1] : fs[0], T_ = type.get() === 'T';
+    var h = { id: 'lam', x: sx(xw), y: T_ ? scene.midY - scene.amp : scene.midY + scene.amp + 18, xw0: xw, lam0: lam, color: ui.colors().accent };
+    if (xw - lam >= -1e-9) h.x0 = sx(xw - lam);
+    return h;
+  }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene) return [];
+      var col = ui.colors(), v = prm.values, hs = [], T_ = type.get() === 'T';
+      if (!scene.tooMany) {
+        var fs = features(), lh = lamHandle();
+        if (T_ && fs.length && !locked('A')) {
+          var xa = fs[0] === (lh && lh.xw0) ? (fs[1] !== undefined ? fs[1] : null) : fs[0];
+          if (xa !== null) hs.push({ id: 'A', x: sx(xa), y: scene.midY - scene.amp, color: col.s1 });
+        }
+        if (lh) hs.push(lh);
+        [['x1', col.s2], ['x2', col.s3]].forEach(function (pr) {
+          if (locked(pr[0])) return;
+          hs.push({ id: pr[0], x: sx(v[pr[0]]), y: T_ ? scene.midY + scene.amp + 22 : scene.top - 22, r: 16, color: pr[1] });
+        });
+      }
+      if (!locked('lam')) hs.push({ id: 'v', x: scene.padL + 135, y: 18, r: 18, color: col.velocity });
+      if (!locked('f')) hs.push({ id: 'f', x: scene.padL + 240, y: 18, r: 18, color: col.ink });
+      return hs;
+    },
+    onDrag: function (hd, x, y) {
+      clock.pause();
+      var v = prm.values;
+      if (hd.id === 'A') {
+        if (!ampRef) ampRef = v.A;
+        setVal('A', ampRef * (scene.midY - y) / scene.amp0, function (a) { return Math.round(a * 10) / 10; });
+      } else if (hd.id === 'lam') {
+        var xw = wx(x); if (xw <= 0) return;
+        setVal('lam', hd.lam0 * xw / hd.xw0, sig3);
+      } else if (hd.id === 'x1' || hd.id === 'x2') {
+        var st = v.Lw >= 2 ? 0.01 : v.Lw >= 0.2 ? 0.001 : 0.0001;
+        setVal(hd.id, U.clamp(wx(x), 0, v.Lw), function (q) { return Number((Math.round(q / st) * st).toFixed(4)); });
+      }
+    },
+    onDrop: function (hd) {
+      ampRef = 0;
+      if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged();
+      frame();
+    },
+    onTap: function (hd, x, y) {
+      var v = prm.values;
+      if (hd.id === 'A') ask('A', x, y, 'Amplitude A', 'Equilibrium to crest (not crest to trough).', [1, 2, 5, 10]);
+      else if (hd.id === 'lam') ask('lam', x, y, 'Wavelength λ', 'Distance between neighbouring crests (or compressions). f stays the same, so v = fλ changes.', [0.1, 0.2, 0.4, 0.5]);
+      else if (hd.id === 'x1') ask('x1', x, y, 'Position of probe P', 'Distance x₁ along the medium.');
+      else if (hd.id === 'x2') ask('x2', x, y, 'Position of probe Q', 'Distance x₂ along the medium.');
+      else if (hd.id === 'f') ask('f', x, y, 'Frequency f', 'Set by the source. λ stays the same here, so v = fλ changes.', [5, 50, 440, 850]);
+      else if (hd.id === 'v') {
+        var sp = prm.rows.lam.spec;
+        ui.askNumber({ title: 'Wave speed v', sub: 'Set by the medium. The frequency (source) stays ' + U.sf(v.f) + ' Hz, so λ = v ÷ f changes.', value: v.f * v.lam,
+          min: Number(sp.min) * v.f, max: Number(sp.max) * v.f, step: 0.1, decimals: 3, unit: 'm s⁻¹', at: { x: x, y: y }, quick: [20, 340, 1500],
+          onInput: function (val) { setVal('lam', val / prm.values.f, function (l) { return Number(l.toPrecision(4)); }); if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); } });
+      }
+    },
+    onHover: function () { draw(); }
+  });
+  ui.stageTip('Drag a crest up/down for A · drag the λ crest (or C) sideways for wavelength · drag P or Q · tap v or f to type');
 
   ui.onTheme(frame);
   vp.onResize = frame;

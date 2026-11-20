@@ -172,12 +172,13 @@
         }
       }
     });
-    if (sol.error) { D.label(c, sol.error, vp.w / 2, 14, col.warn, { bold: true, bg: true, size: 12 }); return; }
+    if (sol.error) { D.label(c, sol.error, vp.w / 2, 14, col.warn, { bold: true, bg: true, size: 12 }); if (ix) ix.paint(c); return; }
     if (showV.get()) Object.keys(lay.nodes).forEach(function (k) {
       var q = P(lay.nodes[k]), Vn = sol.V[Number(k)];
       c.fillStyle = col.s1; c.beginPath(); c.arc(q[0], q[1], 4, 0, 7); c.fill();
       D.label(c, (Number(k) === 0 ? '0 V' : U.sf(Vn) + ' V'), q[0] + 7, q[1] + 11, col.s1, { size: 11, bg: true, align: 'left', bold: true });
     });
+    if (ix) ix.paint(c);
   }
 
   /* ---------- live working ---------- */
@@ -226,6 +227,47 @@
     });
     R.render();
   }
+
+  /* ---------- direct manipulation: tap a component (or its label) to type its value ---------- */
+  var KEY = { E1: 'E', E2: 'E2', R1: 'R1', R2: 'R2', R3: 'R3', R4: 'R4', V: 'Rv' }, RK = { E1: 'r', E2: 'r2' };
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range.disabled); }
+  function decOf(st) { var t = String(st); return t.indexOf('.') < 0 ? 0 : t.length - t.indexOf('.') - 1; }
+  function setVal(k, val) {
+    var sp = prm.rows[k].spec, o = {};
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] === prm.values[k]) return;
+    prm.set(o);
+    if (ui.syncChips) ui.syncChips();
+  }
+  function ask(k, x, y, title, sub, quick) {
+    var sp = prm.rows[k].spec;
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step), decimals: Math.max(decOf(sp.step), 2),
+      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+  }
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!M) return [];
+      var col = ui.colors(), lay = LAYOUT[M.t], u = vp.scale, hs = [];
+      M.net.elements.forEach(function (e) {
+        var ends = lay.el[e.id], k = KEY[e.id]; if (!ends || !k) return;
+        var A = vp.P(ends[0][0], ends[0][1]), B = vp.P(ends[1][0], ends[1][1]), mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, vert = Math.abs(B[1] - A[1]) > Math.abs(B[0] - A[0]);
+        if (!locked(k)) hs.push({ id: e.id, kind: 'el', el: e.id, key: k, x: mx, y: my, color: e.type === 'E' ? col.accent : col['object-line'] });
+        // the label beside it: a cell's label edits its internal resistance, anything else edits the same value
+        var lk = RK[e.id] || k, lx = e.id === 'V' ? mx + 0.8 * u + 24 : vert ? mx + 1.1 * u + 30 : mx, ly = e.id === 'V' ? my : vert ? my : my + (e.type === 'E' ? 1.15 : -0.85) * u;
+        if (!locked(lk)) hs.push({ id: e.id + 'lab', kind: 'lab', el: e.id, key: lk, x: lx, y: ly, r: 20, hidden: true });
+      });
+      return hs;
+    },
+    onTap: function (h, x, y) {
+      var k = h.key, n = NAMES[h.el];
+      if (k === 'E' || k === 'E2') ask(k, x, y, 'e.m.f. of ' + n, 'Tap the label beside the cell to type its internal resistance.', [1.5, 6, 9, 12]);
+      else if (k === 'r' || k === 'r2') ask(k, x, y, 'Internal resistance of ' + n, '0 makes it an ideal cell.', [0, 0.5, 1, 2]);
+      else if (k === 'Rv') ask(k, x, y, 'Voltmeter resistance R<sub>V</sub>', 'An ideal voltmeter has infinite resistance.', [1000, 2000, 10000, 100000]);
+      else ask(k, x, y, 'Resistance ' + n, '0 Ω is drawn as a plain wire.', [0, 2, 4, 6, 10]);
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Tap a resistor or cell to type its value · tap a cell’s label to type its internal resistance');
 
   ui.onTheme(drawScene);
   vp.onResize = drawScene;

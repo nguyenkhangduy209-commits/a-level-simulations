@@ -138,7 +138,17 @@
     }
     var msg = r.cycles > 400 ? 'Too many cycles to display: decrease the time-base setting' : r.clipped ? 'Trace goes off the screen: increase the y-gain setting (more V per div)' : r.tooMany ? 'Too many cycles to count accurately: decrease the time-base setting' : r.tooFew ? 'Less than one cycle on screen: increase the time-base setting' : '';
     if (msg) D.label(c, msg, vp.w / 2, 12, col.warn, { bold: true, size: 12, bg: true });
-    D.label(c, 'time-base ' + U.num(v.tb, 3) + ' ' + { '1e-6': 'µs/div', '1e-3': 'ms/div', '1': 's/div' }[tbUnit.get()] + '   y-gain ' + U.num(v.yg, 3) + ' ' + { '1e-3': 'mV/div', '1': 'V/div' }[ygUnit.get()], vp.w - 18, vp.h - 8, col.muted, { align: 'right', size: 11 });
+    // two separate labels so each can be tapped to type its setting
+    var ygTxt = 'y-gain ' + U.num(v.yg, 3) + ' ' + { '1e-3': 'mV/div', '1': 'V/div' }[ygUnit.get()];
+    var tbTxt = 'time-base ' + U.num(v.tb, 3) + ' ' + { '1e-6': 'µs/div', '1e-3': 'ms/div', '1': 's/div' }[tbUnit.get()];
+    c.save(); c.font = '11px system-ui, sans-serif';
+    var wY = (c.measureText && c.measureText(ygTxt).width) || ygTxt.length * 6, wT = (c.measureText && c.measureText(tbTxt).width) || tbTxt.length * 6;
+    c.restore();
+    var xY = vp.w - 18, xT = xY - wY - 18;
+    D.label(c, ygTxt, xY, vp.h - 8, col.muted, { align: 'right', size: 11 });
+    D.label(c, tbTxt, xT, vp.h - 8, col.muted, { align: 'right', size: 11 });
+    labels = { yg: { x: xY - wY / 2, y: vp.h - 12 }, tb: { x: xT - wT / 2, y: vp.h - 12 } };
+    if (ix) ix.paint(c);
   }
 
   /* ---------- working ---------- */
@@ -171,6 +181,60 @@
     R.eq('λ', 'v ÷ f = ' + s3(speed) + ' ÷ ' + s3(r.fRead), speed / r.fRead, 'm');
     R.render();
   }
+
+  /* ---------- direct manipulation: drag the trace peak (amplitude), the end of one cycle (frequency), trace 2's peak (phase, V₂); tap the settings ---------- */
+  var labels = null, ix = null;
+  function locked(k) { var rw = prm.rows[k]; return !!(rw && rw.range.disabled); }
+  function sig3(x) { return Number(x.toPrecision(3)); }
+  function snapAngle(a) { a = Math.round(a); var near = Math.round(a / 15) * 15; return Math.abs(a - near) <= 2 ? near : a; }
+  function setVals(o) {
+    var out = {}, any = false;
+    Object.keys(o).forEach(function (k) { var sp = prm.rows[k].spec, val = U.clamp(o[k], Number(sp.min), Number(sp.max)); if (val !== prm.values[k]) { out[k] = val; any = true; } });
+    if (any) { prm.set(out); if (ui.syncChips) ui.syncChips(); }
+  }
+  function ask(k, x, y, title, sub, quick, unit) {
+    var sp = prm.rows[k].spec;
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step), decimals: 3, unit: unit !== undefined ? unit : sp.unit,
+      at: { x: x, y: y }, quick: quick, onInput: function (val) { var o = {}; o[k] = val; setVals(o); } });
+  }
+  function onScreen(xd, yd) { return xd >= 0 && xd <= 10 && Math.abs(yd) <= 4.2; }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!r || !labels) return [];
+      var col = ui.colors(), v = prm.values, hs = [], dpc = r.divPerCycle, show = r.cycles <= 400;
+      if (show && !locked('V0') && dpc / 4 <= 10) hs.push({ id: 'V0', x: vp.X(dpc / 4), y: vp.Y(Math.min(r.ampDiv, 4.1)), color: col.s1 });
+      if (show && !locked('f') && dpc >= 0.3 && dpc <= 10) hs.push({ id: 'f', x: vp.X(dpc), y: vp.Y(0), color: col.accent });
+      if (show && two.get() && v.V2 > 0) {
+        var x2 = (0.25 + v.phi / 360) * dpc, y2 = Math.min(v.V2 / yg(), 4.1);
+        if (x2 > 10 && dpc <= 10) x2 -= dpc;
+        if (onScreen(x2, y2) && !(locked('phi') && locked('V2'))) hs.push({ id: 'tr2', x: vp.X(x2), y: vp.Y(y2), color: col.s3 });
+      }
+      if (!locked('tb')) hs.push({ id: 'tb', x: labels.tb.x, y: labels.tb.y, r: 16, color: col.muted });
+      if (!locked('yg')) hs.push({ id: 'yg', x: labels.yg.x, y: labels.yg.y, r: 16, color: col.muted });
+      return hs;
+    },
+    onDrag: function (hd, x, y) {
+      var w = vp.toWorld(x, y), v = prm.values;
+      if (hd.id === 'V0') setVals({ V0: sig3(U.clamp(Math.round(w[1] * 10) / 10, 0.1, 4.2) * yg()) });
+      else if (hd.id === 'f') setVals({ f: sig3(1 / (U.clamp(w[0], 0.2, 10) * tb())) });
+      else if (hd.id === 'tr2') {
+        var o = {};
+        if (!locked('phi')) { var ph = ((w[0] / r.divPerCycle - 0.25) * 360 % 360 + 360) % 360; o.phi = snapAngle(ph); }
+        if (!locked('V2')) o.V2 = sig3(U.clamp(Math.round(w[1] * 10) / 10, 0.1, 4.2) * yg());
+        setVals(o);
+      }
+    },
+    onTap: function (hd, x, y) {
+      var tu = { '1e-6': 'µs/div', '1e-3': 'ms/div', '1': 's/div' }[tbUnit.get()], yu = { '1e-3': 'mV/div', '1': 'V/div' }[ygUnit.get()];
+      if (hd.id === 'V0') ask('V0', x, y, 'Signal amplitude V₀', 'Peak voltage (centre line to peak).', [0.5, 1, 2, 3]);
+      else if (hd.id === 'f') ask('f', x, y, 'Signal frequency f', 'The period T = 1/f sets how many divisions one cycle takes.', [50, 400, 1000, 5000]);
+      else if (hd.id === 'tr2') ask(locked('phi') ? 'V2' : 'phi', x, y, locked('phi') ? 'Trace 2 amplitude V₂' : 'Trace 2 lags trace 1 by Δφ', locked('phi') ? '' : 'Drag the peak sideways to shift it, up/down for V₂.', locked('phi') ? null : [45, 90, 180, 270]);
+      else if (hd.id === 'tb') ask('tb', x, y, 'Time-base setting', 'Time per horizontal division (unit set below: ' + tu + ').', [0.05, 0.1, 0.2, 0.5, 1, 2, 5], tu);
+      else if (hd.id === 'yg') ask('yg', x, y, 'Y-gain setting', 'Voltage per vertical division (unit set below: ' + yu + ').', [0.1, 0.2, 0.5, 1, 2, 5, 10], yu);
+    },
+    onHover: function () { draw(); }
+  });
+  ui.stageTip('Drag the peak to set the amplitude · drag the end of one cycle to set f · drag trace 2’s peak for Δφ · tap the time-base or y-gain label to type it');
 
   ui.onTheme(draw);
   vp.onResize = draw;

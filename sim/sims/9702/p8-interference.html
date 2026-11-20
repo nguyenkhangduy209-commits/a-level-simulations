@@ -127,7 +127,7 @@
       if (G.trueScale) { G.lamD = G.lam / G.a; G.DD = G.D / G.a; G.YD = G.Y / G.a; }
       else { G.lamD = Math.max(G.lam / G.a, 1 / 10); G.DD = 9; G.YD = 3.4; }
     }
-    drawScene(); drawPlots(); readout();
+    drawScene(); drawPlots(); readout(); tip();
   }
 
   /* ---------- colour helpers ---------- */
@@ -162,7 +162,7 @@
     if (!G) return;
     var two = G, wt = 2 * Math.PI * clock.t / PERIOD, DD = G.DD, YD = G.YD, lamD = G.lamD;
     var stripW = Math.max(DD, 2 * YD) * 0.09;
-    vp.fit(-0.9, DD + stripW * 2.6, -YD * 1.08, YD * 1.08);
+    if (!(ix && ix.isDragging())) vp.fit(-0.9, DD + stripW * 2.6, -YD * 1.08, YD * 1.08);   // frozen while dragging so handles stay under the pointer
     var c = vp.begin();
     var ph = G.phase, A2 = prm.values.A2, coh = coherent.get();
     if (!coh) ph = (Math.sin(Math.floor(clock.t * 5) * 12.9898) * 43758.5453 % 1) * 2 * Math.PI; // jumps randomly
@@ -204,11 +204,16 @@
     D.label(c, '±' + U.sf(G.Y * G.kY) + ' ' + G.unitY, sx + sw / 2, bot + 9, col.muted, { size: 10 });
     D.label(c, G.trueScale ? '2-D view to scale (amplitude decrease with distance ignored)' : '2-D view NOT to scale: λ and D shortened to fit (pattern shape only)', vp.X(DD / 2), vp.Y(YD) + 10, col.muted, { size: 11, bg: true });
     if (!coh) D.label(c, 'incoherent: phase difference keeps changing — no stable fringes', vp.X(DD / 2), vp.Y(-YD) - 12, col.warn, { size: 12, bold: true, bg: true });
+    // tap-to-type chip for the wavelength (frequency for sound)
+    var lk = lamKey(), lsp = prm.rows[lk].spec;
+    D.label(c, (lk === 'fS' ? 'f = ' : 'λ = ') + U.num(prm.values[lk], 4) + ' ' + lsp.unit.replace(/<[^>]+>/g, ''), vp.X(0) + 14, vp.Y(-YD) - 12, col.accent, { size: 12, bold: true, bg: true, align: 'left' });
+    scene = { two: true, DD: DD, YD: YD, yPd: yPd, sx: sx, sw: sw, top: top, bot: bot, yPs: yPs, lamX: vp.X(0) + 40, lamY: vp.Y(-YD) - 12 };
+    if (ix) ix.paint(c);
   }
   function drawGap(col) {
     var bl = prm.values.bl, wt = 2 * Math.PI * clock.t / PERIOD, lam = 1, b = bl;
     var Y = Math.max(7, b * 0.8 + 3), X1 = 2 * Y * 1.3, X0 = -4;
-    vp.fit(X0, X1, -Y, Y);
+    if (!(ix && ix.isDragging())) vp.fit(X0, X1, -Y, Y);
     var c = vp.begin();
     field(c, X0, 0, -Y, Y, function (x, y) { return Math.cos(2 * Math.PI * x / lam - wt) * 0.9; }, false);
     field(c, 0, X1, -Y, Y, function (x, y) { return SP.gapField(x, y, wt / (2 * Math.PI), lam, b, Math.max(4, Math.min(24, Math.round(b * 2.5))), 1); }, false);
@@ -219,6 +224,8 @@
     D.line(c, [vp.P(0, -b / 2), vp.P(X1, -b / 2)], col.muted, { dash: [5, 5], width: 1.2 });
     D.label(c, 'QUALITATIVE ONLY — dashed lines: edge of the beam without diffraction', vp.w / 2, 14, col.warn, { size: 12, bold: true, bg: true });
     D.label(c, 'gap', vp.X(0) + 18, vp.Y(b / 2) - 10, col.ink, { size: 11, bg: true });
+    scene = { two: false, b: b };
+    if (ix) ix.paint(c);
   }
 
   /* ---------- plots ---------- */
@@ -275,6 +282,86 @@
     R.html('<div class="eq">' + (coh ? '✓ coherent sources (constant phase difference)' : '✗ sources not coherent') + '</div>');
     R.html('<div class="eq">' + (A2 >= 0.8 ? '✓ similar amplitudes — dark fringes almost completely dark' : A2 > 0 ? '△ unequal amplitudes — fringes visible but poor contrast' : '✗ only one source — no interference') + '</div>');
     R.render();
+  }
+
+  /* ---------- direct manipulation: drag the slits / screen / P, drag the gap edges, tap to type ---------- */
+  var scene = null, ix = null, dragRef = null;
+  var KEYS = { light: { a: 'aMM', D: 'Dm', l: 'lamN' }, micro: { a: 'aC', D: 'DmM', l: 'lamC' }, sound: { a: 'aS', D: 'DS', l: 'fS' }, water: { a: 'aW', D: 'DW', l: 'lamW' } };
+  function lamKey() { return KEYS[wtype.get()].l; }
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range.disabled); }
+  function decOf(st) { var t = String(st); return t.indexOf('.') < 0 ? 0 : t.length - t.indexOf('.') - 1; }
+  /** round to ~2 s.f. (never finer than the slider step) so dragged values stay tidy */
+  function tidy(v, k) { var st = Number(prm.rows[k].spec.step), s2 = Math.pow(10, Math.floor(Math.log10(Math.abs(v) || 1)) - 1); return Math.max(st, s2); }
+  function setVal(k, val, step) {
+    var sp = prm.rows[k].spec, o = {};
+    val = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (step) val = Number((Math.round(val / step) * step).toFixed(decOf(step)));
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] === prm.values[k]) return;
+    prm.set(o);
+    if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged();
+    if (ui.syncChips) ui.syncChips();
+  }
+  function ask(k, x, y, title, sub, quick) {
+    var sp = prm.rows[k].spec;
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step), decimals: Math.max(decOf(sp.step), 2),
+      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+  }
+  if (cv.addEventListener) cv.addEventListener('pointerdown', function () { dragRef = null; });
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene) return [];
+      var col = ui.colors(), hs = [];
+      if (!scene.two) {
+        if (locked('bl')) return hs;
+        hs.push({ id: 'g1', kind: 'gap', x: vp.X(0), y: vp.Y(scene.b / 2), color: col.accent });
+        hs.push({ id: 'g2', kind: 'gap', x: vp.X(0), y: vp.Y(-scene.b / 2), color: col.accent });
+        return hs;
+      }
+      var K = KEYS[wtype.get()], dr = dragRef && dragRef.px;
+      if (!locked(K.a)) {
+        hs.push({ id: 'S1', kind: 'a', x: vp.X(0), y: dr && dragRef.id === 'S1' ? dragRef.py : vp.Y(0.5), color: col.accent });
+        hs.push({ id: 'S2', kind: 'a', x: vp.X(0), y: dr && dragRef.id === 'S2' ? dragRef.py : vp.Y(-0.5), color: col.accent });
+      }
+      if (!locked(K.D)) hs.push({ id: 'scr', kind: 'D', x: dr && dragRef.id === 'scr' ? dragRef.px : vp.X(scene.DD), y: vp.Y(-scene.YD * 0.82), color: col['object-line'] });
+      if (!locked('yP')) {
+        hs.push({ id: 'P', kind: 'P', x: vp.X(scene.DD), y: vp.Y(scene.yPd), color: col.s4 });
+        hs.push({ id: 'Ps', kind: 'Ps', x: scene.sx + scene.sw + 10, y: scene.yPs, color: col.s4 });
+      }
+      if (!locked(K.l)) hs.push({ id: 'lam', kind: 'lam', x: scene.lamX, y: scene.lamY, r: 26, hidden: true });
+      return hs;
+    },
+    onDrag: function (h, x, y) {
+      var w = vp.toWorld(x, y), K = KEYS[wtype.get()];
+      if (h.kind === 'gap') { setVal('bl', 2 * Math.abs(w[1]), 0.1); return; }
+      if (h.kind === 'P') { setVal('yP', w[1] / scene.YD * 100, 0.5); return; }
+      if (h.kind === 'Ps') { setVal('yP', (1 - 2 * (y - scene.top) / (scene.bot - scene.top)) * 100, 0.5); return; }
+      if (h.kind === 'a' || h.kind === 'D') {
+        // stretch gesture: the value scales with the pointer's distance from the centre / slits
+        if (!dragRef || dragRef.id !== h.id) dragRef = { id: h.id, v0: prm.values[h.kind === 'a' ? K.a : K.D], DD0: scene.DD };
+        dragRef.px = x; dragRef.py = y;
+        if (h.kind === 'a') { var na = dragRef.v0 * Math.max(0.02, Math.abs(w[1])) / 0.5; setVal(K.a, na, tidy(na, K.a)); }
+        else { var nd = dragRef.v0 * Math.max(0.05, w[0]) / dragRef.DD0; setVal(K.D, nd, tidy(nd, K.D)); }
+        drawScene();
+      }
+    },
+    onDrop: function () { dragRef = null; drawScene(); },
+    onTap: function (h, x, y) {
+      var K = KEYS[wtype.get()], t = wtype.get();
+      if (h.kind === 'gap') ask('bl', x, y, 'Gap width ÷ wavelength b/λ', 'Diffraction is greatest when the gap is about one wavelength wide.', [1, 2, 5, 8]);
+      else if (h.kind === 'a') ask(K.a, x, y, t === 'sound' ? 'Loudspeaker separation a' : t === 'water' ? 'Dipper separation a' : 'Slit separation a', 'Smaller a ⇒ wider fringes (x = λD/a).');
+      else if (h.kind === 'D') ask(K.D, x, y, 'Distance to the screen D', 'Larger D ⇒ wider fringes (x = λD/a).');
+      else if (h.kind === 'P' || h.kind === 'Ps') ask('yP', x, y, 'Point P on the screen', 'Percentage of the half-width shown (0 = centre line).', [-50, 0, 25, 50]);
+      else if (h.kind === 'lam') {
+        if (K.l === 'fS') ask('fS', x, y, 'Frequency of the sound f', 'λ = v/f', [340, 680, 1000, 2000]);
+        else ask(K.l, x, y, 'Wavelength λ', t === 'light' ? 'Visible light: about 400 nm (violet) to 700 nm (red).' : 'Larger λ ⇒ wider fringes.', t === 'light' ? [450, 550, 600, 650] : null);
+      }
+    },
+    onHover: function () { drawScene(); }
+  });
+  function tip() {
+    ui.stageTip(mode.get() === 'gap' ? 'Drag an edge of the gap to change its width · tap it to type b/λ'
+      : 'Drag S₁ or S₂ to change a · drag the screen to change D · drag P along the screen · tap λ to type it');
   }
 
   ui.onTheme(function () { drawScene(); drawPlots(); });

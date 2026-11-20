@@ -84,6 +84,7 @@
     var v = prm.values;
     if (key === 'v' || key === '*') prm.range('vs', 0, 0.9 * v.v, 0.1);
     prm.show('fo', mode.get() === 'vs');
+    if (ix) setTip();
     solved = null;
     if (mode.get() === 'vs') {
       solved = WV.dopplerSourceSpeed(v.fs, v.fo, v.v);
@@ -120,7 +121,8 @@
     D.line(c, [vp.P(-W, 0), vp.P(W, 0)], col.muted, { dash: [3, 5], width: 1 });
     var xs = x0 + v.vs * t;
     D.particle(c, vp.X(xs), vp.Y(0), 8, { fill: col.applied, label: 'S' });
-    if (v.vs > 0) D.arrow(c, vp.X(xs), vp.Y(0) - 18, vp.X(xs) + 40, vp.Y(0) - 18, col.applied, { width: 2, label: 'v_s' });
+    // arrow length ∝ v_s, so its tip can be dragged to set the speed
+    if (v.vs > 0) D.arrow(c, vp.X(xs), vp.Y(0) - 18, vp.X(xs) + ARR0 + v.vs * arrK(), vp.Y(0) - 18, col.applied, { width: 2, label: 'v_s = ' + U.sf(v.vs).replace(/<[^>]+>/g, '') + ' m/s' });
     function obs(fx, color, name, f) {
       var x = fx * W; c.save(); c.fillStyle = color; c.beginPath(); c.arc(vp.X(x), vp.Y(0), 7, 0, 2 * Math.PI); c.fill(); c.restore();
       D.label(c, name, vp.X(x), vp.Y(0) + 18, color, { bold: true });
@@ -130,6 +132,7 @@
     obs(XC, col.s4, 'C', WV.observedAt(P, XC * W, t));
     D.label(c, 'λ ahead = ' + U.sf(WV.dopplerWavelength(v.fs, v.v, v.vs, true)).replace(/<[^>]+>/g, '') + ' m,  λ behind = ' + U.sf(WV.dopplerWavelength(v.fs, v.v, v.vs, false)).replace(/<[^>]+>/g, '') + ' m,  λ (at rest) = ' + U.sf(lam0).replace(/<[^>]+>/g, '') + ' m', vp.w / 2, 12, col.ink, { size: 11, bg: true });
     if (mode.get() === 'vs' && solved && !solved.ok) D.label(c, 'No valid source speed for this observed frequency (needs v_s < 0.9v here)', vp.w / 2, vp.h - 12, col.warn, { bold: true, size: 12 });
+    if (ix) ix.paint(c);
   }
   function plots() {
     var col = ui.colors(), v = prm.values, t = tPhys(), P = p();
@@ -175,6 +178,56 @@
     R.html('<div class="head">Why: each crest is emitted ' + s3(v.vs / v.fs) + ' m (= v<sub>s</sub>T) further forward, so crests ahead are closer together; the speed of each crest is still ' + s3(v.v) + ' m s<sup>−1</sup>.</div>');
     R.render();
   }
+
+  /* ---------- direct manipulation: drag the v_s arrow tip, tap S to type f_s, tap A/B to type f_o (find-v_s mode) ---------- */
+  var ARR0 = 14, ix = null;
+  function arrK() { return 90 / (0.9 * prm.values.v); }   // px per m s⁻¹ (full range ≈ 90 px)
+  function locked(k) { var rw = prm.rows[k]; return !!(rw && rw.range.disabled); }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function setVal(k, val) {
+    var sp = prm.rows[k].spec, o = {};
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] !== prm.values[k]) prm.set(o);
+  }
+  function ask(k, x, y, title, sub, quick) {
+    var sp = prm.rows[k].spec;
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step) < 1 ? 1 : Number(sp.step), decimals: 1, unit: sp.unit,
+      at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); touched(); } });
+  }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      var col = ui.colors(), v = prm.values, t = tPhys(), xs = vp.X(x0 + v.vs * t), hs = [];
+      if (xs < -20 || xs > vp.w + 20) xs = null;
+      if (xs !== null && !locked('fs')) hs.push({ id: 'fs', x: xs, y: vp.Y(0), r: 16, color: col.applied });
+      if (xs !== null && !locked('vs')) hs.push({ id: 'vs', x: xs + ARR0 + v.vs * arrK(), y: vp.Y(0) - 18, color: col.applied });
+      if (mode.get() === 'vs' && !locked('fo')) {
+        hs.push({ id: 'foA', x: vp.X(XA * W), y: vp.Y(0) + 34, r: 18, color: col.s2 });
+        hs.push({ id: 'foB', x: vp.X(XB * W), y: vp.Y(0) + 34, r: 18, color: col.s3 });
+      }
+      return hs;
+    },
+    onDrag: function (hd, x) {
+      if (hd.id !== 'vs') return;
+      clock.pause();
+      // the source sits at x0 + v_s t, so solve for the v_s that puts the tip under the pointer
+      var t = tPhys(), vs = (x - vp.X(x0) - ARR0) / (t * vp.scale + arrK());
+      setVal('vs', Math.round(U.clamp(vs, 0, 0.9 * prm.values.v)));
+    },
+    onDrop: function () { touched(); },
+    onTap: function (hd, x, y) {
+      if (hd.id === 'fs') ask('fs', x, y, 'Source frequency f<sub>s</sub>', 'Frequency emitted by the source (heard by an observer moving with it).', [256, 440, 500, 700]);
+      else if (hd.id === 'vs') ask('vs', x, y, 'Speed of source v<sub>s</sub>', 'Along the line, relative to still air (up to 0.9v here).', [0, 20, 30, 170]);
+      else ask('fo', x, y, 'Observed frequency f<sub>o</sub>', 'Above f<sub>s</sub> ⇒ approaching; below ⇒ receding.', [450, 494, 531]);
+    },
+    onHover: function () { draw(); }
+  });
+  var tipMode = null;
+  function setTip() {
+    if (tipMode === mode.get()) return; tipMode = mode.get();
+    ui.stageTip(tipMode === 'vs' ? 'Tap the frequency under A or B to type the observed f_o · tap the source S to type f_s'
+      : 'Drag the v_s arrow tip to set the source speed · tap the source S to type its frequency');
+  }
+  setTip();
 
   ui.onTheme(frame);
   vp.onResize = frame;

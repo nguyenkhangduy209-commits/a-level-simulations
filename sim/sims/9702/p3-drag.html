@@ -113,7 +113,61 @@
     else D.label(c, 'resultant ≈ 0', vp.X(1.2), cy, col.resultant, { bold: true });
     if (Math.abs(s.v) > 1e-6) D.arrowPolar(c, vp.X(3), cy, s.v > 0 ? -Math.PI / 2 : Math.PI / 2, 20 + Math.min(80, Math.abs(s.v) * 2), col.velocity, { label: 'v' });
     D.label(c, stageText(s), vp.w / 2, vp.h - 12, col.ink, { size: 12 });
+    scene = { cx: cx, cy: cy, k: k, s: s, open: open };
+    if (ix) ix.paint(c);
   }
+
+  /* ---------- direct manipulation: tap the object / forces to type, drag the velocity arrow to set u ---------- */
+  var scene = null, ix = null;
+  function locked(key) { var r = prm.rows[key]; return !!(r && r.range && r.range.disabled); }
+  function spec(key) { return prm.rows[key].spec; }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function setVal(key, val, step) {
+    if (locked(key) || !isFinite(val)) return;
+    var sp = spec(key), o = {};
+    if (step) val = Math.round(val / step) * step;
+    o[key] = Number(U.clamp(val, Number(sp.min), Number(sp.max)).toFixed(4));
+    if (o[key] !== prm.values[key]) { prm.set(o); touched(); }
+  }
+  function ask(key, x, y, title, sub, quick, step, dec) {
+    if (locked(key)) return;
+    var sp = spec(key);
+    ui.askNumber({ title: title, sub: sub, value: prm.values[key], min: Number(sp.min), max: Number(sp.max), step: step, decimals: dec === undefined ? 3 : dec, unit: sp.unit, at: { x: x, y: y }, quick: quick,
+      onInput: function (val) { setVal(key, val); } });
+  }
+  /** screen tip of the velocity arrow for velocity v (down +), matching drawScene */
+  function vTip(v) { var len = Math.abs(v) > 1e-6 ? 20 + Math.min(80, Math.abs(v) * 2) : 20; return { x: vp.X(3), y: scene.cy + (v >= 0 ? len : -len) }; }
+  if (cv.addEventListener) ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene) return [];
+      var col = ui.colors(), s = scene.s, hs = [], instMode = inst.get();
+      if (!locked('m')) hs.push({ id: 'm', x: scene.cx, y: scene.cy, r: 16, color: col.weight });
+      if (!locked('U')) hs.push({ id: 'U', x: scene.cx + 18, y: scene.cy - Math.max(s.U * scene.k, 24), r: 14, color: col.normal });
+      var dk = instMode === 'a' ? 'Dg' : (scene.open ? 'ko' : 'k');
+      if (!locked(dk)) hs.push({ id: 'D', key: dk, x: scene.cx - 18, y: scene.cy + (s.D >= 0 ? -1 : 1) * Math.max(Math.abs(s.D) * scene.k, 24), r: 14, color: col.friction });
+      if (instMode === 'D' && !locked('ag')) hs.push({ id: 'ag', x: vp.X(1.2), y: scene.cy, r: 16, color: col.resultant });
+      if (!locked('v0')) { var t = vTip(s.v); hs.push({ id: 'v0', x: t.x, y: t.y, color: col.velocity }); }
+      return hs;
+    },
+    onDrag: function (h, x, y) {
+      if (h.id !== 'v0') return;
+      // length of the arrow = 20 + 2|u| px, pointing down for u > 0 (down +)
+      var d = y - scene.cy, len = Math.abs(d), u = len <= 20 ? 0 : U.sgn(d) * (len - 20) / 2;
+      clock.pause(); setVal('v0', u, 0.5); clock.seek(0);
+    },
+    onTap: function (h, x, y) {
+      if (h.id === 'm') ask('m', x, y, 'Mass of the falling object m', 'Weight W = mg changes with it.', [0.1, 4, 68, 78], 0.01, 3);
+      else if (h.id === 'U') ask('U', x, y, 'Upthrust U', 'Upward force from the fluid (0 in air for a dense object).', [0, 0.06, 740], 0.01, 3);
+      else if (h.id === 'D') {
+        if (h.key === 'Dg') ask('Dg', x, y, 'Drag D at the instant in the question', 'Used for a = (W − U − D) ÷ m.', [0, 950, 1800], 0.1, 2);
+        else if (h.key === 'ko') ask('ko', x, y, 'Drag constant with the parachute open k<sub>open</sub>', 'Illustrative model only.', [5, 20], 0.01, 3);
+        else ask('k', x, y, 'Drag constant of the model k', 'Illustrative model only: larger k gives a smaller terminal velocity.', [0.002, 0.05, 0.5], 0.0001, 4);
+      } else if (h.id === 'ag') ask('ag', x, y, 'Acceleration at the instant (down +)', 'Used for D = W − U − ma.', [0, 1.9, -11.9], 0.01, 2);
+      else if (h.id === 'v0') ask('v0', x, y, 'Initial velocity u (down +)', 'Negative = thrown upwards.', [-20, 0, 40], 0.1, 2);
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Tap the object to type its mass · tap the D or U arrow to type it · drag the velocity arrow up or down to set the initial velocity');
   function stageText(s) {
     var mx = Math.max(s.W, s.U, 1e-12), Fres = s.W - s.U - s.D;
     if (Math.abs(Fres) < 2e-3 * mx) return 'Resultant force ≈ 0: (nearly) terminal velocity, a ≈ 0';

@@ -128,7 +128,7 @@
     ['C', 'dC'].forEach(function (k) { prm.show(k, !err && useC.get()); }); prm.show('c', !err && prod && useC.get());
     R.clear();
     if (err) errorsReadout(); else combineReadout();
-    R.render(); draw();
+    R.render(); draw(); tip();
   }
 
   function errorsReadout() {
@@ -202,6 +202,7 @@
       if (!rd) return;
       var v = prm.values, size = Math.min(H - 30, W * 0.45), cx = 15 + size / 2, cy = H / 2;
       var span = Math.max(4, Math.abs(v.bias + v.zero) + 3 * v.sigma), k = (size / 2 - 6) / span;
+      if (frozen && frozen.k) k = frozen.k;   // keep the scale still while a handle is dragged
       for (var r = 5; r >= 1; r--) { c.beginPath(); c.arc(cx, cy, (size / 2 - 6) * r / 5, 0, 2 * Math.PI); c.fillStyle = r % 2 ? col.surface : col.panel; c.fill(); c.strokeStyle = col.line; c.lineWidth = 1; c.stroke(); }
       c.strokeStyle = col.ok; c.lineWidth = 2; c.beginPath(); c.moveTo(cx - 8, cy); c.lineTo(cx + 8, cy); c.moveTo(cx, cy - 8); c.lineTo(cx, cy + 8); c.stroke();
       shots.forEach(function (s) { var x = cx + s[0] * k, y = cy - s[1] * k; if (Math.abs(x - cx) < size / 2 + 4 && Math.abs(y - cy) < size / 2 + 4) { c.fillStyle = col.s2; c.beginPath(); c.arc(x, y, 4, 0, 2 * Math.PI); c.fill(); } });
@@ -209,6 +210,7 @@
       // number line
       var x0 = cx + size / 2 + 30, x1 = W - 20, yl = H * 0.55, st = rd.cst, lo = Math.min(st.min, v.X0), hi = Math.max(st.max, v.X0), pad = Math.max((hi - lo) * 0.15, 0.05 * v.X0, 1e-3);
       lo -= pad; hi += pad;
+      if (frozen && frozen.lo !== undefined) { lo = frozen.lo; hi = frozen.hi; }
       var X = function (x) { return x0 + (x - lo) / (hi - lo) * (x1 - x0); };
       c.strokeStyle = col.muted; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x0, yl); c.lineTo(x1, yl); c.stroke();
       U.niceTicks(lo, hi, 5).ticks.forEach(function (t) { if (t < lo || t > hi) return; c.beginPath(); c.moveTo(X(t), yl); c.lineTo(X(t), yl + 5); c.stroke(); D.label(c, U.num(t, 4), X(t), yl + 16, col.muted, { size: 10 }); });
@@ -219,22 +221,102 @@
       D.label(c, 'mean', X(st.mean), yl + 32, col.accent, { size: 11 });
       c.fillStyle = col.accent; c.globalAlpha = 0.15; c.fillRect(X(st.min), yl - 50, Math.max(2, X(st.max) - X(st.min)), 46); c.globalAlpha = 1;
       D.label(c, 'readings (shaded = range)', (x0 + x1) / 2, 10, col.muted, { size: 11 });
+      var zc2 = corr.get() ? v.zero : 0;
+      scene = { md: 'errors', cx: cx, cy: cy, k: k, x0: x0, x1: x1, yl: yl, lo: lo, hi: hi, sys: v.bias + v.zero - zc2, c0: v.X0 + v.bias + v.zero - zc2, st: st };
     } else {
-      if (!res || !absU) return;
+      if (!res || !absU) { scene = null; return; }
       var prod = kind.get() === 'product', vals = absU.map(function (i, j) { return prod ? 100 * res.terms[j].contrib : i.d; });
       var tot = vals.reduce(function (a, b) { return a + b; }, 0), cols = [col.s1, col.s2, col.s3];
       var L = 60, Rr = 20, y = H * 0.42, bh = 40, w = W - L - Rr;
       D.label(c, prod ? 'total % uncertainty in Q = ' + U.sf(tot, 3) + '%' : 'total absolute uncertainty ΔQ = ' + U.sf(tot, 3), W / 2, 22, col.ink, { bold: true });
       if (!(tot > 0)) { D.label(c, 'all uncertainties are zero', W / 2, y + bh / 2, col.muted); return; }
       var x = L;
+      scene = { md: 'combine', segs: [] };
       absU.forEach(function (i, j) {
         var bw = w * vals[j] / tot; c.fillStyle = cols[j]; c.globalAlpha = 0.8; c.fillRect(x, y, bw, bh); c.globalAlpha = 1;
         if (bw > 30) D.label(c, i.k, x + bw / 2, y + bh / 2, col.panel, { bold: true });
+        scene.segs.push({ k: i.k, cx: x + bw / 2, bw: bw, cy: y + bh / 2, lx: L + j * (w / 3) + 10, ly: y + bh + 22, color: cols[j] });
         D.label(c, i.k + ': ' + U.sf(vals[j], 3) + (prod ? '%' : '') + (prod && Math.abs(i.n) !== 1 ? ' (× ' + M.fracStr(Math.abs(i.n)) + ')' : ''), L + j * (w / 3), y + bh + 22, cols[j], { align: 'left', size: 12 });
         x += bw;
       });
       D.label(c, prod ? '%Q' : 'ΔQ', L - 8, y + bh / 2, col.ink, { align: 'right' });
     }
+    if (ix) ix.paint(c);
+  }
+
+  /* ---------- direct manipulation: drag the cluster / readings, tap to type ---------- */
+  var scene = null, frozen = null, grab = null, ix = null;
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range && r.range.disabled); }
+  function spec(k) { return prm.rows[k].spec; }
+  function decOf(st) { var t = String(st); return t.indexOf('.') < 0 ? 0 : t.length - t.indexOf('.') - 1; }
+  function setVal(k, val, step) {
+    if (locked(k) || !isFinite(val)) return;
+    var sp = spec(k), o = {};
+    val = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (step) val = Number((Math.round(val / step) * step).toFixed(decOf(step)));
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] !== prm.values[k]) { prm.set(o); if (ui.syncChips) ui.syncChips(); }
+  }
+  function ask(k, x, y, title, sub, quick, step, dec, unit) {
+    if (locked(k)) return;
+    var sp = spec(k);
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: step || Number(sp.step), decimals: dec === undefined ? 3 : dec,
+      unit: unit !== undefined ? unit : sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+  }
+  function wxLine(x) { return scene.lo + (x - scene.x0) / (scene.x1 - scene.x0) * (scene.hi - scene.lo); }
+  function clusterKey() { return corr.get() ? 'bias' : 'zero'; }
+  if (cv.addEventListener) ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene) return [];
+      var col = ui.colors(), hs = [];
+      if (scene.md === 'errors') {
+        var X = function (x) { return scene.x0 + (x - scene.lo) / (scene.hi - scene.lo) * (scene.x1 - scene.x0); }, st = scene.st;
+        if (!locked(clusterKey())) hs.push({ id: 'cl', x: scene.cx + scene.sys * scene.k, y: scene.cy, color: col.s2 });
+        if (!locked('X0')) hs.push({ id: 'true', x: X(prm.values.X0), y: scene.yl - 64, r: 16, color: col.ok });
+        if (!locked('bias')) hs.push({ id: 'mean', x: X(st.mean), y: scene.yl + 32, r: 16, color: col.accent });
+        if (!locked('sigma')) hs.push({ id: 'spread', x: X(st.max), y: scene.yl - 27, r: 16, color: col.s2 });
+      } else {
+        var pct = inMode.get() === 'pct';
+        scene.segs.forEach(function (sg) {
+          if (sg.bw >= 18 && !locked('d' + sg.k)) hs.push({ id: 'd' + sg.k, key: 'd' + sg.k, x: sg.cx, y: sg.cy, r: 16, color: sg.color, pct: pct });
+          if (!locked(sg.k)) hs.push({ id: 'v' + sg.k, key: sg.k, x: sg.lx, y: sg.ly, r: 16, color: sg.color });
+        });
+      }
+      return hs;
+    },
+    onDrag: function (h, x, y) {
+      if (!scene || scene.md !== 'errors') return;
+      var v = prm.values;
+      if (!grab || grab.id !== h.id) {   // first move: freeze the scales and remember where the drag started
+        frozen = { k: scene.k, lo: scene.lo, hi: scene.hi };
+        var gmax = v.sigma > 1e-9 ? (scene.st.max - scene.c0) / v.sigma : 0;
+        grab = { id: h.id, b0: v.bias, mean0: scene.st.mean, f: gmax > 0.2 ? gmax : 1.5 };
+      }
+      if (h.id === 'cl') {
+        var off = (x - scene.cx) / scene.k;
+        if (clusterKey() === 'zero') setVal('zero', off - v.bias, 0.01); else setVal('bias', off, 0.01);
+      } else if (h.id === 'true') setVal('X0', wxLine(x), 0.1);
+      else if (h.id === 'mean') setVal('bias', grab.b0 + wxLine(x) - grab.mean0, 0.01);
+      else if (h.id === 'spread') setVal('sigma', (wxLine(x) - (v.X0 + v.bias + v.zero - (corr.get() ? v.zero : 0))) / grab.f, 0.01);
+    },
+    onDrop: function () { frozen = null; grab = null; update(); },
+    onTap: function (h, x, y) {
+      if (h.id === 'cl') {
+        if (clusterKey() === 'zero') ask('zero', x, y, 'Zero error z', 'Reading shown when the true value is zero. Every reading is shifted by z.', [-0.5, 0, 0.03, 0.5], 0.01, 3);
+        else ask('bias', x, y, 'Systematic error b', 'Zero error is corrected, so the cluster offset is the other systematic error b.', [0, 0.5, 1, 4], 0.01, 3);
+      } else if (h.id === 'true') ask('X0', x, y, 'True value X<sub>true</sub>', 'The value a perfect measurement would give.', [2.5, 10, 25, 50], 0.1, 3);
+      else if (h.id === 'mean') ask('bias', x, y, 'Systematic error b', 'Shifts every reading by the same amount (not counting the zero error).', [0, 0.5, 1, 4], 0.01, 3);
+      else if (h.id === 'spread') ask('sigma', x, y, 'Random error σ', 'Spread of the readings about their mean.', [0.2, 1, 3], 0.01, 3);
+      else if (h.key && h.key.charAt(0) === 'd') {
+        var q = h.key.charAt(1);
+        ask(h.key, x, y, (h.pct ? 'Percentage uncertainty in ' : 'Absolute uncertainty in ') + q, h.pct ? 'Type ±% for ' + q + '.' : 'Type ±Δ' + q + ' in the same unit as ' + q + '.', null, h.pct ? 0.1 : 0.01, 4, h.pct ? '%' : '');
+      } else if (h.key) ask(h.key, x, y, 'Measured value ' + h.key, 'Type the reading of ' + h.key + '.', null, 0.1, 4);
+    },
+    onHover: function () { draw(); }
+  });
+  function tip() {
+    ui.stageTip(mode.get() === 'errors' ? 'Drag the cluster on the target to set the ' + (corr.get() ? 'systematic error' : 'zero error') + ' · drag “true”, “mean” or the range edge on the number line · tap any of them to type'
+      : 'Tap a bar to type that uncertainty · tap a label below to type the measured value');
   }
 
   ui.onTheme(draw);

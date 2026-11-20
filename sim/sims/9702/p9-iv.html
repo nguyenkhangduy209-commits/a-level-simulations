@@ -90,7 +90,7 @@
     prm.show('R', c === 'metal'); prm.show('T', c === 'thermistor'); prm.show('Lx', c === 'ldr');
     var f = Ifn(), V = v.V, I = f(V), h = Math.max(1e-6, RANGE[c] * 1e-4), grad = (f(V + h) - f(V - h)) / (2 * h);
     M = { f: f, V: V, I: I, grad: grad, kI: c === 'diode' ? 1e3 : (c === 'thermistor' || c === 'ldr' ? 1e3 : 1), uI: c === 'metal' || c === 'lamp' ? 'A' : 'mA' };
-    drawScene(); drawPlots(); readout();
+    drawScene(); drawPlots(); readout(); tip();
   }
 
   /* ---------- scene: measuring circuit ---------- */
@@ -142,6 +142,14 @@
     D.label(c, M.V.toFixed(M.V !== 0 && Math.abs(M.V) < 1.2 ? 3 : 2).replace('-', '−') + ' V', vp.X(10.2), vp.Y(8.8), col.applied, { size: 12, bg: true, align: 'left' });
     [5.4, 10.6].forEach(function (x) { c.fillStyle = L; c.beginPath(); c.arc(vp.X(x), vp.Y(6.5), 3.5, 0, 7); c.fill(); });
     D.label(c, 'illustrative model curve — shapes are the syllabus content', vp.X(13.6), vp.Y(4.2), col.muted, { size: 11, align: 'center' });
+    // supply control: a slider track inside the loop (drag the knob to set V)
+    var m = RANGE[cn], ty = vp.Y(KNOB.y);
+    D.line(c, [vp.P(KNOB.x0, KNOB.y), vp.P(KNOB.x1, KNOB.y)], col.muted, { width: 3 });
+    [KNOB.x0, KNOB.xc, KNOB.x1].forEach(function (x) { D.line(c, [[vp.X(x), ty - 5], [vp.X(x), ty + 5]], col.muted, { width: 1.5 }); });
+    D.label(c, '−' + m + ' V', vp.X(KNOB.x0), ty + 14, col.muted, { size: 10 }); D.label(c, '0', vp.X(KNOB.xc), ty + 14, col.muted, { size: 10 }); D.label(c, '+' + m + ' V', vp.X(KNOB.x1), ty + 14, col.muted, { size: 10 });
+    D.label(c, 'supply p.d.', vp.X(KNOB.xc), ty - 14, col.muted, { size: 10 });
+    c.fillStyle = col.accent; c.beginPath(); c.arc(vp.X(knobX()), ty, 6, 0, 7); c.fill();
+    if (ix) ix.paint(c);
   }
 
   /* ---------- plots ---------- */
@@ -154,6 +162,7 @@
     if (Math.abs(V) > 1e-9) series.push({ fn: function (x) { return I / V * x * k; }, color: col.s3, width: 1.5 });
     if (tangent.get()) series.push({ fn: function (x) { return (I + M.grad * (x - V)) * k; }, color: col.s2, dash: [5, 4], width: 1.5 });
     pIV.draw({ x: [-m, m], y: yr, yLabel: 'I / ' + M.uI, series: series, markers: [{ x: V, y: I * k, label: '(' + U.sf(V) + ', ' + U.sf(I * k) + ')', color: col.accent }], title: cn === 'diode' ? 'current axis clipped at 60 mA' : '' });
+    if (ixP) paintPlotHandle();
     if (cn === 'thermistor') {
       pR.draw({ x: [-10, 100], xLabel: 'temperature / °C', yLabel: 'R / kΩ', series: [{ fn: function (T) { return IV.thermistorR(T, DEF.thermistor) / 1e3; }, color: col.s4 }], cursor: prm.values.T, title: 'NTC: R falls as T rises' });
     } else if (cn === 'ldr') {
@@ -195,6 +204,74 @@
     R.html('<div class="eq">' + why[cn] + '</div>');
     R.render();
   }
+
+  /* ---------- direct manipulation: slide the supply knob or the point on the I–V graph, tap meters / component to type ---------- */
+  var KNOB = { x0: 4.6, x1: 11.4, xc: 8, y: 3.4 };
+  function knobX() { var m = RANGE[comp.get()]; return KNOB.xc + (KNOB.x1 - KNOB.xc) * U.clamp(prm.values.V / m, -1, 1); }
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range.disabled); }
+  function decOf(st) { var t = String(st); return t.indexOf('.') < 0 ? 0 : t.length - t.indexOf('.') - 1; }
+  function vStep() { return RANGE[comp.get()] <= 1 ? 0.005 : 0.05; }
+  function setVal(k, val, step) {
+    var sp = prm.rows[k].spec, o = {};
+    val = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (step) val = Number((Math.round(val / step) * step).toFixed(decOf(step)));
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] === prm.values[k]) return;
+    prm.set(o);
+    if (ui.syncChips) ui.syncChips();
+  }
+  function ask(k, x, y, title, sub, quick) {
+    var sp = prm.rows[k].spec;
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step), decimals: Math.max(decOf(sp.step), 2),
+      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+  }
+  function askV(x, y) { var m = RANGE[comp.get()]; ask('V', x, y, 'p.d. across the component V', 'Negative values reverse the supply.', m <= 1 ? [-0.5, 0, 0.6, 0.7] : [-m / 2, 0, m / 2, m]); }
+  var COMPKEY = { metal: ['R', 'Resistance R', 'Constant at constant temperature (ohmic).', [2, 6, 10, 50]], thermistor: ['T', 'Temperature of the thermistor T', 'NTC: higher temperature ⇒ lower resistance.', [0, 25, 50, 80]],
+    ldr: ['Lx', 'Light intensity on the LDR', 'Brighter light ⇒ lower resistance.', [2, 20, 50, 90]] };
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!M) return [];
+      var col = ui.colors(), hs = [], ck = COMPKEY[comp.get()];
+      if (!locked('V')) {
+        hs.push({ id: 'knob', kind: 'knob', x: vp.X(knobX()), y: vp.Y(KNOB.y), color: col.accent });
+        hs.push({ id: 'vm', kind: 'vm', x: vp.X(8), y: vp.Y(8.3), color: col.applied });
+      }
+      if (ck && !locked(ck[0])) hs.push({ id: 'comp', kind: 'comp', x: vp.X(8), y: vp.Y(6.5), r: 28, color: col['object-line'] });
+      return hs;
+    },
+    onDrag: function (h, x) {
+      if (h.kind !== 'knob') return;
+      var m = RANGE[comp.get()], wx = vp.toWorld(x, 0)[0];
+      setVal('V', (wx - KNOB.xc) / (KNOB.x1 - KNOB.xc) * m, vStep());
+    },
+    onTap: function (h, x, y) {
+      if (h.kind === 'knob' || h.kind === 'vm') askV(x, y);
+      else if (h.kind === 'comp') { var ck = COMPKEY[comp.get()]; if (ck) ask(ck[0], x, y, ck[1], ck[2], ck[3]); }
+    },
+    onHover: function () { drawScene(); }
+  });
+  // the same point can be slid along the characteristic on the I–V graph
+  // pointer px → plot px (the plot's drawing size can lag its on-screen size until its next resize)
+  function plotK() { var r = pIV.canvas.getBoundingClientRect ? pIV.canvas.getBoundingClientRect() : null; return r && r.width > 0 && pIV.w > 0 ? r.width / pIV.w : 1; }
+  function plotPt() { var b = pIV.box; return [pIV.px(M.V), U.clamp(pIV.py(M.I * M.kI), b.T, b.T + b.H)]; }
+  var ixP = SIM.view.interact(pIV.canvas, {
+    handles: function () {
+      if (!M || locked('V') || !pIV.px || !pIV.box) return [];
+      var p = plotPt(), k = plotK();
+      return [{ id: 'pt', x: p[0] * k, y: p[1] * k }];
+    },
+    onDrag: function (h, x) { var b = pIV.box, m = RANGE[comp.get()]; setVal('V', -m + (x / plotK() - b.L) / b.W * 2 * m, vStep()); },
+    onTap: function () { askV(vp.X(knobX()), vp.Y(KNOB.y)); },   // the editor lives on the main stage
+    onHover: function () { drawPlots(); }
+  });
+  /** grab ring on the plot point, drawn in the plot's own coordinates */
+  function paintPlotHandle() {
+    if (!M || locked('V') || !pIV.px || !pIV.box) return;
+    var c = pIV.ctx, p = plotPt(), on = ixP && ixP.isDragging();
+    c.save(); c.strokeStyle = ui.colors().accent; c.lineWidth = on ? 2.5 : 1.5; c.globalAlpha = on ? 0.95 : 0.6; if (!on) c.setLineDash([3, 3]);
+    c.beginPath(); c.arc(p[0], p[1], on ? 14 : 10, 0, Math.PI * 2); c.stroke(); c.restore();
+  }
+  function tip() { ui.stageTip('Slide the supply knob to change V · tap the voltmeter to type V' + (COMPKEY[comp.get()] ? ' · tap the component to change it' : '') + ' · or drag the point on the I–V graph'); }
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

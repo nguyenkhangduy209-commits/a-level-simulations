@@ -114,6 +114,7 @@
     D.label(c, 'λ / m (log scale)', W - 20, by + bh + 40, col.muted, { align: 'right', size: 10 });
     // polarisation beam
     var y0 = H * 0.68, n = ch.steps.length, segs = n + 1, sx = 40, sw = W - 80, seg = sw / segs, amp0 = Math.min(42, H * 0.15);
+    scene = { BX: BX, bx: bx, bw: bw, by: by, bh: bh, L0: L0, L1: L1, y0: y0, sx: sx, seg: seg, amp0: amp0 };
     D.arrow(c, sx - 20, y0, sx + sw + 20, y0, col.muted, { width: 1, head: 8 });
     function eVec(xc, angDeg, I, color) {
       var a = Math.sqrt(Math.max(0, I) / Math.max(v.I0, 1e-12)) * amp0, r = U.rad(angDeg);
@@ -133,6 +134,7 @@
       eVec(fx + seg / 2, st.axis, st.Iout, col.s1);
       D.label(c, 'I = ' + U.sf(st.Iout).replace(/<[^>]+>/g, ''), fx + seg / 2, y0 + amp0 + 14, col.ink, { size: 11 });
     });
+    if (ix) ix.paint(c);
   }
 
   /* ---------- working ---------- */
@@ -172,6 +174,57 @@
     pI.draw({ x: [0, 360], y: [0, Math.max(v.I0, 1e-6) * 1.1], series: [{ fn: function (a) { return WV.malus(lastS.Iin, a - lastS.from); }, color: col.s1 }],
       cursor: ((lastS.axis % 360) + 360) % 360, hlines: findAng.get() ? [{ y: v.It, label: 'I_t' }] : [], xLabel: 'angle of last filter axis from vertical / °', yLabel: 'I transmitted / W m⁻²' });
   }
+
+  /* ---------- direct manipulation: drag a filter axis or the beam's plane to rotate it, drag the λ cursor, tap I labels to type ---------- */
+  var scene = null, ix = null;
+  function locked(k) { var rw = prm.rows[k]; return !!(rw && rw.range.disabled); }
+  function snapAngle(a) { a = Math.round(a); var near = Math.round(a / 15) * 15; return Math.abs(a - near) <= 2 ? near : a; }
+  function setVal(k, val) {
+    var sp = prm.rows[k].spec, o = {};
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] !== prm.values[k]) { prm.set(o); if (ui.syncChips) ui.syncChips(); }
+  }
+  function ask(k, x, y, title, sub, quick, dec) {
+    var sp = prm.rows[k].spec;
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step) < 0.1 ? 0.1 : Number(sp.step), decimals: dec === undefined ? 2 : dec, unit: sp.unit,
+      at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+  }
+  /** angle from vertical (clockwise +) of a point relative to the beam axis at fx; filters are drawn squashed ×0.5 sideways */
+  function angFrom(fx, x, y, squash) { return Math.atan2((x - fx) / squash, scene.y0 - y) * 180 / Math.PI; }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene || !ch) return [];
+      var col = ui.colors(), v = prm.values, hs = [], S = scene;
+      if (!locked('logL')) hs.push({ id: 'logL', x: S.BX(v.logL), y: S.by + S.bh / 2, color: col.accent });
+      if (!locked('pol') && v.I0 > 0) { var rp = U.rad(v.pol); hs.push({ id: 'pol', x: S.sx + S.seg / 2 + Math.sin(rp) * S.amp0, y: S.y0 - Math.cos(rp) * S.amp0, color: col.s1 }); }
+      if (!locked('I0')) hs.push({ id: 'I0', x: S.sx + S.seg / 2, y: S.y0 + S.amp0 + 14, r: 16, color: col.ink });
+      ch.steps.forEach(function (st, i) {
+        var k = 'a' + (i + 1); if (locked(k)) return;
+        var fx = S.sx + S.seg * (i + 1), r = U.rad(st.axis), L = S.amp0 + 6;
+        hs.push({ id: k, fx: fx, x: fx + Math.sin(r) * L * 0.5, y: S.y0 - Math.cos(r) * L, color: col.s3 });
+      });
+      if (findAng.get() && !locked('It')) hs.push({ id: 'It', x: S.sx + S.seg * (ch.steps.length + 0.5), y: S.y0 + S.amp0 + 14, r: 16, color: col.ink });
+      return hs;
+    },
+    onDrag: function (hd, x, y) {
+      var S = scene;
+      if (hd.id === 'logL') setVal('logL', Math.round((S.L0 + (x - S.bx) / S.bw * (S.L1 - S.L0)) * 100) / 100);
+      else if (hd.id === 'pol') {
+        var a = angFrom(S.sx + S.seg / 2, x, y, 1); if (a > 90) a -= 180; if (a < -90) a += 180;   // a plane: θ and θ ± 180° are the same
+        setVal('pol', snapAngle(a));
+      } else if (/^a\d$/.test(hd.id)) setVal(hd.id, snapAngle(angFrom(hd.fx, x, y, 0.5)));
+    },
+    onTap: function (hd, x, y) {
+      var v = prm.values;
+      if (hd.id === 'logL') ask('logL', x, y, 'Wavelength: log<sub>10</sub>(λ / m)', 'e.g. −6.26 for 550 nm, −1.52 for 3.0 cm.', [-10, -6.26, -1.52, 0], 4);
+      else if (hd.id === 'pol') ask('pol', x, y, 'Plane of polarisation θ<sub>0</sub>', 'Angle of the incoming beam’s plane from vertical.', [0, 30, 45, 90], 1);
+      else if (hd.id === 'I0') ask('I0', x, y, 'Incident intensity I<sub>0</sub>', 'Intensity of the plane-polarised beam arriving at filter 1.', [2, 8, 8.5, 10]);
+      else if (hd.id === 'It') ask('It', x, y, 'Target transmitted intensity I<sub>t</sub>', 'The working finds the last filter’s angle for this intensity.', [1, 2, 5.2]);
+      else ask(hd.id, x, y, 'Filter ' + hd.id.slice(1) + ' transmission axis', 'Angle from vertical. Malus uses the angle from the plane arriving at this filter.', [0, 30, 45, 60, 90], 1);
+    },
+    onHover: function () { draw(); }
+  });
+  ui.stageTip('Drag the top of a filter’s axis to rotate it · drag the beam’s arrow to turn its plane · drag the λ cursor along the spectrum · tap I₀ to type it');
 
   ui.onTheme(function () { draw(); readout(); });
   vp.onResize = draw;

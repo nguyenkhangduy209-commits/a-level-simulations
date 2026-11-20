@@ -148,7 +148,7 @@
     var T = duration();
     prm.range('tA', 0, T, 0.01); prm.range('tB', 0, T, 0.01);
     clock.setDuration(T);
-    drawScene(); drawPlots(); readout();
+    drawScene(); drawPlots(); readout(); tip();
   }
 
   /* ---------- scene ---------- */
@@ -158,6 +158,7 @@
     if (mode.get() === 'bounce') {
       var ymax = B.flights.reduce(function (m, f) { return Math.max(m, f.y0 + (f.v0 > 0 ? f.v0 * f.v0 / (2 * g) : 0)); }, prm.values.h);
       ymax = Math.max(ymax, 0.2);
+      if (frozenFit) ymax = frozenFit.ymax;   // keep the frame still while the start height is dragged
       vp.fit(-ymax * 0.9, ymax * 0.9, -ymax * 0.08, ymax * 1.1);
       c = vp.begin();
       D.ground(c, vp.X(-ymax * 0.6), vp.Y(0), vp.X(ymax * 0.6), vp.Y(0));
@@ -168,10 +169,13 @@
       var ar = sgn() > 0 ? 'up +' : 'down +';
       D.arrow(c, vp.X(-ymax * 0.7), vp.Y(ymax * 0.5), vp.X(-ymax * 0.7), vp.Y(ymax * 0.5) + (sgn() > 0 ? -40 : 40), col.muted, { label: ar, width: 1.4 });
       if (Math.abs(q.v) > 1e-6) D.arrow(c, vp.X(0) + r + 6, by - r, vp.X(0) + r + 6, by - r - U.sgn(sgn() * q.v) * (16 + Math.min(60, Math.abs(q.v) * 8)), col.velocity, { label: 'v = ' + U.num(q.v, 2) + ' m/s', width: 2 });
+      scene = { md: 'bounce', ymax: ymax, r: r };
+      if (ix) ix.paint(c);
       return;
     }
     var smin = 0, smax = 0, T = duration();
     for (var i = 0; i <= 200; i++) { var s = J.stateAt(T * i / 200).s; smin = Math.min(smin, s); smax = Math.max(smax, s); }
+    if (frozenFit && frozenFit.smin !== undefined) { smin = frozenFit.smin; smax = frozenFit.smax; }   // keep the track still while a tick is dragged
     var span = Math.max(smax - smin, 1e-6), pad = span * 0.08;
     vp.fit(smin - pad, smax + pad, -span * 0.25, span * 0.3);
     c = vp.begin();
@@ -183,6 +187,85 @@
     if (Math.abs(q.a) > 1e-9) D.arrowPolar(c, vp.X(q.s), vp.Y(0) - 56, q.a > 0 ? 0 : Math.PI, 30, col.accel, { label: 'a', width: 1.6 });
     D.label(c, '+ direction →', vp.w - 12, 14, col.muted, { align: 'right', size: 11 });
     if (J.invalid) D.label(c, J.invalid, vp.w / 2, vp.h - 14, col.warn, { bold: true, size: 12 });
+    // stage ends on the track: what can be tapped or dragged
+    var lst = stages();
+    J.segs.forEach(function (sg, n) { var x = vp.X(sg.s1); D.line(c, [[x, vp.Y(0) - 7], [x, vp.Y(0) + 7]], col.component, { width: 2 }); D.label(c, String((lst[sg.i] || {}).slot || n + 1), x, vp.Y(0) + 30, col.component, { size: 10 }); });
+    scene = { md: 'stages', smin: smin, smax: smax };
+    if (ix) ix.paint(c);
+  }
+
+  /* ---------- direct manipulation ---------- */
+  var scene = null, frozenFit = null, ix = null;
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range && r.range.disabled); }
+  function spec(k) { return prm.rows[k].spec; }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function setVal(k, val, step) {
+    if (locked(k) || !isFinite(val)) return;
+    var sp = spec(k), o = {};
+    if (step) val = Math.round(val / step) * step;
+    o[k] = Number(U.clamp(val, Number(sp.min), Number(sp.max)).toFixed(4));
+    if (o[k] !== prm.values[k]) { prm.set(o); touched(); }
+  }
+  function ask(k, x, y, title, sub, quick, step, dec) {
+    if (locked(k)) return;
+    var sp = spec(k);
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: step, decimals: dec === undefined ? 2 : dec, unit: sp.unit, at: { x: x, y: y }, quick: quick,
+      onInput: function (val) { setVal(k, val); } });
+  }
+  /** the quantity each stage type is set by (tapping its end on the track types it) */
+  var STAGE_KEY = { a: ['a', 'Acceleration', 'Constant acceleration during this stage.'], v: ['v', 'Final velocity', 'Velocity reached at the end of this stage.'], c: ['t', 'Time', 'Duration of the constant-velocity stage.'],
+    d: ['v', 'Final velocity', 'Velocity at the end of this stage (drag the tick to set its displacement).'], fall: ['t', 'Time', 'Duration of free fall.'] };
+  if (cv.addEventListener) ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene) return [];
+      var col = ui.colors(), hs = [], v = prm.values;
+      if (scene.md === 'bounce' && B) {
+        if (!locked('h')) hs.push({ id: 'h', x: vp.X(0), y: vp.Y(v.h), color: col.accent });
+        if (!locked('ub')) hs.push({ id: 'ub', x: vp.X(scene.ymax * 0.3) + 20, y: vp.Y(v.h), r: 16, color: col.velocity });
+        if (!locked('k') && B.impacts.length) hs.push({ id: 'k', x: vp.X(scene.ymax * 0.35), y: vp.Y(0) + 8, r: 16, color: col['object-line'] });
+      } else if (scene.md === 'stages' && J) {
+        if (!locked('u0')) hs.push({ id: 'u0', x: vp.X(0), y: vp.Y(0) - 28, r: 16, color: col.velocity });
+        var lst = stages();
+        J.segs.forEach(function (sg) {
+          var st = lst[sg.i]; if (!st) return;
+          var key = STAGE_KEY[st.type]; if (!key) return;
+          var drag = st.type === 'd' && !locked('d' + st.slot);
+          if (!drag && locked(key[0] + st.slot)) return;
+          hs.push({ id: 's' + st.slot, slot: st.slot, type: st.type, drag: drag, x: vp.X(sg.s1), y: vp.Y(0), r: 14, color: col.component });
+        });
+      }
+      return hs;
+    },
+    onDrag: function (h, x, y) {
+      var w = vp.toWorld(x, y);
+      if (h.id === 'h') {
+        if (!frozenFit) frozenFit = { ymax: scene.ymax };
+        clock.pause(); setVal('h', w[1], 0.01); clock.seek(0);
+      } else if (h.drag) {
+        if (!frozenFit) frozenFit = { smin: scene.smin, smax: scene.smax };
+        // the tick sits at the end of this stage: its displacement is the tick position minus the stage start
+        var sg = J.segs.filter(function (q) { var st = stages()[q.i]; return st && st.slot === h.slot; })[0];
+        if (!sg) return;
+        var span = Math.max(scene.smax - scene.smin, 1e-6), step = span > 200 ? 1 : span > 20 ? 0.1 : 0.01;
+        clock.pause(); setVal('d' + h.slot, w[0] - sg.s0, step); clock.seek(0);
+      }
+    },
+    onDrop: function () { frozenFit = null; drawScene(); },
+    onTap: function (h, x, y) {
+      if (h.id === 'h') ask('h', x, y, 'Release height h', 'Height of the ball above the ground at t = 0.', [0.5, 1.25, 2, 5], 0.01, 2);
+      else if (h.id === 'ub') ask('ub', x, y, 'Initial velocity u (up +)', '0 = dropped from rest; positive = thrown upwards.', [-5, 0, 5, 10], 0.1, 2);
+      else if (h.id === 'k') ask('k', x, y, 'Rebound fraction k', 'Speed just after a bounce ÷ speed just before it. 0 = no bounce.', [0, 0.5, 0.6, 0.8], 0.01, 2);
+      else if (h.id === 'u0') ask('u0', x, y, 'Initial velocity u', 'Velocity at t = 0 (positive to the right / up).', [-10, 0, 10, 25], 0.1, 2);
+      else if (h.slot) {
+        var key = STAGE_KEY[h.type];
+        ask(key[0] + h.slot, x, y, 'Stage ' + h.slot + ': ' + key[1].toLowerCase(), key[2], null, 0.1, 2);
+      }
+    },
+    onHover: function () { drawScene(); }
+  });
+  function tip() {
+    ui.stageTip(mode.get() === 'bounce' ? 'Drag the ball’s start point to set the release height · tap “start” to type u · tap the ground to type the rebound fraction k'
+      : 'Tap “s = 0” to type u · tap a stage’s end tick to type its value · drag the tick of a “reach v over s” stage to set s');
   }
 
   /* ---------- plots ---------- */

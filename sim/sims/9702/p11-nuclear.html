@@ -105,7 +105,8 @@
   }
 
   /* ---------- scene ---------- */
-  function drawScene() {
+  function drawScene() { sceneBody(); if (ix) ix.paint(vp.ctx); }
+  function sceneBody() {
     if (!M) return;
     var col = ui.colors(), c, v = prm.values;
     vp.fit(0, 16, 0, 9); c = vp.begin();
@@ -226,6 +227,47 @@
       '<tr><td>proton, neutron</td><td>baryons (hadrons)</td><td>no</td></tr><tr><td>quark + antiquark</td><td>mesons (hadrons)</td><td>no</td></tr></table>');
     R.render();
   }
+
+  /* ---------- direct manipulation: scrub A and Z, tap the parent / daughter / arrow ---------- */
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range.disabled); }
+  function spec(k) { return prm.rows[k].spec; }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function setVal(k, val) {
+    var sp = spec(k), o = {};
+    if (!isFinite(val)) return;
+    o[k] = U.clamp(Math.round(val), Number(sp.min), Number(sp.max));
+    if (o[k] !== prm.values[k]) { prm.set(o); touched(); }
+  }
+  function ask(k, x, y, title, sub, quick) {
+    if (locked(k)) return;
+    var sp = spec(k);
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: 1, decimals: 0,
+      at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+  }
+  var DECAYS = ['alpha', 'betaMinus', 'betaPlus', 'gamma'];
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!M) return [];
+      var col = ui.colors(), v = prm.values, hs = [], lx = vp.X(2.6), ly = vp.Y(1.2);
+      if (!locked('A')) { hs.push({ id: 'A', key: 'A', x: lx - 14, y: ly - 12, r: 14, v0: v.A, color: col.ink }); hs.push({ id: 'P', key: 'A', x: vp.X(3), y: vp.Y(5), r: Math.max(22, vp.scale * 1.6), hidden: true }); }
+      if (!locked('Z')) hs.push({ id: 'Z', key: 'Z', x: lx - 12, y: ly + 12, r: 14, v0: v.Z, color: col.s2 });
+      hs.push({ id: 'dec', x: vp.X(6.6), y: vp.Y(5), color: col.s4 });
+      if (!M.nuc.invalid && !M.dec.invalid && dtype.get() !== 'gamma' && !locked('A') && !locked('Z')) hs.push({ id: 'D', x: vp.X(10), y: vp.Y(5), color: col.accent });
+      return hs;
+    },
+    onDrag: function (h, x, y) {
+      // scrub a number: up adds, down subtracts, one step every 10 px
+      if (h.id === 'A' || h.id === 'Z') setVal(h.key, h.v0 - Math.round((y - h.y) / 10));
+    },
+    onTap: function (h, x, y) {
+      if (h.id === 'A' || h.id === 'P') ask('A', x, y, 'Nucleon number A', 'Protons + neutrons. Tap the lower number (Z) to change the proton number.', [4, 14, 60, 238]);
+      else if (h.id === 'Z') ask('Z', x, y, 'Proton number Z', 'Sets the element. Neutrons N = A − Z.', [1, 6, 19, 92]);
+      else if (h.id === 'dec') { dtype.set(DECAYS[(DECAYS.indexOf(dtype.get()) + 1) % DECAYS.length]); touched(); }
+      else if (h.id === 'D' && M && M.dec && !M.dec.invalid) { var d = M.dec.daughter; prm.set({ A: U.clamp(d.A, 1, 260), Z: U.clamp(d.Z, 0, 110) }); touched(); }
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag A or Z up / down (or tap the nucleus) to change the nuclide · tap the arrow to change the decay · tap the daughter to decay it next');
 
   ui.onTheme(function () { drawScene(); drawSpectrum(); drawQuarks(); });
   vp.onResize = drawScene; vS.onResize = drawSpectrum; vQ.onResize = drawQuarks;

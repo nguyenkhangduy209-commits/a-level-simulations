@@ -79,7 +79,8 @@
   }
 
   /* ---------- scene ---------- */
-  function drawScene() {
+  function drawScene() { sceneBody(); if (ix) ix.paint(vp.ctx); }
+  function sceneBody() {
     if (!M) return;
     var col = ui.colors(), c, L = col['object-line'], v = prm.values, cc = M.c;
     vp.fit(0, 16, 0, 9);
@@ -181,6 +182,53 @@
     }
     R.render();
   }
+
+  /* ---------- direct manipulation: drag the load R, tap the cell / r / R to type, tap the switch ---------- */
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range.disabled); }
+  function spec(k) { return prm.rows[k].spec; }
+  function decOf(st) { var t = String(st); return t.indexOf('.') < 0 ? 0 : t.length - t.indexOf('.') - 1; }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function setVal(k, val, step) {
+    var sp = spec(k), o = {};
+    if (!isFinite(val)) return;
+    val = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (step) val = Number((Math.round(val / step) * step).toFixed(decOf(step)));
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] !== prm.values[k]) { prm.set(o); touched(); }
+  }
+  function ask(k, x, y, title, sub, quick) {
+    if (locked(k)) return;
+    var sp = spec(k), st = Number(sp.step);
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: st, decimals: Math.max(decOf(st), 2),
+      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+  }
+  /* the load spans decades: dragging right / up multiplies R, left / down divides it (×2 every 40 px), about 2 s.f. */
+  function niceStep(val, minStep) { return Math.max(minStep, Math.pow(10, Math.floor(Math.log10(Math.max(Math.abs(val), 1e-9))) - 1)); }
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!M) return [];
+      var col = ui.colors(), v = prm.values, hs = [];
+      function add(id, key, wx, wy, color) { if (key && locked(key)) return; hs.push({ id: id, key: key, x: vp.X(wx), y: vp.Y(wy), v0: key ? v[key] : 0, color: color || col['object-line'] }); }
+      add('R', 'R', 8, 6.5, col.accent);
+      add('E', 'E', 5.3, 1.5);
+      add('r', 'r', 9.7, 1.5);
+      add('sw', null, 11.7, 6.5);
+      return hs;
+    },
+    onDrag: function (h, x, y) {
+      if (h.id !== 'R') return;
+      var v0 = Math.max(h.v0, 0.1), val = v0 * Math.pow(2, ((x - h.x) - (y - h.y)) / 40);
+      setVal('R', val, niceStep(val, 0.01));
+    },
+    onTap: function (h, x, y) {
+      if (h.id === 'sw') { open.set(!open.get()); touched(); return; }
+      if (h.id === 'R') ask('R', x, y, 'External (load) resistance R', 'Drag the resistor left / right to change it. R = 0 is a short circuit.', [0, 2, 5.5, 10, 50]);
+      else if (h.id === 'E') ask('E', x, y, 'e.m.f. of the cell E', 'Energy per unit charge given by the cell.', [1.5, 6, 9, 12]);
+      else if (h.id === 'r') ask('r', x, y, 'Internal resistance r', 'Inside the cell: causes the lost volts Ir.', [0, 0.5, 1, 2]);
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag the load resistor R left / right · tap the cell, r or R to type a value · tap the switch to open / close it');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

@@ -105,7 +105,8 @@
     vp.fit(-0.16, 1.12, -0.62, 0.62);
     var c = vp.begin();
     if (st.invalid) { D.label(c, st.invalid, vp.w / 2, vp.h / 2, col.warn, { bold: true }); return; }
-    var L = g.L, X = function (x) { return vp.X(x / L); }, amp = 0.36; // world units: x scaled to 0…1
+    // world units: x scaled to 0…1; while the end is dragged the scale is frozen (Lref) so the end follows the pointer
+    var L = g.L, Ls = Lref || L, X = function (x) { return vp.X(x / Ls); }, amp = 0.36;
     var wt = 2 * Math.PI * clock.t / PERIOD, S = SP.shapeFn(med, st.lambda, L), tp = SP.travellingPair(med, st.lambda, L);
     var y0 = vp.Y(0), sc = vp.scale * amp;
     // apparatus
@@ -166,6 +167,9 @@
     });
     if (med === 'microwave') D.label(c, 'detector reading is largest at A, smallest at N (reflector is a node)', vp.w / 2, 14, col.muted, { size: 11 });
     D.label(c, 'transverse displacement drawn ' + (med === 'closed' || med === 'open' ? '(air displacement is along the tube; dots show it)' : ''), vp.w / 2, vp.h - 10, col.muted, { size: 11 });
+    if (med !== 'microwave') D.label(c, 'f = ' + U.sf(st.f).replace(/<[^>]+>/g, '') + ' Hz (harmonic ' + st.harmonic + ')   ·   v = ' + U.num(g.v, 4) + ' m/s', vp.w / 2, 14, col.ink, { size: 11, bg: true });
+    scene = { X: X, y0: y0, sc: sc, L: L, med: med };
+    if (ix) ix.paint(c);
   }
 
   /* ---------- plots ---------- */
@@ -222,6 +226,71 @@
       rel.rel === 'node' ? '—' : rel.rel + ' (' + rel.deg + '°)');
     R.render();
   }
+
+  /* ---------- direct manipulation: drag the far end (L), drag P / Q, tap the source for the mode (or f), tap the top label for v ---------- */
+  var scene = null, Lref = 0, ix = null;
+  function locked(k) { var rw = prm.rows[k]; return !!(rw && rw.range.disabled); }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function setVal(k, val, step) {
+    var sp = prm.rows[k].spec, o = {};
+    val = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (step) val = U.clamp(Number((Math.round(val / step) * step).toFixed(4)), Number(sp.min), Number(sp.max));
+    o[k] = val;
+    if (o[k] !== prm.values[k]) prm.set(o);
+  }
+  function ask(k, x, y, title, sub, quick, dec) {
+    var sp = prm.rows[k].spec;
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step), decimals: dec === undefined ? 3 : dec, unit: sp.unit,
+      at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val, k === 'k' ? 1 : null); touched(); } });
+  }
+  function lenKey() { return scene && scene.med === 'microwave' ? 'Lc' : 'L'; }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene || !st || st.invalid) return [];
+      var col = ui.colors(), S = scene, hs = [], med = S.med, xe = S.X(S.L);
+      var off = med === 'string' ? 9 : med === 'microwave' ? 5 : med === 'closed' ? 3 : 0;
+      if (!locked(lenKey())) hs.push({ id: 'end', off: off, x: xe + off, y: S.y0, color: col.accent });
+      var src = med === 'string' ? { x: S.X(0) - 20, y: S.y0 } : med === 'microwave' ? { x: S.X(0) - 22, y: S.y0 } : { x: S.X(0) - 22, y: S.y0 };
+      var srcKey = med === 'microwave' ? 'fG' : 'k';
+      if (!locked(srcKey)) hs.push({ id: 'src', x: src.x, y: src.y, r: 18, color: col.muted });
+      if (med !== 'microwave') { var vk = med === 'string' ? 'vs' : 'va'; if (!locked(vk)) hs.push({ id: 'v', x: vp.w / 2, y: 14, r: 18, color: col.ink }); }
+      var wt = 2 * Math.PI * clock.t / PERIOD, tp = SP.travellingPair(med, st.lambda, S.L);
+      [['pP', 'P'], ['pQ', 'Q']].forEach(function (pq) {
+        if (locked(pq[0])) return;
+        var x = S.L * prm.values[pq[0]] / 100;
+        hs.push({ id: pq[0], x: S.X(x), y: S.y0 - S.sc * tp.sum(x, wt) / 2, r: 16, color: col.s4 });
+      });
+      return hs;
+    },
+    onDrag: function (hd, x) {
+      clock.pause();
+      var wx = vp.toWorld(x - (hd.off || 0), 0)[0];
+      if (hd.id === 'end') {
+        if (!Lref) Lref = scene.L;
+        var Lm = Lref * U.clamp(wx, 0.04, 1.08);
+        if (lenKey() === 'Lc') setVal('Lc', Lm * 100, 0.5); else setVal('L', Lm, Lm >= 0.2 ? 0.005 : 0.001);
+      } else if (hd.id === 'pP' || hd.id === 'pQ') setVal(hd.id, U.clamp(wx, 0, 1) * 100, 0.5);   // probes: % of length (x is drawn as x/L)
+    },
+    onDrop: function () { Lref = 0; touched(); drawScene(); },
+    onTap: function (hd, x, y) {
+      var med = scene.med;
+      if (hd.id === 'end') {
+        if (med === 'microwave') ask('Lc', x, y, 'Transmitter–reflector distance', 'Distance from the transmitter to the metal plate.', [10, 20, 30], 1);
+        else ask('L', x, y, med === 'string' ? 'Length of string L' : 'Length of air column L', 'End corrections are ignored.', [0.3, 0.48, 0.8, 1.2]);
+      } else if (hd.id === 'src') {
+        if (med === 'microwave') ask('fG', x, y, 'Microwave frequency', 'λ = c ÷ f.', [10, 12, 24], 1);
+        else {
+          var fr = SP.allowedFrequencies(med, prm.values.L, med === 'string' ? prm.values.vs : prm.values.va, 4).map(function (o) { return U.sf(o.f).replace(/<[^>]+>/g, '') + ' Hz'; }).join(', ');
+          ask('k', x, y, 'Resonance pattern k', 'The source must be driven at a resonant frequency: ' + fr + ' … (k = 1, 2, 3 …)' + (med === 'closed' ? '. Closed pipe: harmonic 2k − 1.' : '.'), [1, 2, 3, 4], 0);
+        }
+      } else if (hd.id === 'v') {
+        if (med === 'string') ask('vs', x, y, 'Wave speed on the string v', 'Depends on the tension and mass per unit length.', [96, 120, 1400], 0);
+        else ask('va', x, y, 'Speed of sound in air v', '', [330, 340], 0);
+      } else ask(hd.id, x, y, 'Probe ' + hd.id.slice(1) + ' position', 'Percentage of the length from the left end.', [0, 25, 50, 75, 100], 1);
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag the far end to change the length · drag P or Q · tap the source to choose the resonance · tap v at the top to type the speed');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

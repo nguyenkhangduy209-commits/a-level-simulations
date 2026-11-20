@@ -140,7 +140,7 @@
     if (!sl) return;
     var col = ui.colors(), v = prm.values, th = U.rad(v.theta), ct = Math.cos(th), st = Math.sin(th);
     var Ls = 10, W = Ls * ct, Hh = Ls * st;
-    vp.fit(-1, Math.max(W, 3) + 1 + 9, -1.2, Math.max(Hh, 3) + 2.5);
+    if (hold) vp.fit.apply(vp, hold.fit); else vp.fit(-1, Math.max(W, 3) + 1 + 9, -1.2, Math.max(Hh, 3) + 2.5);   // frozen while the slope is dragged
     var c = vp.begin();
     D.ground(c, vp.X(-1), vp.Y(0), vp.X(Math.max(W, 3) + 1), vp.Y(0));
     c.save(); c.fillStyle = col.surface; c.beginPath(); c.moveTo(vp.X(0), vp.Y(0)); c.lineTo(vp.X(W), vp.Y(Hh)); c.lineTo(vp.X(W), vp.Y(0)); c.closePath(); c.fill();
@@ -161,6 +161,17 @@
     if (v.Fr > 0 && !sl.noStart) D.arrowPolar(c, cx, cy, mdir + Math.PI, v.Fr * k, col.friction, { label: 'F_r' });
     if (v.Fd > 0) D.arrowPolar(c, cx, cy, mdir, v.Fd * k, col.applied, { label: 'F_d' });
     if (stt.v > 1e-6) D.arrowPolar(c, cx - st * 30, cy - ct * 30, mdir, 20 + Math.min(50, stt.v * 4), col.velocity, { label: 'v = ' + U.sf(stt.v) + ' m/s', width: 2 });
+    // tap targets: start / end of the path, force arrow tips (a faint stub when a force is zero)
+    var sx0 = vp.X(startF * Ls * ct), sy0 = vp.Y(startF * Ls * st), sx1 = vp.X(endPos * ct), sy1 = vp.Y(endPos * st);
+    function tip(ang, len) { return [cx + Math.cos(ang) * len, cy - Math.sin(ang) * len]; }
+    var frOn = v.Fr > 0 && !sl.noStart, frT = tip(mdir + Math.PI, frOn ? v.Fr * k : 30), fdT = tip(mdir, v.Fd > 0 ? v.Fd * k : 30);
+    if (!frOn) D.label(c, 'F_r?', frT[0], frT[1] - 14, col.friction, { size: 10 });
+    if (!(v.Fd > 0)) D.label(c, 'F_d?', fdT[0], fdT[1] - 14, col.applied, { size: 10 });
+    D.label(c, 'u = ' + U.sf(v.u) + ' m/s', sx0, sy0 + 16, col.accent, { size: 10, bg: true });
+    D.label(c, 's = ' + U.sf(v.s) + ' m', sx1, sy1 + 16, col.accent, { size: 10, bg: true });
+    geo = { mode: 'slope', ox: vp.X(0), oy: vp.Y(0), top: [vp.X(W), vp.Y(Hh)], hs: [
+      { id: 'm', x: cx, y: cy, r: 18 }, { id: 'u', x: sx0, y: sy0 + 16, r: 14 }, { id: 's', x: sx1, y: sy1 + 16, r: 14 },
+      { id: 'Fr', x: frT[0], y: frT[1], r: 16 }, { id: 'Fd', x: fdT[0], y: fdT[1], r: 16 }] };
     // energy bars (screen space on the right)
     var e0 = sl.KE0 + Math.max(0, -sl.dGPE) + sl.Wd;
     var items = [
@@ -173,6 +184,7 @@
     bars(c, x0, y0, bw, vp.h * 0.55, items, maxE, 'energy in (left 3) = energy out (right 3)');
     if (sl.noStart) D.label(c, 'Does not move: nothing overcomes the resistive force', vp.w / 2, 14, col.warn, { bold: true, size: 12 });
     else if (sl.stops) D.label(c, 'Stops after ' + U.sf(sl.dEnd) + ' m (before covering s)', vp.w / 2, 14, col.warn, { bold: true, size: 12 });
+    if (ix) ix.paint(c);
     // plot energies against distance
     var dmax = Math.max(sl.dEnd, 1e-6), sgnH = sl.sign * sl.sinT;
     pE.draw({ x: [0, Math.max(dmax, 1e-3)], xLabel: 'distance moved / m', yLabel: 'energy / J', series: [
@@ -193,19 +205,25 @@
     D.line(c, [vp.P(0, 5.8), vp.P(0, yy + 0.6)], col['object-line'], { width: 1.5 });
     D.block(c, vp.X(0), vp.Y(yy - 0.0), 44, 30, 0, { label: U.num(v.m, 2) + ' kg' });
     D.label(c, 'h = ' + U.sf(y) + ' m of ' + U.sf(v.h) + ' m', vp.X(1.6), vp.Y(yy), col.muted, { align: 'left', size: 11 });
+    var vax = vp.X(-1.4), vay = vp.Y(yy), vlen = 20 + Math.min(40, v.v * 20);
+    D.arrow(c, vax, vay + vlen / 2, vax, vay - vlen / 2, col.velocity, { width: 2, label: 'v = ' + U.sf(v.v) + ' m/s' });
+    D.label(c, 'P_in = ' + U.sf(v.Pin) + ' W', vp.X(1.2), vp.Y(6.2), col.applied, { align: 'left', size: 11, bg: true });
+    geo = { mode: 'motor', hs: [{ id: 'm', x: vp.X(0), y: vp.Y(yy) }, { id: 'Pin', x: vp.X(0), y: vp.Y(6.2), r: 18 },
+      { id: 'h', x: vp.X(1.6) + 50, y: vp.Y(yy), r: 16 }, { id: 'v', x: vax, y: vay - vlen / 2, r: 16 }] };
     var Ein = v.Pin * t, Eu = v.m * g * y;
     var items = [{ label: 'E_in', v: Ein, color: col.applied }, { label: 'useful mgh', v: Eu, color: col.s2 }, { label: 'wasted', v: Math.max(0, Ein - Eu), color: col.friction }];
     var maxE = Math.max(mo.Ein, mo.Euseful, 1e-9);
     var bw = Math.min(vp.w * 0.45, 280);
     bars(c, vp.w - bw - 12, vp.h - 40, bw, vp.h * 0.55, items, maxE, 'energy after t = ' + t.toFixed(2) + ' s');
     if (mo.impossible) D.label(c, 'Impossible: useful output power mgv exceeds the input power', vp.w / 2, 14, col.warn, { bold: true, size: 12 });
+    if (ix) ix.paint(c);
     pE.draw({ x: [0, Math.max(mo.t, 1e-3)], xLabel: 't / s', yLabel: 'energy / J', series: [
       { fn: function (tt) { return v.Pin * tt; }, color: col.applied }, { fn: function (tt) { return v.m * g * v.v * tt; }, color: col.s2 }], cursor: t });
   }
   function drawVehicle() {
     if (!ve) return;
     var col = ui.colors(), v = prm.values, th = U.rad(v.theta), ct = Math.cos(th), st = Math.sin(th);
-    vp.fit(-1, 11, -1, Math.max(10 * st, 2) + 2.5);
+    if (hold) vp.fit.apply(vp, hold.fit); else vp.fit(-1, 11, -1, Math.max(10 * st, 2) + 2.5);
     var c = vp.begin();
     D.ground(c, vp.X(-1), vp.Y(0), vp.X(11), vp.Y(0));
     c.save(); c.fillStyle = col.surface; c.beginPath(); c.moveTo(vp.X(0), vp.Y(0)); c.lineTo(vp.X(10 * ct), vp.Y(10 * st)); c.lineTo(vp.X(10 * ct), vp.Y(0)); c.closePath(); c.fill(); c.restore();
@@ -217,7 +235,12 @@
     if (Fd > 0) D.arrowPolar(c, cx, cy, th, Fd * k, col.applied, { label: 'F = P/v = ' + U.sf(Fd) + ' N' });
     if (v.Fr > 0) D.arrowPolar(c, cx, cy - 10, th + Math.PI, v.Fr * k, col.friction, { label: 'F_r' });
     if (ve.Wpar > 0) D.arrowPolar(c, cx, cy + 10, th + Math.PI, ve.Wpar * k, col.component, { dash: [5, 4], label: 'mg sin θ' });
-    D.arrowPolar(c, cx, cy - st * 40 - 20, th, 30 + Math.min(60, v.vc * 1.5), col.velocity, { label: 'v = ' + U.sf(v.vc) + ' m/s', width: 2 });
+    var vL = 30 + Math.min(60, v.vc * 1.5), vy0 = cy - st * 40 - 20;
+    D.arrowPolar(c, cx, vy0, th, vL, col.velocity, { label: 'v = ' + U.sf(v.vc) + ' m/s', width: 2 });
+    function tipV(ang, len, y0) { return [cx + Math.cos(ang) * len, (y0 === undefined ? cy : y0) - Math.sin(ang) * len]; }
+    var fT = tipV(th, Fd > 0 ? Fd * k : 30), rT = tipV(th + Math.PI, v.Fr > 0 ? v.Fr * k : 30, cy - 10), vT = tipV(th, vL, vy0);
+    geo = { mode: 'vehicle', ox: vp.X(0), oy: vp.Y(0), top: [vp.X(10 * ct), vp.Y(10 * st)], hs: [{ id: 'm', x: cx, y: cy, r: 18 }, { id: 'P', x: fT[0], y: fT[1], r: 16 },
+      { id: 'Fr', x: rT[0], y: rT[1], r: 16 }, { id: 'vc', x: vT[0], y: vT[1], r: 16 }] };
     // driving force against speed, resistance line
     var vmaxPlot = Math.min(80, Math.max(v.vc * 1.6, isFinite(ve.vmax) ? ve.vmax * 1.3 : 0, 5));
     var Fcap = Math.max(ve.resist * 3, isFinite(Fd) ? Fd * 1.5 : 0, 10);
@@ -225,6 +248,7 @@
       { fn: function (s) { return s > 0 ? Math.min(v.P / s, Fcap * 2) : NaN; }, color: col.applied },
       { fn: function () { return ve.resist; }, color: col.friction, dash: [5, 4] }],
       cursor: v.vc, vlines: isFinite(ve.vmax) && ve.vmax <= vmaxPlot ? [{ x: ve.vmax, label: 'v_max' }] : [] });
+    if (ix) ix.paint(c);
   }
 
   /* ---------- working ---------- */
@@ -292,6 +316,50 @@
       deriv.innerHTML = '<div class="head">Derivation of P = Fv</div><div class="eq"><span class="rhs">P = W/t = F × s/t = Fv (force constant, along the motion). Here ' + s3(ve.Fdrive) + ' N × ' + s3(v.vc) + ' m s⁻¹ = ' + s3(v.P) + ' W.</span></div>';
     }
   }
+
+  /* ---------- direct manipulation: drag the top of the slope (angle); tap the body, arrows and labels to type values ---------- */
+  var geo = null, hold = null, ix = null;
+  function editable(k) { var r = prm.rows[k]; return !!r && r.row.style.display !== 'none' && !r.range.disabled; }
+  function lim(k, v) { var sp = prm.rows[k].spec; return U.clamp(v, Number(sp.min), Number(sp.max)); }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  var ASK = {
+    m: { t: 'Mass', s: 'Type the mass in kilograms.', u: 'kg', q: [0.5, 2, 50, 1200] },
+    u: { t: 'Initial speed', s: 'Speed at the start of the path.', u: 'm s⁻¹', q: [0, 2, 5, 10] },
+    s: { t: 'Distance along the slope', s: 'Δh = s sin θ', u: 'm', q: [4, 5, 10, 200] },
+    Fr: { t: 'Resistive force', s: 'Friction / air resistance, opposite to the motion.', u: 'N', q: [0, 3, 40, 600] },
+    Fd: { t: 'Driving force along the motion', s: 'e.g. a rope pulling the object.', u: 'N', q: [0, 100, 250] },
+    Pin: { t: 'Input power to the motor', s: 'Efficiency = mgv ÷ P<sub>in</sub>', u: 'W', d: 0, st: 1, q: [200, 400, 1000, 3924] },
+    h: { t: 'Height lifted', s: '', u: 'm', q: [5, 10, 12, 20] },
+    v: { t: 'Lifting speed (constant)', s: 'Useful output power = mgv', u: 'm s⁻¹', st: 0.01, q: [0.2, 0.4, 0.5, 1] },
+    P: { t: 'Output power of the engine', s: 'Driving force F = P ÷ v', u: 'W', d: 0, st: 100, q: [12000, 30000, 60000] },
+    vc: { t: 'Speed of the vehicle', s: 'F = P ÷ v falls as v rises.', u: 'm s⁻¹', q: [10, 18, 20, 30] }
+  };
+  function ask(k, x, y) {
+    var a = ASK[k], sp = prm.rows[k].spec;
+    ui.askNumber({ title: a.t, sub: a.s, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: a.st || 0.1, decimals: a.d === undefined ? 2 : a.d, unit: a.u, quick: a.q, at: { x: x, y: y },
+      onInput: function (val) { var o = {}; o[k] = lim(k, val); prm.set(o); touched(); } });
+  }
+  function snapAng(a) { var r = Math.round(a), s15 = Math.round(a / 15) * 15; return Math.abs(a - s15) <= 2 ? s15 : r; }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!geo || geo.mode !== mode.get()) return [];
+      var col = ui.colors(), out = geo.hs.filter(function (h) { return editable(h.id); }).map(function (h) { return Object.assign({ color: col.accent }, h); });
+      if (geo.top && editable('theta')) out.push({ id: 'theta', x: geo.top[0], y: geo.top[1], color: col['object-line'] });
+      return out;
+    },
+    onDrag: function (hd, x, y) {
+      if (hd.id !== 'theta') return;
+      if (!hold) { hold = { fit: vp.bounds.slice(), ox: geo.ox, oy: geo.oy }; clock.pause(); }
+      var a = SIM.view.screenAngle(hold.ox, hold.oy, x, y);
+      if (a > 180) a = a > 270 ? 0 : 90;   // below the ground: clamp to the nearer end
+      var o = {}; o.theta = lim('theta', snapAng(a)); prm.set(o);
+      if (ui.syncChips) ui.syncChips();
+    },
+    onDrop: function () { if (hold) { hold = null; draw(); touched(); } },
+    onTap: function (hd, x, y) { if (ASK[hd.id]) ask(hd.id, x, y); },
+    onHover: function () { draw(); }
+  });
+  ui.stageTip('Drag the top of the slope to change its angle · tap the body to type its mass · tap an arrow or label to type that value');
 
   ui.onTheme(draw);
   vp.onResize = draw;

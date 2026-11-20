@@ -122,7 +122,7 @@
       } else prm.lock('x', false);
       wr = MT.wire(v.L, dm, v.Fw, solve.get() === 'x' ? MT.wireX(v.L, dm, v.Fw, v.E * 1e9) : v.x * 1e-3);
     }
-    draw(); readout();
+    draw(); readout(); tip();
   }
 
   /* ---------- state during the load/unload animation (t in [0,2]: load 0→1, unload 1→2) ---------- */
@@ -137,11 +137,14 @@
   /* ---------- drawing ---------- */
   function draw() {
     if (mode.get() === 'spring') drawSpring(); else drawWire();
+    if (ix) ix.paint(vp.ctx);
   }
   function drawSpring() {
     if (!lu) return;
     var col = ui.colors(), v = prm.values, st = animState(), comp = sense.get() === 'compression';
     var c0 = lu.curve, xMaxPlot = Math.max(lu.x, c0.xE, c0.xP) * 1.25 || 1;
+    if (frozenX && ix && ix.isDragging()) xMaxPlot = frozenX; else frozenX = 0;   // keep the drawing scale fixed while the load is dragged
+    sGeom = { topY: topYOf(comp), xMax: xMaxPlot };
     vp.fit(-1, 9, -0.5, 6.2);
     var c = vp.begin();
     // support
@@ -193,6 +196,7 @@
     c.beginPath(); c.rect(vp.X(1.5), vp.Y(yb), vp.X(2.5) - vp.X(1.5), vp.Y(yb - 0.6) - vp.Y(yb)); c.fill(); c.stroke(); c.restore();
     D.label(c, 'L = ' + U.sf(v.L) + ' m', vp.X(2.3), vp.Y(4), col.ink, { align: 'left', size: 12 });
     D.label(c, 'd = ' + U.sf(v.d) + ' mm (micrometer)', vp.X(2.3), vp.Y(3.5), col.ink, { align: 'left', size: 12 });
+    if (solve.get() === 'x') D.label(c, 'E = ' + U.sf(v.E) + ' GPa (given)', vp.X(2.3), vp.Y(3.0), col.ink, { align: 'left', size: 12 });
     D.arrow(c, vp.X(2), vp.Y(yb - 0.6), vp.X(2), vp.Y(yb - 0.6) + 40, col.applied, { label: 'F = ' + U.sf(v.Fw) + ' N' });
     D.label(c, 'x = ' + U.sf(wr.strain * v.L * 1000) + ' mm (exaggerated)', vp.X(4.2), vp.Y(2.4), col.ink, { align: 'left', size: 12 });
     D.label(c, 'strain = x/L = ' + U.sf(wr.strain) + ' (no unit)', vp.X(4.2), vp.Y(1.9), col.ink, { align: 'left', size: 12 });
@@ -268,6 +272,89 @@
       if (v.Fw === 0) R.badge('No load: no stress or strain (E cannot be found)', 'info');
     }
     R.render();
+  }
+
+  /* ---------- direct manipulation: drag the load down / up, tap the spring, wire or labels to type ---------- */
+  var frozenX = 0, sGeom = null, BH = 0.5, L0D = 2.4;
+  function topYOf(comp) { return comp ? 0.4 : 5.8; }
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range.disabled); }
+  function spec(k) { return prm.rows[k].spec; }
+  function decOf(st) { var t = String(st); return t.indexOf('.') < 0 ? 0 : t.length - t.indexOf('.') - 1; }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function niceStep(val, minStep) { return Math.max(minStep, Math.pow(10, Math.floor(Math.log10(Math.max(Math.abs(val), 1e-9))) - 1)); }
+  function setVal(k, val, step, quiet) {
+    var sp = spec(k), o = {};
+    if (!isFinite(val)) return;
+    val = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (step) val = Number((Math.round(val / step) * step).toFixed(decOf(step)));
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] !== prm.values[k]) { prm.set(o); if (!quiet) touched(); }
+  }
+  function ask(k, x, y, title, sub, quick) {
+    if (locked(k)) return;
+    var sp = spec(k), st = Number(sp.step);
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: st, decimals: Math.max(decOf(st), 2),
+      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+  }
+  function textW(t) { return String(t).length * 6.6; }
+  function labelHandle(id, key, wx, wy, text) { return { id: id, key: key, x: vp.X(wx) + textW(text) / 2, y: vp.Y(wy), r: Math.max(16, textW(text) / 2), hidden: true }; }
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      var col = ui.colors(), v = prm.values, hs = [];
+      if (mode.get() === 'spring') {
+        if (!lu || !sGeom) return [];
+        var comp = sense.get() === 'compression', st = animState(), topY = sGeom.topY;
+        var xs = sGeom.xMax > 0 ? st.x / sGeom.xMax * 1.8 : 0, endY = comp ? topY + (L0D - xs) : topY - (L0D + xs), by0 = comp ? endY : endY - BH;
+        if (!locked('F')) hs.push({ id: 'load', key: 'F', x: vp.X(2), y: vp.Y(by0 + BH / 2), color: col.applied });
+        if (!locked('k')) hs.push({ id: 'k', key: 'k', x: vp.X(2), y: vp.Y((topY + endY) / 2), color: col['object-line'] });
+        return hs;
+      }
+      if (!wr) return [];
+      var xsw = Math.min(1.2, 0.6 + 0.6 * Math.min(1, wr.strain / 0.005)), yb = 1.6 - (xsw - 0.6);
+      var dragKey = solve.get() === 'x' ? 'Fw' : 'x';
+      if (!locked(dragKey) || !locked('Fw')) hs.push({ id: 'wload', key: dragKey, x: vp.X(2), y: vp.Y(yb - 0.3), color: col.applied });
+      if (!locked('L')) { hs.push({ id: 'L', key: 'L', x: vp.X(2), y: vp.Y(4.6), color: col['object-line'] }); hs.push(labelHandle('Lt', 'L', 2.3, 4, 'L = ' + U.sf(v.L) + ' m')); }
+      if (!locked('d')) hs.push(labelHandle('d', 'd', 2.3, 3.5, 'd = ' + U.sf(v.d) + ' mm (micrometer)'));
+      if (solve.get() === 'x' && !locked('E')) hs.push(labelHandle('E', 'E', 2.3, 3.0, 'E = ' + U.sf(v.E) + ' GPa (given)'));
+      if (solve.get() === 'E' && !locked('x')) hs.push(labelHandle('x', 'x', 4.2, 2.4, 'x = ' + U.sf(wr.strain * v.L * 1000) + ' mm (exaggerated)'));
+      return hs;
+    },
+    onDrag: function (h, x, y) {
+      var wy = vp.toWorld(x, y)[1], v = prm.values;
+      if (h.id === 'load' && lu) {
+        var comp = sense.get() === 'compression';
+        if (!frozenX) frozenX = sGeom ? sGeom.xMax : 1;
+        if (clock.playing || clock.t !== 1) { clock.pause(); clock.seek(1); }   // show the fully loaded state under the pointer
+        var by0 = wy - BH / 2, topY = topYOf(comp);
+        var xs = comp ? topY + L0D - by0 : topY - L0D - (by0 + BH);
+        xs = U.clamp(xs, 0, comp ? L0D - 0.4 : topY - L0D - 0.1);
+        var F = lu.curve.F(xs / 1.8 * frozenX);
+        setVal('F', F, niceStep(F, 0.01), true);
+      } else if (h.id === 'wload' && wr) {
+        var yb = wy + 0.3, frac = U.clamp((1.6 - yb) / 0.6, 0, 1), strain = frac * 0.005;
+        if (h.key === 'x') setVal('x', strain * v.L * 1000, niceStep(strain * v.L * 1000, 0.001));
+        else { var A = Math.PI * Math.pow(v.d * 1e-3, 2) / 4, Fw = v.E * 1e9 * strain * A; setVal('Fw', Fw, niceStep(Fw, 0.1)); }
+      }
+    },
+    onDrop: function (h) { if (h.id === 'load') touched(); },
+    onTap: function (h, x, y) {
+      var comp = sense.get() === 'compression';
+      if (h.id === 'load') ask('F', x, y, 'Load applied F', 'Drag the mass ' + (comp ? 'up to squash' : 'down to stretch') + ' the spring, or type the force.', [2, 4, 8, 12]);
+      else if (h.id === 'k') ask('k', x, y, 'Spring constant k', 'Gradient of the straight part of the force–extension graph.', [25, 50, 100, 250]);
+      else if (h.id === 'wload') ask('Fw', x, y, 'Load on wire F', 'Drag the mass down to ' + (h.key === 'x' ? 'set the measured extension.' : 'pull harder.'), [10, 50, 80, 100]);
+      else if (h.key === 'L') ask('L', x, y, 'Original length of wire L', 'Measured with a metre rule.', [1, 1.5, 2, 3]);
+      else if (h.key === 'd') ask('d', x, y, 'Diameter of wire d', 'Measured with a micrometer: A = πd²/4.', [0.2, 0.4, 0.5, 1]);
+      else if (h.key === 'E') ask('E', x, y, 'Young modulus E', 'Steel ≈ 200 GPa, copper ≈ 120 GPa, aluminium ≈ 70 GPa.', [70, 120, 200]);
+      else if (h.key === 'x') ask('x', x, y, 'Extension of wire x', 'The measured change in length.', [1, 2.5, 5, 10]);
+    },
+    onHover: function () { draw(); }
+  });
+  var lastTip = null;
+  function tip() {
+    var t = mode.get() === 'spring'
+      ? 'Drag the mass ' + (sense.get() === 'compression' ? 'up to squash' : 'down to stretch') + ' the spring · tap the mass to type F · tap the spring to type k'
+      : 'Drag the mass down to ' + (solve.get() === 'x' ? 'increase the load' : 'set the extension') + ' · tap the mass, the wire or a label to type a value';
+    if (t !== lastTip) { lastTip = t; ui.stageTip(t); }
   }
 
   ui.onTheme(draw);

@@ -189,6 +189,19 @@
     if (res.invalid) D.label(c, res.invalid, vp.w / 2, vp.h - 16, col.warn, { bold: true });
     else if (Math.abs(res.a) > 1e-9) D.arrowPolar(c, sx, sy + 30, ang + (res.a > 0 ? 0 : Math.PI), 20 + Math.min(60, Math.abs(res.a) * 30), col.accel, { width: 2, label: 'a = ' + U.sf(res.a) + ' m/s²' });
     if (trk) D.label(c, 'animation: v = ' + U.sf(trk.at(clock.t).v) + ' m/s', vp.w - 10, 14, col.muted, { align: 'right', size: 11 });
+    // layout for direct manipulation (screen px)
+    var vTxt = 'speed at this instant v = ' + U.sf(res.vv) + ' m/s';
+    D.label(c, vTxt, 10, 32, col.muted, { align: 'left', size: 11 });
+    c.save(); c.font = '11px system-ui, -apple-system, sans-serif'; var vW = c.measureText(vTxt).width || 150; c.restore();
+    function tip(x, y, a, len) { len = Math.max(len, 26); return [x + Math.cos(a) * len, y - Math.sin(a) * len]; }
+    var trx = vp.X(trC[0]) + up[0] * 0.8, tr_y = vp.Y(trC[1]) + up[1] * 0.8;
+    lay = { ox: vp.X(0), oy: vp.Y(0), hill: vp.P(p1[0], p1[1]), car: [cx, cy], trailer: [trx, tr_y], speed: [10 + vW / 2, 32],
+      D: tip(cx + Math.cos(ang) * 35, cy - Math.sin(ang) * 35, ang, res.D * kf),
+      R1: tip(cx, cy + 6, ang + Math.PI, (res.R1 + res.brake) * kf),
+      R2: v.m2 > 0 ? tip(trx - Math.cos(ang) * 27, tr_y + Math.sin(ang) * 27 + 6, ang + Math.PI, res.R2 * kf) : null,
+      acc: !res.invalid && Math.abs(res.a) > 1e-9 ? tip(sx, sy + 30, ang + (res.a > 0 ? 0 : Math.PI), 20 + Math.min(60, Math.abs(res.a) * 30)) : null };
+    if (!(v.m2 > 0)) D.label(c, '+ trailer', trx, tr_y, col.muted, { size: 11 });
+    if (ix) ix.paint(c);
   }
 
   /* ---------- plots ---------- */
@@ -253,6 +266,62 @@
     if (Math.abs(res.a) < 1e-9) R.badge('a = 0: moving at constant (steady) speed.', 'ok');
     R.render();
   }
+
+  /* ---------- direct manipulation: drag the hill to tilt it, tap the car / trailer / arrows / speed to type ---------- */
+  var lay = null;
+  function locked(k) { var r = prm.rows[k]; return !r || r.range.disabled; }
+  function setP(k, val, step) {
+    var sp = prm.rows[k].spec, lo = Number(sp.min), hi = Number(sp.max), o = {};
+    val = U.clamp(val, lo, hi);
+    if (step) val = Math.round(val / step) * step;
+    o[k] = Number(U.clamp(val, lo, hi).toFixed(6));
+    if (o[k] !== prm.values[k]) { prm.set(o); ui.syncChips(); }
+  }
+  function replay() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); }
+  function ask(k, title, sub, x, y, step, decimals, quick) {
+    var sp = prm.rows[k].spec;
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: step, decimals: decimals, unit: sp.unit, at: { x: x, y: y }, quick: quick,
+      onInput: function (val) { setP(k, val); replay(); } });
+  }
+  function snapAngle(a) { var r = Math.round(a), near = Math.round(r / 15) * 15; return Math.abs(a - near) <= 2 ? near : r; }
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!lay) return [];
+      var col = ui.colors(), hs = [], mode = res ? res.mode : modeSel.get();
+      if (!locked(useSin.get() ? 's' : 'theta')) hs.push({ id: 'hill', x: lay.hill[0], y: lay.hill[1] });
+      hs.push({ id: 'm1', x: lay.car[0], y: lay.car[1] });
+      hs.push({ id: 'm2', x: lay.trailer[0], y: lay.trailer[1] });
+      if (mode === 'force' ? !locked('D') : !locked('P')) hs.push({ id: 'D', x: lay.D[0], y: lay.D[1], color: col.applied, r: 16 });
+      if (!locked('R1')) hs.push({ id: 'R1', x: lay.R1[0], y: lay.R1[1], color: col.friction, r: 16 });
+      if (lay.R2) hs.push({ id: 'R2', x: lay.R2[0], y: lay.R2[1], color: col.friction, r: 16 });
+      if (lay.acc && ['P', 'R', 'v'].indexOf(solveSel.get()) >= 0) hs.push({ id: 'aT', x: lay.acc[0], y: lay.acc[1], color: col.accel, r: 16 });
+      if (!locked('v')) hs.push({ id: 'v', x: lay.speed[0], y: lay.speed[1], color: col.velocity, r: 14 });
+      return hs;
+    },
+    onDrag: function (hd, x, y) {
+      if (hd.id !== 'hill') return;
+      var a = SIM.view.screenAngle(lay.ox, lay.oy, x, y);
+      if (a > 180) a -= 360;
+      if (a > 90) a -= 180; else if (a < -90) a += 180;
+      a = U.clamp(a, -15, 15);
+      if (useSin.get()) setP('s', Math.sin(U.rad(a)), 0.005);
+      else setP('theta', snapAngle(a));
+    },
+    onDrop: function () { replay(); },
+    onTap: function (hd, x, y) {
+      var mode = res ? res.mode : modeSel.get();
+      if (hd.id === 'hill') { if (useSin.get()) ask('s', 'Hill: sin θ', '+ uphill, − downhill.', x, y, 0.01, 4, [-0.05, 0, 0.02, 0.05, 0.1]); else ask('theta', 'Hill angle θ', '+ uphill, − downhill (degrees).', x, y, 1, 2, [-5, 0, 3, 5, 10]); }
+      else if (hd.id === 'm1') ask('m1', 'Mass of the vehicle', 'In kilograms.', x, y, 10, 0, [70, 1200, 1500, 1700]);
+      else if (hd.id === 'm2') ask('m2', 'Mass of the trailer', '0 = no trailer.', x, y, 10, 0, [0, 300, 500, 1000]);
+      else if (hd.id === 'D') { if (mode === 'force') ask('D', 'Driving force D', 'Constant driving force in newtons.', x, y, 50, 0, [0, 1000, 2000, 5000]); else ask('P', 'Power of the engine', 'In kilowatts. The driving force is D = P ÷ v.', x, y, 1, 3, [10, 14, 20, 40]); }
+      else if (hd.id === 'R1') ask('R1', 'Resistance on the vehicle R₁', 'In newtons (braking B is set in the panel).', x, y, 10, 0, [0, 400, 600, 1000]);
+      else if (hd.id === 'R2') ask('R2', 'Resistance on the trailer R₂', 'In newtons.', x, y, 10, 0, [0, 150, 200, 500]);
+      else if (hd.id === 'aT') ask('aT', 'Target acceleration a', 'Used by “solve for”.', x, y, 0.05, 3, [0, 0.1, 0.3, 0.5]);
+      else if (hd.id === 'v') ask('v', 'Speed at this instant v', 'In m s⁻¹. With power P, D = P ÷ v.', x, y, 1, 2, [5, 10, 20, 30]);
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag the end of the road to tilt the hill · tap the car, trailer, an arrow or the speed to type its value');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;
