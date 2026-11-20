@@ -33,6 +33,52 @@
       dp1: m1 * (v1 - u1), dp2: m2 * (v2 - u2), flag: flag, kind: kind };
   }
 
+  /**
+   * Several bodies on a line (point bodies; + to the right), every collision of one type:
+   *   chain1D({ bodies: [{ name, m, u, x }], mode: 'elastic' | 'stick', tMax })
+   * Event-driven: the next pair to meet (adjacent bodies, left one faster to the right) collides with
+   * collide1D; 'stick' merges the pair into one body. Returns
+   *   { events: [{ t, x, n, names, ids, m:[mL,mR], u:[uL,uR], v:[vL,vR], res, merged }], segments, stateAt(t), stopReason, error }.
+   */
+  function chain1D(o) {
+    var mode = o.mode === 'stick' ? 'stick' : 'elastic', tMax = o.tMax > 0 ? o.tMax : 10;
+    var bodies = (o.bodies || []).map(function (b, i) { return { ids: [i], name: b.name !== undefined ? String(b.name) : String(i + 1), m: b.m, x: b.x, v: b.u }; });
+    function empty(msg) { return { error: msg, events: [], segments: [], stateAt: function () { return []; }, stopReason: msg }; }
+    if (bodies.some(function (b) { return !(b.m > 0); })) return empty('Masses must be positive.');
+    if (bodies.some(function (b) { return !isFinite(b.x) || !isFinite(b.v); })) return empty('Positions and velocities must be numbers.');
+    bodies.sort(function (a, b) { return a.x - b.x; });
+    var t = 0, segs = [], events = [], stop = null;
+    function snap() { return bodies.map(function (b) { return { ids: b.ids.slice(), name: b.name, m: b.m, x0: b.x, v: b.v }; }); }
+    for (var guard = 0; guard < 60; guard++) {
+      var best = Infinity, idx = -1;
+      for (var j = 0; j + 1 < bodies.length; j++) {
+        var dv = bodies[j].v - bodies[j + 1].v;
+        if (dv > TOL) { var tc = Math.max(0, (bodies[j + 1].x - bodies[j].x) / dv); if (tc < best - 1e-12) { best = tc; idx = j; } }
+      }
+      var tEnd = Math.min(t + (best < Infinity ? best : Infinity), tMax);
+      segs.push({ t0: t, t1: tEnd, bodies: snap() });
+      if (!(best < Infinity)) { stop = 'no further collisions'; break; }
+      if (t + best > tMax) { stop = 'time window ends'; break; }
+      bodies.forEach(function (b) { b.x += b.v * best; }); t += best;
+      var L = bodies[idx], R = bodies[idx + 1];
+      R.x = L.x;   // they meet at one point
+      var res = collide1D({ m1: L.m, u1: L.v, m2: R.m, u2: R.v, mode: mode });
+      var ev = { t: t, x: L.x, n: events.length + 1, names: [L.name, R.name], ids: [L.ids.slice(), R.ids.slice()], m: [L.m, R.m], u: [L.v, R.v], v: [res.v1, res.v2], res: res, merged: mode === 'stick' };
+      events.push(ev);
+      if (mode === 'stick') bodies.splice(idx, 2, { ids: L.ids.concat(R.ids), name: L.name + '+' + R.name, m: L.m + R.m, x: L.x, v: res.v1 });
+      else { L.v = res.v1; R.v = res.v2; }
+    }
+    if (!stop) stop = 'too many collisions';
+    var last = segs[segs.length - 1];
+    function stateAt(T) {
+      var s = segs[0];
+      for (var k = 0; k < segs.length; k++) if (T >= segs[k].t0 - 1e-12) s = segs[k];
+      var d = s === last ? T - s.t0 : Math.min(T, s.t1) - s.t0;
+      return s.bodies.map(function (b) { return { ids: b.ids, name: b.name, m: b.m, x: b.x0 + b.v * Math.max(0, d), v: b.v }; });
+    }
+    return { events: events, segments: segs, stateAt: stateAt, stopReason: stop };
+  }
+
   /* ---------- force–time profile for a contact of duration dt (area = Δp) ---------- */
   // shape 'rect': constant force; 'tri': rises linearly then falls (peak = 2 × average). x = τ/dt in [0,1].
   function profile(shape, x) {           // force ÷ average force
@@ -184,7 +230,7 @@
   }
 
   return { discCollision: discCollision, pairTrack: pairTrack, angleBetween: angleBetween,
-    collide1D: collide1D, profile: profile, cumulative: cumulative, contactTrack: contactTrack, forceFromMomentum: forceFromMomentum,
+    collide1D: collide1D, chain1D: chain1D, profile: profile, cumulative: cumulative, contactTrack: contactTrack, forceFromMomentum: forceFromMomentum,
     polar: polar, magAng: magAng, add: add, scale: scale, ke: ke, collide2D: collide2D,
     accelAt: accelAt, dragFromAccel: dragFromAccel, terminal: terminal, fall: fall };
 });

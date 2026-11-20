@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-statics.js"></script>
@@ -399,10 +400,45 @@
     o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
     if (o[k] !== prm.values[k]) prm.set(o);
   }
-  function ask(k, x, y, title, sub, quick) {
+  function ask(k, x, y, title, sub, quick, onDone) {
     var sp = spec(k);
-    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step) < 0.01 ? 0.01 : Number(sp.step), decimals: 3,
-      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+    return ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step) < 0.01 ? 0.01 : Number(sp.step), decimals: 3,
+      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); }, onDone: onDone });
+  }
+  /** add an extra button (e.g. Remove) to the number editor that is open now */
+  function popAction(ed, label, fn) {
+    var sg = ui.stage(), ch = sg && sg.el && sg.el.children, pe = null, k;
+    if (!ch) return;
+    for (k = ch.length - 1; k >= 0 && !pe; k--) if (ch[k].classList && ch[k].classList.contains('pop')) pe = ch[k];
+    var acts = pe && pe.children ? Array.prototype.filter.call(pe.children, function (e) { return e.classList && e.classList.contains('pop-actions'); })[0] : null;
+    if (!acts) return;
+    acts.insertBefore(ui.h('button', { class: 'btn', type: 'button', text: label, onclick: function () { if (ed && ed.close) ed.close(); fn(); } }), acts.firstChild || null);
+  }
+  /** an unused force slot (magnitude 0 = absent), or 0 if all three are in use */
+  function freeSlot() {
+    for (var i = 1; i <= 3; i++) if (!(prm.values['F' + i] > 1e-12) && !locked('F' + i) && !locked('x' + i)) return i;
+    return 0;
+  }
+  function askSize(i, x, y, onDone) {
+    var ed = ask('F' + i, x, y, 'Size of force F' + SUBS[i], 'Type the magnitude in newtons.', [10, 50, 100, 200], onDone);
+    popAction(ed, 'Remove F' + SUBS[i], function () { var o = {}; o['F' + i] = 0; prm.set(o); });
+  }
+  /** placeMode swallows the tap, so put the first-time hint away ourselves once the student has used it */
+  function hideTip() { var sg = ui.stage(); if (sg && sg.tip && sg.tip.style) sg.tip.style.display = 'none'; }
+  /** "+ Add a force": tap the beam to place it (x), type its size, then (pivot mode) its direction */
+  function startAdd() {
+    if (mode.get() === 'couple' || !freeSlot()) return;
+    ui.placeMode({ prompt: 'Tap the beam where F' + SUBS[freeSlot()] + ' acts', onPlace: function (x, y) {
+      var i = freeSlot(); hideTip(); if (!i || mode.get() === 'couple' || !scene) return;
+      var L = prm.values.L, wx = U.clamp(vp.toWorld(x, y)[0], 0, L), st = posStep();
+      var o = {}; o['x' + i] = U.clamp(Number((Math.round(wx / st) * st).toFixed(decOf(st))), 0, L); o['F' + i] = 100; o['a' + i] = -90;
+      prm.set(o);
+      var px = vp.X(o['x' + i]), py = scene.by;
+      askSize(i, px, py - 40, function () {
+        if (mode.get() !== 'pin' || !(prm.values['F' + i] > 1e-12)) return;
+        ask('a' + i, px, py - 40, 'Direction of F' + SUBS[i], 'Anticlockwise from → (pointing right). −90° = straight down, 90° = straight up.', [-90, 90, 0, 180]);
+      });
+    } });
   }
   function posStep() { var L = prm.values.L; return L >= 4 ? 0.05 : L >= 1 ? 0.01 : 0.005; }
   var LOADIX = { 'F₁': 1, 'F₂': 2, 'F₃': 3 }, SUBS = ['', '₁', '₂', '₃'];
@@ -443,7 +479,7 @@
       }
     },
     onTap: function (h, x, y) {
-      if (h.kind === 'F') { if (!locked('F' + h.i)) ask('F' + h.i, x, y, 'Size of force F' + SUBS[h.i], 'Type the magnitude in newtons.', [10, 50, 100, 200]); }
+      if (h.kind === 'F') { if (!locked('F' + h.i)) askSize(h.i, x, y); }
       else if (h.kind === 'W') { if (!locked('W')) ask('W', x, y, 'Weight of the beam W', '0 makes it a light beam.', [0, 10, 50, 100]); }
       else if (h.kind === 'L') ask('L', x, y, 'Length of the beam L', 'Positions along the beam are kept within 0 to L.', [1, 2, 4, 6]);
       else if (h.kind === 'pos') ask(h.key, x, y, { xP: 'Pivot position x<sub>P</sub>', xA: 'Support A position x<sub>A</sub>', xB: 'Support B position x<sub>B</sub>', xO: 'Take moments about O at x<sub>O</sub>' }[h.key], 'Distance from the left end of the beam.');
@@ -453,9 +489,17 @@
     },
     onHover: function () { draw(); }
   });
+  /** keep the hint clear of the + button over the top-right of the stage (desktop only: on phones the hint sits below the stage) */
+  function tipClear(t, o) {
+    if (!t || !t.style || (typeof matchMedia === 'function' && matchMedia('(max-width: 720px)').matches)) return;
+    if (o.bottom) { t.style.top = 'auto'; t.style.bottom = '10px'; } else t.style.maxWidth = 'calc(100% - ' + o.right + 'px)';
+  }
+  var addBtn = ui.stageAction({ label: 'Add a force', icon: '+', onClick: startAdd }), lastTip = null;
   function tip() {
-    ui.stageTip(mode.get() === 'couple' ? 'Drag an arrow tip to change θ · tap it to type F · drag O · tap the bar end to type d'
-      : 'Drag a force along the beam · tap its arrow to type its size · drag the ' + (mode.get() === 'pin' ? 'pivot' : 'supports') + ' or O · tap the beam end to type L');
+    if (addBtn) addBtn.show(mode.get() !== 'couple' && !!freeSlot());
+    var t = mode.get() === 'couple' ? 'Drag an arrow tip to change θ · tap it to type F · drag O · tap the bar end to type d'
+      : 'Press + Add a force, tap the beam where it acts, then type its size' + (mode.get() === 'pin' ? ' and direction' : '') + ' · drag a force along the beam · tap its arrow to change or remove it · drag the ' + (mode.get() === 'pin' ? 'pivot' : 'supports') + ' or O';
+    if (t !== lastTip) { lastTip = t; tipClear(ui.stageTip(t), { right: 165 }); }   // only re-show the hint when it actually changes
   }
 
   ui.onTheme(draw);

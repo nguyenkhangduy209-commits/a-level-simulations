@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/mech-kinematics.js"></script>
@@ -19,6 +20,10 @@
   .subtle { color: var(--muted); font-size: 12.5px; }
   .roots button { margin: 4px 6px 0 0; }
   .tblwrap { overflow-x: auto; }
+  .pop.chooser .choices { display: grid; gap: 6px; margin-top: 8px; }
+  .pop.chooser .choices button { display: block; width: 100%; text-align: left; min-height: 40px; padding: 6px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel2); color: var(--ink); font: 600 13px var(--sans); cursor: pointer; }
+  .pop.chooser .choices button small { display: block; font-weight: 400; color: var(--muted); font-size: 11.5px; }
+  .pop.chooser .choices button:hover { border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -32,7 +37,7 @@
 
   /* ---------- layout ---------- */
   var sceneCard = pg.card('left');
-  var cv = ui.canvas(sceneCard, 'main-canvas'); cv.style.aspectRatio = '4 / 1';
+  var cv = ui.canvas(sceneCard, 'main-canvas'); cv.style.aspectRatio = '3 / 1';   // a little taller than 4:1 so the + / − stage buttons have their own band at the top
   var vp = new SIM.view.Viewport(cv, { pad: 14 });
   var clock = new SIM.anim.Clock(sceneCard, { duration: 10, onFrame: function () { drawScene(); drawPlots(); readout(); } });
   ui.legend(sceneCard, [
@@ -253,6 +258,7 @@
     // highlight invalid stage
     A.stages.forEach(function (s, i) { if (s._el) s._el.classList.toggle('bad', !!(jA.error && jA.error.stage === i)); });
     try { ui.writeHash({ j: JSON.stringify({ A: { u0: A.u0, u0link: A.u0link, u0k: A.u0k, stages: A.stages.map(strip) }, solve: solveOn ? { con: conSel.get(), k: kSel.get(), target: sp.values.target, lo: sp.values.lo, hi: sp.values.hi, X: sp.values.X } : 0 }) }); } catch (e) { /* ignore */ }
+    syncStageButtons();
     drawScene(); drawPlots(); readout(); drawTable();
   }
   function strip(s) { return { type: s.type, t: s.t, a: s.a, v: s.v, d: s.d, T: s.T, link: s.link, k: s.k }; }
@@ -272,7 +278,7 @@
     var c = vp.begin();
     var W = vp.w, H = vp.h, x0 = 30, x1 = W - 30;
     function X(s) { return x0 + (s - (lo - 0.04 * span)) / (span * 1.08) * (x1 - x0); }
-    var yA = H * 0.42, yB = H * 0.78;
+    var yA = Math.max(H * 0.42, Math.min(H * 0.6, 96)), yB = Math.min(H - 14, Math.max(H * 0.78, yA + 44));   // track sits below the stage buttons
     // axis with ticks
     var tk = U.niceTicks(lo, hi, Math.max(3, Math.floor((x1 - x0) / 80)));
     c.strokeStyle = col.muted; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x0, yA); c.lineTo(x1, yA); c.stroke();
@@ -282,7 +288,7 @@
       D.label(c, U.num(v, 6), X(v), yA + 14, col.muted, { size: 11 });
     });
     D.label(c, 'O', X(0), yA - 14, col.ink, { bold: true, size: 12 });
-    D.label(c, 's / m  (positive →)', x1, 12, col.muted, { size: 11, align: 'right' });
+    D.label(c, 's / m  (positive →)', x0, 12, col.muted, { size: 11, align: 'left' });   // left: the + / − buttons sit top-right
     // stage boundary marks for A
     jA.segs.forEach(function (g2) { c.fillStyle = col.muted; c.beginPath(); c.arc(X(g2.s1), yA, 2.5, 0, 7); c.fill(); });
     var st = K.trackAt(PA, clock.t);
@@ -529,11 +535,98 @@
     return { x: a.left - b.left + x, y: a.top - b.top + y };
   }
   var QSTEP = { t: 0.5, a: 0.1, v: 0.5, d: 1, T: 1 }, QUICK = { t: [5, 10, 20, 30], a: [-2, -1, 0.5, 1, 2], v: [0, 5, 10, 20], d: [10, 50, 100], T: [60, 120, 240] };
-  function askStage(i, f, at) {
+  function askStage(i, f, at, onDone, sub) {
     var st = A.stages[i]; if (!st || !f) return;
-    ui.askNumber({ title: 'Stage ' + (i + 1) + ': ' + fieldLabel(st.type, f).toLowerCase(), sub: 'Stage type: ' + TYPES[st.type].label + '. Other values: use the panel.',
+    ui.askNumber({ title: 'Stage ' + (i + 1) + ': ' + fieldLabel(st.type, f).toLowerCase(), sub: sub || ('Stage type: ' + TYPES[st.type].label + '. Other values: use the panel.'),
       value: st[f], min: FIELD[f].min, max: FIELD[f].max, step: QSTEP[f], decimals: 2, unit: FIELD[f].unit, at: at, quick: QUICK[f],
-      onInput: function (v) { var o = {}; o[f] = v; setStage(st, o); replay(); } });
+      onInput: function (v) { var o = {}; o[f] = v; setStage(st, o); replay(); }, onDone: onDone });
+  }
+
+  /* ---------- build it yourself: "+ Add a stage" → pick its kind → type its values ---------- */
+  var CHOICES = [
+    { type: 'ta', name: 'Speed up / slow down for a time', hint: 'you know the time t and acceleration a' },
+    { type: 'tv', name: 'Reach a velocity in a time', hint: 'time t and final velocity v (v = 0 to stop)' },
+    { type: 'hold', name: 'Constant velocity for a time', hint: 'keeps the velocity it already has, for time t' },
+    { type: 'rest', name: 'At rest for a time', hint: 'v = 0 for time t' },
+    { type: 'av', name: 'Accelerate until a velocity', hint: 'acceleration a until velocity v' },
+    { type: 'dv', name: 'Reach a velocity over a distance', hint: 'displacement d and final velocity v' },
+    { type: 'da', name: 'Accelerate over a distance', hint: 'displacement d and acceleration a' },
+    { type: 'vt', name: 'Given constant velocity for a time', hint: 'velocity v (can jump) for time t' },
+    { type: 'fill', name: 'Constant velocity until total time T', hint: 'fills the gap so the journey lasts T' }];
+  var chooser = null;
+  function closeChooser() { if (chooser && chooser.parentNode) chooser.parentNode.removeChild(chooser); chooser = null; }
+  if (typeof document !== 'undefined' && document.addEventListener) {
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && chooser) closeChooser(); });
+    document.addEventListener('pointerdown', function (e) {
+      if (!chooser || !e.target || !e.target.closest) return;
+      if (e.target.closest('.chooser') || e.target.closest('.stage-act')) return;
+      closeChooser();
+    }, true);
+  }
+  /** sensible starting values that follow on from where the journey ends now */
+  function defaultsFor(type) {
+    var vEnd = jA && isFinite(jA.total.v) ? Number(jA.total.v.toFixed(3)) : A.u0, Tend = jA && isFinite(jA.total.T) ? jA.total.T : 0, moving = Math.abs(vEnd) > 1e-9;
+    switch (type) {
+      case 'ta': return { t: 10, a: moving ? -U.sgn(vEnd) * 0.5 : 1 };
+      case 'tv': return { t: 10, v: moving ? 0 : 10 };
+      case 'av': return moving ? { a: -U.sgn(vEnd), v: 0 } : { a: 1, v: 10 };
+      case 'dv': return moving ? { d: U.sgn(vEnd) * 50, v: 0 } : { d: 50, v: 10 };
+      case 'da': return { d: 50, a: 1 };
+      case 'vt': return { v: moving ? vEnd : 10, t: 10 };
+      case 'fill': return { T: Math.ceil(Tend + 20) };
+      default: return { t: 10 };
+    }
+  }
+  function stageMark(i) {
+    var d = lay && lay.dots.filter(function (q) { return q.i === i; })[0];
+    return d ? { x: d.x, y: d.y } : undefined;
+  }
+  function addStage(type) {
+    closeChooser();
+    if (A.stages.length >= MAXST || !TYPES[type]) return;
+    A.stages.push(newStage(type, defaultsFor(type)));
+    var i = A.stages.length - 1;
+    clock.pause(); autoPick = true; edA.render(); update(); replay();
+    // ask its values one after another: time (or distance) first, then acceleration or velocity
+    var order = ['t', 'd', 'T', 'a', 'v'], fs = TYPES[type].fields.slice().sort(function (p, q) { return order.indexOf(p) - order.indexOf(q); });
+    var st = A.stages[i];
+    (function next(k) {
+      if (k >= fs.length || A.stages[i] !== st) return;   // stage removed meanwhile
+      askStage(i, fs[k], stageMark(i), function () { next(k + 1); },
+        'New stage ' + (i + 1) + ' (' + TYPES[type].label + ')' + (fs.length > 1 ? ', value ' + (k + 1) + ' of ' + fs.length : '') + '. Press Done for the next one.');
+    })(0);
+  }
+  function openChooser() {
+    if (chooser) { closeChooser(); return; }
+    if (A.stages.length >= MAXST) return;
+    var sg = ui.stage(); if (!sg || !sg.el) return;
+    ui.cancelPlace();
+    chooser = ui.h('div', { class: 'pop chooser', role: 'dialog', 'aria-label': 'Choose the kind of stage' }, [
+      ui.h('button', { class: 'pop-close', type: 'button', text: '×', 'aria-label': 'Close', onclick: closeChooser }),
+      ui.h('p', { class: 'pop-title', text: 'Add stage ' + (A.stages.length + 1) + ': what happens next?' }),
+      ui.h('p', { class: 'pop-sub', text: 'Pick the kind of motion, then type its values.' }),
+      ui.h('div', { class: 'choices' }, CHOICES.map(function (c) {
+        return ui.h('button', { type: 'button', html: c.name + '<small>' + c.hint + '</small>', onclick: function () { addStage(c.type); } });
+      }))
+    ]);
+    chooser.style.right = '10px'; chooser.style.top = '56px';
+    sg.el.appendChild(chooser);
+  }
+  function removeLast() {
+    closeChooser();
+    if (A.stages.length <= 1) return;
+    A.stages.pop(); clock.pause(); autoPick = true; edA.render(); update(); replay();
+  }
+  /** keep the hint clear of the + button over the top-right of the stage (desktop only: on phones the hint sits below the stage) */
+  function tipClear(t, o) {
+    if (!t || !t.style || (typeof matchMedia === 'function' && matchMedia('(max-width: 720px)').matches)) return;
+    if (o.bottom) { t.style.top = 'auto'; t.style.bottom = '10px'; } else t.style.maxWidth = 'calc(100% - ' + o.right + 'px)';
+  }
+  var addBtn = ui.stageAction({ label: 'Add a stage', icon: '+', onClick: openChooser });
+  var delBtn = ui.stageAction({ label: 'Remove last', icon: '−', onClick: removeLast });
+  function syncStageButtons() {
+    if (addBtn) addBtn.show(A.stages.length < MAXST);
+    if (delBtn) delBtn.show(A.stages.length > 1);
   }
   function askU0(at) {
     ui.askNumber({ title: 'Initial velocity u₀ of A', sub: 'Positive = forwards (to the right).', value: A.u0, min: -50, max: 50, step: 0.5, decimals: 2, unit: 'm s<sup>−1</sup>', at: at,
@@ -600,7 +693,7 @@
     },
     onHover: function () { drawPlots(); }
   });
-  ui.stageTip('Drag A to move through time · tap A for u₀ or a stage mark to type it · on the v–t graph drag a stage’s end point to change its time / velocity');
+  tipClear(ui.stageTip('Press + Add a stage, pick what happens next, then type its values · drag A to move through time · tap A for u₀ or a stage mark to retype it · on the v–t graph drag a stage’s end point'), { bottom: true });
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

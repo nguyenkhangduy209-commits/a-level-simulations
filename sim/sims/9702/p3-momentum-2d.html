@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-dynamics.js"></script>
@@ -154,18 +155,89 @@
 
   /* ---------- drawing ---------- */
   function drawAll() { drawScene(); drawMomentum(); drawKE(); readout(); }
+
+  /* ---------- real-life props (soft pastel style, top view; only in the "Real life" look) ---------- */
+  var SC = SIM.scene, LINE = 'rgba(60,60,90,.22)';
+  function rrect(c, x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r); c.lineTo(x + w, y + h - r);
+    c.quadraticCurveTo(x + w, y + h, x + w - r, y + h); c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r); c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y); c.closePath();
+  }
+  /** which surface the situation is on: 'road' (cars at a junction), 'baize' (exam-style snooker balls) or 'air' (air-hockey table) */
+  function surfaceKind() {
+    var v = prm.values, md = info && info.md;
+    if (md !== 'explode' && v.m1 >= 200 && v.m2 >= 200) return 'road';
+    if (md === 'one' || md === 'dirs') return 'baize';
+    return 'air';
+  }
+  /** a road band through screen point (px, py) along math angle a (deg), half-width hw px */
+  function roadBand(c, px, py, a, hw) {
+    var dk = SC.dark(), L = vp.w + vp.h;
+    c.save(); c.translate(px, py); c.rotate(-U.rad(a));
+    c.fillStyle = dk ? '#3b3f4b' : '#cdd0d9'; c.fillRect(-L, -hw, 2 * L, 2 * hw);
+    c.fillStyle = dk ? '#4a4f5d' : '#e4e6ec'; c.fillRect(-L, -hw - 4, 2 * L, 4); c.fillRect(-L, hw, 2 * L, 4);
+    c.restore();
+  }
+  function roadDashes(c, px, py, a, hw) {
+    var L = vp.w + vp.h;
+    c.save(); c.translate(px, py); c.rotate(-U.rad(a)); c.strokeStyle = SC.dark() ? 'rgba(240,235,200,.5)' : 'rgba(255,255,255,.95)'; c.lineWidth = 2; c.setLineDash([12, 10]);
+    c.beginPath(); c.moveTo(-L, 0); c.lineTo(-hw * 1.2, 0); c.moveTo(hw * 1.2, 0); c.lineTo(L, 0); c.stroke(); c.restore();
+  }
+  function surface(c) {
+    var kind = surfaceKind(), dk = SC.dark(), W = vp.w, H = vp.h, v = prm.values;
+    c.save();
+    if (kind === 'road') {
+      c.fillStyle = dk ? '#2c4430' : '#d6ebcc'; c.fillRect(0, 0, W, H);
+      var cp = info.contact || [0, 0], px = vp.X(cp[0]), py = vp.Y(cp[1]), hw = Math.max(18, Math.max(v.r1, v.r2) * vp.scale * 1.6);
+      roadBand(c, px, py, v.tu1, hw); if (Math.abs(((v.tu2 - v.tu1) % 180 + 180) % 180) > 1) roadBand(c, px, py, v.tu2, hw);
+      roadDashes(c, px, py, v.tu1, hw); if (Math.abs(((v.tu2 - v.tu1) % 180 + 180) % 180) > 1) roadDashes(c, px, py, v.tu2, hw);
+    } else {
+      var felt = kind === 'baize' ? (dk ? '#2f5a46' : '#a9d8b8') : (dk ? '#2a3346' : '#eef4fb'), rim = kind === 'baize' ? (dk ? '#5a4330' : '#e2bf95') : (dk ? '#46557a' : '#bfd0ee');
+      c.fillStyle = rim; c.fillRect(0, 0, W, H);
+      c.fillStyle = felt; rrect(c, 7, 7, W - 14, H - 14, 12); c.fill();
+      c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 1; rrect(c, 7.5, 7.5, W - 15, H - 15, 12); c.stroke();
+      if (kind === 'air') {   // the air holes: a sparse, faint dot pattern
+        c.fillStyle = dk ? 'rgba(255,255,255,.07)' : 'rgba(80,110,160,.12)';
+        for (var yy = 22; yy < H - 12; yy += 22) for (var xx = 22 + (yy % 44 ? 11 : 0); xx < W - 12; xx += 22) { c.beginPath(); c.arc(xx, yy, 1.2, 0, 2 * Math.PI); c.fill(); }
+      }
+    }
+    c.restore();
+  }
+  /** a small car seen from above, centred at (x, y), heading at math angle a (rad), length about 2.2 r px */
+  function topCar(c, x, y, r, color, a) {
+    var L = 2.2 * r, Wd = 1.25 * r, dk = SC.dark(), body = SC.shade(color, dk ? -0.25 : 0.4);
+    c.save(); c.translate(x, y); c.rotate(-a);
+    c.fillStyle = 'rgba(0,0,0,.14)'; rrect(c, -L / 2 + 2, -Wd / 2 + 3, L, Wd, Wd * 0.35); c.fill();
+    c.fillStyle = body; c.strokeStyle = LINE; c.lineWidth = 1; rrect(c, -L / 2, -Wd / 2, L, Wd, Wd * 0.35); c.fill(); c.stroke();
+    c.fillStyle = dk ? 'rgba(150,190,220,.7)' : 'rgba(190,225,245,.95)';
+    rrect(c, L * 0.08, -Wd * 0.36, L * 0.16, Wd * 0.72, 3); c.fill();   // windscreen
+    rrect(c, -L * 0.36, -Wd * 0.32, L * 0.1, Wd * 0.64, 3); c.fill();   // rear window
+    c.fillStyle = SC.shade(body, 0.2); rrect(c, -L * 0.24, -Wd * 0.36, L * 0.3, Wd * 0.72, 4); c.fill();   // roof
+    c.fillStyle = '#fff3b8'; c.fillRect(L / 2 - 3, -Wd * 0.4, 2.5, Wd * 0.18); c.fillRect(L / 2 - 3, Wd * 0.22, 2.5, Wd * 0.18);
+    c.restore();
+  }
+  /** where (and how big) the impact / explosion burst is drawn: world point + size in px; null if nothing happens */
+  function burstAt() {
+    if (!res || res.noCollision || res.invalid) return null;
+    if (info.md === 'explode') { var e = bodiesAt(tc); return { p: e.cm, size: 50 }; }
+    if ((info.md === 'elastic' || info.md === 'stick') && info.contact) return { p: info.contact, size: 30 };
+    var l = bodiesAt(tc).list; if (l.length < 2) return null;
+    return { p: [(l[0].x[0] + l[1].x[0]) / 2, (l[0].x[1] + l[1].x[1]) / 2], size: 30 };
+  }
+
   function drawScene() {
     if (!bodiesAt) return;
-    var col = ui.colors(), t = clock.t, v = prm.values;
+    var col = ui.colors(), t = clock.t, v = prm.values, real = SC.real();
     var vw = hold ? hold.view : view;   // frozen while a velocity arrow is dragged, so the tip stays under the pointer
     vp.fit(vw[0], vw[1], vw[2], vw[3]);
     var c = vp.begin();
+    if (real) surface(c);
     // surface grid (top view)
     var gt = U.niceTicks(view[0], view[1], 8);
     c.strokeStyle = col.grid; c.lineWidth = 1;
     gt.ticks.forEach(function (x) { c.beginPath(); c.moveTo(vp.X(x), 0); c.lineTo(vp.X(x), vp.h); c.stroke(); });
     U.niceTicks(view[2], view[3], 6).ticks.forEach(function (y) { c.beginPath(); c.moveTo(0, vp.Y(y)); c.lineTo(vp.w, vp.Y(y)); c.stroke(); });
-    D.label(c, 'top view, smooth horizontal surface · grid ' + U.num(gt.step, 4) + ' m', 8, 12, col.muted, { align: 'left', size: 11 });
+    D.label(c, 'top view, smooth horizontal surface · grid ' + U.num(gt.step, 4) + ' m', 8, 12, col.muted, { align: 'left', size: 11, bg: real });
     // centre-of-mass path over the whole run
     var cA = bodiesAt(0).cm, cB = bodiesAt(T).cm;
     D.line(c, [vp.P(cA[0], cA[1]), vp.P(cB[0], cB[1])], col.accel, { dash: [3, 5], width: 1.2 });
@@ -194,18 +266,18 @@
     if ((info.md === 'elastic' || info.md === 'stick') && res && !res.noCollision && now.after) {
       var n = res.n, cp = info.contact, L = (v.r1 + v.r2) * 1.6;
       D.line(c, [vp.P(cp[0] - n[0] * L, cp[1] - n[1] * L), vp.P(cp[0] + n[0] * L, cp[1] + n[1] * L)], col.component, { dash: [6, 4], width: 1.2 });
-      D.label(c, 'line of centres at impact', vp.X(cp[0] + n[0] * L), vp.Y(cp[1] + n[1] * L) - 10, col.component, { size: 11 });
+      D.label(c, 'line of centres at impact', vp.X(cp[0] + n[0] * L), vp.Y(cp[1] + n[1] * L) - 10, col.component, { size: 11, bg: real });
     }
     // glancing collision: show the two parallel lines of approach and the sideways offset b between them
     if ((info.md === 'elastic' || info.md === 'stick') && res && !res.noCollision && !now.after && v.b > 1e-6 && now.list.length === 2) {
       var wv = DY.add(V(v.u1, v.tu1), DY.scale(V(v.u2, v.tu2), -1)), wl = Math.hypot(wv[0], wv[1]);
       if (wl > 1e-12) {
         var wh = [wv[0] / wl, wv[1] / wl], Lg = (vw[1] - vw[0]) + (vw[3] - vw[2]);
-        now.list.forEach(function (b) { D.line(c, [vp.P(b.x[0] - wh[0] * Lg, b.x[1] - wh[1] * Lg), vp.P(b.x[0] + wh[0] * Lg, b.x[1] + wh[1] * Lg)], b.c, { dash: [2, 5], width: 1 }); });
+        now.list.forEach(function (b) { D.line(c, [vp.P(b.x[0] - wh[0] * Lg, b.x[1] - wh[1] * Lg), vp.P(b.x[0] + wh[0] * Lg, b.x[1] + wh[1] * Lg)], b.c, { dash: real ? [3, 5] : [2, 5], width: real ? 2 : 1 }); });
         var A = now.list[0].x, B2 = now.list[1].x, ph = [-wh[1], wh[0]], off = (B2[0] - A[0]) * ph[0] + (B2[1] - A[1]) * ph[1];
         var foot = [B2[0] - ph[0] * off, B2[1] - ph[1] * off];   // point on body 1's line level with body 2
         D.line(c, [vp.P(foot[0], foot[1]), vp.P(B2[0], B2[1])], col.component, { width: 1.4 });
-        D.label(c, 'Glancing: the dotted lines of approach are offset sideways by b = ' + U.num(v.b, 3) + ' m (set b = 0 for head-on)', 8, vp.h - 12, col.component, { align: 'left', size: 11, bold: true });
+        D.label(c, 'Glancing: the dotted lines of approach are offset sideways by b = ' + U.num(v.b, 3) + ' m (set b = 0 for head-on)', 8, vp.h - 12, col.component, { align: 'left', size: 11, bold: true, bg: real });
       }
     }
     // bodies
@@ -214,16 +286,23 @@
     now.list.forEach(function (b) {
       var X = vp.X(b.x[0]), Y = vp.Y(b.x[1]), rp = Math.max(3, b.r * vp.scale);
       geo.list.push({ id: b.id, X: X, Y: Y, rp: rp, v: b.v, c: b.c });
-      c.save(); c.fillStyle = b.c; c.globalAlpha = 0.35; c.beginPath(); c.arc(X, Y, rp, 0, 2 * Math.PI); c.fill(); c.globalAlpha = 1;
-      c.strokeStyle = b.c; c.lineWidth = 2; c.stroke(); c.restore();
-      D.label(c, b.n, X, Y, col.ink, { bold: true, size: 12 });
+      if (real) {
+        var road = surfaceKind() === 'road', vv = Math.hypot(b.v[0], b.v[1]) > 1e-9 ? b.v : V(1, b.id === 'b' ? v.tu2 : v.tu1);
+        if (road) { topCar(c, X, Y, rp, b.c, Math.atan2(vv[1], vv[0])); D.label(c, b.n, X, Y, col.ink, { bold: true, size: 12, bg: true }); }
+        else { SC.puck(c, X, Y, rp, b.c, rp > 9 ? b.n : null); if (rp <= 9) D.label(c, b.n, X, Y - rp - 9, col.ink, { bold: true, size: 12, bg: true }); }
+      } else {
+        c.save(); c.fillStyle = b.c; c.globalAlpha = 0.35; c.beginPath(); c.arc(X, Y, rp, 0, 2 * Math.PI); c.fill(); c.globalAlpha = 1;
+        c.strokeStyle = b.c; c.lineWidth = 2; c.stroke(); c.restore();
+        D.label(c, b.n, X, Y, col.ink, { bold: true, size: 12 });
+      }
       var sp = Math.hypot(b.v[0], b.v[1]);
       if (sp > 1e-9) D.arrow(c, X, Y, X + b.v[0] * ks, Y - b.v[1] * ks, col.velocity, { width: 2, label: U.num(sp, 2) + ' m/s' });
     });
+    if (real && !hold) { var bu = burstAt(); if (bu) SC.impact(c, vp.X(bu.p[0]), vp.Y(bu.p[1]), bu.size, (t - tc) / 0.35); }
     // centre of mass marker
     var cx = vp.X(now.cm[0]), cy = vp.Y(now.cm[1]);
     c.strokeStyle = col.accel; c.lineWidth = 2; c.beginPath(); c.moveTo(cx - 7, cy - 7); c.lineTo(cx + 7, cy + 7); c.moveTo(cx - 7, cy + 7); c.lineTo(cx + 7, cy - 7); c.stroke();
-    D.label(c, now.after ? 'after impact' : 'before impact (impact at t = ' + tc.toFixed(2) + ' s)', vp.w - 8, 12, now.after ? col.ok : col.muted, { align: 'right', size: 11, bold: true });
+    D.label(c, now.after ? 'after impact' : 'before impact (impact at t = ' + tc.toFixed(2) + ' s)', vp.w - 8, 12, now.after ? col.ok : col.muted, { align: 'right', size: 11, bold: true, bg: real });
     if (res && (res.noCollision || res.invalid)) D.label(c, res.noCollision || res.invalid, vp.w / 2, vp.h - 14, col.warn, { bold: true, size: 12 });
     else if (info.md === 'one' || info.md === 'dirs') D.label(c, 'Exam mode: impact geometry is schematic (only momentum is used)', vp.w / 2, vp.h - 14, col.muted, { size: 11 });
     if (ix) ix.paint(c);
@@ -297,51 +376,51 @@
     if (res.noCollision) R.badge(res.noCollision, 'warn');
     R.head('Total momentum before');
     if (md === 'explode') {
-      R.eq('p<sub>x</sub>', 'M u cos α = ' + U.num(info.M, 4) + ' × ' + U.num(v.u1, 4) + ' × cos ' + U.dp(v.tu1, 1) + '°', res.P0[0], 'N s');
-      R.eq('p<sub>y</sub>', 'M u sin α', res.P0[1], 'N s');
+      R.eq('p<sub>x</sub>', 'M u cos α = ' + U.num(info.M, 4) + ' × ' + U.num(v.u1, 4) + ' × cos ' + U.dp(v.tu1, 1) + '°', res.P0[0], 'N s', 'Before the explosion there is one body of total mass M. Its x-component of momentum is M × (u cos α).');
+      R.eq('p<sub>y</sub>', 'M u sin α', res.P0[1], 'N s', 'The y-component uses the sine of the same angle. This total momentum is the same after the explosion.');
     } else {
-      R.eq('p<sub>x</sub>', 'm₁u₁ cos α₁ + m₂u₂ cos α₂ = ' + U.num(v.m1, 4) + ' × ' + U.num(v.u1, 4) + ' cos ' + U.dp(v.tu1, 1) + '° + ' + U.num(v.m2, 4) + ' × ' + U.num(v.u2, 4) + ' cos ' + U.dp(v.tu2, 1) + '°', res.P0[0], 'N s');
-      R.eq('p<sub>y</sub>', 'm₁u₁ sin α₁ + m₂u₂ sin α₂', res.P0[1], 'N s');
+      R.eq('p<sub>x</sub>', 'm₁u₁ cos α₁ + m₂u₂ cos α₂ = ' + U.num(v.m1, 4) + ' × ' + U.num(v.u1, 4) + ' cos ' + U.dp(v.tu1, 1) + '° + ' + U.num(v.m2, 4) + ' × ' + U.num(v.u2, 4) + ' cos ' + U.dp(v.tu2, 1) + '°', res.P0[0], 'N s', 'Momentum is a vector, so resolve it: add the x-components of m₁u₁ and m₂u₂.');
+      R.eq('p<sub>y</sub>', 'm₁u₁ sin α₁ + m₂u₂ sin α₂', res.P0[1], 'N s', 'Do the same for the y-components. Each component is conserved separately.');
     }
     if (!res.noCollision) {
       if (md === 'elastic') {
         var na = U.deg(Math.atan2(res.n[1], res.n[0]));
         R.head('Smooth discs: resolve along the line of centres n (at ' + U.dp(na, 1) + '°) and perpendicular to it');
-        R.eq('angle of n to relative velocity', 'sin⁻¹(b ÷ (r₁ + r₂)) = sin⁻¹(' + U.num(v.b, 4) + ' ÷ ' + U.num(v.r1 + v.r2, 4) + ')', U.dp(res.alpha, 1) + '°', '');
-        R.eq('along n before', 'u₁ₙ = ' + U.sf(res.a1) + ', u₂ₙ = ' + U.sf(res.a2), '', '');
-        R.eq('along n after', '1-D elastic: ((m₁ − m₂)u₁ₙ + 2m₂u₂ₙ) ÷ (m₁ + m₂), …', U.sf(res.b1) + ', ' + U.sf(res.b2), ms);
-        R.eq('approach = separation', 'u₁ₙ − u₂ₙ = ' + U.sf(res.approach) + '; v₂ₙ − v₁ₙ = ' + U.sf(res.separation), '', '');
-        R.eq('perpendicular to n', 'unchanged (smooth discs): ' + U.sf(res.perp1) + ', ' + U.sf(res.perp2), '', '');
+        R.eq('angle of n to relative velocity', 'sin⁻¹(b ÷ (r₁ + r₂)) = sin⁻¹(' + U.num(v.b, 4) + ' ÷ ' + U.num(v.r1 + v.r2, 4) + ')', U.dp(res.alpha, 1) + '°', '', 'The offset b and the sum of the radii fix where the discs touch, so they fix the direction of the line of centres.');
+        R.eq('along n before', 'u₁ₙ = ' + U.sf(res.a1) + ', u₂ₙ = ' + U.sf(res.a2), '', '', 'Resolve each velocity along the line of centres n: only these components are changed by the impact.');
+        R.eq('along n after', '1-D elastic: ((m₁ − m₂)u₁ₙ + 2m₂u₂ₙ) ÷ (m₁ + m₂), …', U.sf(res.b1) + ', ' + U.sf(res.b2), ms, 'Along n it is just a 1-D elastic collision: conserve momentum and make separation speed = approach speed.');
+        R.eq('approach = separation', 'u₁ₙ − u₂ₙ = ' + U.sf(res.approach) + '; v₂ₙ − v₁ₙ = ' + U.sf(res.separation), '', '', 'Elastic check along n: the relative speed of separation equals the relative speed of approach.');
+        R.eq('perpendicular to n', 'unchanged (smooth discs): ' + U.sf(res.perp1) + ', ' + U.sf(res.perp2), '', '', 'Smooth discs exert no force at right angles to n, so the velocity components that way do not change.');
       } else if (md === 'stick') {
         R.head('Bodies stick: common velocity = total momentum ÷ total mass');
-        R.eq('V', '|p| ÷ (m₁ + m₂) = ' + U.sf(Math.hypot(res.P0[0], res.P0[1])) + ' ÷ ' + U.num(v.m1 + v.m2, 4), DY.magAng(res.v1).mag, ms);
-        R.eq('direction', 'tan⁻¹(p<sub>y</sub> ÷ p<sub>x</sub>)', dirR(res.v1), '');
+        R.eq('V', '|p| ÷ (m₁ + m₂) = ' + U.sf(Math.hypot(res.P0[0], res.P0[1])) + ' ÷ ' + U.num(v.m1 + v.m2, 4), DY.magAng(res.v1).mag, ms, 'They stick, so they share one velocity: magnitude of total momentum ÷ total mass.');
+        R.eq('direction', 'tan⁻¹(p<sub>y</sub> ÷ p<sub>x</sub>)', dirR(res.v1), '', 'The common velocity points along the total momentum, so use its components.');
       } else if (md === 'one') {
         var p1 = DY.scale(res.v1, v.m1), p2 = DY.scale(res.v2, v.m2);
         R.head('Momentum of 2 after = total − momentum of 1 after');
-        R.eq('p₂<sub>x</sub>', U.sf(res.P0[0]) + ' − ' + Pn(p1[0]), p2[0], 'N s');
-        R.eq('p₂<sub>y</sub>', U.sf(res.P0[1]) + ' − ' + Pn(p1[1]), p2[1], 'N s');
+        R.eq('p₂<sub>x</sub>', U.sf(res.P0[0]) + ' − ' + Pn(p1[0]), p2[0], 'N s', 'Momentum is conserved in the x-direction: body 2’s share = total − body 1’s x-momentum after.');
+        R.eq('p₂<sub>y</sub>', U.sf(res.P0[1]) + ' − ' + Pn(p1[1]), p2[1], 'N s', 'Same in the y-direction. Then combine the two components with Pythagoras for the speed.');
       } else if (md === 'dirs') {
         R.head('Two equations, two unknown speeds');
-        R.eq('x', 'm₁v₁ cos β₁ + m₂v₂ cos β₂ = ' + U.sf(res.P0[0]), '', '');
-        R.eq('y', 'm₁v₁ sin β₁ + m₂v₂ sin β₂ = ' + U.sf(res.P0[1]), '', '');
+        R.eq('x', 'm₁v₁ cos β₁ + m₂v₂ cos β₂ = ' + U.sf(res.P0[0]), '', '', 'Conservation of momentum in the x-direction, with the two final speeds as unknowns.');
+        R.eq('y', 'm₁v₁ sin β₁ + m₂v₂ sin β₂ = ' + U.sf(res.P0[1]), '', '', 'Conservation in the y-direction gives the second equation; solve the pair simultaneously.');
         if (res.warn) R.badge(res.warn, 'warn');
       } else {
         var last = res.two ? '2' : '3', lm = res.two ? v.m2 : v.m3, pl = DY.scale(res.v3, lm), pk = DY.add(DY.scale(res.v1, v.m1), res.two ? [0, 0] : DY.scale(res.v2, v.m2));
         R.head('Momentum of fragment ' + last + ' = total − momentum of the others');
-        R.eq('p' + last + '<sub>x</sub>', U.sf(res.P0[0]) + ' − ' + Pn(pk[0]), pl[0], 'N s');
-        R.eq('p' + last + '<sub>y</sub>', U.sf(res.P0[1]) + ' − ' + Pn(pk[1]), pl[1], 'N s');
+        R.eq('p' + last + '<sub>x</sub>', U.sf(res.P0[0]) + ' − ' + Pn(pk[0]), pl[0], 'N s', 'Momentum in x is conserved: the last fragment takes the total minus the x-momentum of the others.');
+        R.eq('p' + last + '<sub>y</sub>', U.sf(res.P0[1]) + ' − ' + Pn(pk[1]), pl[1], 'N s', 'Same in y. Pythagoras on the two components gives its momentum; divide by its mass for the speed.');
       }
       R.head('Velocities after');
       var outs = md === 'explode' ? info.vs : [res.v1, res.v2];
-      outs.forEach(function (w, i) { R.eq('v' + (i + 1), 'speed, direction', U.sf(DY.magAng(w).mag) + ' ' + ms + ', ' + dirR(w), ''); });
-      if (md !== 'explode' && md !== 'stick') { var ab = DY.angleBetween(res.v1, res.v2); R.eq('angle between final velocities', '', ab === null ? 'undefined (a body is at rest)' : U.dp(ab, 1) + '°', ''); }
+      outs.forEach(function (w, i) { R.eq('v' + (i + 1), 'speed, direction', U.sf(DY.magAng(w).mag) + ' ' + ms + ', ' + dirR(w), '', 'Speed from Pythagoras on the velocity components; direction from tan⁻¹(v<sub>y</sub> ÷ v<sub>x</sub>), measured anticlockwise from +x.'); });
+      if (md !== 'explode' && md !== 'stick') { var ab = DY.angleBetween(res.v1, res.v2); R.eq('angle between final velocities', '', ab === null ? 'undefined (a body is at rest)' : U.dp(ab, 1) + '°', '', 'The angle between the two final velocity vectors (90° for equal masses, one at rest, elastic).'); }
     }
     R.head('Energy');
-    R.eq('KE before', 'Σ ½mv²', res.KE0, 'J'); R.eq('KE after', 'Σ ½mv²', res.KE1, 'J');
+    R.eq('KE before', 'Σ ½mv²', res.KE0, 'J', 'KE = ½mv² for each body, added as scalars (no directions).'); R.eq('KE after', 'Σ ½mv²', res.KE1, 'J', 'Same with the speeds after. Compare: equal for elastic, smaller if KE became heat and sound, larger in an explosion.');
     var dK = res.KE1 - res.KE0, tol = 1e-6 * Math.max(1, res.KE0);
     R.badge(Math.abs(dK) <= tol ? 'KE conserved: elastic' : dK < 0 ? 'KE lost (' + U.sf(-dK) + ' J): inelastic' : 'KE gained (' + U.sf(dK) + ' J): stored energy released', Math.abs(dK) <= tol ? 'ok' : dK < 0 ? 'info' : 'warn');
-    R.eq('p after', 'check (x, y)', '(' + U.sf(res.P1[0]) + ', ' + U.sf(res.P1[1]) + ') N s', '');
+    R.eq('p after', 'check (x, y)', '(' + U.sf(res.P1[0]) + ', ' + U.sf(res.P1[1]) + ') N s', '', 'Check: both components of the total momentum after match the totals before.');
     R.render();
     // table
     var rows = [], mm = momenta();

@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/mech-momentum.js"></script>
@@ -27,8 +28,8 @@
   var cv = ui.canvas(sceneCard, 'main-canvas');
   var vp = new SIM.view.Viewport(cv, { pad: 20 });
   var clock = new SIM.anim.Clock(sceneCard, { duration: 6, onFrame: function () { drawScene(); drawPlots(); } });
-  ui.legend(sceneCard, [{ color: 'var(--c-s1)', label: 'A' }, { color: 'var(--c-s2)', label: 'B' }, { color: 'var(--c-s3)', label: 'C' },
-    { color: 'var(--c-velocity)', label: 'velocity (right = +)' }]);
+  var lg = ui.legend(sceneCard, [{ color: 'var(--c-s1)', label: 'A' }, { color: 'var(--c-s2)', label: 'B' }, { color: 'var(--c-s3)', label: 'C' },
+    { color: 'var(--c-s4)', label: 'D' }, { color: 'var(--c-velocity)', label: 'velocity (right = +)' }]);
   var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
   var pX = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'x / m (world-lines)' });
   var pV = new SIM.plot.Plot(ui.canvas(plotWrap), { yLabel: 'v / m s⁻¹ (right +)' });
@@ -40,7 +41,7 @@
   var outCard = pg.card('right', 'Live working');
   var noteCard = pg.card('right', 'Common traps');
 
-  var nSel = ui.select(paramCard, { label: 'Particles', value: '2', options: [{ value: '2', label: 'A and B' }, { value: '3', label: 'A, B and C' }] }, update);
+  var nSel = ui.select(paramCard, { label: 'Particles', value: '2', options: [{ value: '2', label: 'A and B' }, { value: '3', label: 'A, B and C' }, { value: '4', label: 'A, B, C and D' }] }, update);
   var prm = ui.params(paramCard, [
     { key: 'mA', label: 'Mass of A', sym: 'm<sub>A</sub>', unit: 'kg', min: 0.01, max: 20, step: 0.01, value: 0.3 },
     { key: 'uA', label: 'Velocity of A', sym: 'u<sub>A</sub>', unit: 'm s<sup>−1</sup>', min: -40, max: 40, step: 0.1, value: 4 },
@@ -51,6 +52,9 @@
     { key: 'mC', label: 'Mass of C', sym: 'm<sub>C</sub>', unit: 'kg', min: 0.01, max: 20, step: 0.01, value: 1 },
     { key: 'uC', label: 'Velocity of C', sym: 'u<sub>C</sub>', unit: 'm s<sup>−1</sup>', min: -40, max: 40, step: 0.1, value: 0 },
     { key: 'xC', label: 'Start position of C', sym: 'x<sub>C</sub>', unit: 'm', min: -20, max: 30, step: 0.1, value: 3 },
+    { key: 'mD', label: 'Mass of D', sym: 'm<sub>D</sub>', unit: 'kg', min: 0.01, max: 20, step: 0.01, value: 1, hidden: true },
+    { key: 'uD', label: 'Velocity of D', sym: 'u<sub>D</sub>', unit: 'm s<sup>−1</sup>', min: -40, max: 40, step: 0.1, value: 0, hidden: true },
+    { key: 'xD', label: 'Start position of D', sym: 'x<sub>D</sub>', unit: 'm', min: -20, max: 30, step: 0.1, value: 5, hidden: true },
     { key: 'xW', label: 'Wall position', sym: 'x<sub>W</sub>', unit: 'm', min: -10, max: 40, step: 0.1, value: 9, hidden: true },
     { key: 'wS', label: 'Speed after hitting the wall (given)', sym: 'w', unit: 'm s<sup>−1</sup>', min: 0, max: 40, step: 0.1, value: 0.5, hidden: true },
     { key: 'T', label: 'Time shown', sym: 't<sub>max</sub>', unit: 's', min: 0.5, max: 30, step: 0.5, value: 3 }
@@ -64,6 +68,9 @@
   for (var k = 0; k < 3; k++) {
     oc.push(ui.select(paramCard, { label: 'Collision ' + (k + 1), value: k === 0 ? 'gr' : 'no', options: OUT }, update));
   }
+  // any collision after the third (and collisions left "not specified" when a ball is added with +)
+  var further = ui.select(paramCard, { label: 'Any later collision', value: 'no', options: [
+    { value: 'no', label: 'not specified (stop)' }, { value: 'co', label: 'they coalesce' }, { value: 'el', label: 'no KE is lost (they bounce apart)' }] }, update);
   var prmO = ui.params(paramCard, [
     { key: 'v1', label: 'Given velocity after, collision 1', sym: 'v', unit: 'm s<sup>−1</sup>', min: -40, max: 40, step: 0.05, value: 3 },
     { key: 'L1', label: 'Given KE loss, collision 1', sym: 'ΔKE', unit: 'J', min: 0, max: 500, step: 0.005, value: 1 },
@@ -120,7 +127,7 @@
     { name: 'Impossible outcome: KE would increase', values: { mA: 1, uA: 4, xA: 0, mB: 1, uB: 0, xB: 1, T: 2, v1: -2 }, n: '2', out: ['gl'],
       note: 'Momentum alone gives v_B = 6, but KE 8 J → 20 J: impossible unless there is an explosion. Always check KE after ≤ KE before.' }
   ], function (p) {
-    clock.pause(); nSel.set(p.n || '2', true); setOut(p.out || ['gr']); wallT.set(!!p.wall, true); solveSel.set(p.solve || 'none', true);
+    clock.pause(); nSel.set(p.n || '2', true); setOut(p.out || ['gr']); further.set('no', true); wallT.set(!!p.wall, true); solveSel.set(p.solve || 'none', true);
     var vals = Object.assign({}, p.values), ov = {}, sv = {};
     ['v1', 'v2', 'v3', 'L1', 'L2', 'L3'].forEach(function (k) { if (k in vals) { ov[k] = vals[k]; delete vals[k]; } });
     ['vBa', 'Lk'].forEach(function (k) { if (k in vals) { sv[k] = vals[k]; delete vals[k]; } });
@@ -137,9 +144,11 @@
   ]);
 
   /* ---------- model ---------- */
-  var COLS = ['s1', 's2', 's3'];
+  var COLS = ['s1', 's2', 's3', 's4'], MAXN = 4;
   var tl = null, used = null, solveInfo = null;
+  function ocType(i) { return i < oc.length ? oc[i].get() : further.get(); }
   function outcomeSpec(i) {
+    if (i >= oc.length) { var f = further.get(); return f === 'co' ? { type: 'coalesce' } : f === 'el' ? { type: 'keloss', loss: 0 } : { type: 'none' }; }
     var t = oc[i].get(), v = prmO.values['v' + (i + 1)], L = prmO.values['L' + (i + 1)];
     if (t === 'gl') return { type: 'given', who: 'left', v: v };
     if (t === 'gr') return { type: 'given', who: 'right', v: v };
@@ -151,7 +160,11 @@
   }
   function update() {
     var v = prm.values, n = Number(nSel.get());
-    ['mC', 'uC', 'xC'].forEach(function (k) { prm.show(k, n === 3); });
+    ['mC', 'uC', 'xC'].forEach(function (k) { prm.show(k, n >= 3); });
+    ['mD', 'uD', 'xD'].forEach(function (k) { prm.show(k, n >= 4); });
+    further.row.style.display = n >= 3 || wallT.get() ? '' : 'none';
+    for (var li = 2; li < MAXN; li++) if (lg && lg.children && lg.children[li]) lg.children[li].style.display = li < n ? '' : 'none';
+    if (addBtn) { addBtn.show(n < MAXN); addBtn.label('Add ball ' + NAMES[Math.min(n, MAXN - 1)]); }
     prm.show('xW', wallT.get()); prm.show('wS', wallT.get());
     for (var i = 0; i < 3; i++) {
       var t = oc[i].get();
@@ -177,13 +190,15 @@
       if (isFinite(kk) && kk > 0) { mA *= kk; mB *= kk; }
     }
     var parts = [{ name: 'A', m: mA, x: v.xA, u: v.uA }, { name: 'B', m: mB, x: v.xB, u: v.uB }];
-    if (n === 3) parts.push({ name: 'C', m: v.mC, x: v.xC, u: v.uC });
+    for (var pi = 2; pi < n; pi++) { var nm = NAMES[pi]; parts.push({ name: nm, m: v['m' + nm], x: v['x' + nm], u: v['u' + nm] }); }
     used = parts;
-    tl = MO.timeline({ particles: parts, wall: wallT.get() ? { x: v.xW, speed: v.wS } : null, outcomes: [0, 1, 2].map(outcomeSpec), tMax: v.T });
+    tl = MO.timeline({ particles: parts, wall: wallT.get() ? { x: v.xW, speed: v.wS } : null, outcomes: allOutcomes(), tMax: v.T });
     clock.setDuration(v.T);
     ui.writeHash(Object.assign({}, v, { n: n, wall: +wallT.get() }));
     drawScene(); drawPlots(); readout();
   }
+
+  function allOutcomes() { var a = []; for (var i = 0; i < 30; i++) a.push(outcomeSpec(i)); return a; }
 
   /* ---------- scene ---------- */
   function xRange() {
@@ -219,6 +234,11 @@
       D.label(c, U.sf(b.m) + ' kg', x, vp.Y(0) + 14, col.muted, { size: 11 });
       if (Math.abs(b.v) > 1e-9) D.arrow(c, x, y - r - 12, x + U.sgn(b.v) * arrowLen(b.v), y - r - 12, col.velocity, { label: U.sf(b.v) + ' m/s', width: 2 });
       geo.push({ ids: b.ids, x: x, y: y, r: r, ay: y - r - 12, v: b.v });
+    });
+    delSpots().forEach(function (d) {
+      c.save(); c.fillStyle = col.panel; c.strokeStyle = col.muted; c.lineWidth = 1.4;
+      c.beginPath(); c.arc(d.x, d.y, 8, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.moveTo(d.x - 3.5, d.y - 3.5); c.lineTo(d.x + 3.5, d.y + 3.5); c.moveTo(d.x + 3.5, d.y - 3.5); c.lineTo(d.x - 3.5, d.y + 3.5); c.stroke(); c.restore();
     });
     var ev = tl.events.filter(function (e) { return e.t <= clock.t + 1e-9; });
     if (ev.length) D.label(c, 'last event: ' + (ev[ev.length - 1].kind === 'wall' ? 'wall' : 'collision') + ' at t = ' + U.sf(ev[ev.length - 1].t) + ' s, x = ' + U.sf(ev[ev.length - 1].x) + ' m', vp.w - 10, vp.h - 12, col.muted, { align: 'right', size: 11 });
@@ -291,13 +311,17 @@
       }
       n++;
       var r = e.res, L = e.names[0], Rn = e.names[1];
-      R.head('Collision ' + e.n + ': ' + L + ' (left) and ' + Rn + ' (right) at t = ' + U.sf(e.t) + ' s, x = ' + U.sf(e.x) + ' m');
+      R.head('Collision ' + e.n + ': ' + L + ' and ' + Rn + ' (' + L + ' on the left) at t = ' + U.sf(e.t) + ' s, x = ' + U.sf(e.x) + ' m');
       R.eq('momentum before', U.sf(e.m[0]) + ' × ' + sgnTxt(e.u[0]) + ' + ' + U.sf(e.m[1]) + ' × ' + sgnTxt(e.u[1]), r.p0, 'kg m s<sup>−1</sup>');
-      if (r.coalesced && Math.abs(r.v1 - r.v2) < 1e-12 && oc[e.n - 1].get() === 'co') R.eq('V', r.formula + ' = ' + U.sf(r.p0) + ' ÷ ' + U.sf(e.m[0] + e.m[1]), r.v1, 'm s<sup>−1</sup>');
-      else {
+      var t0 = ocType(e.n - 1);
+      R.html('<div class="eq" style="font-size:12.5px;color:var(--muted)">Outcome used: ' + outcomeText(e.n - 1) + '</div>');
+      if (r.coalesced && Math.abs(r.v1 - r.v2) < 1e-12 && t0 === 'co') {
+        R.eq('V', r.formula.replace(/^V\s*=\s*/, '') + ' = ' + U.sf(r.p0) + ' ÷ ' + U.sf(e.m[0] + e.m[1]), r.v1, 'm s<sup>−1</sup>');
+        R.eq('momentum after', '(' + U.sf(e.m[0]) + ' + ' + U.sf(e.m[1]) + ') × ' + sgnTxt(r.v1), r.p1, 'kg m s<sup>−1</sup> ✓');
+      } else {
         R.eq('v<sub>' + L + '</sub>', 'velocity of ' + L + ' after', r.v1, 'm s<sup>−1</sup>');
         R.eq('v<sub>' + Rn + '</sub>', 'velocity of ' + Rn + ' after', r.v2, 'm s<sup>−1</sup>');
-        R.eq('check', U.sf(e.m[0]) + ' × ' + sgnTxt(r.v1) + ' + ' + U.sf(e.m[1]) + ' × ' + sgnTxt(r.v2), r.p1, 'kg m s<sup>−1</sup> ✓');
+        R.eq('momentum after', U.sf(e.m[0]) + ' × ' + sgnTxt(r.v1) + ' + ' + U.sf(e.m[1]) + ' × ' + sgnTxt(r.v2), r.p1, 'kg m s<sup>−1</sup> ✓');
       }
       R.eq('KE before', '½m₁u₁² + ½m₂u₂²', r.K0, 'J');
       R.eq('KE after', '½m₁v₁² + ½m₂v₂²', r.K1, 'J');
@@ -309,7 +333,6 @@
       }
       r.warnings.forEach(function (w) { R.badge(w, 'warn'); });
       if (r.valid) R.badge('Consistent: they approach, do not pass through, and KE does not increase.', 'ok');
-      var t0 = oc[e.n - 1].get();
       if (t0 === 'gl' || t0 === 'gr') {
         var bs = MO.bothSigns({ m1: e.m[0], u1: e.u[0], m2: e.m[1], u2: e.u[1], who: t0 === 'gl' ? 'left' : 'right', v: prmO.values['v' + e.n] });
         R.html('<div class="eq" style="font-size:12.5px">If only the <b>speed</b> ' + U.sf(Math.abs(prmO.values['v' + e.n])) + ' were given: ' +
@@ -322,15 +345,83 @@
   }
 
   /* ---------- direct manipulation: tap a particle to type its mass; drag its velocity arrow tip left/right (right +), tap the tip to type ---------- */
-  var geo = [], hold = null, ix = null, APX = 3, NAMES = ['A', 'B', 'C'];   // arrow: 16 px + APX px per m s⁻¹
+  var geo = [], hold = null, ix = null, addBtn = null, APX = 3, NAMES = ['A', 'B', 'C', 'D'];   // arrow: 16 px + APX px per m s⁻¹
   function arrowLen(v) { return 16 + Math.min(40, Math.abs(v)) * APX; }
   function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
   function massEditable(id) { var sv = solveSel.get(); return !(sv === 'scale' && id < 2) && sv !== 'm' + NAMES[id]; }
   function beforeFirstEvent() { return !!hold || !tl.events.length || clock.t < tl.events[0].t - 1e-9; }
+  function outcomeText(i) {
+    var t = ocType(i);
+    if (i >= oc.length) return (t === 'co' ? 'they coalesce' : t === 'el' ? 'no KE is lost' : 'not specified') + ' (from “Any later collision”)';
+    var o = OUT.filter(function (x) { return x.value === t; })[0], txt = o ? o.label : t;
+    if (t === 'gl' || t === 'gr') txt += ' (' + U.sf(prmO.values['v' + (i + 1)]) + ' m s<sup>−1</sup>)';
+    if (t === 'ke') txt += ' (' + U.sf(prmO.values['L' + (i + 1)]) + ' J)';
+    return txt + ' — set under Parameters → Collision ' + (i + 1);
+  }
+  /* small × beside each single particle (only before the first collision, and only while more than 2 remain) */
+  function delSpots() {
+    if (hold || !tl || tl.error || Number(nSel.get()) <= 2 || !beforeFirstEvent()) return [];
+    return geo.filter(function (b) { return b.ids.length === 1; }).map(function (b) { return { id: 'del' + NAMES[b.ids[0]], key: 'del', idx: b.ids[0], name: NAMES[b.ids[0]], x: b.x + b.r + 10, y: b.y - b.r * 0.3, r: 11, hidden: true }; });
+  }
+  function removeBall(k) {
+    var n = Number(nSel.get()); if (n <= 2 || k >= n) return;
+    var o = {};
+    for (var i = k; i < n - 1; i++) ['m', 'u', 'x'].forEach(function (p) { o[p + NAMES[i]] = prm.values[p + NAMES[i + 1]]; });
+    clock.pause(); nSel.set(String(n - 1), true); prm.set(o); clock.seek(0); touched();
+  }
+
+  /* ---------- build it yourself: + Add a ball → tap the track → type mass → type velocity → replay ---------- */
+  function startAdd() {
+    var n = Number(nSel.get()); if (n >= MAXN) return;
+    clock.pause(); clock.seek(0);
+    ui.placeMode({ prompt: 'Tap the track to place ball ' + NAMES[n] + ' (Esc to cancel)', onPlace: function (x, y) { placeBall(n, x, y); } });
+  }
+  function placeBall(i, sx) {
+    var nm = NAMES[i], v = prm.values, w = Math.round(vp.toWorld(sx, 0)[0] * 10) / 10;
+    w = U.clamp(w, -20, 30);
+    if (wallT.get()) w = Math.min(w, v.xW - 0.1);
+    // don't drop it on top of another particle
+    for (var tries = 0; tries < 40; tries++) {
+      var clash = false;
+      for (var j = 0; j < i; j++) if (Math.abs(v['x' + NAMES[j]] - w) < 0.15) clash = true;
+      if (!clash) break; w = Math.round((w + 0.2) * 10) / 10;
+    }
+    // collisions nobody has described yet are taken as "they coalesce" so the timeline can carry on
+    oc.forEach(function (s) { if (s.get() === 'no') s.set('co', true); });
+    if (further.get() === 'no') further.set('co', true);
+    var o = {}; o['x' + nm] = w; o['u' + nm] = 0; o['m' + nm] = v['m' + nm] > 0 ? v['m' + nm] : 1;
+    clock.pause(); nSel.set(String(i + 1), true); prm.set(o); clock.seek(0);
+    var at = function () { return { x: vp.X(prm.values['x' + nm]), y: vp.Y(0) - 22 }; };
+    var stage2 = false;
+    ui.askNumber({ title: 'Mass of ' + nm, sub: 'Step 1 of 2: type the mass of the new ball (kg).', value: o['m' + nm], min: 0.01, max: 20, step: 0.1, decimals: 2, unit: 'kg', at: at(),
+      quick: [0.1, 0.2, 0.5, 1, 2], doneLabel: 'Next: velocity →',
+      onInput: function (val) { var q = {}; q['m' + nm] = U.clamp(val, 0.01, 20); prm.set(q); clock.seek(0); },
+      onDone: function () { stage2 = true; askVel(); },
+      onClose: function () { setTimeout(function () { if (!stage2) finishAdd(); }, 0); } });
+    function askVel() {
+      ui.askNumber({ title: 'Velocity of ' + nm, sub: 'Step 2 of 2: right is +, so a ball moving left has a negative velocity.', value: prm.values['u' + nm], min: -40, max: 40, step: 0.5, decimals: 2, unit: 'm s⁻¹', at: at(),
+        quick: [-4, -2, 0, 2, 4], doneLabel: 'Done: collide!',
+        onInput: function (val) { var q = {}; q['u' + nm] = U.clamp(val, -40, 40); prm.set(q); clock.seek(0); },
+        onClose: function () { setTimeout(finishAdd, 0); } });
+    }
+  }
+  var finishing = false;
+  function finishAdd() {
+    if (finishing) return; finishing = true; setTimeout(function () { finishing = false; }, 50);
+    // show long enough to see every collision (time shown up to 30 s)
+    var v = prm.values, n = Number(nSel.get()), parts = [];
+    for (var i = 0; i < n; i++) parts.push({ name: NAMES[i], m: (used[i] || {}).m || v['m' + NAMES[i]], x: v['x' + NAMES[i]], u: v['u' + NAMES[i]] });
+    var t2 = MO.timeline({ particles: parts, wall: wallT.get() ? { x: v.xW, speed: v.wS } : null, outcomes: allOutcomes(), tMax: 30 });
+    if (!t2.error && t2.events.length) {
+      var lastT = t2.events[t2.events.length - 1].t, want = Math.min(30, Math.ceil((lastT * 1.4 + 0.6) * 2) / 2);
+      if (want > v.T) prm.set({ T: want });
+    }
+    touched();
+  }
   ix = SIM.view.interact(cv, {
     handles: function () {
       if (!tl || tl.error) return [];
-      var col = ui.colors(), out = [], early = beforeFirstEvent();
+      var col = ui.colors(), out = delSpots(), early = beforeFirstEvent();
       geo.forEach(function (b) {
         if (b.ids.length !== 1) return;   // a coalesced pair is not an input
         var id = b.ids[0], name = NAMES[id];
@@ -348,6 +439,7 @@
     },
     onDrop: function () { if (hold) { hold = null; clock.seek(0); } },
     onTap: function (hd, x, y) {
+      if (hd.key === 'del') { removeBall(hd.idx); return; }
       var key = hd.key, isM = key[0] === 'm';
       ui.askNumber({ title: (isM ? 'Mass of ' : 'Velocity of ') + hd.name, sub: isM ? 'Type the mass in kilograms.' : 'Right is positive: type a negative value for motion to the left.',
         value: prm.values[key], min: isM ? 0.01 : -40, max: isM ? 20 : 40, step: isM ? 0.1 : 0.5, decimals: 2, unit: isM ? 'kg' : 'm s⁻¹', at: { x: x, y: y },
@@ -356,7 +448,8 @@
     },
     onHover: function () { drawScene(); }
   });
-  ui.stageTip('Drag a velocity arrow tip left/right to set u (right +) · tap it to type u · tap a particle to type its mass');
+  addBtn = ui.stageAction({ label: 'Add ball C', icon: '+', onClick: startAdd });
+  ui.stageTip('Press + to add a ball, tap the track to place it, then type its mass and velocity · drag an arrow tip to change u (right +) · tap a ball for its mass · × removes a ball');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

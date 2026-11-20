@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/mech-forces.js"></script>
@@ -194,6 +195,7 @@
     var hv = {}; hv.n = n; hv.mode = mode;
     blocks.forEach(function (b, j) { if (j < n) { hv['F' + j] = b.p.values.F; hv['th' + j] = b.p.values.th; hv['c' + j] = b.p.values.c; hv['t' + j] = b.type.get(); } });
     ui.writeHash(hv);
+    if (addBtn) addBtn.show(n < NMAX);
     drawScene(); drawPolygon(); drawTable(); readout();
   }
 
@@ -427,16 +429,61 @@
   }
 
   /* ---------- direct manipulation: drag a tip to turn a force, tap it to type its size, draw a new one ---------- */
-  var scene = null, preview = null;
+  var scene = null, preview = null, addBtn = null;
   function snapAngle(a) { a = Math.round(a) % 360; var near = Math.round(a / 15) * 15; return Math.abs(a - near) <= 2 ? near % 360 : a; }
   function canEditDir(j) { return !(M && M.unk.some(function (u) { return u.kind === 'th' && u.i === j; })); }
   function canEditMag(j) { return !(M && M.unk.some(function (u) { return (u.kind === 'F' && u.i === j) || (u.kind === 'k' && blocks[j].type.get() === 'mult'); })); }
+  /** add an extra button (e.g. Remove) to the number editor that is open now */
+  function popAction(ed, label, fn) {
+    var sg = ui.stage(), ch = sg && sg.el && sg.el.children, pe = null, k;
+    if (!ch) return;
+    for (k = ch.length - 1; k >= 0 && !pe; k--) if (ch[k].classList && ch[k].classList.contains('pop')) pe = ch[k];
+    var acts = pe && pe.children ? Array.prototype.filter.call(pe.children, function (e) { return e.classList && e.classList.contains('pop-actions'); })[0] : null;
+    if (!acts) return;
+    acts.insertBefore(ui.h('button', { class: 'btn', type: 'button', text: label, onclick: function () { if (ed && ed.close) ed.close(); fn(); } }), acts.firstChild || null);
+  }
   function askMag(j, x, y, title) {
     var b = blocks[j], mult = b.type.get() === 'mult';
-    ui.askNumber({ title: title || ('Size of force F' + SUB[j]), sub: mult ? 'This force is c × F. Type the multiple c.' : 'Type the magnitude in newtons.',
+    var ed = ui.askNumber({ title: title || ('Size of force F' + SUB[j]), sub: mult ? 'This force is c × F. Type the multiple c.' : 'Type the magnitude in newtons.',
       value: mult ? b.p.values.c : b.p.values.F, min: 0, max: mult ? 10 : 200, step: mult ? 0.5 : 1, decimals: 2, unit: mult ? '× F' : 'N', at: { x: x, y: y },
       quick: mult ? [1, 2, 3] : [5, 10, 20, 50],
       onInput: function (v) { unlockAll(); b.p.set(mult ? { c: v } : { F: v }); } });
+    if (Math.round(top.values.n) > 2) popAction(ed, 'Remove F' + SUB[j], function () { removeForce(j); });
+  }
+  /** remove force j: later forces move down one place so F₁, F₂, … stay in order */
+  function removeForce(j) {
+    var n = Math.round(top.values.n);
+    if (n <= 2 || j >= n) return;
+    unlockAll();
+    for (var q = j; q < n - 1; q++) {
+      var a = blocks[q], b = blocks[q + 1];
+      a.type.set(b.type.get(), true);
+      a.p.set({ F: b.p.values.F, th: b.p.values.th, c: b.p.values.c }, true);
+    }
+    // unknowns that pointed at a later force follow it down
+    [u1Sel, u2Sel, ucSel].forEach(function (sel) {
+      var u = parseU(sel.get());
+      if (u.kind !== 'k' && u.i > j) sel.set(u.kind + (u.i - 1), true);
+    });
+    top.set({ n: n - 1 });
+  }
+  /** placeMode swallows the tap, so put the first-time hint away ourselves once the student has used it */
+  function hideTip() { var sg = ui.stage(); if (sg && sg.tip && sg.tip.style) sg.tip.style.display = 'none'; }
+  /** "+ Add a force": tap to set its direction from O (15° steps), then type its size */
+  function startAdd() {
+    if (Math.round(top.values.n) >= NMAX) return;
+    ui.placeMode({ prompt: 'Tap where force F' + SUB[Math.round(top.values.n)] + ' should point', onPlace: function (x, y) {
+      var j = Math.round(top.values.n);
+      hideTip();
+      if (!scene || j >= NMAX) return;
+      if (Math.hypot(x - scene.ox, y - scene.oy) < 8) { startAdd(); return; }   // too close to O to tell a direction
+      var th = Math.round(SIM.view.screenAngle(scene.ox, scene.oy, x, y) / 15) * 15 % 360;
+      var est = Math.min(200, Math.max(1, Math.round(Math.hypot(x - scene.ox, y - scene.oy) / (scene.k || 1))));
+      unlockAll();
+      blocks[j].type.set('N', true); blocks[j].p.set({ F: est, th: th }, true);
+      top.set({ n: j + 1 });
+      askMag(j, x, y, 'New force F' + SUB[j] + ' at ' + th + '°: how big is it?');
+    } });
   }
   var ix = SIM.view.interact(cv, {
     handles: function () {
@@ -459,7 +506,13 @@
     },
     onHover: function () { drawScene(); }
   });
-  ui.stageTip('Drag an arrow tip to turn it · tap a tip to type its size · drag from empty space to draw a new force');
+  /** keep the hint clear of the + button over the top-right of the stage (desktop only: on phones the hint sits below the stage) */
+  function tipClear(t, o) {
+    if (!t || !t.style || (typeof matchMedia === 'function' && matchMedia('(max-width: 720px)').matches)) return;
+    if (o.bottom) { t.style.top = 'auto'; t.style.bottom = '10px'; } else t.style.maxWidth = 'calc(100% - ' + o.right + 'px)';
+  }
+  addBtn = ui.stageAction({ label: 'Add a force', icon: '+', onClick: startAdd });
+  tipClear(ui.stageTip('Press + Add a force, tap where it should point, then type its size · drag a tip to turn a force · tap a tip to change its size or remove it'), { right: 165 });
 
   ui.onTheme(function () { drawScene(); drawPolygon(); });
   vp.onResize = drawScene; vp2.onResize = drawPolygon;

@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../core/plot.js"></script>
 <script src="../../core/anim.js"></script>
 <script src="../../engine/phys-dynamics.js"></script>
@@ -26,7 +27,7 @@
   var cv = ui.canvas(sceneCard, 'main-canvas');
   var vp = new SIM.view.Viewport(cv, { pad: 20 });
   var clock = new SIM.anim.Clock(sceneCard, { duration: 3, onFrame: function () { drawScene(); drawPlots(); readout(); } });
-  ui.legend(sceneCard, [{ color: 'var(--c-s1)', label: 'body 1' }, { color: 'var(--c-s2)', label: 'body 2' }, { color: 'var(--c-applied)', label: 'contact forces (third-law pair)' }, { color: 'var(--c-velocity)', label: 'velocity' }]);
+  var lg = ui.legend(sceneCard, [{ color: 'var(--c-s1)', label: 'body 1' }, { color: 'var(--c-s2)', label: 'body 2' }, { color: 'var(--c-s3)', label: 'body 3' }, { color: 'var(--c-s4)', label: 'body 4' }, { color: 'var(--c-applied)', label: 'contact forces (third-law pair)' }, { color: 'var(--c-velocity)', label: 'velocity' }]);
   var plotWrap = ui.h('div', { class: 'plots' }); sceneCard.appendChild(plotWrap);
   var cVt = ui.canvas(plotWrap), cFt = ui.canvas(plotWrap);
   var pV = new SIM.plot.Plot(cVt, { yLabel: 'v / m s⁻¹ (right +)' }), pF = new SIM.plot.Plot(cFt, { yLabel: 'F / N (area = Δp)' });
@@ -42,12 +43,21 @@
   var outc = ui.select(paramCard, { label: 'Collision type', value: 'elastic', options: [
     { value: 'elastic', label: 'Elastic (KE conserved: speed of approach = speed of separation)' }, { value: 'stick', label: 'Bodies stick together (perfectly inelastic)' },
     { value: 'given', label: 'Final velocity of body 1 is given' }] }, update);
+  var nb = ui.select(paramCard, { label: 'Bodies on the line', value: '2', options: [{ value: '2', label: '2 bodies (with contact forces)' }, { value: '3', label: '3 bodies' }, { value: '4', label: '4 bodies' }] }, update);
   var shape = ui.select(paramCard, { label: 'Force during contact', value: 'rect', options: [{ value: 'rect', label: 'constant (average) force' }, { value: 'tri', label: 'rises then falls (same area, peak = 2 × average)' }] }, update);
   var prm = ui.params(paramCard, [
     { key: 'm1', label: 'Mass of body 1', sym: 'm<sub>1</sub>', unit: 'kg', min: 0.01, max: 200, step: 0.01, value: 2 },
     { key: 'u1', label: 'Initial velocity of body 1 (right +)', sym: 'u<sub>1</sub>', unit: 'm s<sup>−1</sup>', min: -20, max: 20, step: 0.01, value: 3 },
     { key: 'm2', label: 'Mass of body 2', sym: 'm<sub>2</sub>', unit: 'kg', min: 0.01, max: 200, step: 0.01, value: 1 },
     { key: 'u2', label: 'Initial velocity of body 2 (right +)', sym: 'u<sub>2</sub>', unit: 'm s<sup>−1</sup>', min: -20, max: 20, step: 0.01, value: 0 },
+    { key: 'x1', label: 'Start position of body 1', sym: 'x<sub>1</sub>', unit: 'm', min: -50, max: 50, step: 0.01, value: -3, hidden: true },
+    { key: 'x2', label: 'Start position of body 2', sym: 'x<sub>2</sub>', unit: 'm', min: -50, max: 50, step: 0.01, value: 0, hidden: true },
+    { key: 'm3', label: 'Mass of body 3', sym: 'm<sub>3</sub>', unit: 'kg', min: 0.01, max: 200, step: 0.01, value: 1, hidden: true },
+    { key: 'u3', label: 'Initial velocity of body 3 (right +)', sym: 'u<sub>3</sub>', unit: 'm s<sup>−1</sup>', min: -20, max: 20, step: 0.01, value: 0, hidden: true },
+    { key: 'x3', label: 'Start position of body 3', sym: 'x<sub>3</sub>', unit: 'm', min: -50, max: 50, step: 0.01, value: 2, hidden: true },
+    { key: 'm4', label: 'Mass of body 4', sym: 'm<sub>4</sub>', unit: 'kg', min: 0.01, max: 200, step: 0.01, value: 1, hidden: true },
+    { key: 'u4', label: 'Initial velocity of body 4 (right +)', sym: 'u<sub>4</sub>', unit: 'm s<sup>−1</sup>', min: -20, max: 20, step: 0.01, value: 0, hidden: true },
+    { key: 'x4', label: 'Start position of body 4', sym: 'x<sub>4</sub>', unit: 'm', min: -50, max: 50, step: 0.01, value: 4, hidden: true },
     { key: 'v1', label: 'Final velocity of body 1 (given)', sym: 'v<sub>1</sub>', unit: 'm s<sup>−1</sup>', min: -30, max: 30, step: 0.01, value: 0 },
     { key: 'dt', label: 'Contact time', sym: 'Δt', unit: 's', min: 0.001, max: 0.5, step: 0.001, value: 0.05 },
     { key: 'm', label: 'Mass', sym: 'm', unit: 'kg', min: 0.01, max: 2000, step: 0.01, value: 0.15 },
@@ -73,7 +83,7 @@
     { name: 'Ball rebounds from a wall: 0.15 kg, 20 → −15 m s⁻¹ in 0.050 s', mode: 'single', v: { m: 0.15, u: 20, v: -15, dts: 0.05 }, shape: 'rect', note: 'Δp = 0.15 × (−15 − 20) = −5.25 N s; F = −105 N (105 N away from the wall). The ball also pushes the wall with 105 N.' },
     { name: 'Car brakes: 1200 kg from 25 m s⁻¹ to rest in 5.0 s', mode: 'single', v: { m: 1200, u: 25, v: 0, dts: 5 }, shape: 'rect', note: 'Average resultant force = Δp ÷ Δt = −30 000 ÷ 5.0 = −6000 N.' },
     { name: 'Rocket ejects 90 kg of gas per second at 190 m s⁻¹ (9702/12 M/J 25 Q9)', mode: 'stream', v: { mu: 90, dv: 190 }, note: 'F = (Δm/Δt) × Δv = 90 × 190 = 17 100 N ≈ 17 kN on the gas; by Newton’s third law the gas pushes the rocket forward with the same force.' }
-  ], function (p) { clock.pause(); mode.set(p.mode, true); if (p.out) outc.set(p.out, true); shape.set(p.shape || 'rect', true); prm.set(p.v); clock.seek(0); });
+  ], function (p) { clock.pause(); mode.set(p.mode, true); nb.set('2', true); if (p.out) outc.set(p.out, true); shape.set(p.shape || 'rect', true); prm.set(p.v); clock.seek(0); });
 
   ui.notes(noteCard, [
     'Momentum p = mv is a <b>vector</b>: give velocities a sign (here right is +). Total momentum is conserved in every collision if no external resultant force acts.',
@@ -85,18 +95,37 @@
   ]);
 
   /* ---------- model ---------- */
-  var res = null, tc = 1, tr1 = null, tr2 = null;
+  var res = null, tc = 1, tr1 = null, tr2 = null, chain = null, MAXN = 4;
+  function nBodies() { return mode.get() === 'collide' ? Number(nb.get()) : 2; }
+  function multi() { return nBodies() > 2; }
+  function chainMode() { return outc.get() === 'stick' ? 'stick' : 'elastic'; }
   function collideParams() { var v = prm.values; return { m1: v.m1, m2: v.m2, u1: v.u1, u2: v.u2, mode: outc.get(), v1: v.v1 }; }
   function update() {
     var md = mode.get(), v = prm.values;
     var col = md === 'collide', sg = md === 'single', st = md === 'stream';
-    ['m1', 'u1', 'm2', 'u2', 'dt'].forEach(function (k) { prm.show(k, col); });
-    prm.show('v1', col && outc.get() === 'given');
+    var N = nBodies(), mu = col && N > 2;
+    ['m1', 'u1', 'm2', 'u2'].forEach(function (k) { prm.show(k, col); });
+    prm.show('dt', col && !mu); prm.show('x1', mu); prm.show('x2', mu);
+    ['m3', 'u3', 'x3'].forEach(function (k) { prm.show(k, mu && N >= 3); });
+    ['m4', 'u4', 'x4'].forEach(function (k) { prm.show(k, mu && N >= 4); });
+    prm.show('v1', col && !mu && outc.get() === 'given');
+    nb.row.style.display = col ? '' : 'none';
+    for (var li = 2; li < MAXN; li++) if (lg && lg.children && lg.children[li]) lg.children[li].style.display = mu && li < N ? '' : 'none';
+    if (addBtn) { addBtn.show(col && N < MAXN); addBtn.label('Add ball ' + (N + 1)); }
     ['m', 'u', 'v', 'dts'].forEach(function (k) { prm.show(k, sg); });
     ['mu', 'dv'].forEach(function (k) { prm.show(k, st); });
-    outc.row.style.display = col ? '' : 'none'; shape.row.style.display = st ? 'none' : '';
-    cVt.style.display = st ? 'none' : ''; cFt.style.display = st ? 'none' : '';
-    if (col) {
+    outc.row.style.display = col ? '' : 'none'; shape.row.style.display = st || mu ? 'none' : '';
+    cVt.style.display = st ? 'none' : ''; cFt.style.display = st || mu ? 'none' : '';
+    chain = null;
+    if (mu) {
+      var bodies = [];
+      for (var b = 1; b <= N; b++) bodies.push({ name: String(b), m: v['m' + b], u: v['u' + b], x: v['x' + b] });
+      chain = DY.chain1D({ bodies: bodies, mode: chainMode(), tMax: 60 });
+      var lastT = chain.events.length ? chain.events[chain.events.length - 1].t : 0;
+      chain.T = U.clamp(Math.ceil((lastT * 1.35 + 1) * 2) / 2, 2, 30);
+      res = { multi: true };
+      clock.setDuration(chain.T);
+    } else if (col) {
       res = DY.collide1D(collideParams());
       tc = 1;
       if (!res.noCollision) { tr1 = DY.contactTrack(v.u1, res.v1, tc, v.dt, shape.get(), 0); tr2 = DY.contactTrack(v.u2, res.v2, tc, v.dt, shape.get(), 0); }
@@ -110,16 +139,80 @@
     drawScene(); drawPlots(); readout();
   }
 
+  /* ---------- real-life props (soft pastel style, drawn only in the "Real life" look) ---------- */
+  var SC = SIM.scene, LINE = 'rgba(60,60,90,.22)';
+  function rrect(c, x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r); c.lineTo(x + w, y + h - r);
+    c.quadraticCurveTo(x + w, y + h, x + w - r, y + h); c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r); c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y); c.closePath();
+  }
+  function tint(hex, k) { return SC.shade(hex, SC.dark() ? -k * 0.6 : k); }
+  /** a lab trolley filling the box [xl, xl + w] × [yBase − h, yBase]; buffer spring on the side facing the other trolley (side +1 = right, −1 = left) */
+  function trolley(c, xl, yBase, w, h, color, wheelAng, side) {
+    var wr = Math.max(3, Math.min(h * 0.17, 9)), buf = Math.min(9, w * 0.2), bx = side > 0 ? xl : xl + buf, bw = w - buf;
+    var top = yBase - h, bot = yBase - wr * 1.5;
+    c.save();
+    c.fillStyle = tint(color, 0.45); c.strokeStyle = LINE; c.lineWidth = 1;
+    rrect(c, bx, top, bw, bot - top, Math.min(8, (bot - top) * 0.3)); c.fill(); c.stroke();
+    c.fillStyle = 'rgba(255,255,255,.35)'; rrect(c, bx + 3, top + 3, bw - 6, Math.max(2, (bot - top) * 0.22), 4); c.fill();
+    // buffer: a short spring and a round pad
+    var sx0 = side > 0 ? bx + bw : bx, sx1 = side > 0 ? xl + w - 2 : xl + 2, sy = top + (bot - top) * 0.55;
+    c.strokeStyle = SC.dark() ? 'rgba(220,220,235,.6)' : 'rgba(90,90,110,.55)'; c.lineWidth = 1.3; c.beginPath(); c.moveTo(sx0, sy);
+    for (var i = 1; i <= 4; i++) c.lineTo(sx0 + (sx1 - sx0) * i / 4, sy + (i % 2 ? -3 : 3));
+    c.stroke();
+    c.fillStyle = SC.dark() ? '#8a90a8' : '#c9cedd'; c.beginPath(); c.arc(sx1, sy, 2.6, 0, 2 * Math.PI); c.fill();
+    c.restore();
+    [bx + bw * 0.24, bx + bw * 0.76].forEach(function (wx) { SC.wheel(c, wx, yBase - wr, wr, wheelAng); });
+  }
+  /** the aluminium track on the floor; its top surface is at screen y */
+  function track(c, y) {
+    SC.ground(c, 0, vp.w, y + 7, { kind: 'floor', depth: Math.max(10, vp.h - y - 7) });
+    c.save(); c.fillStyle = SC.dark() ? '#6c7186' : '#dfe3ec'; c.strokeStyle = LINE; c.lineWidth = 1;
+    rrect(c, 2, y, vp.w - 4, 7, 3); c.fill(); c.stroke();
+    c.fillStyle = 'rgba(255,255,255,.4)'; c.fillRect(4, y + 1, vp.w - 8, 1.5); c.restore();
+  }
+  /** a pastel rocket lying along +x between world x = −1.5 and 2.4, height 1 */
+  function rocket(c) {
+    var x0 = vp.X(-1.5), x1 = vp.X(1.5), xn = vp.X(2.4), yt = vp.Y(0.5), yb = vp.Y(-0.5), ym = vp.Y(0), hh = yb - yt, dk = SC.dark();
+    var bodyC = dk ? '#b9bfd0' : '#f6f2ea', red = dk ? '#b86a62' : '#f2a093';
+    c.save(); c.strokeStyle = LINE; c.lineWidth = 1;
+    c.fillStyle = red;   // fins
+    c.beginPath(); c.moveTo(x0 + hh * 0.1, yt + 2); c.lineTo(x0 - hh * 0.25, yt - hh * 0.45); c.lineTo(x0 + hh * 0.75, yt + 2); c.closePath(); c.fill(); c.stroke();
+    c.beginPath(); c.moveTo(x0 + hh * 0.1, yb - 2); c.lineTo(x0 - hh * 0.25, yb + hh * 0.45); c.lineTo(x0 + hh * 0.75, yb - 2); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = bodyC; rrect(c, x0, yt, x1 - x0 + 2, hh, hh * 0.22); c.fill(); c.stroke();
+    c.fillStyle = red; c.beginPath(); c.moveTo(x1, yt); c.quadraticCurveTo(x1 + (xn - x1) * 0.75, yt + hh * 0.05, xn, ym); c.quadraticCurveTo(x1 + (xn - x1) * 0.75, yb - hh * 0.05, x1, yb); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = 'rgba(255,255,255,.35)'; rrect(c, x0 + 4, yt + 3, x1 - x0 - 8, hh * 0.18, 4); c.fill();
+    c.fillStyle = SC.shade(red, 0.15); c.fillRect(x0 + (x1 - x0) * 0.18, yt, (x1 - x0) * 0.06, hh);
+    var wx = x0 + (x1 - x0) * 0.72, wr = hh * 0.22;
+    c.fillStyle = dk ? '#6f8fb0' : '#a9d6f2'; c.beginPath(); c.arc(wx, ym, wr, 0, 2 * Math.PI); c.fill(); c.lineWidth = 2; c.strokeStyle = dk ? '#8a90a8' : '#d4d8e3'; c.stroke();
+    c.restore();
+  }
+  /** soft exhaust puffs streaming left from the nozzle; phase from the clock so scrubbing is exact */
+  function exhaust(c, t) {
+    var xn = vp.X(-1.6), L = vp.X(-1.6) - vp.X(-4.6), ym = vp.Y(0), hh = vp.Y(-0.5) - vp.Y(0.5), dk = SC.dark();
+    c.save();
+    c.fillStyle = dk ? 'rgba(255,190,120,.55)' : 'rgba(255,200,140,.75)'; c.beginPath(); c.moveTo(xn + 2, ym - hh * 0.3); c.quadraticCurveTo(xn - hh * 0.9, ym, xn + 2, ym + hh * 0.3); c.closePath(); c.fill();
+    for (var i = 0; i < 9; i++) {
+      var ph = ((t * 1.6 + i / 9) % 1 + 1) % 1, r = hh * (0.18 + 0.32 * ph);
+      c.globalAlpha = 0.55 * (1 - ph); c.fillStyle = dk ? '#9aa0b4' : '#e9e6f0';
+      c.beginPath(); c.arc(xn - ph * L, ym + Math.sin(i * 2.3) * hh * 0.25 * ph, r, 0, 2 * Math.PI); c.fill();
+    }
+    c.restore();
+  }
+
   /* ---------- scene ---------- */
   function drawScene() {
     if (!res) return;
-    var c, col = ui.colors(), md = mode.get(), t = clock.t, v = prm.values, T = clock.duration;
+    var c, col = ui.colors(), md = mode.get(), t = clock.t, v = prm.values, T = clock.duration, real = SC.real();
     if (md === 'stream') {
       vp.fit(-5, 5, -2, 2); c = vp.begin();
-      c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
-      c.beginPath(); c.moveTo(vp.X(-1.5), vp.Y(0.5)); c.lineTo(vp.X(1.5), vp.Y(0.5)); c.lineTo(vp.X(2.4), vp.Y(0)); c.lineTo(vp.X(1.5), vp.Y(-0.5)); c.lineTo(vp.X(-1.5), vp.Y(-0.5)); c.closePath(); c.fill(); c.stroke();
+      if (real) { SC.sky(c, 0, 0, vp.w, vp.h, { horizon: vp.h }); exhaust(c, t); rocket(c); }
+      else {
+        c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
+        c.beginPath(); c.moveTo(vp.X(-1.5), vp.Y(0.5)); c.lineTo(vp.X(1.5), vp.Y(0.5)); c.lineTo(vp.X(2.4), vp.Y(0)); c.lineTo(vp.X(1.5), vp.Y(-0.5)); c.lineTo(vp.X(-1.5), vp.Y(-0.5)); c.closePath(); c.fill(); c.stroke();
+      }
       for (var k = 0; k < 6; k++) { var yy = -0.35 + k * 0.14; D.arrow(c, vp.X(-1.6), vp.Y(yy), vp.X(-3.6 - (k % 2) * 0.4), vp.Y(yy), col.s2, { width: 1.2, head: 7 }); }
-      D.label(c, 'gas: ' + U.num(v.mu, 1) + ' kg every second, speed change ' + U.num(v.dv, 1) + ' m/s', vp.X(-2.6), vp.Y(-1.1), col.s2, { size: 12 });
+      D.label(c, 'gas: ' + U.num(v.mu, 1) + ' kg every second, speed change ' + U.num(v.dv, 1) + ' m/s', vp.X(-2.6), vp.Y(-1.1), col.s2, { size: 12, bg: real });
       D.arrow(c, vp.X(2.5), vp.Y(0), vp.X(4.6), vp.Y(0), col.applied, { width: 3, label: 'F on rocket' });
       D.arrow(c, vp.X(-1.6), vp.Y(0.9), vp.X(-3.6), vp.Y(0.9), col.applied, { width: 2, label: 'F on gas' });
       return;
@@ -129,12 +222,26 @@
       for (k2 = 0; k2 <= 60; k2++) xs.push(tr1.x(T * k2 / 60));
       var lo = Math.min.apply(null, xs), hi = Math.max.apply(null, xs), span = Math.max(hi - lo, 1e-3), wall = v.u * v.v < 0;
       vp.fit(lo - span * 0.35, hi + span * 0.35, -span * 0.25, span * 0.3); c = vp.begin();
-      D.ground(c, 0, vp.Y(0), vp.w, vp.Y(0));
-      var x = tr1.x(t), bw = 34, dir = v.u >= 0 ? 1 : -1;
-      if (wall) { c.fillStyle = col.surface; c.fillRect(vp.X(0) + (dir > 0 ? 0 : -14), vp.Y(span * 0.28), 14, vp.Y(0) - vp.Y(span * 0.28)); }
-      var cx = vp.X(x) - dir * bw / 2;
-      D.particle(c, cx, vp.Y(0) - 16, 15, { fill: col.s1, label: 'm' });
-      var vel = tr1.v(t);
+      var x = tr1.x(t), bw = 34, dir = v.u >= 0 ? 1 : -1, vel = tr1.v(t), y0s = vp.Y(0);
+      var isCar = real && !wall && v.m >= 200, cx = vp.X(x) - dir * (isCar ? 45 : bw / 2);
+      if (real) {
+        SC.sky(c, 0, 0, vp.w, y0s, { horizon: y0s });
+        SC.ground(c, 0, vp.w, y0s, { kind: isCar ? 'road' : 'floor', depth: Math.max(10, vp.h - y0s) });
+        if (wall) SC.wall(c, vp.X(0) + (dir > 0 ? 0 : -18), vp.Y(span * 0.28), 18, y0s - vp.Y(span * 0.28), { kind: 'brick' });
+        if (isCar) {
+          SC.car(c, cx, y0s, 90, 0, { kind: 'car', facing: dir, wheel: -vp.X(x) / 9 * dir });
+          if (t > tc && t < tc + v.dts && Math.abs(vel) > 1e-9) SC.dust(c, cx - dir * 32, y0s, ((t - tc) % 0.4) / 0.4);   // tyres scrubbing while braking
+        } else {
+          SC.shadow(c, cx, y0s, 13, 3);
+          SC.ball(c, cx, y0s - 16, 15, { kind: 'tennis', spin: -vp.X(x) / 15 });
+          D.label(c, 'm', cx, y0s - 16, '#1a1a1a', { bold: true, size: 12 });
+          if (wall) SC.impact(c, vp.X(0) - dir * 2, y0s - 16, 26, (t - tc) / Math.max(0.35, v.dts));
+        }
+      } else {
+        D.ground(c, 0, vp.Y(0), vp.w, vp.Y(0));
+        if (wall) { c.fillStyle = col.surface; c.fillRect(vp.X(0) + (dir > 0 ? 0 : -14), vp.Y(span * 0.28), 14, vp.Y(0) - vp.Y(span * 0.28)); }
+        D.particle(c, cx, vp.Y(0) - 16, 15, { fill: col.s1, label: 'm' });
+      }
       if (Math.abs(vel) > 1e-9) D.arrowPolar(c, cx, vp.Y(0) - 46, vel > 0 ? 0 : Math.PI, 20 + Math.min(70, Math.abs(vel) * 3), col.velocity, { label: 'v = ' + U.num(vel, 2) + ' m/s', width: 2 });
       var inC = t > tc && t < tc + v.dts;
       if (inC && Math.abs(res.F) > 0) {
@@ -143,6 +250,7 @@
       }
       return;
     }
+    if (chain) { drawMulti(); return; }
     // collision
     var X1 = [], X2 = [];
     for (var i = 0; i <= 80; i++) { var tt = T * i / 80; X1.push(tr1.x(tt)); X2.push(tr2.x(tt)); }
@@ -150,15 +258,24 @@
     // while a velocity arrow is dragged, the view and both bodies stay where they were when the drag began
     if (hold) { t = 0; vp.fit.apply(vp, hold.bounds); } else vp.fit(lo2 - sp * 0.3, hi2 + sp * 0.3, -sp * 0.2, sp * 0.3);
     c = vp.begin();
-    D.ground(c, 0, vp.Y(0), vp.w, vp.Y(0));
     var x1 = hold ? hold.x1 : tr1.x(t), x2 = hold ? hold.x2 : tr2.x(t);
     if (x1 > x2) { var mid = (x1 + x2) / 2; x1 = mid; x2 = mid; }
     var s1 = 20 + 14 * Math.cbrt(v.m1 / Math.max(v.m1, v.m2)), s2 = 20 + 14 * Math.cbrt(v.m2 / Math.max(v.m1, v.m2));
     var y0 = vp.Y(0);
-    c.fillStyle = col.s1; c.globalAlpha = 0.85; c.fillRect(vp.X(x1) - 2 * s1, y0 - 2 * s1, 2 * s1, 2 * s1);
-    c.fillStyle = col.s2; c.fillRect(vp.X(x2), y0 - 2 * s2, 2 * s2, 2 * s2); c.globalAlpha = 1;
-    D.label(c, '1: ' + U.num(v.m1, 2) + ' kg', vp.X(x1) - s1, y0 - s1, col.panel, { bold: true, size: 11 });
-    D.label(c, '2: ' + U.num(v.m2, 2) + ' kg', vp.X(x2) + s2, y0 - s2, col.panel, { bold: true, size: 11 });
+    if (real) {
+      track(c, y0);
+      trolley(c, vp.X(x1) - 2 * s1, y0, 2 * s1, 2 * s1, col.s1, -vp.X(x1) / 6, 1);
+      trolley(c, vp.X(x2), y0, 2 * s2, 2 * s2, col.s2, -vp.X(x2) / 6, -1);
+      if (!res.noCollision && !hold) SC.impact(c, vp.X(x1), y0 - Math.min(s1, s2) * 1.1, 26, (t - tc) / 0.35);
+      D.label(c, '1: ' + U.num(v.m1, 2) + ' kg', vp.X(x1) - s1, y0 - s1 * 1.15, col.ink, { bold: true, size: 11, bg: true });
+      D.label(c, '2: ' + U.num(v.m2, 2) + ' kg', vp.X(x2) + s2, y0 - s2 * 1.15, col.ink, { bold: true, size: 11, bg: true });
+    } else {
+      D.ground(c, 0, vp.Y(0), vp.w, vp.Y(0));
+      c.fillStyle = col.s1; c.globalAlpha = 0.85; c.fillRect(vp.X(x1) - 2 * s1, y0 - 2 * s1, 2 * s1, 2 * s1);
+      c.fillStyle = col.s2; c.fillRect(vp.X(x2), y0 - 2 * s2, 2 * s2, 2 * s2); c.globalAlpha = 1;
+      D.label(c, '1: ' + U.num(v.m1, 2) + ' kg', vp.X(x1) - s1, y0 - s1, col.panel, { bold: true, size: 11 });
+      D.label(c, '2: ' + U.num(v.m2, 2) + ' kg', vp.X(x2) + s2, y0 - s2, col.panel, { bold: true, size: 11 });
+    }
     var w1 = tr1.v(t), w2 = tr2.v(t);
     if (Math.abs(w1) > 1e-9) D.arrowPolar(c, vp.X(x1) - s1, y0 - 2 * s1 - 14, w1 > 0 ? 0 : Math.PI, arrowLen(w1), col.velocity, { label: U.num(w1, 2) + ' m/s', width: 2 });
     if (Math.abs(w2) > 1e-9) D.arrowPolar(c, vp.X(x2) + s2, y0 - 2 * s2 - 14, w2 > 0 ? 0 : Math.PI, arrowLen(w2), col.velocity, { label: U.num(w2, 2) + ' m/s', width: 2 });
@@ -177,11 +294,59 @@
     if (ix) ix.paint(c);
   }
 
+  /* ---------- three or four bodies: point bodies on a line, every collision elastic or sticking ---------- */
+  var geoM = [];
+  function txt(x) { return U.sf(x).replace(/<[^>]+>/g, ''); }
+  function drawMulti() {
+    var col = ui.colors(), v = prm.values, N = nBodies(), T = chain.T, t = hold ? 0 : clock.t, c, k;
+    var lo = Infinity, hi = -Infinity;
+    for (k = 1; k <= N; k++) { lo = Math.min(lo, v['x' + k]); hi = Math.max(hi, v['x' + k]); }
+    if (!chain.error) for (k = 0; k <= 60; k++) chain.stateAt(T * k / 60).forEach(function (b) { lo = Math.min(lo, b.x); hi = Math.max(hi, b.x); });
+    if (!(hi - lo > 1e-6)) { lo -= 1; hi += 1; }
+    var sp = hi - lo;
+    if (hold) vp.fit.apply(vp, hold.bounds); else vp.fit(lo - sp * 0.12, hi + sp * 0.12, -sp * 0.22, sp * 0.3);
+    c = vp.begin();
+    var real = SC.real();
+    if (real) SC.ground(c, 0, vp.w, vp.Y(0), { kind: 'floor', depth: Math.max(10, vp.h - vp.Y(0)) });
+    else D.ground(c, 0, vp.Y(0), vp.w, vp.Y(0));
+    D.label(c, 'smooth straight line — positive to the right →', 10, 14, col.muted, { align: 'left', size: 11 });
+    geoM = [];
+    if (chain.error) { D.label(c, chain.error, vp.w / 2, vp.h / 2, col.warn, { bold: true }); return; }
+    var st = chain.stateAt(t), mMax = 0, P = 0, K = 0, K0 = 0;
+    for (k = 1; k <= N; k++) { mMax = Math.max(mMax, v['m' + k]); K0 += 0.5 * v['m' + k] * v['u' + k] * v['u' + k]; }
+    st.forEach(function (b) {
+      var r = 10 + 14 * Math.cbrt(b.m / (mMax * 2 || 1)), x = vp.X(b.x), y = vp.Y(0) - r;
+      if (real) { SC.shadow(c, x, vp.Y(0), r * 0.85, 3); SC.ball(c, x, y, r, { color: col['s' + (b.ids[0] + 1)], spin: -x / r }); }
+      else D.particle(c, x, y, r, { fill: col['s' + (b.ids[0] + 1)] });
+      D.label(c, b.name, x, y, '#fff', { bold: true, size: 12 });
+      D.label(c, U.num(b.m, 2) + ' kg', x, vp.Y(0) + 14, real ? col.ink : col.muted, { size: 11, bg: real });
+      if (Math.abs(b.v) > 1e-9) D.arrow(c, x, y - r - 12, x + (b.v > 0 ? 1 : -1) * arrowLen(b.v), y - r - 12, col.velocity, { label: U.num(b.v, 2) + ' m/s', width: 2 });
+      geoM.push({ ids: b.ids, x: x, y: y, r: r, ay: y - r - 12, v: b.v });
+      P += b.m * b.v; K += 0.5 * b.m * b.v * b.v;
+    });
+    if (real && !hold) chain.events.forEach(function (e) { SC.impact(c, vp.X(e.x), vp.Y(0) - 16, 22, (t - e.t) / 0.35); });
+    delSpots().forEach(function (d) {
+      c.save(); c.fillStyle = col.panel; c.strokeStyle = col.muted; c.lineWidth = 1.4;
+      c.beginPath(); c.arc(d.x, d.y, 8, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.beginPath(); c.moveTo(d.x - 3.5, d.y - 3.5); c.lineTo(d.x + 3.5, d.y + 3.5); c.moveTo(d.x + 3.5, d.y - 3.5); c.lineTo(d.x - 3.5, d.y + 3.5); c.stroke(); c.restore();
+    });
+    D.label(c, 'total p = ' + txt(P) + ' N s (constant) · total KE = ' + txt(K) + ' J (start ' + txt(K0) + ' J)', vp.w - 10, vp.h - 12, col.muted, { align: 'right', size: 11 });
+    var ev = chain.events.filter(function (e) { return e.t <= t + 1e-9; });
+    if (ev.length) D.label(c, 'last collision: #' + ev[ev.length - 1].n + ' at t = ' + txt(ev[ev.length - 1].t) + ' s', 10, vp.h - 12, col.muted, { align: 'left', size: 11 });
+    if (ix) ix.paint(c);
+  }
+  function chainEarly() { return !!hold || !chain || !chain.events.length || clock.t < chain.events[0].t - 1e-9; }
+  /* small × beside each body while more than 2 remain (before the first collision) */
+  function delSpots() {
+    if (!chain || chain.error || hold || nBodies() <= 2 || !chainEarly()) return [];
+    return geoM.filter(function (b) { return b.ids.length === 1; }).map(function (b) { return { id: 'del' + (b.ids[0] + 1), idx: b.ids[0], x: b.x + b.r + 10, y: b.y - b.r * 0.3, r: 11, hidden: true }; });
+  }
+
   /** stacked KE bars (KE of each body at this instant) with the initial total dashed */
   function keBars(c, col, t) {
     var v = prm.values, w1 = tr1.v(t), w2 = tr2.v(t), k1 = 0.5 * v.m1 * w1 * w1, k2 = 0.5 * v.m2 * w2 * w2;
     var k0 = res.KE0, kEnd = res.noCollision ? k0 : res.KE1, mx = Math.max(k0, kEnd, k1 + k2, 1e-12);
-    var bx = vp.w - 70, top = 34, base = Math.min(vp.h - 30, 150), bw = 26, h1 = (base - top) * k1 / mx, h2 = (base - top) * k2 / mx;
+    var bx = vp.w - 70, top = Math.min(84, vp.h * 0.3), base = Math.max(top + 30, Math.min(vp.h - 30, 190)), bw = 26, h1 = (base - top) * k1 / mx, h2 = (base - top) * k2 / mx;
     c.save(); c.globalAlpha = 0.85;
     c.fillStyle = col.s1; c.fillRect(bx, base - h1, bw, h1); c.fillStyle = col.s2; c.fillRect(bx, base - h1 - h2, bw, h2); c.restore();
     var y0 = base - (base - top) * k0 / mx;
@@ -209,6 +374,15 @@
         cursor: t, hlines: [{ y: res.F, label: 'average F = ' + U.sf(res.F).replace(/<[^>]+>/g, '') + ' N' }], xLabel: 't / s', title: 'area = Δp = ' + U.sf(res.dp).replace(/<[^>]+>/g, '') + ' N s' });
       return;
     }
+    if (chain) {
+      if (chain.error) return;
+      var ser = [];
+      for (var bi = 0; bi < nBodies(); bi++) (function (i) {
+        ser.push({ fn: function (tt) { var b = chain.stateAt(tt).filter(function (q) { return q.ids.indexOf(i) >= 0; })[0]; return b ? b.v : 0; }, color: col['s' + (i + 1)], steps: 800 });
+      })(bi);
+      pV.draw({ x: [0, T], series: ser, cursor: t, vlines: chain.events.filter(function (e) { return e.t <= T; }).map(function (e) { return { x: e.t, label: '#' + e.n }; }) });
+      return;
+    }
     pV.draw({ x: [0, T], series: [{ fn: tr1.v, color: col.s1, steps: 800 }, { fn: tr2.v, color: col.s2, steps: 800 }], cursor: t });
     if (res.noCollision) { pF.draw({ x: [0, T], series: [{ fn: function () { return 0; }, color: col.applied }], title: 'no collision' }); return; }
     var b0 = tc - 0.5 * v.dt, b1 = tc + 1.5 * v.dt, Fav = res.dp2 / v.dt;
@@ -226,58 +400,92 @@
     R.clear();
     if (md === 'stream') {
       R.badge('Force = rate of change of momentum', 'info');
-      R.eq('Δp each second', '(Δm/Δt) × Δv = ' + U.num(v.mu, 1) + ' × ' + U.num(v.dv, 1), res.F, 'N s per s');
-      R.eq('F', 'Δp ÷ Δt', res.F, 'N');
+      R.eq('Δp each second', '(Δm/Δt) × Δv = ' + U.num(v.mu, 1) + ' × ' + U.num(v.dv, 1), res.F, 'N s per s', 'Every second a mass Δm/Δt of gas has its velocity changed by Δv, so its momentum changes by (Δm/Δt) × Δv each second.');
+      R.eq('F', 'Δp ÷ Δt', res.F, 'N', 'Newton’s second law: force = rate of change of momentum. This is the force on the gas; the gas pushes back on the rocket with an equal and opposite force (third law).');
       R.badge('Newton’s third law: the gas pushes the rocket with ' + U.sf(res.F) + ' N in the opposite direction', 'ok');
       R.render(); return;
     }
+    if (chain) { readoutMulti(); return; }
     R.badge('Sign convention: velocities and forces to the right are positive', 'info');
     if (md === 'single') {
       R.head('Change in momentum');
-      R.eq('Δp', 'm(v − u) = ' + U.num(v.m, 4) + ' × (' + P(v.v) + ' − ' + P(v.u) + ')', res.dp, 'N s');
-      R.eq('F', 'Δp ÷ Δt = ' + U.sf(res.dp) + ' ÷ ' + U.num(v.dts, 4), res.F, 'N');
-      R.eq('a', 'F ÷ m = (v − u) ÷ Δt', res.F / v.m, 'm s<sup>−2</sup>');
-      if (shape.get() === 'tri') R.eq('peak force', '2 × average (triangular force–time graph, same area)', 2 * res.F, 'N');
+      R.eq('Δp', 'm(v − u) = ' + U.num(v.m, 4) + ' × (' + P(v.v) + ' − ' + P(v.u) + ')', res.dp, 'N s', 'Change in momentum = final momentum − initial momentum. Keep the signs: a rebound reverses the velocity.');
+      R.eq('F', 'Δp ÷ Δt = ' + U.sf(res.dp) + ' ÷ ' + U.num(v.dts, 4), res.F, 'N', 'Average resultant force = rate of change of momentum, Δp ÷ Δt.');
+      R.eq('a', 'F ÷ m = (v − u) ÷ Δt', res.F / v.m, 'm s<sup>−2</sup>', 'F = ma, so the average acceleration is F ÷ m, the same as the change in velocity ÷ time.');
+      if (shape.get() === 'tri') R.eq('peak force', '2 × average (triangular force–time graph, same area)', 2 * res.F, 'N', 'The area under the force–time graph is Δp. A triangle of the same area and base must be twice as tall as the rectangle.');
       if (v.u * v.v < 0) R.badge('Rebound: the body pushes the wall with ' + U.sf(Math.abs(res.F)) + ' N towards the wall (third-law pair)', 'ok');
-      R.eq('KE change', '½m(v² − u²)', 0.5 * v.m * (v.v * v.v - v.u * v.u), 'J');
+      R.eq('KE change', '½m(v² − u²)', 0.5 * v.m * (v.v * v.v - v.u * v.u), 'J', 'Kinetic energy is ½mv². Momentum can change while KE stays the same (e.g. an elastic rebound with equal speeds).');
       R.render(); return;
     }
-    if (res.noCollision) { R.badge('No collision: body 1 must move faster to the right than body 2 (u₁ > u₂)', 'warn'); R.eq('total momentum', 'm₁u₁ + m₂u₂', res.p0, 'N s'); R.render(); return; }
+    if (res.noCollision) { R.badge('No collision: body 1 must move faster to the right than body 2 (u₁ > u₂)', 'warn'); R.eq('total momentum', 'm₁u₁ + m₂u₂', res.p0, 'N s', 'Total momentum is still m₁u₁ + m₂u₂ (with signs); nothing changes it because the bodies never touch.'); R.render(); return; }
     R.head('Conservation of momentum');
-    R.eq('p before', 'm₁u₁ + m₂u₂ = ' + U.num(v.m1, 4) + ' × ' + P(v.u1) + ' + ' + U.num(v.m2, 4) + ' × ' + P(v.u2), res.p0, 'N s');
+    R.eq('p before', 'm₁u₁ + m₂u₂ = ' + U.num(v.m1, 4) + ' × ' + P(v.u1) + ' + ' + U.num(v.m2, 4) + ' × ' + P(v.u2), res.p0, 'N s', 'Momentum = mass × velocity. Add both, keeping the sign of each velocity (right is +).');
     var oc = outc.get();
     if (oc === 'elastic') {
       R.head('Elastic: also v₂ − v₁ = u₁ − u₂ (approach = separation)');
-      R.eq('v₁', '((m₁ − m₂)u₁ + 2m₂u₂) ÷ (m₁ + m₂)', res.v1, ms);
-      R.eq('v₂', '((m₂ − m₁)u₂ + 2m₁u₁) ÷ (m₁ + m₂)', res.v2, ms);
+      R.eq('v₁', '((m₁ − m₂)u₁ + 2m₂u₂) ÷ (m₁ + m₂)', res.v1, ms, 'Solving momentum conservation together with approach speed = separation speed gives this result for body 1.');
+      R.eq('v₂', '((m₂ − m₁)u₂ + 2m₁u₁) ÷ (m₁ + m₂)', res.v2, ms, 'The same two equations give body 2’s velocity; check that v₂ − v₁ equals u₁ − u₂.');
     } else if (oc === 'stick') {
-      R.eq('v', 'p ÷ (m₁ + m₂) = ' + U.sf(res.p0) + ' ÷ ' + U.num(v.m1 + v.m2, 4), res.v1, ms);
+      R.eq('v', 'p ÷ (m₁ + m₂) = ' + U.sf(res.p0) + ' ÷ ' + U.num(v.m1 + v.m2, 4), res.v1, ms, 'They move off together with one common velocity: total momentum ÷ total mass.');
     } else {
-      R.eq('v₂', '(p − m₁v₁) ÷ m₂ = (' + U.sf(res.p0) + ' − ' + U.num(v.m1, 4) + ' × ' + P(v.v1) + ') ÷ ' + U.num(v.m2, 4), res.v2, ms);
+      R.eq('v₂', '(p − m₁v₁) ÷ m₂ = (' + U.sf(res.p0) + ' − ' + U.num(v.m1, 4) + ' × ' + P(v.v1) + ') ÷ ' + U.num(v.m2, 4), res.v2, ms, 'Total momentum is conserved, so body 2 takes whatever momentum body 1 does not keep: (p − m₁v₁) ÷ m₂.');
     }
-    R.eq('p after', 'm₁v₁ + m₂v₂', res.p1, 'N s');
+    R.eq('p after', 'm₁v₁ + m₂v₂', res.p1, 'N s', 'Check: with no external force the total momentum after must equal the total momentum before.');
     R.head('Relative speeds');
-    R.eq('approach', 'u₁ − u₂ = ' + P(v.u1) + ' − ' + P(v.u2), res.approach, ms);
-    R.eq('separation', 'v₂ − v₁ = ' + P(res.v2) + ' − ' + P(res.v1), res.separation, ms);
+    R.eq('approach', 'u₁ − u₂ = ' + P(v.u1) + ' − ' + P(v.u2), res.approach, ms, 'Relative speed of approach: how fast the gap closes before the collision.');
+    R.eq('separation', 'v₂ − v₁ = ' + P(res.v2) + ' − ' + P(res.v1), res.separation, ms, 'Relative speed of separation: how fast the gap opens afterwards. Equal to the approach speed only for an elastic collision.');
     R.head('Kinetic energy');
-    R.eq('KE before', '½m₁u₁² + ½m₂u₂²', res.KE0, 'J');
-    R.eq('KE after', '½m₁v₁² + ½m₂v₂²', res.KE1, 'J');
-    R.eq('ΔKE', 'after − before', res.dKE, 'J');
+    R.eq('KE before', '½m₁u₁² + ½m₂u₂²', res.KE0, 'J', 'KE = ½mv² for each body. KE is a scalar, so add the values with no signs.');
+    R.eq('KE after', '½m₁v₁² + ½m₂v₂²', res.KE1, 'J', 'Same formula with the velocities after the collision.');
+    R.eq('ΔKE', 'after − before', res.dKE, 'J', 'Zero for an elastic collision. Negative means KE was transferred to heat, sound and deformation (inelastic).');
     if (res.flag === 'pass') R.badge('Impossible: v₁ > v₂ means body 1 passes through body 2', 'warn');
     else if (res.flag === 'gain') R.badge('KE increases: only possible if stored energy is released (spring, explosive)', 'warn');
     else R.badge('This collision is ' + res.kind, res.kind === 'elastic' ? 'ok' : 'info');
     R.head('Forces during contact (Newton’s third law)');
-    R.eq('Δp₁', 'm₁(v₁ − u₁)', res.dp1, 'N s'); R.eq('Δp₂', 'm₂(v₂ − u₂)', res.dp2, 'N s');
-    R.eq('F on 2 by 1', 'Δp₂ ÷ Δt = ' + U.sf(res.dp2) + ' ÷ ' + U.num(v.dt, 4), res.dp2 / v.dt, 'N');
-    R.eq('F on 1 by 2', 'Δp₁ ÷ Δt', res.dp1 / v.dt, 'N');
-    R.eq('a₂', 'F ÷ m₂ (average)', res.dp2 / v.dt / v.m2, 'm s<sup>−2</sup>');
-    R.eq('a₁', 'F ÷ m₁ (average)', res.dp1 / v.dt / v.m1, 'm s<sup>−2</sup>');
-    if (shape.get() === 'tri') R.eq('peak force', '2 × average', 2 * Math.abs(res.dp2 / v.dt), 'N');
+    R.eq('Δp₁', 'm₁(v₁ − u₁)', res.dp1, 'N s', 'Change in momentum of body 1 = m₁(v₁ − u₁). It is equal and opposite to Δp₂.'); R.eq('Δp₂', 'm₂(v₂ − u₂)', res.dp2, 'N s', 'Change in momentum of body 2. Δp₁ + Δp₂ = 0, so total momentum is conserved.');
+    R.eq('F on 2 by 1', 'Δp₂ ÷ Δt = ' + U.sf(res.dp2) + ' ÷ ' + U.num(v.dt, 4), res.dp2 / v.dt, 'N', 'Average force = rate of change of momentum of body 2 during the contact time Δt.');
+    R.eq('F on 1 by 2', 'Δp₁ ÷ Δt', res.dp1 / v.dt, 'N', 'Newton’s third law: body 2 pushes body 1 with a force equal in size and opposite in direction, for the same time.');
+    R.eq('a₂', 'F ÷ m₂ (average)', res.dp2 / v.dt / v.m2, 'm s<sup>−2</sup>', 'F = ma for body 2 alone: average acceleration = force on it ÷ its mass.');
+    R.eq('a₁', 'F ÷ m₁ (average)', res.dp1 / v.dt / v.m1, 'm s<sup>−2</sup>', 'F = ma for body 1: the same size of force on a different mass gives a different acceleration.');
+    if (shape.get() === 'tri') R.eq('peak force', '2 × average', 2 * Math.abs(res.dp2 / v.dt), 'N', 'The force–time graph must have the same area (Δp); a triangle on the same base is twice as tall as the average.');
+    R.render();
+  }
+
+  function sub(name) { return '<sub>' + name + '</sub>'; }
+  function bodyName(name) { return name.indexOf('+') >= 0 ? 'bodies ' + name + ' (stuck together)' : 'body ' + name; }
+  function readoutMulti() {
+    var v = prm.values, N = nBodies(), ms = 'm s<sup>−1</sup>', stick = chainMode() === 'stick', k, p0 = 0, terms = [];
+    R.badge('Sign convention: velocities to the right are positive. Each collision is between two neighbours, one at a time.', 'info');
+    if (outc.get() === 'given') R.badge('“Final velocity of body 1 is given” describes two bodies only, so with ' + N + ' bodies every collision here is treated as elastic.', 'warn');
+    if (chain.error) { R.badge(chain.error, 'warn'); R.render(); return; }
+    for (k = 1; k <= N; k++) { p0 += v['m' + k] * v['u' + k]; terms.push(U.num(v['m' + k], 4) + ' × ' + P(v['u' + k])); }
+    R.eq('total p', 'Σmu = ' + terms.join(' + '), p0, 'N s', 'Momentum = mass × velocity for each body, added with signs (right +). This total stays the same through every collision.');
+    R.html('<div class="eq" style="font-size:12.5px;color:var(--muted)">Collision type: ' + (stick ? 'bodies stick together (V = total p ÷ total m)' : 'elastic (KE conserved; speed of approach = speed of separation)') + '. Change it under Parameters → Collision type.</div>');
+    chain.events.forEach(function (e) {
+      var r = e.res, a = e.names[0], b = e.names[1], mL = e.m[0], mR = e.m[1], uL = e.u[0], uR = e.u[1];
+      var nL = U.num(mL, 4), nR = U.num(mR, 4);
+      R.head('Collision ' + e.n + ': ' + bodyName(a) + ' and ' + bodyName(b) + ' at t = ' + U.sf(e.t) + ' s, x = ' + U.sf(e.x) + ' m');
+      R.eq('p before', 'm' + sub(a) + 'u' + sub(a) + ' + m' + sub(b) + 'u' + sub(b) + ' = ' + nL + ' × ' + P(uL) + ' + ' + nR + ' × ' + P(uR), r.p0, 'N s', 'Only these two bodies take part in this collision, so add just their momenta (with signs).');
+      if (stick) {
+        R.eq('v', 'p ÷ (m' + sub(a) + ' + m' + sub(b) + ') = ' + U.sf(r.p0) + ' ÷ ' + U.num(mL + mR, 4), r.v1, ms, 'They stick together, so they share one velocity: momentum ÷ combined mass.');
+        R.eq('p after', '(' + nL + ' + ' + nR + ') × ' + P(r.v1), r.p1, 'N s ✓', 'Check: the combined body carries the same momentum as the two bodies had before.');
+      } else {
+        R.eq('v' + sub(a), '((m' + sub(a) + ' − m' + sub(b) + ')u' + sub(a) + ' + 2m' + sub(b) + 'u' + sub(b) + ') ÷ (m' + sub(a) + ' + m' + sub(b) + ') = ((' + nL + ' − ' + nR + ') × ' + P(uL) + ' + 2 × ' + nR + ' × ' + P(uR) + ') ÷ ' + U.num(mL + mR, 4), r.v1, ms, 'Elastic collision: momentum conserved and approach speed = separation speed. Solving both gives this velocity.');
+        R.eq('v' + sub(b), '((m' + sub(b) + ' − m' + sub(a) + ')u' + sub(b) + ' + 2m' + sub(a) + 'u' + sub(a) + ') ÷ (m' + sub(a) + ' + m' + sub(b) + ') = ((' + nR + ' − ' + nL + ') × ' + P(uR) + ' + 2 × ' + nL + ' × ' + P(uL) + ') ÷ ' + U.num(mL + mR, 4), r.v2, ms, 'The same two equations give the other body’s velocity.');
+        R.eq('p after', nL + ' × ' + P(r.v1) + ' + ' + nR + ' × ' + P(r.v2), r.p1, 'N s ✓', 'Check: total momentum of the pair after equals the total before.');
+        R.eq('separation', 'v' + sub(b) + ' − v' + sub(a) + ' (approach u' + sub(a) + ' − u' + sub(b) + ' was ' + U.sf(r.approach) + ': the same)', r.separation, ms, 'For an elastic collision the relative speed of separation equals the relative speed of approach.');
+      }
+      R.eq('KE before', '½ × ' + nL + ' × ' + P(uL) + '² + ½ × ' + nR + ' × ' + P(uR) + '²', r.KE0, 'J', 'KE = ½mv² for each of the two bodies, added as scalars.');
+      R.eq('KE after', stick ? '½ × ' + U.num(mL + mR, 4) + ' × ' + P(r.v1) + '²' : '½ × ' + nL + ' × ' + P(r.v1) + '² + ½ × ' + nR + ' × ' + P(r.v2) + '²', r.KE1, 'J', 'Same formula with the velocities after this collision.');
+      R.eq('KE lost', 'KE before − KE after', -r.dKE, 'J', 'KE before − KE after: zero if elastic, positive if KE became heat, sound and deformation.');
+    });
+    if (!chain.events.length) R.badge('No collision: no body is catching the one to its right (check the directions — they must approach).', 'info');
+    else R.badge('No further collisions: every body is moving away from its neighbours. Total momentum is still ' + U.sf(p0) + ' N s.', 'ok');
     R.render();
   }
 
   /* ---------- direct manipulation (collisions): tap a body to type its mass; drag its velocity arrow tip left/right ---------- */
-  var geo = null, hold = null, ix = null, APX = 3;   // arrow: 16 px + APX px per m s⁻¹
+  var geo = null, hold = null, ix = null, addBtn = null, APX = 3;   // arrow: 16 px + APX px per m s⁻¹
   function arrowLen(w) { return 16 + Math.min(20, Math.abs(w)) * APX; }
   function tipOf(a) { return Math.abs(a.w) > 1e-9 ? a.x + (a.w > 0 ? 1 : -1) * arrowLen(a.w) : a.x; }
   function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
@@ -293,7 +501,19 @@
   }
   ix = SIM.view.interact(cv, {
     handles: function () {
-      if (!res || !geo || mode.get() !== 'collide') return [];
+      if (!res || mode.get() !== 'collide') return [];
+      if (chain) {
+        var cm = ui.colors(), hs = delSpots(), early = chainEarly();
+        if (chain.error) return [];
+        geoM.forEach(function (b) {
+          if (b.ids.length !== 1) return;   // bodies stuck together are not inputs
+          var j = b.ids[0] + 1;
+          if (early) hs.push({ id: 'u' + j, j: j, x: Math.abs(b.v) > 1e-9 ? b.x + (b.v > 0 ? 1 : -1) * arrowLen(b.v) : b.x, y: b.ay, bx: b.x, color: cm.velocity });
+          hs.push({ id: 'm' + j, j: j, x: b.x, y: b.y, r: Math.max(12, b.r), color: cm['s' + j] });
+        });
+        return hs;
+      }
+      if (!geo) return [];
       var col = ui.colors(), out = [];
       if (hold || geo.t <= tc) {   // before contact the arrows show the initial velocities u₁, u₂ (the inputs)
         out.push({ id: 'u1', j: 1, x: tipOf(geo.a1), y: geo.a1.y, color: col.velocity });
@@ -305,16 +525,59 @@
     },
     onDrag: function (hd, x) {
       if (hd.id[0] !== 'u') return;
-      if (!hold) hold = { bounds: vp.bounds.slice(), x1: geo.x1, x2: geo.x2, base: (hd.j === 1 ? geo.a1 : geo.a2).x };
+      if (!hold) hold = chain ? { bounds: vp.bounds.slice(), base: hd.bx } : { bounds: vp.bounds.slice(), x1: geo.x1, x2: geo.x2, base: (hd.j === 1 ? geo.a1 : geo.a2).x };
       var dx = x - hold.base, sp = Math.max(0, Math.abs(dx) - 16) / APX, o = {};
       o[hd.id] = U.clamp((dx < 0 ? -1 : 1) * Math.round(sp * 2) / 2, -20, 20);
       clock.pause(); prm.set(o); touched(); clock.seek(0);
     },
     onDrop: function () { if (hold) { hold = null; clock.seek(0); } },
-    onTap: function (hd, x, y) { if (hd.id[0] === 'm') askMass(hd.j, x, y); else askVel(hd.j, x, y); },
+    onTap: function (hd, x, y) { if (hd.id.indexOf('del') === 0) { removeBall(hd.idx); return; } if (hd.id[0] === 'm') askMass(hd.j, x, y); else askVel(hd.j, x, y); },
     onHover: function () { drawScene(); }
   });
-  ui.stageTip('Collisions: drag a velocity arrow tip left/right to set u (right +) · tap it to type u · tap a body to type its mass');
+  /* ---------- build it yourself: + Add a ball → tap the track → type mass → type velocity → replay ---------- */
+  function removeBall(idx) {
+    var N = nBodies(), v = prm.values, o = {}, b;
+    if (N <= 2 || idx >= N) return;
+    for (b = idx + 1; b < N; b++) ['m', 'u', 'x'].forEach(function (p) { o[p + b] = v[p + (b + 1)]; });
+    var get = function (k) { return k in o ? o[k] : v[k]; };
+    if (N - 1 === 2 && get('x1') > get('x2')) {   // two bodies: body 1 is the one on the left
+      var sw = {}; ['m', 'u', 'x'].forEach(function (p) { sw[p + '1'] = get(p + '2'); sw[p + '2'] = get(p + '1'); }); Object.assign(o, sw);
+    }
+    clock.pause(); nb.set(String(N - 1), true); prm.set(o); clock.seek(0); touched();
+  }
+  function startAdd() {
+    var N = nBodies(); if (mode.get() !== 'collide' || N >= MAXN) return;
+    clock.pause(); clock.seek(0);
+    ui.placeMode({ prompt: 'Tap the track to place ball ' + (N + 1) + ' (Esc to cancel)', onPlace: function (x) { placeBall(N + 1, x); } });
+  }
+  function r2(x) { return Math.round(x * 100) / 100; }
+  function placeBall(j, sx) {
+    var v = prm.values, w = vp.toWorld(sx, 0)[0], gap = 24 / (vp.scale || 1), o = {}, xs = [], k;
+    if (j === 3) {   // the two-body picture has no positions: take them from where the bodies are at t = 0
+      var a = -v.u1 * tc, b = -v.u2 * tc;
+      if (b - a < gap) b = a + Math.max(gap * 2, 1);
+      o.x1 = r2(a); o.x2 = r2(b);
+    }
+    for (k = 1; k < j; k++) xs.push(('x' + k) in o ? o['x' + k] : v['x' + k]);
+    w = U.clamp(r2(w), -50, 50);
+    for (var tries = 0; tries < 40 && xs.some(function (x) { return Math.abs(x - w) < gap; }); tries++) w = U.clamp(r2(w + gap), -50, 50);
+    o['x' + j] = w; o['u' + j] = 0; if (!(v['m' + j] > 0)) o['m' + j] = 1;
+    clock.pause(); nb.set(String(j), true); prm.set(o); clock.seek(0);
+    var at = function () { return { x: vp.X(prm.values['x' + j]), y: vp.Y(0) - 22 }; }, stage2 = false;
+    ui.askNumber({ title: 'Mass of ball ' + j, sub: 'Step 1 of 2: type the mass of the new ball (kg).', value: prm.values['m' + j], min: 0.01, max: 200, step: 0.1, decimals: 2, unit: 'kg', at: at(),
+      quick: [0.5, 1, 2, 5], doneLabel: 'Next: velocity →',
+      onInput: function (val) { var q = {}; q['m' + j] = U.clamp(val, 0.01, 200); prm.set(q); clock.seek(0); },
+      onDone: function () { stage2 = true; askV(); },
+      onClose: function () { setTimeout(function () { if (!stage2) touched(); }, 0); } });
+    function askV() {
+      ui.askNumber({ title: 'Velocity of ball ' + j, sub: 'Step 2 of 2: right is +, so a ball moving left has a negative velocity.', value: prm.values['u' + j], min: -20, max: 20, step: 0.5, decimals: 2, unit: 'm s⁻¹', at: at(),
+        quick: [-4, -2, 0, 2, 4], doneLabel: 'Done: collide!',
+        onInput: function (val) { var q = {}; q['u' + j] = U.clamp(val, -20, 20); prm.set(q); clock.seek(0); },
+        onClose: function () { setTimeout(touched, 0); } });
+    }
+  }
+  addBtn = ui.stageAction({ label: 'Add ball 3', icon: '+', onClick: startAdd });
+  ui.stageTip('Press + to add a ball, tap the track to place it, then type its mass and velocity · drag an arrow tip to change u (right +) · tap a body for its mass');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;
