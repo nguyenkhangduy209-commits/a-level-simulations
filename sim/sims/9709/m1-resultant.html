@@ -59,6 +59,11 @@
   var compsAll = ui.toggle(paramCard, { label: 'Dashed components of every force (resultant always shown)' }, update);
   var angleMode = ui.select(paramCard, { label: 'Angle arcs', value: 'exam', options: [
     { value: 'exam', label: 'from the nearest x-direction (exam style)' }, { value: 'std', label: 'anticlockwise from +x (0–360°)' }] }, update);
+  var realSceneSel = ui.select(paramCard, { label: 'Real-life scenario', value: 'harbour', options: [
+    { value: 'harbour', label: 'Harbour tugboats & cargo barge' },
+    { value: 'space', label: 'Spacecraft & thruster drones' },
+    { value: 'crane', label: 'Heavy-lift winches & steel ring' },
+    { value: 'tug', label: 'Lawn tug-of-war (people & ring)' }] }, function () { drawScene(); });
 
   var top = ui.params(paramCard, [{ key: 'n', label: 'Number of forces', sym: 'n', unit: '', min: 2, max: NMAX, step: 1, value: 3 }], update);
   var defaults = [[10, 0], [20, 90], [15, 210], [12, 300], [8, 135]];
@@ -281,8 +286,104 @@
     D.label(c, real ? 'seen from above · angles anticlockwise from +x' : 'angles anticlockwise from +x', 8, vp.h - 10, real ? col.ink : col.muted, { align: 'left', size: 11, bg: real });
   }
 
-  /* ---------- real-life look (soft pastel, seen from above): a ring on a lawn, pulled by ropes held by people ---------- */
+  /* ---------- real-life scenarios (seen from above): Harbour tugboats, Space drones, Heavy-lift winches, or Lawn tug-of-war ---------- */
   var SC = SIM.scene;
+  function harbourWater(c) {
+    var dk = SC.dark(), w = vp.w, h = vp.h, i;
+    c.save();
+    var g = c.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, dk ? '#09223a' : '#7ec8e3'); g.addColorStop(0.5, dk ? '#0d3152' : '#56b4d3'); g.addColorStop(1, dk ? '#081e34' : '#3a96c4');
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+    // subtle water ripples
+    c.strokeStyle = dk ? 'rgba(160,220,255,0.08)' : 'rgba(255,255,255,0.22)'; c.lineWidth = 1.4;
+    var s = 13;
+    for (i = 0; i < Math.round(w * h / 7500); i++) {
+      s = (s * 1664525 + 1013904223) >>> 0; var rx = (s / 4294967296) * w;
+      s = (s * 1664525 + 1013904223) >>> 0; var ry = (s / 4294967296) * h;
+      c.beginPath(); c.moveTo(rx - 14, ry); c.quadraticCurveTo(rx, ry - 4, rx + 14, ry); c.stroke();
+    }
+    c.restore();
+  }
+  function tugboat(c, x, y, ux, uy, s, hullCol) {
+    var ang = Math.atan2(uy, ux);
+    c.save(); c.translate(x, y); c.rotate(ang);
+    // V-shaped water wake behind the tugboat
+    c.strokeStyle = 'rgba(255,255,255,0.35)'; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(s * 0.6, -s * 0.35); c.lineTo(s * 1.9, -s * 0.9);
+    c.moveTo(s * 0.6, s * 0.35); c.lineTo(s * 1.9, s * 0.9); c.stroke();
+    // hull
+    c.fillStyle = hullCol; c.strokeStyle = 'rgba(15,25,45,0.45)'; c.lineWidth = 1.4;
+    c.beginPath(); c.moveTo(s * 0.95, 0); c.quadraticCurveTo(s * 0.65, -s * 0.55, -s * 0.7, -s * 0.45);
+    c.lineTo(-s * 0.95, 0); c.lineTo(-s * 0.7, s * 0.45); c.quadraticCurveTo(s * 0.65, s * 0.55, s * 0.95, 0); c.closePath();
+    c.fill(); c.stroke();
+    // white wheelhouse cabin
+    c.fillStyle = '#f8fafc'; c.beginPath();
+    if (c.roundRect) c.roundRect(-s * 0.3, -s * 0.25, s * 0.62, s * 0.5, 3); else c.rect(-s * 0.3, -s * 0.25, s * 0.62, s * 0.5);
+    c.fill(); c.stroke();
+    c.restore();
+  }
+  function cargoBarge(c, ox, oy, ang) {
+    c.save(); c.translate(ox, oy); c.rotate(ang);
+    // water ring around barge
+    c.strokeStyle = 'rgba(255,255,255,0.28)'; c.lineWidth = 1.6;
+    c.beginPath(); if (c.ellipse) c.ellipse(0, 0, 26, 15, 0, 0, 2 * Math.PI); c.stroke();
+    // barge hull
+    c.fillStyle = SC.dark() ? '#334155' : '#475569'; c.strokeStyle = '#e2e8f0'; c.lineWidth = 1.5;
+    c.beginPath(); if (c.roundRect) c.roundRect(-20, -10, 40, 20, 6); else c.rect(-20, -10, 40, 20);
+    c.fill(); c.stroke();
+    // deck containers
+    c.fillStyle = '#f59e0b'; c.fillRect(-13, -6, 10, 12);
+    c.fillStyle = '#38bdf8'; c.fillRect(-1, -6, 10, 12);
+    c.fillStyle = '#f8fafc'; c.fillRect(11, -5, 5, 10);
+    c.restore();
+  }
+  function spaceBg(c) {
+    var w = vp.w, h = vp.h, s = 29;
+    c.save();
+    var g = c.createRadialGradient ? c.createRadialGradient(w * 0.5, h * 0.5, 20, w * 0.5, h * 0.5, Math.max(w, h) * 0.7) : null;
+    if (g) { g.addColorStop(0, '#1b1d3a'); g.addColorStop(0.6, '#0f1226'); g.addColorStop(1, '#080a16'); c.fillStyle = g; }
+    else c.fillStyle = '#0f1226';
+    c.fillRect(0, 0, w, h);
+    for (var i = 0; i < Math.round(w * h / 4200); i++) {
+      s = (s * 1664525 + 1013904223) >>> 0; var sx = (s / 4294967296) * w;
+      s = (s * 1664525 + 1013904223) >>> 0; var sy = (s / 4294967296) * h;
+      s = (s * 1664525 + 1013904223) >>> 0; var r = 0.7 + (s / 4294967296) * 1.4;
+      c.fillStyle = i % 7 === 0 ? '#bae6fd' : '#ffffff'; c.globalAlpha = 0.35 + (i % 5) * 0.13;
+      c.beginPath(); c.arc(sx, sy, r, 0, 2 * Math.PI); c.fill();
+    }
+    c.restore();
+  }
+  function spaceDrone(c, x, y, ux, uy, s, glowCol) {
+    var ang = Math.atan2(uy, ux);
+    c.save(); c.translate(x, y); c.rotate(ang);
+    // glowing thruster plume
+    var pg = c.createLinearGradient(s * 0.4, 0, s * 1.9, 0);
+    pg.addColorStop(0, glowCol); pg.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = pg; c.beginPath(); c.moveTo(s * 0.4, -s * 0.25); c.lineTo(s * 1.9, 0); c.lineTo(s * 0.4, s * 0.25); c.closePath(); c.fill();
+    // drone body
+    c.fillStyle = '#cbd5e1'; c.strokeStyle = glowCol; c.lineWidth = 1.6;
+    c.beginPath(); c.moveTo(-s * 0.7, 0); c.lineTo(s * 0.3, -s * 0.45); c.lineTo(s * 0.55, 0); c.lineTo(s * 0.3, s * 0.45); c.closePath();
+    c.fill(); c.stroke();
+    c.restore();
+  }
+  function craneYard(c) {
+    var dk = SC.dark(), w = vp.w, h = vp.h;
+    c.save();
+    c.fillStyle = dk ? '#1f2433' : '#e6e8ef'; c.fillRect(0, 0, w, h);
+    c.strokeStyle = dk ? 'rgba(255,255,255,0.05)' : 'rgba(20,24,38,0.06)'; c.lineWidth = 1;
+    for (var x = 0; x < w; x += 36) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, h); c.stroke(); }
+    for (var y = 0; y < h; y += 36) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); }
+    c.restore();
+  }
+  function winchUnit(c, x, y, ux, uy, s, accentCol) {
+    var ang = Math.atan2(uy, ux);
+    c.save(); c.translate(x, y); c.rotate(ang);
+    c.fillStyle = SC.dark() ? '#334155' : '#cbd5e1'; c.strokeStyle = accentCol; c.lineWidth = 2;
+    c.beginPath(); if (c.roundRect) c.roundRect(-s * 0.55, -s * 0.55, s * 1.1, s * 1.1, 5); else c.rect(-s * 0.55, -s * 0.55, s * 1.1, s * 1.1);
+    c.fill(); c.stroke();
+    c.fillStyle = accentCol; c.beginPath(); c.arc(0, 0, s * 0.25, 0, 2 * Math.PI); c.fill();
+    c.restore();
+  }
   function lawn(c) {
     var dk = SC.dark(), w = vp.w, h = vp.h, i;
     c.save();
@@ -314,22 +415,48 @@
     return [hx, hy];
   }
   function realScene(c, col, ox, oy, L, fl) {
-    lawn(c);
-    var s = U.clamp(Math.min(vp.w, vp.h) * 0.07, 12, 22), m = s + 8;
+    var kind = realSceneSel ? realSceneSel.get() : 'harbour';
+    if (kind === 'harbour') harbourWater(c);
+    else if (kind === 'space') spaceBg(c);
+    else if (kind === 'crane') craneYard(c);
+    else lawn(c);
+    var s = U.clamp(Math.min(vp.w, vp.h) * 0.07, 12, 22), m = s + 10;
     fl.forEach(function (fd) {
       if (!(Math.abs(fd.mag) > 1e-9)) return;
-      var a = U.rad(fd.th) + (fd.mag < 0 ? Math.PI : 0), ux = Math.cos(a), uy = -Math.sin(a);
-      // as far out as fits on the canvas, a little beyond the longest arrow
+      var a = U.rad(fd.th) + (fd.mag < 0 ? Math.PI : 0), ux = Math.cos(a), uy = -Math.sin(a), fc = forceColor(col, fd.j);
       var tE = Infinity;
       if (ux > 1e-9) tE = Math.min(tE, (vp.w - m - ox) / ux); if (ux < -1e-9) tE = Math.min(tE, (m - ox) / ux);
       if (uy > 1e-9) tE = Math.min(tE, (vp.h - m - oy) / uy); if (uy < -1e-9) tE = Math.min(tE, (m - oy) / uy);
-      var R = Math.max(s * 2, Math.min(tE, L + 34)), x = ox + ux * R, y = oy + uy * R;
-      SC.rope(c, [[ox + ux * 8, oy + uy * 8], [x - ux * s * 0.85, y - uy * s * 0.85]], { width: 2.6 });   // rope first, so the hands hold it
-      topPerson(c, x, y, ux, uy, s, SC.shade(forceColor(col, fd.j), SC.dark() ? -0.25 : 0.45));
+      var R = Math.max(s * 2.2, Math.min(tE, L + 36)), x = ox + ux * R, y = oy + uy * R;
+      if (kind === 'space') {
+        c.save(); c.strokeStyle = fc; c.globalAlpha = 0.55; c.lineWidth = 2; c.setLineDash([5, 4]);
+        c.beginPath(); c.moveTo(ox + ux * 14, oy + uy * 14); c.lineTo(x - ux * s * 0.7, y - uy * s * 0.7); c.stroke(); c.restore();
+        spaceDrone(c, x, y, ux, uy, s, fc);
+      } else if (kind === 'harbour') {
+        SC.rope(c, [[ox + ux * 12, oy + uy * 12], [x - ux * s * 0.9, y - uy * s * 0.9]], { width: 2.2, color: '#e2e8f0' });
+        tugboat(c, x, y, ux, uy, s, SC.shade(fc, SC.dark() ? -0.15 : 0.15));
+      } else if (kind === 'crane') {
+        c.save(); c.strokeStyle = '#64748b'; c.lineWidth = 2.4;
+        c.beginPath(); c.moveTo(ox + ux * 10, oy + uy * 10); c.lineTo(x - ux * s * 0.55, y - uy * s * 0.55); c.stroke(); c.restore();
+        winchUnit(c, x, y, ux, uy, s, fc);
+      } else {
+        SC.rope(c, [[ox + ux * 8, oy + uy * 8], [x - ux * s * 0.85, y - uy * s * 0.85]], { width: 2.6 });
+        topPerson(c, x, y, ux, uy, s, SC.shade(fc, SC.dark() ? -0.25 : 0.45));
+      }
     });
-    // the steel ring the ropes are tied to
-    c.save(); c.strokeStyle = SC.dark() ? '#aeb4c6' : '#9aa1b5'; c.lineWidth = 3.5; c.beginPath(); c.arc(ox, oy, 8, 0, 2 * Math.PI); c.stroke();
-    c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.2; c.beginPath(); c.arc(ox, oy, 8, Math.PI * 1.05, Math.PI * 1.6); c.stroke(); c.restore();
+    if (kind === 'harbour') {
+      var resAng = M && M.res && M.res.R > 1e-6 ? -U.rad(M.res.dir) : 0;
+      cargoBarge(c, ox, oy, resAng);
+    } else if (kind === 'space') {
+      c.save();
+      c.fillStyle = '#64748b'; c.strokeStyle = '#e2e8f0'; c.lineWidth = 1.6;
+      c.beginPath(); c.arc(ox, oy, 13, 0, 2 * Math.PI); c.fill(); c.stroke();
+      c.fillStyle = '#38bdf8'; c.beginPath(); c.arc(ox, oy, 5, 0, 2 * Math.PI); c.fill();
+      c.restore();
+    } else {
+      c.save(); c.strokeStyle = SC.dark() ? '#aeb4c6' : '#9aa1b5'; c.lineWidth = 3.5; c.beginPath(); c.arc(ox, oy, 8, 0, 2 * Math.PI); c.stroke();
+      c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.2; c.beginPath(); c.arc(ox, oy, 8, Math.PI * 1.05, Math.PI * 1.6); c.stroke(); c.restore();
+    }
   }
 
   /* ---------- force polygon (tip to tail) ---------- */
