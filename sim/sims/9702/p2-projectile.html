@@ -44,8 +44,8 @@
   var launchMode = ui.select(paramCard, { label: 'Launch velocity given as', value: 'polar', options: [
     { value: 'polar', label: 'speed u and angle θ' }, { value: 'comp', label: 'horizontal and vertical components' }] }, function (v) { switchMode(v); });
   var prm = ui.params(paramCard, [
-    { key: 'ux', label: 'Horizontal component of launch velocity', sym: 'u<sub>x</sub>', unit: 'm s<sup>−1</sup>', min: 0, max: 50, step: 0.1, value: 17.3, hidden: true },
-    { key: 'uy', label: 'Vertical component of launch velocity (up +)', sym: 'u<sub>y</sub>', unit: 'm s<sup>−1</sup>', min: -50, max: 50, step: 0.1, value: 10, hidden: true },
+    { key: 'ux', label: 'Horizontal component of launch velocity', sym: 'u<sub>x</sub>', unit: 'm s<sup>−1</sup>', min: 0, max: 50, step: 0.1, value: 17.32 },
+    { key: 'uy', label: 'Vertical component of launch velocity (up +)', sym: 'u<sub>y</sub>', unit: 'm s<sup>−1</sup>', min: -50, max: 50, step: 0.1, value: 10 },
     { key: 'u', label: 'Launch speed', sym: 'u', unit: 'm s<sup>−1</sup>', min: 0, max: 50, step: 0.1, value: 20 },
     { key: 'theta', label: 'Launch angle above horizontal', sym: 'θ', unit: '°', min: -90, max: 90, step: 0.5, value: 30 },
     { key: 'h0', label: 'Launch height', sym: 'h', unit: 'm', min: 0, max: 200, step: 0.1, value: 0 },
@@ -108,12 +108,16 @@
     var v = prm.values;
     if (mode === 'comp') syncComponents();
     else prm.set({ u: Math.min(50, Number(Math.hypot(v.ux, v.uy).toFixed(3))), theta: Number(U.deg(Math.atan2(v.uy, v.ux)).toFixed(2)) }, true);
-    prm.show('ux', mode === 'comp'); prm.show('uy', mode === 'comp');
-    prm.show('u', mode !== 'comp'); prm.show('theta', mode !== 'comp');
     update();
   }
   var sol = null, tEnd = 2, ghost = null, view = null;
-  function update() {
+  function update(key) {
+    var v = prm.values;
+    if (key === 'ux' || key === 'uy') {
+      prm.set({ u: Math.min(50, Number(Math.hypot(v.ux, v.uy).toFixed(3))), theta: Number(U.deg(Math.atan2(v.uy, v.ux)).toFixed(2)) }, true);
+    } else if (key === 'u' || key === 'theta') {
+      syncComponents();
+    }
     var p = params();
     prm.show('wx', showWall.get()); prm.show('wh', showWall.get());
     sol = PJ.solve(p);
@@ -333,19 +337,44 @@
   ix = SIM.view.interact(cv, {
     handles: function () {
       if (!sol || !view) return [];
-      var o = launchPt(), t = launchTip(), col = ui.colors();
-      return [{ id: 'tip', x: t.x, y: t.y, color: col.accent }, { id: 'h0', x: o.x, y: o.y, r: 14, color: col.muted }];
+      var o = launchPt(), t = launchTip(), col = ui.colors(), p = params(), a = U.rad(p.theta);
+      var hs = [{ id: 'tip', x: t.x, y: t.y, color: col.accent }, { id: 'h0', x: o.x, y: o.y, r: 14, color: col.muted }];
+      if (showComp.get()) {
+        hs.push({ id: 'ux', x: o.x + p.u * Math.cos(a) * UPX, y: o.y, r: 15, color: col.component });
+        hs.push({ id: 'uy', x: o.x, y: o.y - p.u * Math.sin(a) * UPX, r: 15, color: col.component });
+      }
+      return hs;
     },
-    onDrag: function (hd, x, y) { if (hd.id !== 'tip') return; launchDragging = true; clock.pause(); setFromDrag(x, y); touched(); clock.seek(0); },
-    onDrop: function (hd) { if (hd.id !== 'tip') return; launchDragging = false; if (isComp()) update(); else { syncComponents(); update(); } },
+    onDrag: function (hd, x, y) {
+      var o = launchPt();
+      if (hd.id === 'tip') { launchDragging = true; clock.pause(); setFromDrag(x, y); touched(); clock.seek(0); }
+      else if (hd.id === 'ux') {
+        launchDragging = true; clock.pause();
+        var ux = U.clamp(Math.round(((x - o.x) / UPX) * 2) / 2, 0, 50), uy = prm.values.uy;
+        prm.set({ ux: ux, u: Math.min(50, Number(Math.hypot(ux, uy).toFixed(3))), theta: Number(U.deg(Math.atan2(uy, ux)).toFixed(2)) });
+        touched(); clock.seek(0);
+      } else if (hd.id === 'uy') {
+        launchDragging = true; clock.pause();
+        var uy2 = U.clamp(Math.round(((o.y - y) / UPX) * 2) / 2, -50, 50), ux2 = prm.values.ux;
+        prm.set({ uy: uy2, u: Math.min(50, Number(Math.hypot(ux2, uy2).toFixed(3))), theta: Number(U.deg(Math.atan2(uy2, ux2)).toFixed(2)) });
+        touched(); clock.seek(0);
+      }
+    },
+    onDrop: function (hd) { if (hd.id === 'tip' || hd.id === 'ux' || hd.id === 'uy') { launchDragging = false; if (!isComp() && hd.id === 'tip') syncComponents(); update(); } },
     onTap: function (hd, x, y) {
       var v = prm.values;
       if (hd.id === 'h0') {
         ui.askNumber({ title: 'Launch height h', sub: 'Height of the launch point above the ground, in metres.', value: v.h0, min: 0, max: 200, step: 0.5, decimals: 2, unit: 'm',
           at: { x: x, y: y }, quick: [0, 1.5, 10, 20], onInput: function (val) { prm.set({ h0: U.clamp(val, 0, 200) }); touched(); } });
+      } else if (hd.id === 'ux') {
+        ui.askNumber({ title: 'Horizontal component uₓ', sub: 'Stays constant throughout flight (no horizontal acceleration).', value: v.ux, min: 0, max: 50, step: 0.5, decimals: 2, unit: 'm s⁻¹',
+          at: { x: x, y: y }, quick: [5, 10, 15, 20], onInput: function (val) { update('ux'); prm.set({ ux: U.clamp(val, 0, 50) }); update('ux'); touched(); } });
+      } else if (hd.id === 'uy') {
+        ui.askNumber({ title: 'Vertical component uᵧ', sub: 'Changes at −g each second (upwards is positive).', value: v.uy, min: -50, max: 50, step: 0.5, decimals: 2, unit: 'm s⁻¹',
+          at: { x: x, y: y }, quick: [-10, 0, 10, 20], onInput: function (val) { prm.set({ uy: U.clamp(val, -50, 50) }); update('uy'); touched(); } });
       } else if (isComp()) {
         ui.askNumber({ title: 'Horizontal component uₓ', sub: 'Type the horizontal component of the launch velocity.', value: v.ux, min: 0, max: 50, step: 0.5, decimals: 2, unit: 'm s⁻¹',
-          at: { x: x, y: y }, quick: [5, 10, 15, 20], onInput: function (val) { prm.set({ ux: U.clamp(val, 0, 50) }); touched(); } });
+          at: { x: x, y: y }, quick: [5, 10, 15, 20], onInput: function (val) { prm.set({ ux: U.clamp(val, 0, 50) }); update('ux'); touched(); } });
       } else {
         ui.askNumber({ title: 'Launch speed u', sub: 'Type the launch speed (direction stays ' + U.num(v.theta, 1) + '°).', value: v.u, min: 0, max: 50, step: 0.5, decimals: 2, unit: 'm s⁻¹',
           at: { x: x, y: y }, quick: [10, 15, 20, 25], onInput: function (val) { prm.set({ u: U.clamp(val, 0, 50) }); syncComponents(); touched(); } });
@@ -353,7 +382,7 @@
     },
     onHover: function () { drawScene(); }
   });
-  ui.stageTip('Drag the dashed u arrow to set launch angle and speed · tap its tip to type u · tap the launch point to type h');
+  ui.stageTip('Drag the u, uₓ or uᵧ arrow tips to set speed, angle or components · tap any tip to type');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

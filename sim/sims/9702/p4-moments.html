@@ -30,6 +30,7 @@
   var sceneCard = pg.card('left');
   var cv = ui.canvas(sceneCard, 'main-canvas');
   var vp = new SIM.view.Viewport(cv, { pad: 26 });
+  var clock = new SIM.anim.Clock(sceneCard, { duration: 4, loop: true, autoplay: false, onFrame: function () { draw(); } });
   ui.legend(sceneCard, [
     { color: 'var(--c-weight)', label: 'weight W (at centre of gravity)' }, { color: 'var(--c-applied)', label: 'applied forces' },
     { color: 'var(--c-normal)', label: 'support / pivot reactions' }, { color: 'var(--c-component)', label: 'line of action and perpendicular distance' },
@@ -189,18 +190,28 @@
     var by = vp.Y(0), th = Math.max(8, Math.min(16, vp.scale * L * 0.03));
     scene = { md: md, by: by, th: th, L: L, arrows: [] };
     var real = SC.real();
-    if (real) {   // backdrop, wall / stands / trestles, ropes and springs, then the plank itself and what sits on it
-      realBack(c, col, v, md, L, by, th);
-      realRopes(c, v, md, L, by, th);
-      realBeam(c, L, by, th);
-      realLoads(c, v, md, L, by, th);
-    } else {
-    // wall for a hinge at an end
-    if (md === 'pin' && (v.xP < 1e-9 || v.xP > L - 1e-9)) {
+    var tilt = 0, pivX = vp.X(md === 'supports' ? v.xA : v.xP);
+    if (clock.t > 0 && res) {
+      if (md === 'pin' && !res.balanced) { tilt = -U.sgn(res.Mnet) * Math.min(0.32, 0.08 * clock.t * clock.t + 0.04 * Math.sin(3 * clock.t)); }
+      else if (md === 'supports' && res.tips) { pivX = vp.X(res.tips === 'A' ? v.xA : v.xB); tilt = (res.tips === 'B' ? 1 : -1) * Math.min(0.28, 0.08 * clock.t * clock.t); }
+    }
+    // draw static backdrop & supports before rotating the beam
+    if (real) realBack(c, col, v, md, L, by, th);
+    if (md === 'pin' && !real && (v.xP < 1e-9 || v.xP > L - 1e-9)) {
       var wx = vp.X(v.xP), dir = v.xP < 1e-9 ? -1 : 1;
       c.save(); c.fillStyle = col.surface; c.fillRect(Math.min(wx, wx + dir * 14), by - 90, 14, 180); c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
       c.beginPath(); c.moveTo(wx, by - 90); c.lineTo(wx, by + 90); c.stroke(); c.restore();
     }
+    function tri(x) { var px = vp.X(x); c.save(); c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.4; c.beginPath(); c.moveTo(px, by + th / 2); c.lineTo(px - 11, by + th / 2 + 20); c.lineTo(px + 11, by + th / 2 + 20); c.closePath(); c.fill(); c.stroke(); c.restore(); }
+    if (md === 'supports') { if (!real) { tri(v.xA); tri(v.xB); } D.label(c, 'A', vp.X(v.xA), by + th / 2 + 30, col.ink, { bold: true, bg: real }); D.label(c, 'B', vp.X(v.xB), by + th / 2 + 30, col.ink, { bold: true, bg: real }); }
+    else { if (!real && v.xP > 1e-9 && v.xP < L - 1e-9) tri(v.xP); D.label(c, real && (v.xP < 1e-9 || v.xP > L - 1e-9) ? 'hinge' : 'pivot', vp.X(v.xP), by + th / 2 + 30, real ? col.ink : col.muted, { size: 11, bg: real }); }
+    c.save();
+    if (tilt) { c.translate(pivX, by); c.rotate(tilt); c.translate(-pivX, -by); }
+    if (real) {
+      realRopes(c, v, md, L, by, th);
+      realBeam(c, L, by, th);
+      realLoads(c, v, md, L, by, th);
+    } else {
     // beam
     c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
     c.beginPath(); c.rect(vp.X(0), by - th / 2, vp.X(L) - vp.X(0), th); c.fill(); c.stroke(); c.restore();
@@ -208,10 +219,7 @@
     // scale ticks
     var tk = U.niceTicks(0, L, 6);
     tk.ticks.forEach(function (t) { if (t < -1e-9 || t > L + 1e-9) return; D.line(c, [[vp.X(t), by + th / 2], [vp.X(t), by + th / 2 + 5]], col.muted, { width: 1 }); D.label(c, U.num(t, 3), vp.X(t), by + th / 2 + 13, real ? col.ink : col.muted, { size: 10, bg: real }); });
-    // supports / pivot
-    function tri(x) { var px = vp.X(x); c.save(); c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.4; c.beginPath(); c.moveTo(px, by + th / 2); c.lineTo(px - 11, by + th / 2 + 20); c.lineTo(px + 11, by + th / 2 + 20); c.closePath(); c.fill(); c.stroke(); c.restore(); }
-    if (md === 'supports') { if (!real) { tri(v.xA); tri(v.xB); } D.label(c, 'A', vp.X(v.xA), by + th / 2 + 30, col.ink, { bold: true, bg: real }); D.label(c, 'B', vp.X(v.xB), by + th / 2 + 30, col.ink, { bold: true, bg: real }); }
-    else { c.save(); c.fillStyle = col['object-line']; c.beginPath(); c.arc(vp.X(v.xP), by, 4, 0, 2 * Math.PI); c.fill(); c.restore(); if (!real && v.xP > 1e-9 && v.xP < L - 1e-9) tri(v.xP); D.label(c, real && (v.xP < 1e-9 || v.xP > L - 1e-9) ? 'hinge' : 'pivot', vp.X(v.xP), by + th / 2 + 30, real ? col.ink : col.muted, { size: 11, bg: real }); }
+    if (md !== 'supports') { c.save(); c.fillStyle = col['object-line']; c.beginPath(); c.arc(vp.X(v.xP), by, 4, 0, 2 * Math.PI); c.fill(); c.restore(); }
     if (!res) return;
     if (res.invalid) { D.label(c, res.invalid, vp.w / 2, 18, col.warn, { bold: true, size: 12 }); }
     var all = res.all || res.forces;
@@ -245,11 +253,12 @@
     if (md === 'pin' && res && !res.balanced) {
       var cw = res.Mnet < 0;
       c.save(); c.strokeStyle = col.warn; c.lineWidth = 2; c.beginPath(); c.arc(vp.X(v.xP), by, 30, cw ? -2.4 : -0.7, cw ? -0.7 : -2.4, !cw); c.stroke(); c.restore();
-      D.label(c, 'resultant moment ⇒ rotates ' + (cw ? 'clockwise' : 'anticlockwise'), vp.w / 2, 16, col.warn, { bold: true, size: 12 });
     }
+    if (!(v.W > 1e-12) && !locked('W')) D.label(c, 'W?', vp.X(v.xG), by - th / 2 - 16, col.muted, { size: 10 });
+    c.restore();
+    if (md === 'pin' && res && !res.balanced) D.label(c, 'resultant moment ⇒ rotates ' + (res.Mnet < 0 ? 'clockwise' : 'anticlockwise') + (clock.t === 0 ? ' (press Play)' : ''), vp.w / 2, 16, col.warn, { bold: true, size: 12 });
     if (md === 'supports' && res && res.tips) D.label(c, 'Not possible: R_' + (res.tips === 'B' ? 'A' : 'B') + ' would be negative ⇒ beam tips about ' + res.tips, vp.w / 2, 16, col.warn, { bold: true, size: 12 });
     if (showPoly.get()) drawPolygon(c, all, col);
-    if (!(v.W > 1e-12) && !locked('W')) D.label(c, 'W?', vp.X(v.xG), by - th / 2 - 16, col.muted, { size: 10 });
     if (ix) ix.paint(c);
   }
   function drawPolygon(c, list, col) {
@@ -274,6 +283,9 @@
     var col = ui.colors(), v = prm.values, d = v.dc, cp = ST.couple(v.Fc, d, v.thc);
     vp.fit(-1.1 * d, 2.1 * d, -0.75 * d, 0.75 * d);
     var c = vp.begin(), by = vp.Y(0);
+    var ctilt = clock.t > 0 && cp.torque > 1e-12 ? (cp.signedTorque > 0 ? -1 : 1) * clock.t * 1.4 : 0;
+    c.save();
+    if (ctilt) { c.translate(vp.X(d / 2), by); c.rotate(ctilt); c.translate(-vp.X(d / 2), -by); }
     if (SC.real()) realCouple(c, d, by, v.thc);
     else {
     c.save(); c.fillStyle = col.object; c.strokeStyle = col['object-line']; c.lineWidth = 1.5;
@@ -298,6 +310,7 @@
     var ox = vp.X(v.xO);
     c.save(); c.strokeStyle = col.accent; c.lineWidth = 2; c.beginPath(); c.arc(ox, by, 7, 0, 2 * Math.PI); c.stroke(); c.restore();
     D.label(c, 'O', ox, by + 18, col.accent, { bold: true });
+    c.restore();
     if (cp.torque > 1e-12) {
       var acw = cp.signedTorque > 0;
       c.save(); c.strokeStyle = col.resultant; c.lineWidth = 2; c.beginPath(); c.arc(vp.X(d / 2), by, 26, acw ? -0.3 : -2.8, acw ? -2.8 : -0.3, acw); c.stroke(); c.restore();

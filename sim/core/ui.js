@@ -143,13 +143,18 @@
     else document.body.appendChild(head);
     var bottom = h('section', { class: 'bottom' });
     document.body.appendChild(h('main', { class: 'sim' }, [left, right, bottom]));
+    var wsRefs = { left: left, right: right, bottom: bottom, setup: [], explain: [], calc: [] };
     function card(where, title) {
       // "Live working" sits under the scene and graphs, full width, so the working is big enough to read
       var working = where === 'right' && /^(live working|how to calculate it)/i.test(title || '');
       var c = h('div', { class: 'card' + (working ? ' working' : '') }, title ? [h('h2', { text: title })] : []);
       (working ? bottom : where === 'left' ? left : where === 'right' ? right : where).appendChild(c);
+      if (working) wsRefs.calc.push(c);
+      else if (where === 'right' && /trap|tip|note/i.test(title || '')) wsRefs.explain.push(c);
+      else if (where === 'right') wsRefs.setup.push(c);
       return c;
     }
+    setTimeout(function () { initWorkspace(wsRefs); }, 0);
     return { left: left, right: right, bottom: bottom, card: card };
   }
 
@@ -768,6 +773,69 @@
   /** escape for safe HTML interpolation of user-provided text */
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
+  /* ---------- simulation-first workspace: clean hero stage + corner/fullscreen popup drawers ---------- */
+  var wsDrawers = [];
+  function makeDrawer(cls, title, allowFullscreen, onOpen) {
+    var body = h('div', { class: 'ws-dbody' });
+    var fsBtn = allowFullscreen ? h('button', { type: 'button', class: 'ws-dbtn', text: '⛶ Fullscreen', title: 'Toggle fullscreen', onclick: function () {
+      var fs = box.classList.toggle('fullscreen');
+      fsBtn.textContent = fs ? '🗗 Restore' : '⛶ Fullscreen';
+      if (onOpen) onOpen();
+    } }) : null;
+    var box = h('section', { class: 'ws-drawer ' + cls, role: 'dialog', 'aria-label': title }, [
+      h('div', { class: 'ws-dhead' }, [
+        h('h3', { text: title }),
+        fsBtn,
+        h('button', { type: 'button', class: 'ws-dbtn', text: '×', 'aria-label': 'Close ' + title, onclick: function () { setOpen(false); } })
+      ]),
+      body
+    ]);
+    box.hidden = true;
+    var pill = null;
+    function setOpen(v) {
+      box.hidden = !v;
+      if (pill) pill.classList.toggle('on', v);
+      if (v && onOpen) onOpen();
+    }
+    document.body.appendChild(box);
+    var d = { el: box, body: body, isOpen: function () { return !box.hidden; }, setOpen: setOpen, toggle: function () { setOpen(box.hidden); }, bindPill: function (p) { pill = p; } };
+    wsDrawers.push(d);
+    return d;
+  }
+  function initWorkspace(refs) {
+    if (!stage || !stage.dock || !document.body || !document.body.classList) return;
+    if (!refs.setup.length && !refs.explain.length && !refs.calc.length) return;
+    document.body.classList.add('ws-clean');
+    function fireResize() {
+      setTimeout(function () { if (typeof root.dispatchEvent === 'function') root.dispatchEvent(new Event('resize')); }, 20);
+    }
+    var dData = makeDrawer('top-left', '⚙ Data & Parameters', true, fireResize);
+    var dExplain = makeDrawer('bottom-left', '💡 Explanations & Common Traps', false, null);
+    var dCalc = makeDrawer('calc-box', '📊 Calculations & Graphs', true, fireResize);
+
+    var bar = h('div', { class: 'ws-bar', role: 'toolbar', 'aria-label': 'Simulation panels' });
+    var cnt = visibleParams().length;
+    var bData = h('button', { type: 'button', class: 'ws-pill', html: '⚙ <span>Data &amp; Setup</span>' + (cnt ? '<span class="ws-cnt">' + cnt + '</span>' : ''), onclick: function () { dData.toggle(); } });
+    var bExp = h('button', { type: 'button', class: 'ws-pill', html: '💡 <span>Explain</span>', onclick: function () { dExplain.toggle(); } });
+    var bCalc = h('button', { type: 'button', class: 'ws-pill primary', html: '📊 <span>Calculations &amp; Graphs</span>', onclick: function () { dCalc.toggle(); } });
+    dData.bindPill(bData); dExplain.bindPill(bExp); dCalc.bindPill(bCalc);
+
+    bar.appendChild(bData);
+    if (refs.explain.length) bar.appendChild(bExp);
+    if (refs.calc.length) bar.appendChild(bCalc);
+    bar.appendChild(h('button', { type: 'button', class: 'ws-pill', html: '⇣ <span>Fetch Data</span>', onclick: openDataHub }));
+    if (query.get('embed') === '1') bar.appendChild(h('button', { type: 'button', class: 'ws-pill', html: '? <span>Guide</span>', onclick: openGuide }));
+
+    if (stage.dock.parentNode) stage.dock.parentNode.insertBefore(bar, stage.dock);
+    dData.body.appendChild(stage.dock);
+    refs.setup.forEach(function (c) { dData.body.appendChild(c); });
+    refs.explain.forEach(function (c) { dExplain.body.appendChild(c); });
+    if (refs.left && refs.left.querySelectorAll) {
+      Array.prototype.slice.call(refs.left.querySelectorAll('.plots')).forEach(function (pl) { dCalc.body.appendChild(pl); });
+    }
+    refs.calc.forEach(function (c) { dCalc.body.appendChild(c); });
+  }
+
   /* ---------- dock quick-entry & universal modals (? Guide, Quick Edit All, Fetch Data Hub) ---------- */
   var dockToolsAdded = false, activeModal = null;
   function closeModal() {
@@ -778,6 +846,7 @@
   if (typeof document !== 'undefined' && document.addEventListener) {
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && activeModal) { closeModal(); return; }
+      if (e.key === 'Escape') { var closed = false; wsDrawers.forEach(function (d) { if (d.isOpen()) { d.setOpen(false); closed = true; } }); if (closed) return; }
       if (e.target && /INPUT|SELECT|TEXTAREA|BUTTON/.test(e.target.tagName || '')) return;
       if (activeModal || pop) return;
       if (e.key === '?' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); openGuide(); return; }
