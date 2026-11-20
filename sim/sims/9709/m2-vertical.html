@@ -153,8 +153,12 @@
     ['A', 'B'].forEach(function (n) { if (!sim.tracks[n] || !sim.tracks[n].length) return; for (var i = 0; i <= 300; i++) { var st = sim.stateAt(tWin * i / 300)[n]; if (st) ymax = Math.max(ymax, st.y); } });
     ymax *= 1.12;
     var c = vp.begin(), W = vp.w, H = vp.h, top = 20, bot = H - 26;
+    // launch-arrow scale (px per m s⁻¹); both scales are frozen while something is dragged so the handle stays under the pointer
+    var ku = Math.min(2, (bot - top) * 0.3 / Math.max(20, Math.abs(pa.values.uA), sim.opts.B ? Math.abs(pb.values.uB) : 0));
+    if (ix && ix.isDragging() && lay) { ymax = lay.ymax; ku = lay.ku; }
     function Y(y) { return bot - (y / ymax) * (bot - top); }
     var cx = W * 0.5;
+    lay = { ymax: ymax, ku: ku, top: top, bot: bot, cx: cx, launch: [] };
     D.ground(c, 40, bot, W - 20, bot);
     // height axis
     var tk = U.niceTicks(0, ymax, 6);
@@ -165,12 +169,24 @@
     D.line(c, [[cx, Y(0)], [cx, top]], col.grid, { dash: [3, 5] });
     // apex / H line
     if (pq.values.H <= ymax) { D.line(c, [[60, Y(pq.values.H)], [W - 20, Y(pq.values.H)]], col.accent, { dash: [6, 4], width: 1 }); D.label(c, 'H = ' + U.sf(pq.values.H) + ' m', W - 22, Y(pq.values.H) - 8, col.accent, { size: 11, align: 'right' }); }
-    var st = sim.stateAt(clock.t);
+    var st = sim.stateAt(clock.t), two = !!sim.opts.B;
+    // launch points and initial-velocity arrows (drawn to a linear scale; these are the drag handles)
+    [['A', 'hA', 'uA', pa, two ? -14 : 0, col.s1], ['B', 'hB', 'uB', pb, 14, col.s2]].forEach(function (L) {
+      if (L[0] === 'B' && !two) return;
+      var h = L[3].values[L[1]], u = L[3].values[L[2]], px = cx + L[4], py = Y(h) - 9, side = L[4] < 0 ? -1 : 1, ax = px + side * 34;
+      lay.launch.push({ n: L[0], hk: L[1], uk: L[2], ctl: L[3], px: px, py: py, ax: ax, tipY: py - u * ku, color: L[5] });
+      if (clock.t > 1e-9) { c.save(); c.globalAlpha = 0.5; c.setLineDash([3, 3]); c.strokeStyle = L[5]; c.lineWidth = 1.2; c.beginPath(); c.arc(px, py, 9, 0, 2 * Math.PI); c.stroke(); c.restore(); }
+      if (Math.abs(u) > 1e-9) {
+        c.save(); if (clock.t > 1e-9) c.globalAlpha = 0.55;
+        D.arrow(c, ax, py, ax, py - u * ku, col.velocity, { label: clock.t > 1e-9 ? '' : 'u' + (two ? L[0] : '') + ' = ' + U.sf(u), width: 2 });
+        c.restore();
+      }
+    });
     function drawP(s, name, colr, dx) {
       if (!s) return;
       var x = cx + dx, y = Y(s.y) - 9;
       D.particle(c, x, y, 9, { fill: colr, label: name });
-      if (Math.abs(s.v) > 1e-9) D.arrow(c, x + (dx >= 0 ? 18 : -18), y, x + (dx >= 0 ? 18 : -18), y - U.sgn(s.v) * (12 + Math.min(70, Math.abs(s.v) * 1.5)), col.velocity, { label: U.sf(Math.abs(s.v)) + ' m/s', width: 2 });
+      if (Math.abs(s.v) > 1e-9 && clock.t > 1e-9) D.arrow(c, x + (dx >= 0 ? 18 : -18), y, x + (dx >= 0 ? 18 : -18), y - U.sgn(s.v) * (12 + Math.min(70, Math.abs(s.v) * 1.5)), col.velocity, { label: U.sf(Math.abs(s.v)) + ' m/s', width: 2 });
     }
     var merged = st.B && st.B.mode === 'merged';
     if (merged) drawP(st.A, 'C', col.s3, 0);
@@ -180,6 +196,7 @@
     }
     if (st.B && st.B.mode === 'held' && sim.opts.B && sim.opts.B.delay > 0) D.label(c, 'B waits until t = ' + U.sf(sim.opts.B.delay) + ' s', cx + 30, Y(st.B.y) - 24, col.muted, { size: 11, align: 'left' });
     D.label(c, 'up = positive', W - 22, 12, col.muted, { size: 11, align: 'right' });
+    if (ix) ix.paint(c);
   }
 
   /* ---------- plots ---------- */
@@ -315,6 +332,51 @@
     }
     R.render();
   }
+
+  /* ---------- direct manipulation: drag a launch point up/down (height), drag the u arrow (initial velocity), tap to type ---------- */
+  var lay = null;
+  function setP(ctl, k, val, step) {
+    var sp = ctl.rows[k].spec, o = {};
+    val = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (step) val = Number((Math.round(val / step) * step).toFixed(step < 1 ? 1 : 0));
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] !== ctl.values[k]) ctl.set(o);
+  }
+  function replay() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); }
+  function toStart() { if (clock.playing) clock.pause(); if (clock.t !== 0) clock.seek(0); }
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!lay) return [];
+      var hs = [], col = ui.colors();
+      lay.launch.forEach(function (l) {
+        hs.push({ id: 'h' + l.n, kind: 'h', l: l, x: l.px, y: l.py, color: l.color });
+        hs.push({ id: 'u' + l.n, kind: 'u', l: l, x: l.ax, y: l.tipY, color: col.velocity });
+      });
+      return hs;
+    },
+    onDrag: function (hd, x, y) {
+      toStart();
+      var l = hd.l;
+      if (hd.kind === 'h') {
+        var hv = (lay.bot - (y + 9)) / (lay.bot - lay.top) * lay.ymax;
+        setP(l.ctl, l.hk, hv, lay.ymax < 12 ? 0.1 : lay.ymax <= 80 ? 0.5 : 1);
+      } else {
+        var base = lay.bot - (l.ctl.values[l.hk] / lay.ymax) * (lay.bot - lay.top) - 9;
+        setP(l.ctl, l.uk, (base - y) / lay.ku, 0.5);
+      }
+    },
+    onDrop: function () { drawScene(); replay(); },
+    onTap: function (hd, x, y) {
+      var l = hd.l, k = hd.kind === 'h' ? l.hk : l.uk, sp = l.ctl.rows[k].spec;
+      ui.askNumber({ title: hd.kind === 'h' ? 'Starting height of ' + l.n : 'Initial velocity of ' + l.n + ' (up +)',
+        sub: hd.kind === 'h' ? 'Height above the ground in metres.' : 'Positive = projected upwards, negative = projected downwards.',
+        value: l.ctl.values[k], min: Number(sp.min), max: Number(sp.max), step: 0.1, decimals: 2, unit: sp.unit, at: { x: x, y: y },
+        quick: hd.kind === 'h' ? [0, 10, 20, 40] : [-10, 0, 10, 20, 30],
+        onInput: function (val) { setP(l.ctl, k, val); toStart(); replay(); } });
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag a particle’s start point up or down to set its height · drag the u arrow to set its initial velocity · tap either to type');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

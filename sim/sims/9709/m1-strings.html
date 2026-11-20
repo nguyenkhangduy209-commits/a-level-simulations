@@ -271,6 +271,7 @@
     if (!M) return;
     var col = ui.colors(), c;
     var r = M.res, v = prm.values;
+    scene = null;
     if (M.errors.length || !r || !r.values) {
       vp.fit(-1, 1, -1, 1); c = vp.begin();
       D.label(c, M.errors[0] || (r && r.message) || 'Invalid set-up', vp.w / 2, vp.h / 2, col.warn, { bold: true, bg: true });
@@ -330,6 +331,11 @@
     });
     if (M.cfg === 'ring') D.particle(c, cx, cy, 7, { fill: col.panel }); else D.particle(c, cx, cy, 6, {});
     if (r.status !== 'ok') D.label(c, r.message.split(':')[0], vp.w / 2, 14, col.warn, { bold: true, bg: true });
+    // remember where things are on screen for direct manipulation
+    var fP = null; forces.forEach(function (f) { if (f.key === 'P') fP = f; });
+    scene = { cx: cx, cy: cy, A: vp.P(A[0], A[1]), B: B ? vp.P(B[0], B[1]) : null,
+      P: fP ? [cx + Math.cos(U.rad(fP.dir)) * fP.mag * k, cy - Math.sin(U.rad(fP.dir)) * fP.mag * k] : null };
+    if (ix) ix.paint(c);
   }
 
   /* ---------- triangle (polygon) of forces ---------- */
@@ -488,6 +494,52 @@
     }
     R.render();
   }
+
+  /* ---------- direct manipulation: drag a fixed point to turn its string, drag / tap the tip of P, tap the particle for m ---------- */
+  var scene = null, ix = null;
+  function snapAngle(a) { a = Math.round(a); var near = Math.round(a / 15) * 15; return Math.abs(a - near) <= 2 ? near : a; }
+  /** α (0–90°) for a screen direction, kept inside the quadrant chosen in “String n goes” */
+  function alphaIn(dir, orient) {
+    var a = FO.alphaFromDir(dir, orient).alpha;
+    if (a > 90 || a < -135) a = 90; else if (a < 0) a = 0;
+    return U.clamp(snapAngle(a), 0, 90);
+  }
+  function angleGeo() { return M && !M.errors.length && M.res && M.res.values && M.geo === 'angles'; }
+  function canString(n) { return angleGeo() && (n === 1 || (M.cfg !== 'one' && !has('dir2'))); }
+  function canPhi() { return pmSel.get() === 'angle' && !has('phi'); }
+  function askAngle(n, x, y) {
+    var key = n === 1 ? 'a1' : 'a2', o = (n === 1 ? o1Sel : o2Sel).get();
+    ui.askNumber({ title: 'Angle of ' + strName(n), sub: 'Measured from the ' + (o.slice(-1) === 'v' ? 'vertical' : 'horizontal') + ', in degrees.',
+      value: prm.values[key], min: 0, max: 90, step: 1, decimals: 1, unit: '°', at: { x: x, y: y }, quick: [30, 45, 60],
+      onInput: function (v) { var q = {}; q[key] = U.clamp(v, 0, 90); prm.set(q); } });
+  }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene) return [];
+      var col = ui.colors(), hs = [];
+      if (canString(1)) hs.push({ id: 's1', n: 1, x: scene.A[0], y: scene.A[1], color: col.component });
+      if (scene.B && canString(2)) hs.push({ id: 's2', n: 2, x: scene.B[0], y: scene.B[1], color: col.component });
+      if (scene.P && (canPhi() || !has('P'))) hs.push({ id: 'P', x: scene.P[0], y: scene.P[1], color: col.applied });
+      if (!has('m')) hs.push({ id: 'm', x: scene.cx, y: scene.cy, color: col.weight });
+      return hs;
+    },
+    onDrag: function (hd, x, y) {
+      if (!scene) return;
+      var dir = SIM.view.screenAngle(scene.cx, scene.cy, x, y);
+      if (hd.id === 's1') prm.set({ a1: alphaIn(dir, o1Sel.get()) });
+      else if (hd.id === 's2') prm.set({ a2: alphaIn(dir, o2Sel.get()) });
+      else if (hd.id === 'P' && canPhi()) prm.set({ phi: snapAngle(dir) % 360 });
+    },
+    onTap: function (hd, x, y) {
+      if (hd.id === 's1' || hd.id === 's2') askAngle(hd.n, x, y);
+      else if (hd.id === 'P' && !has('P')) ui.askNumber({ title: 'Applied force P', sub: 'Type the magnitude in newtons.', value: prm.values.P, min: 0, max: 300, step: 1, decimals: 2, unit: 'N',
+        at: { x: x, y: y }, quick: [5, 10, 20, 50], onInput: function (v) { prm.set({ P: U.clamp(v, 0, 300) }); } });
+      else if (hd.id === 'm' && !has('m')) ui.askNumber({ title: 'Mass of the ' + (M.cfg === 'ring' ? 'ring' : 'particle'), sub: 'Type the mass in kilograms.', value: prm.values.m, min: 0.01, max: 100, step: 0.1, decimals: 3, unit: 'kg',
+        at: { x: x, y: y }, quick: [0.2, 1, 2.4, 10], onInput: function (v) { prm.set({ m: U.clamp(v, 0.01, 100) }); } });
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag a fixed point to change its string’s angle (tap it to type) · drag the tip of P to turn it, tap to type P · tap the particle to type m');
 
   ui.onTheme(function () { drawScene(); drawTriangle(); });
   vp.onResize = drawScene; vp2.onResize = drawTriangle;

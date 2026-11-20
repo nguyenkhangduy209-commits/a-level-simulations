@@ -129,7 +129,10 @@
     else D.block(c, bx, by, bw, bh, th, { label: U.num(p.m, 2) + ' kg' });
     var cx = bx - st * bh / 2, cy = by - ct * bh / 2;
     if (ks < 1) D.label(c, 'motion drawn at ' + U.sf(ks, 2) + '× scale', vp.w - 10, 14, col.muted, { align: 'right', size: 11 });
-    if (sim.invalid) { D.label(c, sim.invalid, vp.w / 2, 20, col.warn, { bold: true }); return; }
+    // surface point for the μ handle: on the slope, away from the block
+    var dm = d > SL * 0.5 ? SL * 0.18 : SL * 0.82;
+    scene = { ox: vp.X(0), oy: vp.Y(0), top: vp.P(SL * ct, SL * st), bx: cx, by: cy, mu: vp.P(dm * ct, dm * st), th: p.theta, P: null, k: 0 };
+    if (sim.invalid) { D.label(c, sim.invalid, vp.w / 2, 20, col.warn, { bold: true }); if (ix) ix.paint(c); return; }
     // forces
     var f = sim.f, F = st0.F;
     var list = [f.W, f.R, p.P, f.Fmax, Math.abs(F)];
@@ -155,11 +158,14 @@
     }
     if (Math.abs(F) > 1e-9) D.arrowPolar(c, cx, cy, F > 0 ? th : th + Math.PI, Math.abs(F) * k, col.friction, { label: lab('F', Math.abs(F)) });
     if (p.P > 0) D.arrowPolar(c, cx, cy, th + U.rad(p.phi), p.P * k, col.applied, { label: lab('P', p.P) });
+    scene.k = k;
+    if (p.P > 0) scene.P = [cx + Math.cos(th + U.rad(p.phi)) * p.P * k, cy - Math.sin(th + U.rad(p.phi)) * p.P * k];
     // velocity
     if (Math.abs(st0.v) > 1e-6) {
       var vy = cy - ct * (bh / 2 + 26), vx = cx - st * (bh / 2 + 26);
       D.arrowPolar(c, vx, vy, st0.v > 0 ? th : th + Math.PI, 26 + Math.min(60, Math.abs(st0.v) * 6), col.velocity, { label: 'v = ' + U.sf(Math.abs(st0.v)) + ' m/s', width: 2 });
     }
+    if (ix) ix.paint(c);
   }
 
   /* ---------- plots ---------- */
@@ -229,6 +235,60 @@
     R.render();
   }
   function ordinal(n) { var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+
+  /* ---------- direct manipulation: drag the slope top for θ, drag / tap the tip of P, tap the block for m, tap the surface for μ ---------- */
+  var scene = null, ix = null, pull = null;
+  function snap15(a) { a = Math.round(a); var near = Math.round(a / 15) * 15; return Math.abs(a - near) <= 2 ? near : a; }
+  function norm180(a) { a = ((a % 360) + 360) % 360; return a > 180 ? a - 360 : a; }
+  /** φ (relative to the up-slope line) from a screen direction: snaps to 15° steps of φ, or to horizontal / vertical in the picture */
+  function phiFrom(screenDeg) {
+    var raw = norm180(screenDeg - scene.th), ph = snap15(raw);
+    if (ph === Math.round(raw)) { var abs = snap15(screenDeg); if (abs % 15 === 0) ph = Math.round(norm180(abs - scene.th)); }
+    return U.clamp(ph, -180, 180);
+  }
+  function askP(x, y, title) {
+    ui.askNumber({ title: title || 'Applied force P', sub: 'Type the magnitude in newtons.', value: prm.values.P, min: 0, max: 500, step: 1, decimals: 2, unit: 'N',
+      at: { x: x, y: y }, quick: [10, 20, 40, 50], onInput: function (v) { prm.set({ P: U.clamp(v, 0, 500) }); } });
+  }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene) return [];
+      var col = ui.colors(), hs = [{ id: 'theta', x: scene.top[0], y: scene.top[1], color: col.muted }, { id: 'mu', x: scene.mu[0], y: scene.mu[1], color: col.friction }];
+      if (scene.P) hs.push({ id: 'P', x: scene.P[0], y: scene.P[1], color: col.applied });
+      hs.push({ id: 'm', x: scene.bx, y: scene.by, color: col.weight });
+      return hs;
+    },
+    onDrag: function (hd, x, y) {
+      if (!scene) return;
+      if (hd.id === 'theta') {
+        var a = SIM.view.screenAngle(scene.ox, scene.oy, x, y); if (a > 180) a = 0;
+        prm.set({ theta: U.clamp(snap15(a), 0, 80) });
+      } else if (hd.id === 'P') prm.set({ phi: phiFrom(SIM.view.screenAngle(scene.bx, scene.by, x, y)) });
+      else if (hd.id === 'm') {
+        // pulling the block when there is no applied force draws one
+        if (!pull) pull = { ok: prm.values.P === 0, bx: scene.bx, by: scene.by, k: scene.k || 1 };
+        if (!pull.ok) return;
+        var len = Math.hypot(x - pull.bx, y - pull.by);
+        prm.set({ P: U.clamp(Math.max(1, Math.round(len / pull.k)), 0, 500), phi: phiFrom(SIM.view.screenAngle(pull.bx, pull.by, x, y)) });
+      }
+    },
+    onDrop: function (hd, x, y) {
+      var made = pull && pull.ok; pull = null;
+      if (made) askP(x, y, 'New force P at φ = ' + U.num(prm.values.phi, 0) + '° to the slope: how big is it?');
+    },
+    onTap: function (hd, x, y) {
+      pull = null;
+      if (hd.id === 'P') askP(x, y);
+      else if (hd.id === 'theta') ui.askNumber({ title: 'Slope angle θ', sub: 'Angle of the plane above the horizontal (0° = floor).', value: prm.values.theta, min: 0, max: 80, step: 1, decimals: 1, unit: '°',
+        at: { x: x, y: y }, quick: [0, 20, 30, 45], onInput: function (v) { prm.set({ theta: U.clamp(v, 0, 80) }); } });
+      else if (hd.id === 'm') ui.askNumber({ title: 'Mass m', sub: 'Type the mass in kilograms.', value: prm.values.m, min: 0.1, max: 200, step: 0.1, decimals: 2, unit: 'kg',
+        at: { x: x, y: y }, quick: [1, 2, 5, 10], onInput: function (v) { prm.set({ m: U.clamp(v, 0.1, 200) }); } });
+      else if (hd.id === 'mu') ui.askNumber({ title: 'Coefficient of friction μ', sub: smooth.get() ? 'Typing a value makes the surface rough.' : 'Between the particle and the surface.', value: prm.values.mu, min: 0, max: 1.5, step: 0.05, decimals: 3, unit: '',
+        at: { x: x, y: y }, quick: [0.2, 0.3, 0.5], onInput: function (v) { if (smooth.get()) smooth.set(false, true); prm.set({ mu: U.clamp(v, 0, 1.5) }); } });
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag the top of the slope to change θ · drag the tip of P to turn it, tap to type P (no P? drag out from the block) · tap the block for m, the surface for μ');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

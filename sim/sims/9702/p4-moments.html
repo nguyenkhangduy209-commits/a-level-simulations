@@ -172,7 +172,7 @@
       }
     }
     res = md === 'couple' ? null : ST.solveBeam(baseModel());
-    draw(); readout();
+    tip(); draw(); readout();
   }
 
   /* ---------- drawing ---------- */
@@ -185,6 +185,7 @@
     vp.fit(-0.14 * L, 1.14 * L, -0.42 * L, 0.42 * L);
     c = vp.begin();
     var by = vp.Y(0), th = Math.max(8, Math.min(16, vp.scale * L * 0.03));
+    scene = { md: md, by: by, th: th, L: L, arrows: [] };
     // wall for a hinge at an end
     if (md === 'pin' && (v.xP < 1e-9 || v.xP > L - 1e-9)) {
       var wx = vp.X(v.xP), dir = v.xP < 1e-9 ? -1 : 1;
@@ -219,6 +220,8 @@
       var sx = px, sy = by, ex = px + Math.cos(a) * len, ey = by - Math.sin(a) * len;
       if (f.kind === 'reaction' && Math.sin(a) > 0.5) { sx = px - Math.cos(a) * len; sy = by + Math.sin(a) * len + th / 2 + 22; ex = px; ey = by + th / 2 + 22; }
       D.arrow(c, sx, sy, ex, ey, color, { label: lab });
+      if (f.kind === 'weight') scene.arrows.push({ kind: 'W', x: ex, y: ey, off: ex - px, color: color });
+      else if (f.kind !== 'reaction' && LOADIX[f.name]) scene.arrows.push({ kind: 'F', i: LOADIX[f.name], x: ex, y: ey, off: ex - px, color: color });
       if (showPerp.get() && f.kind !== 'reaction' && Math.abs(Math.cos(a)) > 1e-6 && Math.abs(Math.sin(a)) > 1e-6 && Math.abs(f.x - v.xO) > 1e-9) {
         // line of action through (x,0) along (cos a, sin a); foot of perpendicular from O
         var t = (v.xO - f.x) * Math.cos(a), fx = f.x + t * Math.cos(a), fy = t * Math.sin(a);
@@ -236,6 +239,8 @@
     }
     if (md === 'supports' && res && res.tips) D.label(c, 'Not possible: R_' + (res.tips === 'B' ? 'A' : 'B') + ' would be negative ⇒ beam tips about ' + res.tips, vp.w / 2, 16, col.warn, { bold: true, size: 12 });
     if (showPoly.get()) drawPolygon(c, all, col);
+    if (!(v.W > 1e-12) && !locked('W')) D.label(c, 'W?', vp.X(v.xG), by - th / 2 - 16, col.muted, { size: 10 });
+    if (ix) ix.paint(c);
   }
   function drawPolygon(c, list, col) {
     var fs = list.filter(function (f) { return f.F > 1e-12; });
@@ -285,6 +290,8 @@
       c.save(); c.strokeStyle = col.resultant; c.lineWidth = 2; c.beginPath(); c.arc(vp.X(d / 2), by, 26, acw ? -0.3 : -2.8, acw ? -2.8 : -0.3, acw); c.stroke(); c.restore();
       D.label(c, (acw ? 'anticlockwise' : 'clockwise') + ' torque ' + U.sf(cp.torque) + ' N m', vp.w / 2, 16, col.resultant, { bold: true, size: 12 });
     } else D.label(c, 'forces in line: no turning effect (not a couple)', vp.w / 2, 16, col.warn, { bold: true, size: 12 });
+    scene = { md: 'couple', by: by, len: len, d: d, forces: cp.forces.map(function (f, i) { var a = U.rad(f.ang), px = vp.X(f.x); return { i: i, bx: px, x: px + Math.cos(a) * len, y: by - Math.sin(a) * len }; }) };
+    if (ix) ix.paint(c);
   }
 
   /* ---------- working ---------- */
@@ -379,6 +386,76 @@
     if (cp.torque > 1e-12) R.badge('Rotation only: zero resultant force, non-zero torque', 'info');
     else R.badge('θ = 0° or 180°: the forces act along the same line, so there is no couple', 'warn');
     R.render();
+  }
+
+  /* ---------- direct manipulation: drag loads / pivot / supports / O along the beam, tap to type ---------- */
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range.disabled); }
+  function spec(k) { return prm.rows[k].spec; }
+  function decOf(st) { var t = String(st); return t.indexOf('.') < 0 ? 0 : t.length - t.indexOf('.') - 1; }
+  function setVal(k, val, step) {
+    var sp = spec(k), o = {};
+    val = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (step) val = Number((Math.round(val / step) * step).toFixed(decOf(step)));
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] !== prm.values[k]) prm.set(o);
+  }
+  function ask(k, x, y, title, sub, quick) {
+    var sp = spec(k);
+    ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step) < 0.01 ? 0.01 : Number(sp.step), decimals: 3,
+      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+  }
+  function posStep() { var L = prm.values.L; return L >= 4 ? 0.05 : L >= 1 ? 0.01 : 0.005; }
+  var LOADIX = { 'F₁': 1, 'F₂': 2, 'F₃': 3 }, SUBS = ['', '₁', '₂', '₃'];
+  var scene = null;
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene) return [];
+      var v = prm.values, col = ui.colors(), hs = [];
+      if (scene.md === 'couple') {
+        scene.forces.forEach(function (f) { hs.push({ id: 'c' + f.i, kind: 'cf', i: f.i, bx: f.bx, x: f.x, y: f.y, color: col.applied }); });
+        hs.push({ id: 'cd', kind: 'cd', x: vp.X(scene.d), y: scene.by + 22, color: col['object-line'] });
+        hs.push({ id: 'O', kind: 'O', x: vp.X(v.xO), y: scene.by, color: col.accent });
+        return hs;
+      }
+      scene.arrows.forEach(function (a) {
+        if (a.kind === 'W') { if (!locked('W') || !locked('xG')) hs.push({ id: 'W', kind: 'W', x: a.x, y: a.y, off: a.off, color: a.color }); }
+        else if (!locked('F' + a.i) || !locked('x' + a.i)) hs.push({ id: 'F' + a.i, kind: 'F', i: a.i, x: a.x, y: a.y, off: a.off, color: a.color });
+      });
+      if (!(v.W > 1e-12) && !locked('W')) hs.push({ id: 'W', kind: 'W', x: vp.X(v.xG), y: scene.by - scene.th / 2 - 16, off: 0, color: col.weight });
+      var py = scene.by + scene.th / 2 + 13;
+      if (scene.md === 'pin') hs.push({ id: 'P', kind: 'pos', key: 'xP', x: vp.X(v.xP), y: py, color: col['object-line'] });
+      else { hs.push({ id: 'A', kind: 'pos', key: 'xA', x: vp.X(v.xA), y: py, color: col['object-line'] }); hs.push({ id: 'B', kind: 'pos', key: 'xB', x: vp.X(v.xB), y: py, color: col['object-line'] }); }
+      hs.push({ id: 'O', kind: 'pos', key: 'xO', x: vp.X(v.xO), y: scene.by, color: col.accent });
+      hs.push({ id: 'L', kind: 'L', x: vp.X(scene.L), y: scene.by, color: col['object-line'] });
+      return hs;
+    },
+    onDrag: function (h, x, y) {
+      var wx = vp.toWorld(x - (h.off || 0), y)[0];
+      if (h.kind === 'F') { if (!locked('x' + h.i)) setVal('x' + h.i, wx, posStep()); }
+      else if (h.kind === 'W') { if (!locked('xG') && !uniform.get()) setVal('xG', wx, posStep()); }
+      else if (h.kind === 'pos') setVal(h.key, wx, posStep());
+      else if (h.kind === 'O') setVal('xO', wx, 0.01);
+      else if (h.kind === 'cf') {
+        var a = SIM.view.screenAngle(h.bx, scene.by, x, y);
+        if (h.i === 0) a = (a + 180) % 360;
+        if (a > 180) a = a > 270 ? 0 : 180;
+        setVal('thc', a, 1);
+      }
+    },
+    onTap: function (h, x, y) {
+      if (h.kind === 'F') { if (!locked('F' + h.i)) ask('F' + h.i, x, y, 'Size of force F' + SUBS[h.i], 'Type the magnitude in newtons.', [10, 50, 100, 200]); }
+      else if (h.kind === 'W') { if (!locked('W')) ask('W', x, y, 'Weight of the beam W', '0 makes it a light beam.', [0, 10, 50, 100]); }
+      else if (h.kind === 'L') ask('L', x, y, 'Length of the beam L', 'Positions along the beam are kept within 0 to L.', [1, 2, 4, 6]);
+      else if (h.kind === 'pos') ask(h.key, x, y, { xP: 'Pivot position x<sub>P</sub>', xA: 'Support A position x<sub>A</sub>', xB: 'Support B position x<sub>B</sub>', xO: 'Take moments about O at x<sub>O</sub>' }[h.key], 'Distance from the left end of the beam.');
+      else if (h.kind === 'O') ask('xO', x, y, 'Take moments about O at x<sub>O</sub>', 'Distance from the left force.');
+      else if (h.kind === 'cf') ask('Fc', x, y, 'Each force of the couple F', 'Type the magnitude in newtons.', [5, 10, 15, 20]);
+      else if (h.kind === 'cd') ask('dc', x, y, 'Distance between the forces d', 'Length of the bar between the points of application.', [0.2, 0.4, 0.5, 1]);
+    },
+    onHover: function () { draw(); }
+  });
+  function tip() {
+    ui.stageTip(mode.get() === 'couple' ? 'Drag an arrow tip to change θ · tap it to type F · drag O · tap the bar end to type d'
+      : 'Drag a force along the beam · tap its arrow to type its size · drag the ' + (mode.get() === 'pin' ? 'pivot' : 'supports') + ' or O · tap the beam end to type L');
   }
 
   ui.onTheme(draw);

@@ -4,199 +4,231 @@
 <meta charset="utf-8">
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>A Level Mechanics & Physics Simulations</title>
+<title>A Level Sims · Mechanics &amp; Physics you can touch</title>
 <link rel="stylesheet" href="assets/theme.css">
 <style>
-  .hub { max-width: 1100px; margin: 0 auto; padding: 18px 20px 60px; }
-  .hub h1 { font-size: 26px; margin: 6px 0 4px; letter-spacing: -.015em; }
-  .hub .lede { color: var(--muted); margin: 0 0 14px; max-width: 760px; }
-  .tabs { display: flex; gap: 6px; margin: 10px 0 18px; flex-wrap: wrap; align-items: center; }
-  .tabs button.tab { font: 600 14px var(--sans); border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
-  .tabs button.tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-  .search { flex: 1 1 220px; font: 14px var(--sans); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
-  .topic { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 6px 18px; padding: 14px 0; border-top: 1px solid var(--line); }
-  @media (max-width: 720px) { .topic { grid-template-columns: minmax(0, 1fr); } }
-  .topic .tname { font-weight: 650; font-size: 15.5px; }
-  .topic .tref { color: var(--muted); font-size: 12.5px; }
-  .sims { display: grid; gap: 10px; }
-  .simcard { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
-  .simcard h3 { margin: 0 0 3px; font-size: 16px; }
-  .simcard h3 a { color: var(--ink); text-decoration: none; }
-  .simcard h3 a:hover { color: var(--accent); }
-  .simcard p { margin: 0 0 9px; font-size: 13px; color: var(--muted); }
-  .modechips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .modechips a { font-size: 13px; text-decoration: none; color: var(--ink); background: var(--chip); border-radius: 999px; padding: 4px 10px; }
-  .modechips a:hover { background: var(--accent); color: var(--accent-ink); }
-  h2.section { font-size: 18px; margin: 30px 0 6px; }
-  .types { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; align-items: start; }
-  .types details { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
-  .types summary { font-size: 14px; color: var(--ink); font-weight: 600; }
-  .types summary .n { color: var(--muted); font-weight: 400; }
-  .types ol { font-size: 12.5px; padding-left: 18px; max-height: 320px; overflow: auto; margin: 8px 0 4px; }
-  .types li { margin: 4px 0; }
-  .types .ref { font-family: var(--mono); color: var(--muted); }
-  .types .open { font-size: 12.5px; }
-  .types .subs { font-size: 12px; color: var(--muted); margin: 4px 0; }
-  .types .sub { font-size: 11px; background: var(--chip); border-radius: 4px; padding: 0 5px; color: var(--muted); }
-  .empty { color: var(--muted); font-size: 13px; }
-  .alsoin { font-size: 13px; color: var(--muted); padding: 2px 2px; }
-  .start { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 0 0 8px; }
-  .start h2 { font-size: 16px; margin: 0 0 4px; }
-  .start .sub { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
-  .start .learnbtn { display: inline-block; text-decoration: none; background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 14px; padding: 8px 14px; border-radius: 8px; margin-bottom: 12px; }
-  .start ol { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; counter-reset: s; }
-  .start li { counter-increment: s; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px 8px 38px; position: relative; font-size: 13px; color: var(--muted); }
-  .start li::before { content: counter(s); position: absolute; left: 10px; top: 8px; width: 20px; height: 20px; border-radius: 50%; background: var(--chip); color: var(--ink); font-weight: 700; font-size: 12px; display: grid; place-items: center; }
-  .start li a { font-weight: 600; font-size: 14px; text-decoration: none; display: block; color: var(--ink); }
-  .start li a:hover { color: var(--accent); }
-  .start .rules { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+  body { overflow-x: hidden; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px 70px; position: relative; z-index: 1; }
+  #sky { position: absolute; left: 0; top: 0; width: 100%; height: 620px; z-index: 0; pointer-events: none; -webkit-mask-image: linear-gradient(#000 55%, transparent); mask-image: linear-gradient(#000 55%, transparent); }
+  .hero { padding: 64px 0 34px; text-align: center; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; box-shadow: var(--shadow); }
+  .pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 25%, transparent); }
+  .hero h1 { font-size: clamp(34px, 6.2vw, 68px); line-height: 1.02; letter-spacing: -.045em; margin: 18px auto 14px; max-width: 900px; font-weight: 800; }
+  .grad { background: linear-gradient(100deg, #6d5dfc 0%, #b25cf6 45%, #22c3b5 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p.sub { font-size: clamp(15px, 2vw, 19px); color: var(--muted); max-width: 640px; margin: 0 auto; }
+
+  .courses { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 34px; }
+  @media (max-width: 820px) { .courses { grid-template-columns: minmax(0, 1fr); } }
+  .course { --a: #5146e5; --b: #9a3ff0; position: relative; display: flex; flex-direction: column; min-height: 400px; border-radius: 28px; overflow: hidden; text-decoration: none; color: #fff;
+    background: linear-gradient(150deg, var(--a), var(--b)); box-shadow: 0 30px 80px -20px color-mix(in srgb, var(--a) 60%, transparent); transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s; isolation: isolate; }
+  .course.phys { --a: #0b8f8a; --b: #0e74c4; }
+  .course::before { content: ""; position: absolute; inset: 0; background: radial-gradient(420px 260px at 85% 0%, rgba(255,255,255,.28), transparent 70%), linear-gradient(to top, rgba(0,0,0,.28), transparent 55%); z-index: -1; }
+  .course:hover { transform: translateY(-6px); box-shadow: 0 40px 90px -20px color-mix(in srgb, var(--a) 75%, transparent); }
+  .course:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
+  .course .art { height: 190px; position: relative; }
+  .course .art svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .course .body { padding: 0 26px 24px; display: flex; flex-direction: column; flex: 1; }
+  .course .code { font: 700 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; opacity: .85; }
+  .course h2 { font-size: 30px; margin: 4px 0 6px; letter-spacing: -.03em; line-height: 1.1; }
+  .course p { margin: 0 0 16px; opacity: .92; font-size: 14.5px; max-width: 460px; }
+  .course .meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  .course .meta span { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.26); border-radius: 999px; padding: 5px 11px; font-size: 12.5px; font-weight: 600; }
+  .course .enter { margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 20px; border-radius: 14px; background: #fff; color: #161a2c; font-weight: 750; font-size: 15px; box-shadow: 0 10px 24px rgba(0,0,0,.18); }
+  .course .enter b { transition: transform .2s; }
+  .course:hover .enter b { transform: translateX(4px); }
+  /* card art animations */
+  .slide { animation: slide 4.5s cubic-bezier(.45,0,.55,1) infinite alternate; transform-box: fill-box; }
+  @keyframes slide { from { transform: translate(0, 0); } to { transform: translate(-70px, 30.6px); } }
+  .wave { animation: wave 3s linear infinite; }
+  @keyframes wave { to { transform: translateX(-80px); } }
+  .dash { stroke-dasharray: 6 8; animation: dash 1.2s linear infinite; }
+  @keyframes dash { to { stroke-dashoffset: -28; } }
+  .ball { offset-path: path("M30 160 Q 150 -40 270 160"); animation: fly 3.2s cubic-bezier(.3,.2,.7,.8) infinite; }
+  @keyframes fly { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 26px 0 0; }
+  @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); }
+  .stat b { display: block; font-size: 28px; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 13px; }
+
+  h3.section { font-size: 20px; letter-spacing: -.02em; margin: 40px 0 12px; display: flex; align-items: center; gap: 10px; }
+  .recent { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+  .recent a { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); text-decoration: none; color: var(--ink); box-shadow: var(--shadow); transition: border-color .15s, transform .15s; }
+  .recent a:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .recent .dot { flex: none; width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; font: 800 11px var(--mono); color: #fff; background: linear-gradient(135deg, #5146e5, #9a3ff0); }
+  .recent .dot.p { background: linear-gradient(135deg, #0b8f8a, #0e74c4); }
+  .recent small { display: block; color: var(--muted); font-size: 12px; }
+
+  .features { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 900px) { .features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 520px) { .features { grid-template-columns: minmax(0, 1fr); } }
+  .feat { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px; box-shadow: var(--shadow); }
+  .feat .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; margin-bottom: 12px; box-shadow: 0 8px 20px var(--glow); }
+  .feat .ic svg { width: 22px; height: 22px; }
+  .feat h4 { margin: 0 0 4px; font-size: 15px; }
+  .feat p { margin: 0; color: var(--muted); font-size: 13.5px; }
+  footer { margin-top: 48px; color: var(--muted); font-size: 12.5px; text-align: center; }
 </style>
-<script src="core/util.js"></script>
-<script src="core/ui.js"></script>
 <script src="catalog/groups.js"></script>
-<script src="catalog/9709-plane.js"></script>
-<script src="catalog/9709-forces.js"></script>
-<script src="catalog/9709-kinematics.js"></script>
-<script src="catalog/9709-dynamics.js"></script>
-<script src="catalog/9702-projectile.js"></script>
-<script src="catalog/9702-t1to3.js"></script>
-<script src="catalog/9702-t4to7.js"></script>
-<script src="catalog/9702-t8to11.js"></script>
-<!-- tagged past-paper Paper 4 questions (generated by tools/papers) -->
-<script src="data/p4-questions.js"></script>
 </head>
 <body>
-<div class="hub">
-  <h1>A Level Mechanics &amp; Physics Simulations</h1>
-  <p class="lede">Cambridge 9709 Paper 4 Mechanics (g = 10) and 9702 AS Physics (g = 9.81). One simulation per idea: open it, then pick a mode or an exam setup inside. Every parameter has a slider, and the working is shown with your numbers.</p>
-  <div class="tabs" role="tablist">
-    <button class="tab" role="tab" data-c="9709" aria-selected="true">9709 Mechanics</button>
-    <button class="tab" role="tab" data-c="9702" aria-selected="false">9702 AS Physics</button>
-    <input class="search" type="search" placeholder="Search, e.g. pulley, power, projectile, friction…" aria-label="Search">
-    <button class="theme-btn" id="themeBtn">Light / dark</button>
+<canvas id="sky" aria-hidden="true"></canvas>
+<header class="sim-head">
+  <a class="brand" href="index.html" aria-label="Dashboard"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18c3-9 8-12 16-12"/><circle cx="4" cy="18" r="1.6" fill="#fff"/><path d="M15 6h5v5"/></svg></span><span>A Level Sims</span></a>
+  <button class="theme-btn" id="themeBtn" aria-label="Switch light or dark theme">◐ <span style="margin-left:6px">Theme</span></button>
+</header>
+<div class="wrap">
+  <section class="hero">
+    <span class="pill"><i></i>Cambridge 9709 Mechanics · 9702 AS Physics</span>
+    <h1>See the physics.<br><span class="grad">Move the numbers.</span></h1>
+    <p class="sub">Interactive simulations where you drag the forces, aim the projectile and watch the working update like a mark scheme. Built from real past papers.</p>
+  </section>
+
+  <section class="courses" aria-label="Choose a course">
+    <a class="course mech" href="course.html?c=9709">
+      <div class="art" aria-hidden="true">
+        <svg viewBox="0 0 400 190" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M40 170 H360 V30 Z" stroke-width="2.5" fill="rgba(255,255,255,.08)"/>
+          <path d="M60 170 a 20 20 0 0 0 -2 -9" stroke-width="2" opacity=".8"/>
+          <g class="slide">
+            <g transform="translate(266 82) rotate(-23.6)">
+              <rect x="-22" y="-30" width="44" height="30" rx="5" fill="rgba(255,255,255,.95)" stroke="none"/>
+              <path d="M0 -15 V-62" stroke="#c9d6ff" stroke-width="3"/><path d="M-5 -55 L0 -64 L5 -55" stroke="#c9d6ff" stroke-width="3"/>
+              <path d="M22 -10 H62" stroke="#ffe7a0" stroke-width="3"/><path d="M55 -15 L64 -10 L55 -5" stroke="#ffe7a0" stroke-width="3"/>
+            </g>
+            <path d="M260 68 V128" stroke="#ffd0c4" stroke-width="3"/><path d="M255 121 L260 130 L265 121" stroke="#ffd0c4" stroke-width="3"/>
+          </g>
+          <path class="dash" d="M70 40 H180" stroke-width="2" opacity=".6"/>
+          <text x="70" y="30" fill="#fff" stroke="none" font-size="13" font-family="ui-monospace,monospace" opacity=".85">R = mg cos θ</text>
+        </svg>
+      </div>
+      <div class="body">
+        <span class="code">Mathematics 9709 · Paper 4</span>
+        <h2>Mechanics</h2>
+        <p>Forces and equilibrium, straight-line motion, momentum, Newton’s laws, energy and power.</p>
+        <div class="meta"><span id="m9709">simulations</span><span>g = 10</span><span>Guided first lesson</span></div>
+        <span class="enter">Enter Mechanics <b>→</b></span>
+      </div>
+    </a>
+    <a class="course phys" href="course.html?c=9702">
+      <div class="art" aria-hidden="true">
+        <svg viewBox="0 0 400 190" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+          <g opacity=".55"><path class="wave" d="M0 150 q 20 -26 40 0 t 40 0 t 40 0 t 40 0 t 40 0 t 40 0 t 40 0 t 40 0 t 40 0 t 40 0 t 40 0 t 40 0" stroke-width="2.5"/></g>
+          <path d="M30 160 Q 150 -40 270 160" stroke-width="2" opacity=".7" stroke-dasharray="2 7"/>
+          <path d="M20 160 H380" stroke-width="2" opacity=".6"/>
+          <circle class="ball" r="9" fill="#fff" stroke="none"/>
+          <path d="M30 160 L70 112" stroke="#d6fff7" stroke-width="3"/><path d="M60 113 L71 111 L69 122" stroke="#d6fff7" stroke-width="3"/>
+          <text x="300" y="40" fill="#fff" stroke="none" font-size="13" font-family="ui-monospace,monospace" opacity=".85">v = fλ</text>
+        </svg>
+      </div>
+      <div class="body">
+        <span class="code">Physics 9702 · AS Level</span>
+        <h2>AS Physics</h2>
+        <p>Uncertainties, kinematics, dynamics, forces, energy, materials, waves, superposition, circuits and particles.</p>
+        <div class="meta"><span id="m9702">simulations</span><span>g = 9.81</span><span>Topics 1–11</span></div>
+        <span class="enter">Enter AS Physics <b>→</b></span>
+      </div>
+    </a>
+  </section>
+
+  <section class="stats" aria-label="What is inside">
+    <div class="stat"><b id="sSims">16</b><span>simulations</span></div>
+    <div class="stat"><b id="sModes">46</b><span>modes to explore</span></div>
+    <div class="stat"><b>1,081</b><span>past-paper questions tagged</span></div>
+    <div class="stat"><b>121</b><span>Paper 4s, 2018–2026</span></div>
+  </section>
+
+  <div id="recentWrap" style="display:none">
+    <h3 class="section">Continue where you left off</h3>
+    <div class="recent" id="recent"></div>
   </div>
-  <div id="start"></div>
-  <div id="list"></div>
-  <h2 class="section" id="ppHead">Past Paper 4 questions by type</h2>
-  <p class="lede" id="ppNote" style="margin-top:0"></p>
-  <div id="types" class="types"></div>
+
+  <h3 class="section">Built for learning, not just watching</h3>
+  <section class="features">
+    <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 11V5a2 2 0 1 1 4 0v6"/><path d="M13 9a2 2 0 1 1 4 0v3a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-3l-2-4a2 2 0 0 1 3-2l2 2"/></svg></div><h4>Touch the diagram</h4><p>Drag a force or a launch arrow, then type the exact value. The numbers sit on the simulation, not in a far-away panel.</p></div>
+    <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h12l4 4v12H4z"/><path d="M8 12h8M8 16h5"/></svg></div><h4>Real exam set-ups</h4><p>One tap loads a past-paper question, checked against its mark scheme.</p></div>
+    <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M5 12h10M5 17h7"/><path d="m16 16 2 2 4-4"/></svg></div><h4>Working like a mark scheme</h4><p>Every equation is written out with your numbers, to 3 significant figures.</p></div>
+    <div class="feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/></svg></div><h4>Exam mode</h4><p>Hide the answers, try it yourself, then tap each line to check one step at a time.</p></div>
+  </section>
+
+  <footer>Past-paper content © Cambridge University Press &amp; Assessment (UCLES). For personal study use.</footer>
 </div>
 <script>
 (function () {
   'use strict';
-  var ui = SIM.ui, h = ui.h, esc = ui.esc;
-  var TOPICS = {
-    '9709': [
-      ['9709-M1', 'Forces and equilibrium', '4.1'], ['9709-M2', 'Kinematics in a straight line', '4.2'], ['9709-M3', 'Momentum', '4.3'],
-      ['9709-M4', 'Newton’s laws of motion', '4.4'], ['9709-M5', 'Energy, work and power', '4.5']],
-    '9702': [
-      ['9702-1', 'Physical quantities and units', 'Topic 1'], ['9702-2', 'Kinematics', 'Topic 2'], ['9702-3', 'Dynamics', 'Topic 3'],
-      ['9702-4', 'Forces, density and pressure', 'Topic 4'], ['9702-5', 'Work, energy and power', 'Topic 5'], ['9702-6', 'Deformation of solids', 'Topic 6'],
-      ['9702-7', 'Waves', 'Topic 7'], ['9702-8', 'Superposition', 'Topic 8'], ['9702-9', 'Electricity', 'Topic 9'], ['9702-10', 'D.C. circuits', 'Topic 10'],
-      ['9702-11', 'Particle physics', 'Topic 11']]
-  };
-  var GROUPS = window.SIM_GROUPS || [], CAT = window.SIM_CATALOG || [];
-  var state = { c: '9709', q: '' };
-  try { var sc = localStorage.getItem('hub-course'); if (sc === '9702' || sc === '9709') state.c = sc; } catch (e) { /* ignore */ }
-
-  function groupUrl(g, m, preset) { return 'group.html?g=' + g.id + (m ? '&m=' + m.id : '') + (preset !== undefined && preset !== null ? '&preset=' + preset : ''); }
-  /** searchable text for a group: its title, summary, mode labels and the question types of its pages */
-  function hay(g) {
-    var t = g.title + ' ' + g.summary + ' ' + g.modes.map(function (m) { return m.label; }).join(' ');
-    g.modes.forEach(function (m) { CAT.forEach(function (e) { if (e.path === m.path) t += ' ' + (e.summary || '') + ' ' + (e.questionTypes || []).map(function (x) { return x.text; }).join(' '); }); });
-    return t.toLowerCase();
-  }
-  /** find the group/mode that shows a sim id (for past-paper links) */
-  function locate(simId, course) {
-    for (var i = 0; i < GROUPS.length; i++) {
-      var g = GROUPS[i]; if (g.course !== course) continue;
-      for (var j = 0; j < g.modes.length; j++) if (g.modes[j].path.indexOf('/' + simId + '.html') >= 0) return groupUrl(g, g.modes[j]);
-    }
-    return null;
-  }
-
-  function renderStart() {
-    var box = document.getElementById('start'); box.innerHTML = '';
-    if (state.c !== '9709' || state.q) return;
-    // syllabus order: 4.1 first (resolving is used everywhere), 4.2 alongside it, then 4.4 and 4.5 which need both; 4.3 is self-contained
-    box.innerHTML =
-      '<section class="start" aria-labelledby="startH"><h2 id="startH">New to mechanics? Start here</h2>' +
-      '<p class="sub">A guided first lesson that goes one idea at a time, then the topics in an order where each one builds on the last.</p>' +
-      '<a class="learnbtn" href="learn/equilibrium.html">Learn: a particle held by two strings (11 short steps) →</a>' +
-      '<ol>' +
-      '<li><a href="group.html?g=forces">Forces and equilibrium</a>4.1: resolving forces, used in every later topic</li>' +
-      '<li><a href="group.html?g=kinematics">Straight-line motion</a>4.2: v–t graphs, constant acceleration, calculus</li>' +
-      '<li><a href="group.html?g=newton">Slopes, pulleys and lifts</a>4.4: F = ma, needs 4.1 and 4.2</li>' +
-      '<li><a href="group.html?g=energy">Work and energy</a>4.5: work–energy and power, needs 4.4</li>' +
-      '<li><a href="group.html?g=momentum">Momentum and collisions</a>4.3: self-contained, often combined with 4.2</li>' +
-      '</ol>' +
-      '<p class="rules">Every 9709 Paper 4: use g = 10 m s<sup>−2</sup>, give answers to 3 significant figures and angles to 1 decimal place, and write out each equation you use. ' +
-      '9702 AS Physics is a separate course (g = 9.81).</p></section>';
-  }
-
-  function render() {
-    renderStart();
-    document.querySelectorAll('.tabs .tab').forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-c') === state.c)); });
-    var list = document.getElementById('list'); list.innerHTML = '';
-    var q = state.q.toLowerCase();
-    TOPICS[state.c].forEach(function (tp) {
-      var gs = GROUPS.filter(function (g) { return g.course === state.c && g.topics.indexOf(tp[0]) >= 0 && (!q || hay(g).indexOf(q) >= 0); });
-      if (q && !gs.length) return;
-      var sims = h('div', { class: 'sims' });
-      // a simulation gets its full card only under its MAIN topic (topics[0]); elsewhere a one-line "also in" link
-      var also = gs.filter(function (g) { return g.topics[0] !== tp[0]; });
-      gs = gs.filter(function (g) { return g.topics[0] === tp[0]; });
-      gs.forEach(function (g) {
-        var chips = h('div', { class: 'modechips' });
-        if (g.modes.length > 1) g.modes.forEach(function (m) { chips.appendChild(h('a', { href: groupUrl(g, m), text: m.label })); });
-        sims.appendChild(h('div', { class: 'simcard' }, [h('h3', {}, [h('a', { href: groupUrl(g), text: g.title })]), h('p', { text: g.summary }), chips]));
-      });
-      if (also.length) {
-        var line = h('div', { class: 'alsoin' }, [document.createTextNode(gs.length ? 'Also used here: ' : 'Covered in: ')]);
-        also.forEach(function (g, i) { if (i) line.appendChild(document.createTextNode(', ')); line.appendChild(h('a', { href: groupUrl(g), text: g.title })); });
-        sims.appendChild(line);
-      }
-      if (!gs.length && !also.length) sims.appendChild(h('div', { class: 'empty', text: 'Coming soon.' }));
-      list.appendChild(h('section', { class: 'topic' }, [h('div', {}, [h('div', { class: 'tname', text: tp[1] }), h('div', { class: 'tref', text: state.c + ' · ' + tp[2] })]), sims]));
-    });
-    if (!list.children.length) list.appendChild(h('div', { class: 'empty', text: 'No simulation matches “' + state.q + '”.' }));
-    renderTypes(q);
-  }
-
-  function renderTypes(q) {
-    var box = document.getElementById('types'); box.innerHTML = '';
-    var types = (window.P4_TYPES || []).filter(function (t) { return t.subject === state.c; });
-    document.getElementById('ppHead').style.display = types.length ? '' : 'none';
-    document.getElementById('ppNote').textContent = state.c === '9702'
-      ? '9702 Paper 4 is the A Level paper (topics 12–25), so these questions go beyond the AS simulations above. Papers 2018–2021 include the old electronics and communication topics.'
-      : 'Every 9709 Paper 4 question from 2018 to 2026, grouped by situation. Open a type to see the questions and its simulation.';
-    types.forEach(function (t) {
-      var items = t.items || [];
-      if (q && (t.name + ' ' + items.map(function (i) { return i.text; }).join(' ')).toLowerCase().indexOf(q) < 0) return;
-      var det = h('details');
-      det.appendChild(h('summary', { html: esc(t.name) + ' <span class="n">(' + items.length + ')</span>' }));
-      var gEntry = t.group ? GROUPS.filter(function (g) { return g.id === t.group; })[0] : null;
-      var mEntry = gEntry ? gEntry.modes.filter(function (m) { return m.id === t.mode; })[0] : null;
-      var url = gEntry ? groupUrl(gEntry, mEntry) : (t.sim ? locate(t.sim, t.subject) : null);
-      if (url) det.appendChild(h('div', { class: 'open' }, [h('a', { href: url, text: 'Open the simulation for this type →' })]));
-      var ol = h('ol');
-      if (t.subtypes && t.subtypes.length > 1) det.appendChild(h('div', { class: 'subs', text: 'Includes: ' + t.subtypes.join(' · ') }));
-      items.forEach(function (it) { ol.appendChild(h('li', { html: '<span class="ref">' + esc(it.ref) + (it.marks ? ' [' + esc(it.marks) + ']' : '') + '</span> ' + (it.sub && t.subtypes && t.subtypes.length > 1 ? '<span class="sub">' + esc(it.sub) + '</span> ' : '') + esc(it.text) })); });
-      det.appendChild(ol); box.appendChild(det);
-    });
-  }
-
-  document.querySelectorAll('.tabs .tab').forEach(function (b) {
-    b.addEventListener('click', function () { state.c = b.getAttribute('data-c'); try { localStorage.setItem('hub-course', state.c); } catch (e) { /* ignore */ } render(); });
-  });
-  document.querySelector('.search').addEventListener('input', function (e) { state.q = e.target.value.trim(); render(); });
   try { var th = localStorage.getItem('sim-theme'); if (th) document.documentElement.setAttribute('data-theme', th); } catch (e) { /* ignore */ }
   document.getElementById('themeBtn').addEventListener('click', function () {
     var d = document.documentElement, cur = d.getAttribute('data-theme');
     var dark = cur ? cur === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
     d.setAttribute('data-theme', dark ? 'light' : 'dark'); try { localStorage.setItem('sim-theme', dark ? 'light' : 'dark'); } catch (e) { /* ignore */ }
   });
-  render();
+
+  /* counts from the catalogue */
+  var G = window.SIM_GROUPS || [];
+  function count(c) { return G.filter(function (g) { return g.course === c; }).length; }
+  document.getElementById('m9709').textContent = count('9709') + ' simulations';
+  document.getElementById('m9702').textContent = count('9702') + ' simulations';
+  document.getElementById('sSims').textContent = G.length;
+  document.getElementById('sModes').textContent = G.reduce(function (n, g) { return n + g.modes.length; }, 0);
+
+  /* recently opened simulations (saved by group.html on this device only) */
+  var rec = [];
+  try { rec = JSON.parse(localStorage.getItem('recent-sims') || '[]'); } catch (e) { rec = []; }
+  if (rec.length) {
+    var box = document.getElementById('recent');
+    rec.slice(0, 6).forEach(function (r) {
+      var a = document.createElement('a'); a.href = r.url;
+      a.innerHTML = '<span class="dot' + (r.course === '9702' ? ' p' : '') + '">' + (r.course === '9702' ? 'PHY' : 'MEC') + '</span><span><span class="t"></span><small></small></span>';
+      a.querySelector('.t').textContent = r.title; a.querySelector('small').textContent = r.mode || '';
+      box.appendChild(a);
+    });
+    document.getElementById('recentWrap').style.display = '';
+  }
+
+  /* hero background: projectiles launched across the sky, leaving trails */
+  var cv = document.getElementById('sky'), c = cv.getContext('2d'), W = 0, H = 0, dpr = Math.min(2, window.devicePixelRatio || 1);
+  var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function size() { W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr; c.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  size(); window.addEventListener('resize', function () { size(); if (still) paintStill(); });
+  var COLS = ['#6d5dfc', '#b25cf6', '#22c3b5', '#38bdf8', '#f472b6'], shots = [];
+  function launch() {
+    var fromLeft = Math.random() < 0.5, u = 260 + Math.random() * 160, a = (48 + Math.random() * 28) * Math.PI / 180;
+    shots.push({ x: fromLeft ? -10 : W + 10, y: H * (0.55 + Math.random() * 0.25), vx: (fromLeft ? 1 : -1) * u * Math.cos(a), vy: -u * Math.sin(a), trail: [], col: COLS[(Math.random() * COLS.length) | 0], life: 0 });
+  }
+  function paintShot(s, alpha) {
+    c.lineWidth = 2; c.lineCap = 'round';
+    for (var i = 1; i < s.trail.length; i++) {
+      c.strokeStyle = s.col; c.globalAlpha = alpha * (i / s.trail.length) * 0.55;
+      c.beginPath(); c.moveTo(s.trail[i - 1][0], s.trail[i - 1][1]); c.lineTo(s.trail[i][0], s.trail[i][1]); c.stroke();
+    }
+    var p = s.trail[s.trail.length - 1]; if (!p) return;
+    c.globalAlpha = alpha; c.fillStyle = s.col; c.beginPath(); c.arc(p[0], p[1], 3.5, 0, 7); c.fill();
+    c.globalAlpha = alpha * 0.25; c.beginPath(); c.arc(p[0], p[1], 10, 0, 7); c.fill(); c.globalAlpha = 1;
+  }
+  function paintStill() {
+    c.clearRect(0, 0, W, H);
+    for (var k = 0; k < 5; k++) {
+      var s = { trail: [], col: COLS[k] }, x0 = W * (0.05 + k * 0.2), y0 = H * 0.7, u = 300, a = (50 + k * 6) * Math.PI / 180;
+      for (var t = 0; t < 1.6; t += 0.02) s.trail.push([x0 + u * Math.cos(a) * t * 0.6, y0 - u * Math.sin(a) * t + 0.5 * 420 * t * t]);
+      paintShot(s, 0.7);
+    }
+  }
+  if (still) { paintStill(); return; }
+  var last = performance.now(), next = 0;
+  function frame(now) {
+    var dt = Math.min(0.05, (now - last) / 1000); last = now; next -= dt;
+    if (next <= 0 && shots.length < 6) { launch(); next = 0.9 + Math.random() * 1.2; }
+    c.clearRect(0, 0, W, H);
+    shots.forEach(function (s) {
+      s.vy += 420 * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.life += dt;
+      s.trail.push([s.x, s.y]); if (s.trail.length > 70) s.trail.shift();
+      paintShot(s, Math.min(1, s.life * 2));
+    });
+    shots = shots.filter(function (s) { return s.y < H + 40 && s.x > -60 && s.x < W + 60; });
+    if (!document.hidden) requestAnimationFrame(frame); else setTimeout(function () { last = performance.now(); requestAnimationFrame(frame); }, 500);
+  }
+  requestAnimationFrame(frame);
 })();
 </script>
 </body>

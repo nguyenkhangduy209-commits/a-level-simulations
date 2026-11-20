@@ -191,7 +191,7 @@
     var ks = mr > 3 ? 3 / mr : 1;
     if (v.h > 0) ks = Math.min(ks, 3.2 / v.h);
     if (v.dP > 0) ks = Math.min(ks, 4.5 / v.dP);
-    var G = { ks: ks, tracks: [], pulleys: [], strings: [], polys: [], floors: [], lines: [] };
+    var G = { ks: ks, tracks: [], pulleys: [], strings: [], polys: [], floors: [], lines: [], slopes: [] };
     var dirOf = function (alphaDeg) { return [Math.cos(rad(alphaDeg)), Math.sin(rad(alphaDeg))]; };
     var hf = v.h > 0 ? v.h * ks : null, dp = v.dP > 0 ? v.dP * ks : null;
     if (c === 'atwood') {
@@ -207,6 +207,7 @@
       var th = c === 'table' ? 0 : v.th1, e = dirOf(th), L = 7, pulX = 0, pulY = 5;
       var start = [pulX - e[0] * L, pulY - e[1] * L];
       G.polys.push(c === 'table' ? [[pulX - L, pulY], [pulX, pulY], [pulX, 0], [pulX - L, 0]] : [start, [pulX, pulY], [pulX, start[1]]]);
+      if (c === 'incline') G.slopes.push({ key: 'th1', pivot: [pulX, pulY], end: start, ux: -1, uy: -1 });
       var dA = dp !== null ? dp : L * 0.55;
       G.tracks[idxOf('A')] = { p0: [pulX - e[0] * dA, pulY - e[1] * dA], e: e, angle: th };
       var yB2 = pulY - 1.4, floorY = hf !== null ? yB2 - hf : Math.min(0, start[1]);
@@ -222,6 +223,7 @@
       var e2 = dirOf(-v.th2), s2 = [apex[0] + e2[0] * L1, apex[1] + e2[1] * L1];
       var baseY = Math.min(s1[1], s2[1]);
       G.polys.push([[s1[0], baseY], s1, apex, s2, [s2[0], baseY]]);
+      G.slopes.push({ key: 'th1', pivot: apex, end: s1, ux: -1, uy: -1 }, { key: 'th2', pivot: apex, end: s2, ux: 1, uy: -1 });
       var dA2 = dp !== null ? dp : L1 * 0.5;
       G.tracks[idxOf('A')] = { p0: [apex[0] - e1[0] * dA2, apex[1] - e1[1] * dA2], e: e1, angle: v.th1 };
       G.tracks[idxOf('B')] = { p0: [apex[0] + e2[0] * dA2, apex[1] + e2[1] * dA2], e: e2, angle: -v.th2 };
@@ -233,6 +235,7 @@
       var Apt = [corner[0] - a1[0] * La, corner[1] - a1[1] * La], Cpt = [corner[0] + a2[0] * Lb, corner[1] + a2[1] * Lb];
       var bY = Math.min(Apt[1], 0);
       G.polys.push([[Apt[0], bY], Apt, corner, Cpt, [Cpt[0], bY]]);
+      G.slopes.push({ key: 'th1', pivot: corner, end: Apt, ux: -1, uy: -1 }, { key: 'th2', pivot: corner, end: Cpt, ux: 1, uy: 1 });
       var dB = dp !== null ? dp : Lb * 0.5;
       // B moves down BC towards the corner (e_B = −a2), A moves down AB away from the corner (e_A = −a1)
       G.tracks[idxOf('B')] = { p0: [corner[0] + a2[0] * dB, corner[1] + a2[1] * dB], e: [-a2[0], -a2[1]], angle: v.th2 };
@@ -245,6 +248,7 @@
       var es = dirOf(v.th1), Ls = 5, p1 = [0, 5], p2 = [6, 5];
       var ss = [p1[0] - es[0] * Ls, p1[1] - es[1] * Ls];
       G.polys.push([ss, p1, p2, [p2[0], Math.min(ss[1], 0)], [ss[0], Math.min(ss[1], 0)]]);
+      G.slopes.push({ key: 'th1', pivot: p1, end: ss, ux: -1, uy: -1 });
       G.tracks[idxOf('A')] = { p0: [p1[0] - es[0] * Ls * 0.5, p1[1] - es[1] * Ls * 0.5], e: es, angle: v.th1 };
       var dBx = dp !== null ? dp : 3;
       G.tracks[idxOf('B')] = { p0: [p2[0] - dBx, p2[1]], e: [1, 0], angle: 0 };
@@ -260,6 +264,7 @@
       var ep = dirOf(v.th1), Lp = 10, o = [0, 0];
       var top2 = [ep[0] * Lp, ep[1] * Lp];
       G.polys.push(v.th1 > 0 ? [o, top2, [top2[0], 0]] : [[0, 0], [Lp, 0], [Lp, -0.4], [0, -0.4]]);
+      G.slopes.push({ key: 'th1', pivot: o, end: top2, ux: 1, uy: 1 });
       var gap = v.len * ks;
       G.tracks[idxOf('A')] = { p0: [ep[0] * (Lp * 0.42 - gap / 2), ep[1] * (Lp * 0.42 - gap / 2)], e: ep, angle: v.th1 };
       G.tracks[idxOf('B')] = { p0: [ep[0] * (Lp * 0.42 + gap / 2), ep[1] * (Lp * 0.42 + gap / 2)], e: ep, angle: v.th1 };
@@ -284,7 +289,8 @@
     });
     G.floors.forEach(function (f) { D.ground(c, vp.X(f[0]), vp.Y(f[1]), vp.X(f[2]), vp.Y(f[3])); });
     G.lines.forEach(function (l) { D.label(c, l.t, vp.X(l.p[0]) - 10, vp.Y(l.p[1]) - 10, col.muted, { size: 12, bold: true }); });
-    if (sim.invalid) { D.label(c, sim.invalid, vp.w / 2, 18, col.warn, { bold: true }); return; }
+    scene = { slopes: G.slopes.map(function (sl) { return { key: sl.key, px: vp.X(sl.pivot[0]), py: vp.Y(sl.pivot[1]), x: vp.X(sl.end[0]), y: vp.Y(sl.end[1]), ux: sl.ux, uy: sl.uy }; }), parts: [], mus: [] };
+    if (sim.invalid) { D.label(c, sim.invalid, vp.w / 2, 18, col.warn, { bold: true }); if (ix) ix.paint(c); return; }
     var st = sim.stateAt(clock.t), P = built.particles, N = P.length;
     var scr = [], attach = [];
     for (var i = 0; i < N; i++) {
@@ -311,6 +317,9 @@
       var tr2 = G.tracks[j], fill = col[COLS[j]];
       if (tr2.hang) D.particle(c, scr[j][0], scr[j][1], 12, { fill: fill });
       else D.block(c, scr[j][0], scr[j][1], 34, 24, U.rad(tr2.angle || 0), { fill: fill });
+      var mk = MKEY ? MKEY[P[j].name] : null, uk = muKey(P[j].name), nAn = U.rad(tr2.angle || 0), nx = -Math.sin(nAn), ny = -Math.cos(nAn);
+      if (mk) scene.parts.push({ key: mk, name: P[j].name, x: tr2.hang ? scr[j][0] : scr[j][0] + nx * 12, y: tr2.hang ? scr[j][1] : scr[j][1] + ny * 12, color: fill });
+      if (!tr2.hang && uk) scene.mus.push({ key: uk, name: P[j].name, x: scr[j][0] - nx * 24, y: scr[j][1] - ny * 24 });
       var lp = tr2.hang ? [scr[j][0] + 18, scr[j][1]] : [attach[j][0], attach[j][1] - 22];
       D.label(c, P[j].name + ' ' + U.sf(st.m[j]) + ' kg', lp[0], lp[1], col.ink, { size: 12, bold: true, align: tr2.hang ? 'left' : 'center', bg: true });
       if (Math.abs(st.v[j]) > 1e-6) {
@@ -322,6 +331,7 @@
     if (G.ks < 1) D.label(c, 'motion drawn at ' + U.sf(G.ks, 2) + '× scale', vp.w - 8, 12, col.muted, { align: 'right', size: 11 });
     D.label(c, 'positive: ' + built.positive, 8, vp.h - 10, col.muted, { align: 'left', size: 11 });
     if (st.stopped) D.label(c, 'model stopped', vp.w / 2, 14, col.warn, { bold: true });
+    if (ix) ix.paint(c);
   }
 
   /* ---------- free-body diagrams ---------- */
@@ -466,6 +476,51 @@
     }
     R.render();
   }
+
+  /* ---------- direct manipulation: tap a particle for its mass, drag the free end of a slope for its angle, tap under a block for μ ---------- */
+  var scene = null, ix = null, MKEY = { A: 'm1', B: 'm2', C: 'm3' };
+  function muKey(name) {
+    var c = cfgSel.get();
+    if (name === 'A') return c === 'atwood' ? null : 'mu1';
+    if (name === 'B') return (c === 'double' || c === 'step' || c === 'ihh' || c === 'pair') ? 'mu2' : null;
+    return null;
+  }
+  function snap15(a) { a = Math.round(a); var near = Math.round(a / 15) * 15; return Math.abs(a - near) <= 2 ? near : a; }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene) return [];
+      var col = ui.colors(), hs = [];
+      scene.slopes.forEach(function (sl) { hs.push({ id: 'sl-' + sl.key, kind: 'slope', sl: sl, x: sl.x, y: sl.y, color: col.muted }); });
+      scene.mus.forEach(function (q) { hs.push({ id: 'mu-' + q.key, kind: 'mu', q: q, x: q.x, y: q.y, color: col.friction }); });
+      scene.parts.forEach(function (q) { hs.push({ id: 'm-' + q.key, kind: 'm', q: q, x: q.x, y: q.y, color: col.weight }); });
+      return hs;
+    },
+    onDrag: function (hd, x, y) {
+      if (hd.kind !== 'slope' || !scene) return;
+      // use the pivot as drawn now (the view refits as the angle changes)
+      var sl = null; scene.slopes.forEach(function (q) { if (q.key === hd.sl.key) sl = q; }); if (!sl) return;
+      var a = Math.atan2(sl.uy * -(y - sl.py), sl.ux * (x - sl.px)) * 180 / Math.PI;
+      if (a < 0) a = a < -90 ? 80 : 0;
+      var o = {}; o[sl.key] = U.clamp(snap15(a), 0, 80); prm.set(o);
+    },
+    onTap: function (hd, x, y) {
+      if (hd.kind === 'slope') {
+        var key = hd.sl.key;
+        ui.askNumber({ title: 'Angle of slope ' + (key === 'th1' ? '1' : '2'), sub: 'Angle above the horizontal, in degrees.', value: prm.values[key], min: 0, max: 80, step: 1, decimals: 1, unit: '°',
+          at: { x: x, y: y }, quick: [30, 45, 60], onInput: function (v) { var o = {}; o[key] = U.clamp(v, 0, 80); prm.set(o); } });
+      } else if (hd.kind === 'm') {
+        var mk = hd.q.key;
+        ui.askNumber({ title: 'Mass of ' + hd.q.name, sub: 'Type the mass in kilograms' + (prm.values.mC > 0 && cfgObj().mC > 0 ? ' (the extra mass Δm is set separately).' : '.'), value: prm.values[mk], min: 0.05, max: 50, step: 0.1, decimals: 3, unit: 'kg',
+          at: { x: x, y: y }, quick: [0.2, 0.5, 1, 2, 5], onInput: function (v) { var o = {}; o[mk] = U.clamp(v, 0.05, 50); prm.set(o); } });
+      } else if (hd.kind === 'mu') {
+        var uk = hd.q.key;
+        ui.askNumber({ title: 'Coefficient of friction for ' + hd.q.name, sub: '0 means a smooth surface.', value: prm.values[uk], min: 0, max: 1.5, step: 0.05, decimals: 3, unit: '',
+          at: { x: x, y: y }, quick: [0, 0.2, 0.25, 0.4, 0.5], onInput: function (v) { var o = {}; o[uk] = U.clamp(v, 0, 1.5); prm.set(o); } });
+      }
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Tap a particle to type its mass · drag the free end of a slope to change its angle (tap it to type) · tap the surface just under a block for μ');
 
   ui.onTheme(function () { drawScene(); drawFBD(); drawPlots(); });
   vp.onResize = drawScene; fvp.onResize = drawFBD;

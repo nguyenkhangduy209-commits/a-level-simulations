@@ -9,6 +9,10 @@ No install, no build step: plain HTML + canvas + JavaScript.
 - Open `sim/index.html` in a browser, or
 - serve the folder: `python3 -m http.server 8765 --directory sim` and go to http://localhost:8765
 
+`index.html` is the dashboard: pick **9709 Mechanics** or **9702 AS Physics** to open that course's page (`course.html?c=9709|9702`), with a recommended start, a route through the topics, every simulation and the past-paper question types.
+
+**Changing values:** every value is a chip under the simulation. Tap it to type, use − / +, or drag the slider. On force and motion pages you can also drag the diagram directly (arrow tips, launch arrows, string ends, slopes) and draw a new force, then type its size. Design rationale: `docs/ERGONOMICS.md`.
+
 ## What is inside
 
 ### New to mechanics? (`sim/learn/`)

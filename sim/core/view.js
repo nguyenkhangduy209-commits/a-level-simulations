@@ -146,5 +146,68 @@
   /** Choose a force-arrow scale (px per newton) so the largest force is maxPx long. Returns px/N. */
   function forceScale(forces, maxPx) { var m = 0; forces.forEach(function (f) { m = Math.max(m, Math.abs(f)); }); return m > 0 ? (maxPx || 110) / m : 1; }
 
-  SIM.view = { Viewport: Viewport, draw: D, forceScale: forceScale };
+  /* ---------------- direct manipulation on a canvas ----------------
+     interact(canvas, {
+       handles(): [{ id, x, y, r?, kind? }]   screen px; grab radius defaults to 22 px (a 44 px target)
+       onDrag(h, x, y, e)   while a handle is dragged (x, y in canvas px)
+       onDrop(h, x, y)      drag finished
+       onTap(h, x, y)       a handle was tapped without moving (e.g. open a number editor)
+       canDraw(x, y) → bool, onDraw(x0, y0, x, y), onDrawEnd(x0, y0, x, y)   drag on empty space to draw something new
+       onHover(h | null)    redraw so paint() can highlight
+     })
+     paint(ctx): call at the end of a frame to draw grab rings, so students can see what moves.
+     Handles snap nothing themselves: the page decides (e.g. round an angle to 1°). */
+  function interact(canvas, opt) {
+    var drag = null, hover = null, drawing = null, TAP = 6;
+    function pos(e) { var r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+    function hit(x, y, touch) {
+      var hs = (opt.handles && opt.handles()) || [], best = null, bd = Infinity;
+      hs.forEach(function (h) { var d = Math.hypot(h.x - x, h.y - y), r = (h.r || 22) + (touch ? 8 : 0); if (d <= r && d < bd) { bd = d; best = h; } });
+      return best;
+    }
+    function setHover(h) { if ((h && h.id) !== (hover && hover.id)) { hover = h; canvas.style.cursor = h ? 'grab' : (opt.canDraw ? 'crosshair' : ''); if (opt.onHover) opt.onHover(h); } }
+    canvas.addEventListener('pointerdown', function (e) {
+      if (e.button !== undefined && e.button !== 0) return;
+      var p = pos(e), h = hit(p[0], p[1], e.pointerType === 'touch');
+      if (h) { drag = { h: h, x0: p[0], y0: p[1], moved: false }; canvas.style.cursor = 'grabbing'; }
+      else if (opt.canDraw && opt.canDraw(p[0], p[1])) drawing = { x0: p[0], y0: p[1], moved: false };
+      else return;
+      e.preventDefault(); if (canvas.setPointerCapture) try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    });
+    canvas.addEventListener('pointermove', function (e) {
+      var p = pos(e);
+      if (drag) { if (!drag.moved && Math.hypot(p[0] - drag.x0, p[1] - drag.y0) < TAP) return; drag.moved = true; if (opt.onDrag) opt.onDrag(drag.h, p[0], p[1], e); return; }
+      if (drawing) { if (!drawing.moved && Math.hypot(p[0] - drawing.x0, p[1] - drawing.y0) < TAP) return; drawing.moved = true; if (opt.onDraw) opt.onDraw(drawing.x0, drawing.y0, p[0], p[1]); return; }
+      if (e.pointerType !== 'touch') setHover(hit(p[0], p[1], false));
+    });
+    function end(e) {
+      var p = pos(e);
+      if (drag) { var d = drag; drag = null; canvas.style.cursor = hover ? 'grab' : ''; if (d.moved) { if (opt.onDrop) opt.onDrop(d.h, p[0], p[1]); } else if (opt.onTap) opt.onTap(d.h, p[0], p[1]); }
+      if (drawing) { var w = drawing; drawing = null; if (w.moved && opt.onDrawEnd) opt.onDrawEnd(w.x0, w.y0, p[0], p[1]); }
+    }
+    canvas.addEventListener('pointerup', end);
+    canvas.addEventListener('pointercancel', function () { drag = null; drawing = null; });
+    canvas.addEventListener('pointerleave', function (e) { if (!drag && !drawing && e.pointerType !== 'touch') setHover(null); });
+    return {
+      isDragging: function () { return !!drag || !!drawing; },
+      /** draw grab rings around handles: a faint dashed ring always, a solid glow on hover/drag */
+      paint: function (c) {
+        var hs = (opt.handles && opt.handles()) || [], col = SIM.ui.colors(), active = drag ? drag.h.id : hover ? hover.id : null;
+        c.save();
+        hs.forEach(function (h) {
+          if (h.hidden) return;
+          var on = h.id === active;
+          c.beginPath(); c.arc(h.x, h.y, on ? 15 : 11, 0, Math.PI * 2);
+          c.lineWidth = on ? 2.5 : 1.5; c.strokeStyle = h.color || col.accent; c.globalAlpha = on ? 0.95 : 0.55;
+          c.setLineDash(on ? [] : [3, 3]); c.stroke();
+          if (on) { c.globalAlpha = 0.18; c.fillStyle = h.color || col.accent; c.fill(); }
+        });
+        c.restore();
+      }
+    };
+  }
+  /** angle (degrees, anticlockwise from +x) of the screen vector from (x0,y0) to (x,y) */
+  function screenAngle(x0, y0, x, y) { var a = Math.atan2(-(y - y0), x - x0) * 180 / Math.PI; return (a + 360) % 360; }
+
+  SIM.view = { Viewport: Viewport, draw: D, forceScale: forceScale, interact: interact, screenAngle: screenAngle };
 })(typeof self !== 'undefined' ? self : this);

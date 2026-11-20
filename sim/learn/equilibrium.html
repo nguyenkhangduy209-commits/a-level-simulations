@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-course="9709">
 <head>
 <meta charset="utf-8">
 <link rel="icon" href="data:,">
@@ -25,7 +25,7 @@
   .math { font-family: var(--mono); font-size: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 8px 0; overflow-wrap: anywhere; }
   .math .c { color: var(--muted); font-size: 12.5px; font-family: var(--sans); display: block; margin-top: 2px; }
   .choices { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
-  .choices button { font: 14px var(--sans); padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+  .choices button { font: 600 14px var(--sans); min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
   .choices button[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
   .choices button.right { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 16%, transparent); }
   .choices button.wrong { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, transparent); }
@@ -34,7 +34,7 @@
   .fb.no { border-color: var(--warn); }
   .nav { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
   .nav .spacer { flex: 1; }
-  button.btn { font-size: 14px; padding: 7px 12px; }
+  button.btn { min-height: 44px; }
   button.btn:disabled { opacity: .45; cursor: default; }
   .reveal[hidden] { display: none; }
   .ans { display: grid; grid-template-columns: auto 1fr; gap: 6px 8px; align-items: center; margin: 8px 0; }
@@ -49,10 +49,11 @@
 </head>
 <body>
 <header class="sim-head">
-  <a class="crumb" href="../index.html">← All simulations</a>
+  <a class="brand" href="../index.html" aria-label="Dashboard"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18c3-9 8-12 16-12"/><circle cx="4" cy="18" r="1.6" fill="#fff"/><path d="M15 6h5v5"/></svg></span></a>
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="../index.html">Dashboard</a><span class="sep">›</span><a href="../course.html?c=9709">9709 Mechanics</a><span class="sep">›</span></nav>
   <h1>Learn: a particle held by two strings</h1>
   <div class="tags"><span class="chip">9709 4.1 Forces &amp; equilibrium</span><span class="chip g">g = 10 m s<sup>−2</sup></span></div>
-  <button class="theme-btn" id="themeBtn">Light / dark</button>
+  <button class="theme-btn" id="themeBtn" aria-label="Switch light or dark theme">◐ <span style="margin-left:6px">Theme</span></button>
 </header>
 
 <main class="learn">
@@ -391,7 +392,7 @@
         '<p>You can now do the standard 4.1 strings question. Try this one on paper first:</p>' +
         '<div class="math" style="font-family:var(--sans)"><b>9709/41 Oct/Nov 2023 Q2:</b> a particle of mass 2.4 kg hangs in equilibrium from two strings at 35° and 40° to the horizontal. Find the tension in each string.</div>' +
         '<p>Then open it in the full simulation and turn on <b>Exam mode</b>. Tap each line to check your working one step at a time.</p>' +
-        '<p><a class="btn primary" style="display:inline-block;text-decoration:none;padding:7px 12px;border-radius:6px;background:var(--accent);color:var(--accent-ink)" href="../group.html?g=forces&amp;m=strings&amp;preset=3">Open in Strings and rings →</a></p>' +
+        '<p><a class="btn primary" href="../group.html?g=forces&amp;m=strings&amp;preset=3">Open in Strings and rings →</a></p>' +
         '<p style="font-size:13.5px">Where to go next: <a href="../group.html?g=forces&amp;m=friction">friction and limiting equilibrium</a> (still 4.1), then <a href="../group.html?g=newton">slopes, pulleys and lifts</a> (4.4), which use the same resolving.</p>';
     } });
 

@@ -62,9 +62,12 @@
   var top = ui.params(paramCard, [{ key: 'n', label: 'Number of forces', sym: 'n', unit: '', min: 2, max: NMAX, step: 1, value: 3 }], update);
   var defaults = [[10, 0], [20, 90], [15, 210], [12, 300], [8, 135]];
   var blocks = [];
+  // exact numbers for each force live in a collapsed section: the main way in is drawing on the diagram
+  var adv = ui.h('details', { class: 'advanced' }, [ui.h('summary', { text: 'Exact values for each force (or draw them on the diagram)' })]);
+  paramCard.appendChild(adv);
   for (i = 0; i < NMAX; i++) {
     var box = ui.h('div', { style: 'border-top:1px solid var(--line);margin-top:8px;padding-top:4px' });
-    paramCard.appendChild(box);
+    adv.appendChild(box);
     box.appendChild(ui.h('div', { html: '<b>Force ' + (i + 1) + '</b>', style: 'font-size:13.5px;margin-top:4px' }));
     var type = ui.select(box, { label: 'F' + SUB[i] + ' is given as', value: 'N', options: [{ value: 'N', label: 'a number of newtons' }, { value: 'mult', label: 'a multiple of F (c × F)' }] }, update);
     var p = ui.params(box, [
@@ -259,6 +262,13 @@
       arcFor(c, ox, oy, 16 + 9 * fl.length + 10, M.res.dir, col.resultant, exam.get() ? 'β' : null);
     }
     D.particle(c, ox, oy, 4, {});
+    scene = { ox: ox, oy: oy, k: k, list: fl };
+    if (preview) {   // a force being drawn
+      var pl = Math.hypot(preview.x - ox, preview.y - oy);
+      D.arrow(c, ox, oy, preview.x, preview.y, forceColor(col, top.values.n % 5), { width: 3, dash: [7, 5] });
+      D.label(c, 'F' + SUB[top.values.n] + ' at ' + preview.th + '°', preview.x + 12, preview.y - 12, forceColor(col, top.values.n % 5), { bold: true, bg: true, align: 'left' });
+    }
+    if (ix) ix.paint(c);
     var msg = null;
     if (M.res && M.res.equilibrium) msg = { t: 'R = 0: in equilibrium', col: col.ok };
     else if (!M.eff) msg = { t: 'No valid solution: unknown force not drawn', col: col.warn };
@@ -415,6 +425,41 @@
     }
     R.render();
   }
+
+  /* ---------- direct manipulation: drag a tip to turn a force, tap it to type its size, draw a new one ---------- */
+  var scene = null, preview = null;
+  function snapAngle(a) { a = Math.round(a) % 360; var near = Math.round(a / 15) * 15; return Math.abs(a - near) <= 2 ? near % 360 : a; }
+  function canEditDir(j) { return !(M && M.unk.some(function (u) { return u.kind === 'th' && u.i === j; })); }
+  function canEditMag(j) { return !(M && M.unk.some(function (u) { return (u.kind === 'F' && u.i === j) || (u.kind === 'k' && blocks[j].type.get() === 'mult'); })); }
+  function askMag(j, x, y, title) {
+    var b = blocks[j], mult = b.type.get() === 'mult';
+    ui.askNumber({ title: title || ('Size of force F' + SUB[j]), sub: mult ? 'This force is c × F. Type the multiple c.' : 'Type the magnitude in newtons.',
+      value: mult ? b.p.values.c : b.p.values.F, min: 0, max: mult ? 10 : 200, step: mult ? 0.5 : 1, decimals: 2, unit: mult ? '× F' : 'N', at: { x: x, y: y },
+      quick: mult ? [1, 2, 3] : [5, 10, 20, 50],
+      onInput: function (v) { unlockAll(); b.p.set(mult ? { c: v } : { F: v }); } });
+  }
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!scene) return [];
+      return scene.list.filter(function (fd) { return canEditDir(fd.j) && Math.abs(fd.mag) > 1e-9; }).map(function (fd) {
+        var a = U.rad(fd.th); return { id: 'f' + fd.j, j: fd.j, x: scene.ox + Math.cos(a) * fd.mag * scene.k, y: scene.oy - Math.sin(a) * fd.mag * scene.k, color: forceColor(ui.colors(), fd.j) };
+      });
+    },
+    onDrag: function (hd, x, y) { blocks[hd.j].p.set({ th: snapAngle(SIM.view.screenAngle(scene.ox, scene.oy, x, y)) }); },
+    onTap: function (hd, x, y) { if (canEditMag(hd.j)) askMag(hd.j, x, y); },
+    canDraw: function (x, y) { return !!scene && top.values.n < NMAX && Math.hypot(x - scene.ox, y - scene.oy) > 4; },
+    onDraw: function (x0, y0, x, y) { preview = { x: x, y: y, th: snapAngle(SIM.view.screenAngle(scene.ox, scene.oy, x, y)) }; drawScene(); },
+    onDrawEnd: function (x0, y0, x, y) {
+      if (!preview) return;
+      var th = preview.th, j = top.values.n, est = Math.max(1, Math.round(Math.hypot(x - scene.ox, y - scene.oy) / (scene.k || 1)));
+      preview = null; unlockAll();
+      blocks[j].type.set('N', true); blocks[j].p.set({ F: est, th: th }, true);
+      top.set({ n: j + 1 });
+      askMag(j, x, y, 'New force F' + SUB[j] + ' at ' + th + '°: how big is it?');
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag an arrow tip to turn it · tap a tip to type its size · drag from empty space to draw a new force');
 
   ui.onTheme(function () { drawScene(); drawPolygon(); });
   vp.onResize = drawScene; vp2.onResize = drawPolygon;

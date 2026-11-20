@@ -147,9 +147,11 @@
     var X1 = [], X2 = [];
     for (var i = 0; i <= 80; i++) { var tt = T * i / 80; X1.push(tr1.x(tt)); X2.push(tr2.x(tt)); }
     var all = X1.concat(X2), lo2 = Math.min.apply(null, all), hi2 = Math.max.apply(null, all), sp = Math.max(hi2 - lo2, 1e-3);
-    vp.fit(lo2 - sp * 0.3, hi2 + sp * 0.3, -sp * 0.2, sp * 0.3); c = vp.begin();
+    // while a velocity arrow is dragged, the view and both bodies stay where they were when the drag began
+    if (hold) { t = 0; vp.fit.apply(vp, hold.bounds); } else vp.fit(lo2 - sp * 0.3, hi2 + sp * 0.3, -sp * 0.2, sp * 0.3);
+    c = vp.begin();
     D.ground(c, 0, vp.Y(0), vp.w, vp.Y(0));
-    var x1 = tr1.x(t), x2 = tr2.x(t);
+    var x1 = hold ? hold.x1 : tr1.x(t), x2 = hold ? hold.x2 : tr2.x(t);
     if (x1 > x2) { var mid = (x1 + x2) / 2; x1 = mid; x2 = mid; }
     var s1 = 20 + 14 * Math.cbrt(v.m1 / Math.max(v.m1, v.m2)), s2 = 20 + 14 * Math.cbrt(v.m2 / Math.max(v.m1, v.m2));
     var y0 = vp.Y(0);
@@ -158,8 +160,10 @@
     D.label(c, '1: ' + U.num(v.m1, 2) + ' kg', vp.X(x1) - s1, y0 - s1, col.panel, { bold: true, size: 11 });
     D.label(c, '2: ' + U.num(v.m2, 2) + ' kg', vp.X(x2) + s2, y0 - s2, col.panel, { bold: true, size: 11 });
     var w1 = tr1.v(t), w2 = tr2.v(t);
-    if (Math.abs(w1) > 1e-9) D.arrowPolar(c, vp.X(x1) - s1, y0 - 2 * s1 - 14, w1 > 0 ? 0 : Math.PI, 16 + Math.min(60, Math.abs(w1) * 4), col.velocity, { label: U.num(w1, 2) + ' m/s', width: 2 });
-    if (Math.abs(w2) > 1e-9) D.arrowPolar(c, vp.X(x2) + s2, y0 - 2 * s2 - 14, w2 > 0 ? 0 : Math.PI, 16 + Math.min(60, Math.abs(w2) * 4), col.velocity, { label: U.num(w2, 2) + ' m/s', width: 2 });
+    if (Math.abs(w1) > 1e-9) D.arrowPolar(c, vp.X(x1) - s1, y0 - 2 * s1 - 14, w1 > 0 ? 0 : Math.PI, arrowLen(w1), col.velocity, { label: U.num(w1, 2) + ' m/s', width: 2 });
+    if (Math.abs(w2) > 1e-9) D.arrowPolar(c, vp.X(x2) + s2, y0 - 2 * s2 - 14, w2 > 0 ? 0 : Math.PI, arrowLen(w2), col.velocity, { label: U.num(w2, 2) + ' m/s', width: 2 });
+    geo = { t: t, x1: x1, x2: x2, b1: { x: vp.X(x1) - s1, y: y0 - s1, s: s1 }, b2: { x: vp.X(x2) + s2, y: y0 - s2, s: s2 },
+      a1: { x: vp.X(x1) - s1, y: y0 - 2 * s1 - 14, w: w1 }, a2: { x: vp.X(x2) + s2, y: y0 - 2 * s2 - 14, w: w2 } };
     if (!res.noCollision && t > tc && t < tc + v.dt) {
       var F21 = res.dp2 / v.dt * DY.profile(shape.get(), (t - tc) / v.dt);
       if (Math.abs(F21) > 1e-12) {
@@ -170,6 +174,7 @@
     keBars(c, col, t);
     if (res.noCollision) D.label(c, 'Body 1 is not catching body 2 (u₁ ≤ u₂): no collision', vp.w / 2, 16, col.warn, { bold: true });
     else if (res.flag === 'pass') D.label(c, 'Impossible: body 1 would pass through body 2', vp.w / 2, 16, col.warn, { bold: true });
+    if (ix) ix.paint(c);
   }
 
   /** stacked KE bars (KE of each body at this instant) with the initial total dashed */
@@ -270,6 +275,46 @@
     if (shape.get() === 'tri') R.eq('peak force', '2 × average', 2 * Math.abs(res.dp2 / v.dt), 'N');
     R.render();
   }
+
+  /* ---------- direct manipulation (collisions): tap a body to type its mass; drag its velocity arrow tip left/right ---------- */
+  var geo = null, hold = null, ix = null, APX = 3;   // arrow: 16 px + APX px per m s⁻¹
+  function arrowLen(w) { return 16 + Math.min(20, Math.abs(w)) * APX; }
+  function tipOf(a) { return Math.abs(a.w) > 1e-9 ? a.x + (a.w > 0 ? 1 : -1) * arrowLen(a.w) : a.x; }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function askMass(j, x, y) {
+    var key = 'm' + j;
+    ui.askNumber({ title: 'Mass of body ' + j, sub: 'Type the mass in kilograms.', value: prm.values[key], min: 0.01, max: 200, step: 0.1, decimals: 2, unit: 'kg', at: { x: x, y: y },
+      quick: [0.5, 1, 2, 5], onInput: function (v) { var o = {}; o[key] = U.clamp(v, 0.01, 200); prm.set(o); touched(); } });
+  }
+  function askVel(j, x, y) {
+    var key = 'u' + j;
+    ui.askNumber({ title: 'Initial velocity of body ' + j, sub: 'Right is positive: type a negative value for a body moving left.', value: prm.values[key], min: -20, max: 20, step: 0.5, decimals: 2,
+      unit: 'm s⁻¹', at: { x: x, y: y }, quick: [-3, 0, 3, 5], onInput: function (v) { var o = {}; o[key] = U.clamp(v, -20, 20); prm.set(o); touched(); } });
+  }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!res || !geo || mode.get() !== 'collide') return [];
+      var col = ui.colors(), out = [];
+      if (hold || geo.t <= tc) {   // before contact the arrows show the initial velocities u₁, u₂ (the inputs)
+        out.push({ id: 'u1', j: 1, x: tipOf(geo.a1), y: geo.a1.y, color: col.velocity });
+        out.push({ id: 'u2', j: 2, x: tipOf(geo.a2), y: geo.a2.y, color: col.velocity });
+      }
+      out.push({ id: 'm1', j: 1, x: geo.b1.x, y: geo.b1.y, r: geo.b1.s * 0.9, color: col.s1 });
+      out.push({ id: 'm2', j: 2, x: geo.b2.x, y: geo.b2.y, r: geo.b2.s * 0.9, color: col.s2 });
+      return out;
+    },
+    onDrag: function (hd, x) {
+      if (hd.id[0] !== 'u') return;
+      if (!hold) hold = { bounds: vp.bounds.slice(), x1: geo.x1, x2: geo.x2, base: (hd.j === 1 ? geo.a1 : geo.a2).x };
+      var dx = x - hold.base, sp = Math.max(0, Math.abs(dx) - 16) / APX, o = {};
+      o[hd.id] = U.clamp((dx < 0 ? -1 : 1) * Math.round(sp * 2) / 2, -20, 20);
+      clock.pause(); prm.set(o); touched(); clock.seek(0);
+    },
+    onDrop: function () { if (hold) { hold = null; clock.seek(0); } },
+    onTap: function (hd, x, y) { if (hd.id[0] === 'm') askMass(hd.j, x, y); else askVel(hd.j, x, y); },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Collisions: drag a velocity arrow tip left/right to set u (right +) · tap it to type u · tap a body to type its mass');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

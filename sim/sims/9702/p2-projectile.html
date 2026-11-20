@@ -120,7 +120,12 @@
     clock.setDuration(tEnd);
     var k = Number(drag.get());
     ghost = k > 0 ? PJ.dragPath(p, k, 1e-3) : null;
-    // view box covering the whole flight
+    // view box covering the whole flight (kept fixed while the launch arrow is dragged, so the launch point stays under the finger)
+    if (!(view && ix && ix.isDragging())) fitView(p);
+    ui.writeHash(prm.values);
+    drawScene(); drawPlots(); readout();
+  }
+  function fitView(p) {
     var xs = [0], ys = [0, p.h0, p.yL];
     for (var i = 0; i <= 120; i++) { var s = sol.stateAt(tEnd * i / 120); xs.push(s.x); ys.push(s.y); }
     if (showWall.get()) { xs.push(prm.values.wx + 1); ys.push(prm.values.wh); }
@@ -130,8 +135,6 @@
     // canvas shape follows the trajectory (true scale keeps angles honest), between 4:3 and 3:1
     var ar = U.clamp((view[1] - view[0]) / (view[3] - view[2]), 4 / 3, 3);
     if (cv.style.aspectRatio !== String(ar)) { cv.style.aspectRatio = String(ar); vp.resize(); }
-    ui.writeHash(prm.values);
-    drawScene(); drawPlots(); readout();
   }
 
   /* ---------- scene ---------- */
@@ -205,6 +208,11 @@
     D.arrow(c, px + 18, py + 12, px + 18, py + 40, col.accel, { label: 'g', width: 1.6, head: 7 });
     if (p.theta !== 0 && t < 1e-9 && p.u > 0) D.arc(c, vp.X(0), vp.Y(p.h0), 30, 0, U.rad(p.theta), col.muted, 'θ');
     if (!sol.land) D.label(c, 'Never reaches the landing level: ' + sol.reason, vp.w / 2, 16, col.warn, { bold: true, size: 12 });
+    // launch-velocity arrow u at the launch point (fixed scale UPX px per m/s): drag its tip, tap to type
+    var lo = launchPt(), lt = launchTip();
+    if (p.u > 1e-9) D.arrow(c, lo.x, lo.y, lt.x, lt.y, col.accent, { width: 2, dash: [6, 4], label: launchDragging ? null : 'u', ly: -12 });
+    if (launchDragging) D.label(c, 'u = ' + U.num(p.u, 1) + ' m s⁻¹ at ' + U.num(p.theta, 1) + '°', lt.x, lt.y - 22, col.accent, { bold: true, size: 12, bg: true });
+    if (ix) ix.paint(c);
   }
 
   /* ---------- plots ---------- */
@@ -269,6 +277,44 @@
     R.eq('speed', 'direction ' + U.dp(st.dir, 1) + '° to horizontal', st.speed, 'm s<sup>−1</sup>');
     R.render();
   }
+
+  /* ---------- direct manipulation: drag the launch arrow's tip (direction = θ, length = u), tap to type ---------- */
+  var UPX = 4, launchDragging = false, ix = null;   // UPX: px of arrow per 1 m s⁻¹
+  function launchPt() { return { x: vp.X(0), y: vp.Y(params().h0) }; }
+  function launchTip() { var p = params(), o = launchPt(), a = U.rad(p.theta); return { x: o.x + Math.cos(a) * p.u * UPX, y: o.y - Math.sin(a) * p.u * UPX }; }
+  /** a canvas edit counts as an input change: replay the motion once input settles, refresh the chips */
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function snapAngle(a) { a = Math.round(a); var near = Math.round(a / 15) * 15; return Math.abs(a - near) <= 2 ? near : a; }
+  function setFromDrag(x, y) {
+    var o = launchPt(), dx = (x - o.x) / UPX, dy = (o.y - y) / UPX;
+    if (isComp()) { prm.set({ ux: U.clamp(Math.round(dx * 2) / 2, 0, 50), uy: U.clamp(Math.round(dy * 2) / 2, -50, 50) }); return; }
+    var a = SIM.view.screenAngle(o.x, o.y, x, y); if (a > 180) a -= 360;
+    prm.set({ u: U.clamp(Math.round(Math.hypot(dx, dy) * 2) / 2, 0, 50), theta: U.clamp(snapAngle(a), -90, 90) });
+  }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!sol || !view) return [];
+      var o = launchPt(), t = launchTip(), col = ui.colors();
+      return [{ id: 'tip', x: t.x, y: t.y, color: col.accent }, { id: 'h0', x: o.x, y: o.y, r: 14, color: col.muted }];
+    },
+    onDrag: function (hd, x, y) { if (hd.id !== 'tip') return; launchDragging = true; clock.pause(); setFromDrag(x, y); touched(); clock.seek(0); },
+    onDrop: function (hd) { if (hd.id !== 'tip') return; launchDragging = false; if (isComp()) update(); else { syncComponents(); update(); } },
+    onTap: function (hd, x, y) {
+      var v = prm.values;
+      if (hd.id === 'h0') {
+        ui.askNumber({ title: 'Launch height h', sub: 'Height of the launch point above the ground, in metres.', value: v.h0, min: 0, max: 200, step: 0.5, decimals: 2, unit: 'm',
+          at: { x: x, y: y }, quick: [0, 1.5, 10, 20], onInput: function (val) { prm.set({ h0: U.clamp(val, 0, 200) }); touched(); } });
+      } else if (isComp()) {
+        ui.askNumber({ title: 'Horizontal component uₓ', sub: 'Type the horizontal component of the launch velocity.', value: v.ux, min: 0, max: 50, step: 0.5, decimals: 2, unit: 'm s⁻¹',
+          at: { x: x, y: y }, quick: [5, 10, 15, 20], onInput: function (val) { prm.set({ ux: U.clamp(val, 0, 50) }); touched(); } });
+      } else {
+        ui.askNumber({ title: 'Launch speed u', sub: 'Type the launch speed (direction stays ' + U.num(v.theta, 1) + '°).', value: v.u, min: 0, max: 50, step: 0.5, decimals: 2, unit: 'm s⁻¹',
+          at: { x: x, y: y }, quick: [10, 15, 20, 25], onInput: function (val) { prm.set({ u: U.clamp(val, 0, 50) }); syncComponents(); touched(); } });
+      }
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag the dashed u arrow to set launch angle and speed · tap its tip to type u · tap the launch point to type h');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

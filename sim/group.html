@@ -11,10 +11,11 @@
 <body>
 <div class="group-shell">
   <header class="sim-head">
-    <a class="crumb" href="index.html">← All simulations</a>
+    <a class="brand" href="index.html" aria-label="Dashboard"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18c3-9 8-12 16-12"/><circle cx="4" cy="18" r="1.6" fill="#fff"/><path d="M15 6h5v5"/></svg></span></a>
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Dashboard</a><span class="sep">›</span><a id="gCourse" href="course.html">Course</a><span class="sep">›</span></nav>
     <h1 id="gTitle">Simulation</h1>
     <div class="tags" id="gTags"></div>
-    <button class="theme-btn" id="themeBtn">Light / dark</button>
+    <button class="theme-btn" id="themeBtn" aria-label="Switch light or dark theme">◐ <span style="margin-left:6px">Theme</span></button>
   </header>
   <nav class="modes" id="modes" role="tablist" aria-label="Modes"></nav>
   <iframe id="frame" title="Simulation"></iframe>
@@ -36,6 +37,8 @@
   if (theme) document.documentElement.setAttribute('data-theme', theme);
 
   document.title = g.title;
+  document.documentElement.setAttribute('data-course', g.course);
+  var gc0 = document.getElementById('gCourse'); gc0.href = 'course.html?c=' + g.course; gc0.textContent = g.course === '9702' ? '9702 AS Physics' : '9709 Mechanics';
   document.getElementById('gTitle').textContent = g.title;
   var tags = document.getElementById('gTags');
   g.topics.forEach(function (t) { var s = document.createElement('span'); s.className = 'chip'; s.textContent = g.course + ' ' + (TOPIC_NAMES[t] || t); tags.appendChild(s); });
@@ -54,6 +57,12 @@
     frame.src = src(m, preset);
     var u = new URLSearchParams(); u.set('g', g.id); u.set('m', m.id); if (preset !== null && preset !== undefined) u.set('preset', preset);
     history.replaceState(null, '', location.pathname + '?' + u.toString());
+    // remember on this device for "Continue where you left off" on the dashboard
+    try {
+      var url = 'group.html?g=' + g.id + '&m=' + m.id, rec = JSON.parse(localStorage.getItem('recent-sims') || '[]').filter(function (r) { return r.url !== url; });
+      rec.unshift({ url: url, title: g.title, mode: g.modes.length > 1 ? m.label : '', course: g.course });
+      localStorage.setItem('recent-sims', JSON.stringify(rec.slice(0, 8)));
+    } catch (e) { /* storage blocked: fine */ }
   }
   g.modes.forEach(function (m) {
     var b = document.createElement('button'); b.setAttribute('role', 'tab'); b.setAttribute('data-m', m.id); b.textContent = m.label;

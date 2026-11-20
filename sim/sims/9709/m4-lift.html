@@ -158,6 +158,9 @@
     c.fillRect(vp.X(-1.6), vp.Y(y + 1.6), vp.X(1.6) - vp.X(-1.6), vp.Y(y) - vp.Y(y + 1.6)); c.strokeRect(vp.X(-1.6), vp.Y(y + 1.6), vp.X(1.6) - vp.X(-1.6), vp.Y(y) - vp.Y(y + 1.6)); c.restore();
     if (mused > 0) D.block(c, vp.X(0.4), vp.Y(y), 30, 22, 0, { label: 'm' });
     var list = [Math.abs(st.T), (Mused + mused) * g, Math.abs(st.R), mused * g], kf = SIM.view.forceScale(list, Math.min(90, vp.h * 0.3));
+    lay = { y: y, st: st, Ttip: st.T > 0 ? vp.Y(y + 1.6) - st.T * kf : null,
+      atip: Math.abs(st.a) > 1e-9 ? vp.Y(y + 0.8) - U.sgn(st.a) * (15 + Math.min(50, Math.abs(st.a) * 12)) : null };
+    if (!(mused > 0) && !locked('m')) D.label(c, 'm?', vp.X(0.4), vp.Y(y) - 11, col.muted, { size: 10 });
     if (st.T > 0) D.arrow(c, vp.X(-0.4), vp.Y(y + 1.6), vp.X(-0.4), vp.Y(y + 1.6) - st.T * kf, col.tension, { label: 'T = ' + U.sf(st.T) + ' N' });
     D.arrow(c, vp.X(-1.0), vp.Y(y + 0.8), vp.X(-1.0), vp.Y(y + 0.8) + Mused * g * kf, col.weight, { label: 'Mg', width: 1.6 });
     if (mused > 0) {
@@ -169,6 +172,7 @@
     if (ky < 1) D.label(c, 'motion drawn at ' + U.sf(ky, 2) + '× scale', vp.w - 8, 12, col.muted, { align: 'right', size: 11 });
     D.label(c, 'up = positive', 8, 12, col.muted, { align: 'left', size: 11 });
     if (st.T < 0 || st.R < 0) D.label(c, 'impossible: a < −g', vp.w / 2, vp.h - 12, col.warn, { bold: true });
+    if (ix) ix.paint(c);
   }
 
   /* ---------- plots ---------- */
@@ -220,6 +224,43 @@
     R.eq('v, s', 'velocity and displacement', s3(st.v) + ' m s⁻¹, ' + s3(st.s) + ' m', '');
     R.render();
   }
+
+  /* ---------- direct manipulation: tap the lift, the load, the acceleration arrow or (when given) the tension arrow to type ---------- */
+  var lay = null;
+  function locked(k) { var r = prm.rows[k]; return !!(r && r.range.disabled); }
+  function setP(ctl, k, val) {
+    var sp = ctl.rows[k].spec, o = {};
+    o[k] = U.clamp(val, Number(sp.min), Number(sp.max));
+    if (o[k] !== ctl.values[k]) ctl.set(o);
+  }
+  function ask(ctl, k, x, y, title, sub, step, quick) {
+    var sp = ctl.rows[k].spec;
+    ui.askNumber({ title: title, sub: sub, value: ctl.values[k], min: Number(sp.min), max: Number(sp.max), step: step, decimals: 3, unit: sp.unit, at: { x: x, y: y }, quick: quick,
+      onInput: function (val) { setP(ctl, k, val); if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); } });
+  }
+  var ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!lay) return [];
+      var col = ui.colors(), hs = [], y = lay.y, st = lay.st;
+      if (!locked('M')) hs.push({ id: 'M', x: vp.X(-1.25), y: vp.Y(y + 1.3), color: col['object-line'] });
+      if (!locked('m')) hs.push({ id: 'm', x: vp.X(0.4), y: vp.Y(y) - 11, color: col['object-line'] });
+      if (lay.atip !== null && st.seg >= 0) {
+        var ty = stSel[st.seg].get();
+        if (ty === 'a' || ty === 'v') hs.push({ id: 'a', seg: st.seg, type: ty, x: vp.X(2.8), y: lay.atip, color: col.accel });
+      }
+      if (solveSel.get() !== 'none' && lay.Ttip !== null) hs.push({ id: 'T', x: vp.X(-0.4), y: lay.Ttip, color: col.tension });
+      return hs;
+    },
+    onTap: function (h, x, y) {
+      if (h.id === 'M') ask(prm, 'M', x, y, 'Mass of the lift M', 'In kilograms (not including the load).', 1, [500, 800, 1000, 1200]);
+      else if (h.id === 'm') ask(prm, 'm', x, y, 'Mass of the load m', 'The load or person standing on the floor of the lift (0 = no load).', 0.1, [0, 50, 60, 80]);
+      else if (h.id === 'a' && h.type === 'a') ask(stPrm[h.seg], 'a', x, y, 'Acceleration in stage ' + (h.seg + 1) + ' (up +)', 'Negative = accelerating downwards or slowing while moving up.', 0.1, [-2, -0.5, 0.5, 2]);
+      else if (h.id === 'a') ask(stPrm[h.seg], 'v', x, y, 'Velocity at the end of stage ' + (h.seg + 1) + ' (up +)', 'This stage’s acceleration is (v − u) ÷ t.', 0.1, [-2, 0, 2, 4]);
+      else if (h.id === 'T') ask(prmS, 'Tg', x, y, 'Given cable tension T', 'The tension in stage ' + Math.round(prmS.values.k) + ' used to find the unknown mass.', 10, [10000, 12000, 12250, 15000]);
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Tap the lift or the load to type its mass · tap the a arrow to type that stage · when solving, tap T');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

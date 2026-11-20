@@ -197,8 +197,10 @@
   function drawScene() {
     if (!tl) return;
     var col = ui.colors(), xr = xRange();
-    vp.fit(xr[0], xr[1], -(xr[1] - xr[0]) * 0.22, (xr[1] - xr[0]) * 0.3);
+    if (hold) vp.fit.apply(vp, hold.bounds);   // keep the scale still while a velocity arrow is dragged
+    else vp.fit(xr[0], xr[1], -(xr[1] - xr[0]) * 0.22, (xr[1] - xr[0]) * 0.3);
     var c = vp.begin();
+    geo = [];
     D.ground(c, vp.X(xr[0]), vp.Y(0), vp.X(xr[1]), vp.Y(0));
     D.label(c, 'smooth horizontal line — positive to the right →', 10, 14, col.muted, { align: 'left', size: 11 });
     if (wallT.get()) {
@@ -215,10 +217,12 @@
       D.particle(c, x, y, r, { fill: colr });
       D.label(c, b.name, x, y, '#fff', { bold: true, size: 12 });
       D.label(c, U.sf(b.m) + ' kg', x, vp.Y(0) + 14, col.muted, { size: 11 });
-      if (Math.abs(b.v) > 1e-9) D.arrow(c, x, y - r - 12, x + U.sgn(b.v) * (16 + Math.min(70, Math.abs(b.v) * 5)), y - r - 12, col.velocity, { label: U.sf(b.v) + ' m/s', width: 2 });
+      if (Math.abs(b.v) > 1e-9) D.arrow(c, x, y - r - 12, x + U.sgn(b.v) * arrowLen(b.v), y - r - 12, col.velocity, { label: U.sf(b.v) + ' m/s', width: 2 });
+      geo.push({ ids: b.ids, x: x, y: y, r: r, ay: y - r - 12, v: b.v });
     });
     var ev = tl.events.filter(function (e) { return e.t <= clock.t + 1e-9; });
     if (ev.length) D.label(c, 'last event: ' + (ev[ev.length - 1].kind === 'wall' ? 'wall' : 'collision') + ' at t = ' + U.sf(ev[ev.length - 1].t) + ' s, x = ' + U.sf(ev[ev.length - 1].x) + ' m', vp.w - 10, vp.h - 12, col.muted, { align: 'right', size: 11 });
+    if (ix) ix.paint(c);
   }
 
   /* ---------- plots ---------- */
@@ -316,6 +320,43 @@
     else if (tl.stopReason === 'no further collisions') R.badge('No further collisions: every particle is moving away from the next one (and from the wall).', 'ok');
     R.render();
   }
+
+  /* ---------- direct manipulation: tap a particle to type its mass; drag its velocity arrow tip left/right (right +), tap the tip to type ---------- */
+  var geo = [], hold = null, ix = null, APX = 3, NAMES = ['A', 'B', 'C'];   // arrow: 16 px + APX px per m s⁻¹
+  function arrowLen(v) { return 16 + Math.min(40, Math.abs(v)) * APX; }
+  function touched() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); if (ui.syncChips) ui.syncChips(); }
+  function massEditable(id) { var sv = solveSel.get(); return !(sv === 'scale' && id < 2) && sv !== 'm' + NAMES[id]; }
+  function beforeFirstEvent() { return !!hold || !tl.events.length || clock.t < tl.events[0].t - 1e-9; }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!tl || tl.error) return [];
+      var col = ui.colors(), out = [], early = beforeFirstEvent();
+      geo.forEach(function (b) {
+        if (b.ids.length !== 1) return;   // a coalesced pair is not an input
+        var id = b.ids[0], name = NAMES[id];
+        if (early) out.push({ id: 'u' + name, key: 'u' + name, name: name, x: Math.abs(b.v) > 1e-9 ? b.x + U.sgn(b.v) * arrowLen(b.v) : b.x, y: b.ay, bx: b.x, color: col.velocity });
+        if (massEditable(id)) out.push({ id: 'm' + name, key: 'm' + name, name: name, x: b.x, y: b.y, r: Math.max(12, b.r), color: col[COLS[id]] });
+      });
+      return out;
+    },
+    onDrag: function (hd, x) {
+      if (hd.key[0] !== 'u') return;
+      if (!hold) hold = { bounds: vp.bounds.slice(), base: hd.bx };
+      var dx = x - hold.base, sp = Math.max(0, Math.abs(dx) - 16) / APX, o = {};
+      o[hd.key] = U.clamp((dx < 0 ? -1 : 1) * Math.round(sp * 2) / 2, -40, 40);
+      clock.pause(); prm.set(o); touched(); clock.seek(0);
+    },
+    onDrop: function () { if (hold) { hold = null; clock.seek(0); } },
+    onTap: function (hd, x, y) {
+      var key = hd.key, isM = key[0] === 'm';
+      ui.askNumber({ title: (isM ? 'Mass of ' : 'Velocity of ') + hd.name, sub: isM ? 'Type the mass in kilograms.' : 'Right is positive: type a negative value for motion to the left.',
+        value: prm.values[key], min: isM ? 0.01 : -40, max: isM ? 20 : 40, step: isM ? 0.1 : 0.5, decimals: 2, unit: isM ? 'kg' : 'm s⁻¹', at: { x: x, y: y },
+        quick: isM ? [0.1, 0.2, 0.5, 1] : [-2, 0, 2, 4],
+        onInput: function (v) { var o = {}; o[key] = isM ? U.clamp(v, 0.01, 20) : U.clamp(v, -40, 40); prm.set(o); touched(); } });
+    },
+    onHover: function () { drawScene(); }
+  });
+  ui.stageTip('Drag a velocity arrow tip left/right to set u (right +) · tap it to type u · tap a particle to type its mass');
 
   ui.onTheme(function () { drawScene(); drawPlots(); });
   vp.onResize = drawScene;

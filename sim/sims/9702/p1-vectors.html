@@ -156,7 +156,8 @@
     var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
     var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
     var span = Math.max(x1 - x0, y1 - y0, 1e-6), m = span * 0.12;
-    vp.fit(x0 - m, x1 + m, y0 - m, y1 + m);
+    if (frozen) { vp.fit.apply(vp, frozen); span = frozenSpan; }   // keep the scale still while a tip is dragged
+    else vp.fit(x0 - m, x1 + m, y0 - m, y1 + m);
     c = vp.begin();
     var O = vp.P(0, 0), P = function (v) { return vp.P(v[0], v[1]); };
     // axes through origin
@@ -187,7 +188,49 @@
       }
     }
     if (rm.mag > 1e-9) D.arc(c, O[0], O[1], 26, 0, U.rad(rm.ang), col.muted, U.dp(rm.ang, 1) + '°');
+    lastSpan = span;
+    if (dragInfo) D.label(c, dragInfo.text, dragInfo.x, dragInfo.y - 24, col.ink, { bold: true, size: 12, bg: true });
+    if (ix) ix.paint(c);
   }
+
+  /* ---------- direct manipulation: drag a vector's tip to set its size and direction, tap it to type the size ---------- */
+  var frozen = null, frozenSpan = 1, lastSpan = 1, dragInfo = null, ix = null;
+  function snapAngle(a) { a = Math.round(a); var near = Math.round(a / 15) * 15; if (Math.abs(a - near) <= 2) a = near; a = ((a + 180) % 360 + 360) % 360 - 180; return a === -180 ? 180 : a; }
+  function magStep() { var sp = frozen ? frozenSpan : lastSpan; return sp < 12 ? 0.1 : sp < 60 ? 0.5 : 1; }
+  /** which parameter pair the drawn arrows stand for: the first arrow starts at O, the second at the first tip */
+  function arrowKeys(which) {
+    var o = op.get();
+    if (which === 'first') return o === 'dv' ? { m: 'B', t: 'tB', sign: 1, n: 'B' } : { m: 'A', t: 'tA', sign: 1, n: 'A' };
+    if (o === 'add') return { m: 'B', t: 'tB', sign: 1, n: 'B' };
+    if (o === 'sub') return { m: 'B', t: 'tB', sign: -1, n: 'B' };
+    return { m: 'A', t: 'tA', sign: -1, n: 'A' };   // dv: second arrow is −A
+  }
+  function touched() { if (ui.syncChips) ui.syncChips(); }
+  ix = SIM.view.interact(cv, {
+    handles: function () {
+      if (!res) return [];
+      var col = ui.colors(), f = vp.P(res.first.v[0], res.first.v[1]), out = [{ id: 'first', x: f[0], y: f[1], color: col.s1 }];
+      if (res.second) { var t = DY.add(res.first.v, res.second.v), tp = vp.P(t[0], t[1]); out.push({ id: 'second', x: tp[0], y: tp[1], color: col.s2 }); }
+      return out;
+    },
+    onDrag: function (hd, x, y) {
+      if (!frozen) { frozen = vp.bounds.slice(); frozenSpan = lastSpan; }
+      var k = arrowKeys(hd.id), w = vp.toWorld(x, y), base = hd.id === 'first' ? [0, 0] : res.first.v;
+      var dx = (w[0] - base[0]) * k.sign, dy = (w[1] - base[1]) * k.sign, st = magStep();
+      var mag = U.clamp(Math.round(Math.hypot(dx, dy) / st) * st, 0, 300), th = snapAngle(U.deg(Math.atan2(dy, dx)));
+      var o = {}; o[k.m] = Number(mag.toFixed(4)); o[k.t] = th;
+      aimMsg = ''; prm.set(o); touched();
+      dragInfo = { x: x, y: y, text: '|' + k.n + '| = ' + U.num(mag, st < 1 ? 1 : 0) + ' at ' + th + '°' }; draw();
+    },
+    onDrop: function () { frozen = null; dragInfo = null; draw(); },
+    onTap: function (hd, x, y) {
+      var k = arrowKeys(hd.id), u = QTY[qty.get()].u.replace(/<sup>−1<\/sup>/, '⁻¹');
+      ui.askNumber({ title: 'Magnitude of ' + k.n, sub: 'Type the size; the direction stays ' + U.num(prm.values[k.t], 1) + '°.', value: prm.values[k.m], min: 0, max: 300, step: 0.1, decimals: 2,
+        unit: u, at: { x: x, y: y }, quick: [3, 4, 5, 10], onInput: function (v) { var o = {}; o[k.m] = U.clamp(v, 0, 300); aimMsg = ''; prm.set(o); touched(); } });
+    },
+    onHover: function () { draw(); }
+  });
+  ui.stageTip('Drag the tip of A or B to set its size and direction · tap a tip to type its size');
 
   ui.onTheme(draw);
   vp.onResize = draw;
