@@ -1,6 +1,26 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "sim", "runtimeExecutable": "python3", "runtimeArgs": ["-m", "http.server", "8765", "--directory", "sim"], "port": 8765 }
+    {
+      "name": "sim",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "sim"
+      ],
+      "port": 8765
+    },
+    {
+      "name": "sim-alt",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "exec python3 -m http.server ${PORT:-8766} --directory sim"
+      ],
+      "port": 8766
+    }
   ]
 }

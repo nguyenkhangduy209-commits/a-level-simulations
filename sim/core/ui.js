@@ -71,7 +71,10 @@
 
   /* ---------- sliders ---------- */
   /** tell the animation clock(s) that an input changed, so the simulation replays from t = 0 */
-  function notify() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); }
+  function notify() {
+    examResets.forEach(function (f) { f(); });   // new numbers: hide exam answers again
+    if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged();
+  }
   function decimalsOf(step) { var s = String(step); return s.indexOf('.') < 0 ? 0 : s.length - s.indexOf('.') - 1; }
   /** Slider snapping: whole numbers when the range allows it (≥ 10 wide), otherwise 0.1 or 0.01.
       Exact values (e.g. 0.35, 9.81) are always available by typing in the box. spec.snap overrides. */
@@ -187,8 +190,59 @@
     };
     return api;
   }
+  /** Exam mode: answers are blurred; tap/click a line (or focus it and press Enter/Space) to reveal it,
+      or step through with "Reveal next". Works on touch screens and with a keyboard, not only on hover.
+      Revealed lines are remembered by position while the readout re-renders, and hidden again when an input changes. */
+  var examResets = [];
   function examToggle(container, target) {
-    return toggle(container, { label: 'Exam mode: hide answers (blur until hover)' }, function (on) { target.classList.toggle('exam-hidden', on); });
+    var on = false, revealed = {};
+    var count = h('span', { class: 'exam-count', 'aria-live': 'polite' });
+    var bar = h('div', { class: 'exam-bar', style: 'display:none' }, [
+      h('button', { class: 'btn primary', text: 'Reveal next line', onclick: function () {
+        var ls = lines(); for (var i = 0; i < ls.length; i++) if (!revealed[i]) { revealed[i] = true; break; } apply();
+      } }),
+      h('button', { class: 'btn', text: 'Reveal all', onclick: function () { lines().forEach(function (e, i) { revealed[i] = true; }); apply(); } }),
+      h('button', { class: 'btn', text: 'Hide all', onclick: function () { revealed = {}; apply(); } }),
+      count]);
+    /** only lines that actually have a hidden answer (equation-only lines have nothing to reveal) */
+    function lines() {
+      return Array.prototype.slice.call(target.querySelectorAll('.eq')).filter(function (e) {
+        var r = e.querySelector('.res'); return r && String(r.textContent || '').trim() !== '';
+      });
+    }
+    function apply() {
+      var ls = lines(), n = 0;
+      ls.forEach(function (el, i) {
+        if (on) {
+          var want = !!revealed[i]; if (want) n++;
+          if (el.classList.contains('revealed') !== want) el.classList.toggle('revealed', want);
+          if (el.getAttribute('tabindex') !== '0') { el.setAttribute('tabindex', '0'); el.setAttribute('role', 'button'); }
+          if (el.getAttribute('aria-pressed') !== String(want)) el.setAttribute('aria-pressed', String(want));
+        } else if (el.getAttribute('tabindex') !== null) {
+          el.removeAttribute('tabindex'); el.removeAttribute('role'); el.removeAttribute('aria-pressed'); el.classList.remove('revealed');
+        }
+      });
+      var txt = on ? n + ' of ' + ls.length + ' answers shown' : '';
+      if (count.textContent !== txt) count.textContent = txt;
+    }
+    function hit(e) {
+      if (!on) return null;
+      var eq = e.target.closest && e.target.closest('.eq');
+      return eq && target.contains(eq) ? eq : null;
+    }
+    function flip(eq) { var i = lines().indexOf(eq); if (i >= 0) { revealed[i] = !revealed[i]; apply(); } }
+    target.addEventListener('click', function (e) { var eq = hit(e); if (eq) flip(eq); });
+    target.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var eq = hit(e); if (eq) { e.preventDefault(); flip(eq); }
+    });
+    if (root.MutationObserver) new MutationObserver(apply).observe(target, { childList: true, subtree: true });
+    examResets.push(function () { if (on) { revealed = {}; apply(); } });
+    var t = toggle(container, { label: 'Exam mode: hide answers (tap a line to reveal it)' }, function (v) {
+      on = v; revealed = {}; target.classList.toggle('exam-hidden', on); bar.style.display = on ? '' : 'none'; apply();
+    });
+    container.appendChild(bar);
+    return t;
   }
   function notes(container, items) {
     var ul = h('ul'); items.forEach(function (t) { ul.appendChild(h('li', { html: t })); });

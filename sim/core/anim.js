@@ -35,15 +35,22 @@
     this.autoplay = opt.autoplay !== false;
     clocks.push(this);
     // start playing automatically once the page has drawn its first frame
-    if (this.autoplay) setTimeout(function () { if (!self.playing && self.t === 0) self.play(); }, 600);
+    // (with "reduce motion" switched on, show the finished state instead; Play still animates)
+    if (this.autoplay) setTimeout(function () { if (!self.playing && self.t === 0) { if (reducedMotion()) self.showEnd(); else self.play(); } }, 600);
   }
   var clocks = [], inputTimer = null;
+  function reducedMotion() { return !!(root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches); }
   /** called by SIM.ui whenever a parameter, select, checkbox or preset changes: replay from t = 0 once input settles */
   function inputChanged() {
     clocks.forEach(function (c) { if (c.autoplay) c.pause(); });
     clearTimeout(inputTimer);
-    inputTimer = setTimeout(function () { clocks.forEach(function (c) { if (c.autoplay) { c.seek(0); c.play(); } }); }, 350);
+    inputTimer = setTimeout(function () {
+      var still = reducedMotion();
+      clocks.forEach(function (c) { if (c.autoplay) { if (still) c.showEnd(); else { c.seek(0); c.play(); } } });
+    }, 350);
   }
+  /** reduced motion: jump to the end of a one-shot motion; a looping one (e.g. a wave) stays where it is */
+  Clock.prototype.showEnd = function () { this.seek(this.loop ? this.t : this.duration); };
   Clock.prototype.toggle = function () { if (this.playing) this.pause(); else this.play(); };
   Clock.prototype.play = function () {
     if (this.t >= this.duration - 1e-9) this.t = 0;
@@ -74,5 +81,5 @@
     this.scrub.value = String(Math.round(1000 * this.t / this.duration));
   };
 
-  SIM.anim = { Clock: Clock, inputChanged: inputChanged };
+  SIM.anim = { Clock: Clock, inputChanged: inputChanged, reducedMotion: reducedMotion };
 })(typeof self !== 'undefined' ? self : this);

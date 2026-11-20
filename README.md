@@ -11,6 +11,9 @@ No install, no build step: plain HTML + canvas + JavaScript.
 
 ## What is inside
 
+### New to mechanics? (`sim/learn/`)
+`learn/equilibrium.html` is a guided first lesson (9709 4.1, a particle held by two strings), one idea per step, ending with a real past-paper question. The 9709 hub's "Start here" panel links to it and lists the topics in syllabus order.
+
 ### Simulations (`sim/`)
 16 simulations, each with modes (tabs). Every parameter has a slider (snaps to whole numbers; type exact values in the box), the working is shown with your numbers to 3 s.f., each sim auto-plays when an input changes, and you can type a time to see the data at that instant. "Exam setups" presets reproduce real past-paper questions (checked against the mark schemes).
 
@@ -43,7 +46,7 @@ Only syllabus content is included (e.g. no air resistance in calculations; it ap
 
 ## Layout
 ```
-sim/            simulations (index.html hub, group.html, sims/, engine/, core/, tests/)
+sim/            simulations (index.html hub, group.html, learn/, sims/, engine/, core/, tests/)
 tools/papers/   question extraction and tagging pipeline (Python 3, stdlib)
 data/           extracted paper text, tagged questions, syllabus data
 docs/           PLAN.md (design + test values), SIM_CONVENTIONS.md

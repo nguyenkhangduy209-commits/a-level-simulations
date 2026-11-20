@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learn: a particle held by two strings</title>
+<link rel="stylesheet" href="../assets/theme.css">
+<script src="../core/util.js"></script>
+<style>
+  .learn { max-width: 1040px; margin: 0 auto; padding: 14px 16px 60px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  @media (max-width: 820px) { .learn { grid-template-columns: minmax(0, 1fr); } .figure { position: static !important; } }
+  .figure { position: sticky; top: 10px; }
+  .figure svg { width: 100%; height: auto; display: block; }
+  .rules { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .rules b { color: var(--ink); }
+  .progress { display: flex; gap: 4px; margin: 0 0 10px; }
+  .progress i { flex: 1; height: 5px; border-radius: 3px; background: var(--grid); }
+  .progress i.done { background: var(--accent); }
+  .stepno { font-size: 12.5px; color: var(--muted); margin: 0; }
+  .step h2.title { font-size: 19px; text-transform: none; letter-spacing: -.01em; color: var(--ink); margin: 2px 0 8px; font-weight: 650; outline: none; }
+  .step p { margin: 8px 0; }
+  .term { font-weight: 650; }
+  .def { font-size: 13.5px; background: var(--chip); border-radius: 8px; padding: 6px 10px; margin: 8px 0; }
+  .math { font-family: var(--mono); font-size: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 8px 0; overflow-wrap: anywhere; }
+  .math .c { color: var(--muted); font-size: 12.5px; font-family: var(--sans); display: block; margin-top: 2px; }
+  .choices { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .choices button { font: 14px var(--sans); padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+  .choices button[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+  .choices button.right { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 16%, transparent); }
+  .choices button.wrong { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, transparent); }
+  .fb { font-size: 14px; border-left: 3px solid var(--line); padding: 4px 10px; margin: 8px 0; }
+  .fb.ok { border-color: var(--ok); }
+  .fb.no { border-color: var(--warn); }
+  .nav { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .nav .spacer { flex: 1; }
+  button.btn { font-size: 14px; padding: 7px 12px; }
+  button.btn:disabled { opacity: .45; cursor: default; }
+  .reveal[hidden] { display: none; }
+  .ans { display: grid; grid-template-columns: auto 1fr; gap: 6px 8px; align-items: center; margin: 8px 0; }
+  .ans > span { white-space: nowrap; }
+  .ans > .row { grid-column: 1 / -1; }
+  .ans input { font: 14px var(--mono); padding: 5px 7px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 110px; }
+  .slider { margin: 8px 0; }
+  .slider input { width: 100%; accent-color: var(--accent); }
+  .live { font-family: var(--mono); font-size: 14px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<header class="sim-head">
+  <a class="crumb" href="../index.html">← All simulations</a>
+  <h1>Learn: a particle held by two strings</h1>
+  <div class="tags"><span class="chip">9709 4.1 Forces &amp; equilibrium</span><span class="chip g">g = 10 m s<sup>−2</sup></span></div>
+  <button class="theme-btn" id="themeBtn">Light / dark</button>
+</header>
+
+<main class="learn">
+  <div class="figure card">
+    <svg id="fig" viewBox="0 0 400 270" role="img" aria-label="Diagram"></svg>
+    <div class="rules"><b>9709 rules:</b> use g = 10 m s<sup>−2</sup>. Give answers to 3 significant figures, angles to 1 decimal place. Write out each equation you resolve.</div>
+  </div>
+  <div class="card step">
+    <div class="progress" id="progress" aria-hidden="true"></div>
+    <p class="stepno" id="stepno"></p>
+    <h2 class="title" id="title" tabindex="-1"></h2>
+    <div id="body"></div>
+    <div class="nav">
+      <button class="btn" id="back">← Back</button>
+      <span class="spacer"></span>
+      <button class="btn primary" id="next">Next →</button>
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var U = SIM.util, DEG = Math.PI / 180;
+  var sf = function (x) { return U.sf(x, 3); };
+
+  /* Worked example: 9709/43 O/N 21 Q2. 8 kg, strings at 60° (left) and 45° (right) above the horizontal. */
+  var EX = { m: 8, a: 60, b: 45 };
+  function solve(m, a, b, g) {
+    g = g || 10; var s = Math.sin((a + b) * DEG);
+    return { W: m * g, T1: m * g * Math.cos(b * DEG) / s, T2: m * g * Math.cos(a * DEG) / s };
+  }
+
+  /* ---------- diagram ---------- */
+  var NS = 'http://www.w3.org/2000/svg', fig = document.getElementById('fig');
+  function el(tag, attrs, text) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text; return e;
+  }
+  function arrow(g, x1, y1, x2, y2, color, dashed, width) {
+    var ang = Math.atan2(y2 - y1, x2 - x1), hl = 9;
+    g.appendChild(el('line', { x1: x1, y1: y1, x2: x2 - 4 * Math.cos(ang), y2: y2 - 4 * Math.sin(ang), stroke: color, 'stroke-width': width || 3, 'stroke-dasharray': dashed ? '5 4' : '', 'stroke-linecap': 'round' }));
+    g.appendChild(el('path', { d: 'M' + x2 + ',' + y2 + ' L' + (x2 - hl * Math.cos(ang - 0.4)) + ',' + (y2 - hl * Math.sin(ang - 0.4)) +
+      ' L' + (x2 - hl * Math.cos(ang + 0.4)) + ',' + (y2 - hl * Math.sin(ang + 0.4)) + ' Z', fill: color }));
+  }
+  function label(g, x, y, text, color, anchor, size) {
+    g.appendChild(el('text', { x: x, y: y, fill: color, 'font-size': size || 14, 'font-family': 'system-ui, sans-serif', 'text-anchor': anchor || 'middle', 'font-weight': 600, 'paint-order': 'stroke', stroke: 'var(--panel)', 'stroke-width': 4 }, text));
+  }
+  function arc(g, cx, cy, r, a0, a1, color) {   // angles in degrees, measured anticlockwise from +x (screen y flipped)
+    var p0 = [cx + r * Math.cos(a0 * DEG), cy - r * Math.sin(a0 * DEG)], p1 = [cx + r * Math.cos(a1 * DEG), cy - r * Math.sin(a1 * DEG)];
+    g.appendChild(el('path', { d: 'M' + p0 + ' A' + r + ',' + r + ' 0 0 0 ' + p1, fill: 'none', stroke: color, 'stroke-width': 1.5 }));
+  }
+  /** show: which layers to draw. m, a, b: the numbers. */
+  function draw(show, m, a, b) {
+    while (fig.firstChild) fig.removeChild(fig.firstChild);
+    var g = el('g', {}); fig.appendChild(g);
+    var ink = 'var(--ink)', mute = 'var(--c-component)', cW = 'var(--c-weight)', cT = 'var(--c-tension)';
+    var top = 34, gap = 140, dxA = gap / Math.tan(a * DEG), dxB = gap / Math.tan(b * DEG);
+    var s = Math.min(1, 320 / (dxA + dxB)); dxA *= s; dxB *= s; var vg = gap * s;
+    var px = 200 + (dxA - dxB) / 2, py = top + vg, ax = px - dxA, bx = px + dxB;
+    // ceiling
+    g.appendChild(el('line', { x1: Math.min(ax, 40) - 10, y1: top, x2: Math.max(bx, 360) + 10, y2: top, stroke: ink, 'stroke-width': 2 }));
+    for (var x = Math.min(ax, 40) - 6; x < Math.max(bx, 360) + 10; x += 12) g.appendChild(el('line', { x1: x, y1: top, x2: x + 8, y2: top - 8, stroke: mute, 'stroke-width': 1 }));
+    // strings
+    g.appendChild(el('line', { x1: px, y1: py, x2: ax, y2: top, stroke: show.hiT ? cT : ink, 'stroke-width': show.hiT ? 2.5 : 1.6 }));
+    g.appendChild(el('line', { x1: px, y1: py, x2: bx, y2: top, stroke: show.hiT ? cT : ink, 'stroke-width': show.hiT ? 2.5 : 1.6 }));
+    label(g, ax - 4, top - 12, 'A', mute); label(g, bx + 4, top - 12, 'B', mute);
+    // angles at the fixed points, measured from the horizontal ceiling
+    if (show.angles) {   // marked at A and B, between the ceiling and the string, as on the exam paper
+      arc(g, ax, top, 30, -a, 0, mute); label(g, ax + 34 * Math.cos(a / 2 * DEG) + 4, top + 34 * Math.sin(a / 2 * DEG) + 6, a + '°', mute, 'start', 13);
+      arc(g, bx, top, 30, 180, 180 + b, mute); label(g, bx - 34 * Math.cos(b / 2 * DEG) - 4, top + 34 * Math.sin(b / 2 * DEG) + 6, b + '°', mute, 'end', 13);
+    }
+    // forces
+    var L = 84;
+    if (show.weight) { arrow(g, px, py, px, py + L, cW); label(g, px + 8, py + L + 2, show.wNum ? (m * 10) + ' N' : 'W', cW, 'start'); }
+    if (show.tension) {
+      var ux = -Math.cos(a * DEG), uy = -Math.sin(a * DEG), vx = Math.cos(b * DEG), vy = -Math.sin(b * DEG);
+      arrow(g, px, py, px + L * ux, py + L * uy, cT); label(g, px + (L + 14) * ux, py + (L + 14) * uy + 4, 'T₁', cT);
+      arrow(g, px, py, px + L * vx, py + L * vy, cT); label(g, px + (L + 14) * vx, py + (L + 14) * vy + 4, 'T₂', cT);
+      if (show.comp1 || show.comp2) {
+        if (show.comp1) {
+          arrow(g, px, py, px + L * ux, py, mute, true, 2); arrow(g, px + L * ux, py, px + L * ux, py + L * uy, mute, true, 2);
+          label(g, px - 7, py + 20, 'T₁ cos ' + a + '°', mute, 'end', 12);
+          label(g, px + L * ux - 7, py + L * uy / 2 + 4, 'T₁ sin ' + a + '°', mute, 'end', 12);
+        }
+        if (show.comp2) {
+          arrow(g, px, py, px + L * vx, py, mute, true, 2); arrow(g, px + L * vx, py, px + L * vx, py + L * vy, mute, true, 2);
+          label(g, px + 7, py + 20, 'T₂ cos ' + b + '°', mute, 'start', 12);
+          label(g, px + L * vx + 7, py + L * vy / 2 + 4, 'T₂ sin ' + b + '°', mute, 'start', 12);
+        }
+      }
+    }
+    // the particle
+    g.appendChild(el('circle', { cx: px, cy: py, r: 7, fill: 'var(--object)', stroke: 'var(--object-line)', 'stroke-width': 2 }));
+    if (!show.weight) label(g, px + 14, py + 18, m + ' kg', ink, 'start', 13);
+    // positive directions
+    if (show.axes) {
+      var ox = 30, oy = 250;
+      arrow(g, ox, oy, ox + 40, oy, 'var(--accent)', false, 2); arrow(g, ox, oy, ox, oy - 40, 'var(--accent)', false, 2);
+      label(g, ox + 50, oy + 5, '+', 'var(--accent)', 'start', 16); label(g, ox, oy - 48, '+', 'var(--accent)', 'middle', 16);
+    }
+    fig.setAttribute('aria-label', 'Particle of mass ' + m + ' kg hanging from two strings at ' + a + '° and ' + b + '° to the horizontal' +
+      (show.weight ? '; weight acts downwards' : '') + (show.tension ? '; tensions T1 and T2 act along the strings, away from the particle' : '') +
+      (show.axes ? '; right and up are positive' : ''));
+  }
+
+  /* ---------- small building blocks for steps ---------- */
+  function h(tag, attrs, html) {
+    var e = document.createElement(tag);
+    for (var k in attrs || {}) { if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), attrs[k]); else e.setAttribute(k, attrs[k]); }
+    if (html !== undefined) e.innerHTML = html; return e;
+  }
+  /** single-answer question: options [{t, ok, why}] — feedback explains the misconception for each wrong choice */
+  function quiz(box, opts, onRight) {
+    var row = h('div', { class: 'choices', role: 'group' }), fb = h('div', { class: 'fb', 'aria-live': 'polite' });
+    fb.style.display = 'none';
+    opts.forEach(function (o) {
+      var b = h('button', { type: 'button', onclick: function () {
+        row.querySelectorAll('button').forEach(function (x) { x.classList.remove('wrong'); });
+        b.classList.add(o.ok ? 'right' : 'wrong');
+        fb.className = 'fb ' + (o.ok ? 'ok' : 'no'); fb.innerHTML = o.why; fb.style.display = '';
+        if (o.ok && onRight) onRight();
+      } }, o.t);
+      row.appendChild(b);
+    });
+    box.appendChild(row); box.appendChild(fb);
+  }
+  /** lines revealed one at a time with a button (and all at once) */
+  function reveals(box, lines, done) {
+    var items = lines.map(function (html) { var d = h('div', { class: 'math reveal' }, html); d.hidden = true; box.appendChild(d); return d; });
+    var n = 0, bar = h('div', { class: 'row' });
+    var nextB = h('button', { class: 'btn primary', type: 'button', onclick: function () { show(n + 1); } }, 'Show next line');
+    var allB = h('button', { class: 'btn', type: 'button', onclick: function () { show(items.length); } }, 'Show all');
+    function show(k) { n = Math.min(k, items.length); items.forEach(function (d, i) { d.hidden = i >= n; }); nextB.disabled = allB.disabled = n >= items.length; if (n >= items.length && done) done(); }
+    bar.appendChild(nextB); bar.appendChild(allB); box.appendChild(bar);
+  }
+
+  /* ---------- the steps ---------- */
+  var r = solve(EX.m, EX.a, EX.b);
+  var STEPS = [
+    { title: 'What are we modelling?',
+      fig: { angles: true },
+      body: function (b) {
+        b.innerHTML =
+          '<p>A particle of mass <b>8 kg</b> hangs from two strings fixed to a ceiling at A and B. The strings make angles of <b>60°</b> and <b>45°</b> with the horizontal. It is at rest. <i>Find the tension in each string.</i></p>' +
+          '<p style="font-size:13px;color:var(--muted)">This is Cambridge 9709/43 Oct/Nov 2021, Question 2.</p>' +
+          '<div class="def"><span class="term">Particle</span>: we treat the object as a single point, so every force acts at that point.</div>' +
+          '<div class="def"><span class="term">Light, inextensible string</span>: the string has no weight and does not stretch.</div>' +
+          '<div class="def"><span class="term">Equilibrium</span>: the particle is at rest (or moving at constant velocity), so the forces on it balance. The total force is zero.</div>' +
+          '<p>First question: which forces act on the particle?</p>';
+        quiz(b, [
+          { t: 'Weight and two tensions', ok: true, why: 'Right. Gravity pulls it down (weight), and each string pulls on it (a tension in each).' },
+          { t: 'Weight, two tensions and a normal reaction', ok: false, why: 'Not quite. A normal reaction comes from a <b>surface</b> pushing back. The particle is not touching a surface, so there is none.' },
+          { t: 'Two tensions only', ok: false, why: 'Not quite. Gravity always acts on a mass, so the weight must be included. It is the force the strings are holding up.' },
+          { t: 'Weight, two tensions and friction', ok: false, why: 'Not quite. Friction needs a rough surface in contact. There is no surface here.' }]);
+      } },
+    { title: 'Force 1: the weight',
+      fig: { weight: true, wNum: true },
+      body: function (b) {
+        b.innerHTML =
+          '<p>The <span class="term">weight</span> is the pull of gravity. It always acts <b>vertically downwards</b>.</p>' +
+          '<div class="math">W = mg = 8 × 10 = 80 N<span class="c">In 9709 always use g = 10 m s⁻². (9702 Physics uses 9.81.)</span></div>' +
+          '<p>Mass (kg) and weight (N) are different things: the question gives a mass, so you multiply by g.</p>';
+      } },
+    { title: 'Forces 2 and 3: the tensions',
+      fig: { weight: true, wNum: true, tension: true, hiT: true },
+      body: function (b) {
+        b.innerHTML =
+          '<p>A <span class="term">tension</span> is the pull of a string. It acts <b>along the string, away from the particle</b>, towards the fixed point.</p>' +
+          '<div class="def">A string can <b>pull</b> but it can never <b>push</b>. If a calculation gives a negative tension, that string would go <span class="term">slack</span> (loose) and the set-up is impossible.</div>' +
+          '<p>The two strings have different angles, so their tensions are different. Call them <b>T₁</b> (left) and <b>T₂</b> (right). These are the two unknowns.</p>';
+      } },
+    { title: 'Choose your positive directions',
+      fig: { weight: true, wNum: true, tension: true, axes: true, angles: true },
+      body: function (b) {
+        b.innerHTML =
+          '<p>We will split every force into a <b>horizontal</b> part and a <b>vertical</b> part. This is called <span class="term">resolving</span>.</p>' +
+          '<p>Pick a positive direction for each: here <b>right is positive</b> and <b>up is positive</b> (the blue arrows). A force pointing left or down then gets a minus sign.</p>' +
+          '<div class="def">Resolving horizontally and vertically works for every particle-equilibrium question in 9709. Lami’s theorem and the triangle of forces are optional shortcuts, not required.</div>';
+      } },
+    { title: 'Split one tension into parts',
+      fig: { weight: true, wNum: true, tension: true, axes: true, angles: true, comp1: true },
+      body: function (b) {
+        b.innerHTML = '<p>Look at T₁. It makes an angle of 60° with the <b>horizontal</b>. Its horizontal part (dashed, pointing left) is…</p>';
+        quiz(b, [
+          { t: 'T₁ cos 60°', ok: true, why: 'Right. The horizontal part lies <b>next to</b> the 60° angle, so it uses <b>cos</b>. The vertical part is the side <b>opposite</b> the angle, so it is <b>T₁ sin 60°</b>.' },
+          { t: 'T₁ sin 60°', ok: false, why: 'This is the most common mistake in 4.1. The angle is measured from the horizontal, so the horizontal part sits <b>next to</b> the angle and uses <b>cos</b>. Ask yourself each time: is this part next to the angle (cos) or opposite it (sin)?' },
+          { t: 'T₁ tan 60°', ok: false, why: 'Not quite. Components always use sin or cos: a part of a force can never be bigger than the force itself, and tan 60° is bigger than 1.' }],
+          function () { draw(Object.assign({}, STEPS[4].fig, { comp2: true }), EX.m, EX.a, EX.b); });
+        b.appendChild(h('p', { style: 'font-size:13px;color:var(--muted)' }, 'Careful: if a question measures the angle from the <b>vertical</b>, sin and cos swap over. Always check which line the angle is measured from.'));
+      } },
+    { title: 'Write the two equations',
+      fig: { weight: true, wNum: true, tension: true, axes: true, angles: true, comp1: true, comp2: true },
+      body: function (b) {
+        b.innerHTML = '<p>The particle is in equilibrium, so the parts in each direction add up to zero.</p>';
+        reveals(b, [
+          '<b>Resolve horizontally</b> (right +):<br>T₂ cos 45° − T₁ cos 60° = 0<span class="c">T₁ pulls left, so its part is negative. The weight has no horizontal part.</span>',
+          '<b>Resolve vertically</b> (up +):<br>T₁ sin 60° + T₂ sin 45° − 80 = 0<span class="c">Both strings pull up; the weight pulls down.</span>',
+          'Each equation must include <b>every</b> force acting in that direction, with sin or cos applied correctly. Mark schemes usually give a method mark for each one, so write them out in full.']);
+      } },
+    { title: 'Solve the pair of equations',
+      fig: { weight: true, wNum: true, tension: true, angles: true },
+      body: function (b) {
+        b.innerHTML = '<p>Two equations, two unknowns. Use the first equation to write T₂ in terms of T₁.</p>';
+        reveals(b, [
+          'From the horizontal equation:<br>T₂ = T₁ cos 60° ÷ cos 45° = 0.7071… T₁',
+          'Substitute into the vertical equation:<br>T₁ sin 60° + 0.7071… T₁ × sin 45° = 80<br>T₁ (0.8660… + 0.5) = 80',
+          'T₁ = 80 ÷ 1.3660… = <b>' + sf(r.T1) + ' N</b>',
+          'T₂ = 0.7071… × ' + sf(r.T1) + ' = <b>' + sf(r.T2) + ' N</b><span class="c">Keep full accuracy on your calculator until the end, then round to 3 s.f.</span>']);
+      } },
+    { title: 'Check your answer makes sense',
+      fig: { weight: true, wNum: true, tension: true, angles: true },
+      body: function (b) {
+        b.innerHTML =
+          '<p>Two quick checks catch most errors:</p>' +
+          '<div class="math">Both tensions positive? ' + sf(r.T1) + ' N and ' + sf(r.T2) + ' N ✓<span class="c">A negative tension would mean that string is slack.</span></div>' +
+          '<div class="math">Horizontal parts balance?<br>' + sf(r.T1) + ' × cos 60° = ' + sf(r.T1 * 0.5) + '<br>' + sf(r.T2) + ' × cos 45° = ' + sf(r.T2 * Math.SQRT1_2) + ' ✓</div>' +
+          '<p>Does it make physical sense? The left string is steeper (60°), so it holds up more of the weight. It has the bigger tension. ✓</p>' +
+          '<p>And the picture check: draw the three forces <b>nose to tail</b>, to scale. If they balance, you end up back where you started, and the arrows make a closed <span class="term">triangle of forces</span>.</p>';
+        b.appendChild(triangle(r, EX.a, EX.b));
+      } },
+    { title: 'Predict, then test',
+      fig: { weight: true, wNum: true, tension: true, angles: true },
+      body: function (b) {
+        b.innerHTML = '<p>Suppose the <b>right</b> string becomes steeper: its angle goes up from 45° to 70°. What happens to T₂?</p>';
+        var test = h('div'); test.style.display = 'none';
+        quiz(b, [
+          { t: 'T₂ gets bigger', ok: true, why: 'Right: a steeper string points more upwards, so it takes more of the weight. Try it with the slider below.' },
+          { t: 'T₂ gets smaller', ok: false, why: 'Have another think: a steeper string points more upwards. Which string now does more of the holding up? Test it with the slider below.' },
+          { t: 'T₂ stays the same', ok: false, why: 'Have another think: the angles decide how the 80 N is shared between the strings. Test it with the slider below.' }],
+          function () {});
+        b.querySelectorAll('.choices button').forEach(function (x) { x.addEventListener('click', function () { test.style.display = ''; }); });
+        var out = h('div', { class: 'live', 'aria-live': 'polite' });
+        var sl = h('input', { type: 'range', min: 20, max: 80, step: 1, value: 45, 'aria-label': 'Angle of the right string to the horizontal, in degrees' });
+        var lab = h('label', {}, 'Angle of the right string: <b id="bv">45</b>°');
+        function upd() {
+          var bb = Number(sl.value), q = solve(EX.m, EX.a, bb);
+          lab.querySelector('#bv').textContent = bb;
+          out.innerHTML = 'T₁ = ' + sf(q.T1) + ' N &nbsp; T₂ = ' + sf(q.T2) + ' N';
+          draw(STEPS[8].fig, EX.m, EX.a, bb);
+        }
+        sl.addEventListener('input', upd);
+        var wrap = h('div', { class: 'slider' }); wrap.appendChild(lab); wrap.appendChild(sl);
+        test.appendChild(wrap); test.appendChild(out);
+        test.appendChild(h('p', { style: 'font-size:13px;color:var(--muted)' }, 'Notice: whichever string is steeper always has the larger tension.'));
+        b.appendChild(test); upd();
+      } },
+    { title: 'Your turn',
+      fig: null,   // drawn from the practice question
+      body: function (b) { practice(b); } }
+  ];
+
+  /* ---------- triangle of forces: W, then T₂, then T₁, drawn in turn, closing back at the start ---------- */
+  function triangle(res, a, b) {
+    var vecs = [
+      { dx: 0, dy: -res.W, c: 'var(--c-weight)', t: 'W = ' + U.sf(res.W, 3).replace(/\.0+$/, '') + ' N' },
+      { dx: res.T2 * Math.cos(b * DEG), dy: res.T2 * Math.sin(b * DEG), c: 'var(--c-tension)', t: 'T₂ = ' + sf(res.T2) + ' N' },
+      { dx: -res.T1 * Math.cos(a * DEG), dy: res.T1 * Math.sin(a * DEG), c: 'var(--c-tension)', t: 'T₁ = ' + sf(res.T1) + ' N' }];
+    var pts = [[0, 0]]; vecs.forEach(function (v, i) { pts.push([pts[i][0] + v.dx, pts[i][1] + v.dy]); });
+    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
+    var x0 = Math.min.apply(0, xs), x1 = Math.max.apply(0, xs), y0 = Math.min.apply(0, ys), y1 = Math.max.apply(0, ys);
+    var W = 300, H = 210, k = Math.min((W - 150) / (x1 - x0 || 1), (H - 40) / (y1 - y0 || 1));
+    var X = function (x) { return 75 + (x - x0) * k + ((W - 150) - (x1 - x0) * k) / 2; }, Y = function (y) { return 20 + (y1 - y) * k; };
+    var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Triangle of forces: weight, T2 and T1 drawn nose to tail form a closed triangle', style: 'width:100%;max-width:340px;display:block;margin:6px auto' });
+    var style = el('style', {}, '.tri-seg{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:tri-draw .7s ease-out forwards}' +
+      '.tri-head,.tri-lab{opacity:0;animation:tri-fade .25s ease-out forwards}@keyframes tri-draw{to{stroke-dashoffset:0}}@keyframes tri-fade{to{opacity:1}}');
+    svg.appendChild(style);
+    vecs.forEach(function (v, i) {
+      var ax = X(pts[i][0]), ay = Y(pts[i][1]), bx = X(pts[i + 1][0]), by = Y(pts[i + 1][1]);
+      var len = Math.hypot(bx - ax, by - ay), ang = Math.atan2(by - ay, bx - ax), delay = (i * 0.8) + 's';
+      svg.appendChild(el('line', { x1: ax, y1: ay, x2: bx, y2: by, stroke: v.c, 'stroke-width': 3, 'stroke-linecap': 'round', class: 'tri-seg', style: '--len:' + len + ';animation-delay:' + delay }));
+      svg.appendChild(el('path', { class: 'tri-head', style: 'animation-delay:' + (i * 0.8 + 0.6) + 's', fill: v.c,
+        d: 'M' + bx + ',' + by + ' L' + (bx - 10 * Math.cos(ang - 0.4)) + ',' + (by - 10 * Math.sin(ang - 0.4)) + ' L' + (bx - 10 * Math.cos(ang + 0.4)) + ',' + (by - 10 * Math.sin(ang + 0.4)) + ' Z' }));
+      // put each label on the outside of the triangle (away from its centroid)
+      var mx = (ax + bx) / 2, my = (ay + by) / 2, nx = -(by - ay) / len, ny = (bx - ax) / len;
+      var cx = (X(pts[0][0]) + X(pts[1][0]) + X(pts[2][0])) / 3, cy = (Y(pts[0][1]) + Y(pts[1][1]) + Y(pts[2][1])) / 3;
+      var side = ((mx - cx) * nx + (my - cy) * ny) >= 0 ? 1 : -1, ox = side * nx * 12, oy = side * ny * 12;
+      var lab = el('text', { x: mx + ox, y: my + oy + 4, 'text-anchor': Math.abs(ox) < 3 ? 'middle' : ox < 0 ? 'end' : 'start',
+        fill: v.c, 'font-size': 12.5, 'font-weight': 600, 'font-family': 'system-ui, sans-serif', class: 'tri-lab', style: 'animation-delay:' + (i * 0.8 + 0.5) + 's' }, v.t);
+      svg.appendChild(lab);
+    });
+    var done = el('text', { x: W / 2, y: H - 4, 'text-anchor': 'middle', fill: 'var(--ok)', 'font-size': 13, 'font-weight': 700, 'font-family': 'system-ui, sans-serif', class: 'tri-lab', style: 'animation-delay:2.5s' }, 'Back to the start: the forces balance ✓');
+    svg.appendChild(done);
+    return svg;
+  }
+
+  /* ---------- practice with targeted hints ---------- */
+  var PRACTICE = [{ m: 5, a: 50, b: 35 }, { m: 12, a: 35, b: 65 }, { m: 6, a: 55, b: 30 }, { m: 10, a: 40, b: 70 }];
+  var pi = 0;
+  function practice(b) {
+    var q = PRACTICE[pi % PRACTICE.length], ans = solve(q.m, q.a, q.b);
+    draw({ angles: true }, q.m, q.a, q.b);
+    b.innerHTML = '<p>A particle of mass <b>' + q.m + ' kg</b> hangs from two strings at <b>' + q.a + '°</b> (left) and <b>' + q.b + '°</b> (right) to the horizontal. Find T₁ and T₂ to 3 s.f.</p>';
+    var form = h('form', { class: 'ans' });
+    form.innerHTML = '<label for="t1">T₁ =</label><span><input id="t1" inputmode="decimal" autocomplete="off"> N</span><label for="t2">T₂ =</label><span><input id="t2" inputmode="decimal" autocomplete="off"> N</span>';
+    var fb = h('div', { class: 'fb', 'aria-live': 'polite' }); fb.style.display = 'none';
+    var row = h('div', { class: 'row' });
+    var check = h('button', { class: 'btn primary', type: 'submit' }, 'Check');
+    var hint = h('button', { class: 'btn', type: 'button' }, 'Hint');
+    var work = h('button', { class: 'btn', type: 'button' }, 'Show the working');
+    var another = h('button', { class: 'btn', type: 'button' }, 'Another question');
+    form.appendChild(row); row.appendChild(check); row.appendChild(hint); row.appendChild(work); row.appendChild(another);
+    b.appendChild(form); b.appendChild(fb);
+    var sol = h('div', { class: 'reveal' }); sol.hidden = true; b.appendChild(sol);
+    sol.innerHTML =
+      '<div class="math">Horizontally: T₂ cos ' + q.b + '° − T₁ cos ' + q.a + '° = 0</div>' +
+      '<div class="math">Vertically: T₁ sin ' + q.a + '° + T₂ sin ' + q.b + '° − ' + (q.m * 10) + ' = 0</div>' +
+      '<div class="math">T₁ = <b>' + sf(ans.T1) + ' N</b>, T₂ = <b>' + sf(ans.T2) + ' N</b></div>';
+    var hints = ['Start with the weight: W = mg with g = 10.', 'Resolve horizontally first: the two horizontal parts must cancel. Each uses cos, because the angles are measured from the horizontal.', 'Use the horizontal equation to write T₂ in terms of T₁, then substitute into the vertical equation.'], hn = 0;
+    function say(cls, html) { fb.className = 'fb ' + cls; fb.innerHTML = html; fb.style.display = ''; }
+    function close(x, y) { return isFinite(x) && Math.abs(x - y) <= 0.005 * Math.abs(y) + 1e-9; }
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var x1 = Number(form.querySelector('#t1').value.replace(',', '.')), x2 = Number(form.querySelector('#t2').value.replace(',', '.'));
+      if (!form.querySelector('#t1').value || !form.querySelector('#t2').value) { say('no', 'Enter both tensions first.'); return; }
+      var swapped = solve(q.m, 90 - q.a, 90 - q.b), g981 = solve(q.m, q.a, q.b, 9.81);
+      if (close(x1, ans.T1) && close(x2, ans.T2)) { say('ok', '<b>Correct.</b> Both strings are taut, and the steeper string has the larger tension. Ready for a real exam question? Press Next.'); }
+      else if (close(x1, ans.T2) && close(x2, ans.T1)) say('no', 'Your numbers are right, but swapped round. T₁ is the <b>left</b> string (' + q.a + '°).');
+      else if (close(x1, swapped.T1) || close(x2, swapped.T2)) say('no', 'It looks like <b>sin and cos are swapped</b>. The angles are measured from the horizontal, so the horizontal parts use cos and the vertical parts use sin.');
+      else if (close(x1, g981.T1) || close(x2, g981.T2)) say('no', 'Nearly there: you used g = 9.81. 9709 Mechanics uses <b>g = 10</b>.');
+      else if (close(x1, ans.T1) || close(x2, ans.T2)) say('no', 'One of the two is right. Check the other by substituting back into the horizontal equation.');
+      else say('no', 'Not yet. Try the hint, or check each of your two equations has every force in it.');
+    });
+    hint.addEventListener('click', function () { say('', '<b>Hint ' + (hn + 1) + ':</b> ' + hints[Math.min(hn, hints.length - 1)]); hn = Math.min(hn + 1, hints.length - 1); });
+    work.addEventListener('click', function () { sol.hidden = false; });
+    another.addEventListener('click', function () { pi++; practice(b); });
+  }
+
+  /* ---------- final page: transfer to a real exam question ---------- */
+  STEPS.push({ title: 'Now a real exam question',
+    fig: { weight: true, tension: true, angles: true },
+    m: 2.4, a: 35, b: 40,
+    body: function (b) {
+      b.innerHTML =
+        '<p>You can now do the standard 4.1 strings question. Try this one on paper first:</p>' +
+        '<div class="math" style="font-family:var(--sans)"><b>9709/41 Oct/Nov 2023 Q2:</b> a particle of mass 2.4 kg hangs in equilibrium from two strings at 35° and 40° to the horizontal. Find the tension in each string.</div>' +
+        '<p>Then open it in the full simulation and turn on <b>Exam mode</b>. Tap each line to check your working one step at a time.</p>' +
+        '<p><a class="btn primary" style="display:inline-block;text-decoration:none;padding:7px 12px;border-radius:6px;background:var(--accent);color:var(--accent-ink)" href="../group.html?g=forces&amp;m=strings&amp;preset=3">Open in Strings and rings →</a></p>' +
+        '<p style="font-size:13.5px">Where to go next: <a href="../group.html?g=forces&amp;m=friction">friction and limiting equilibrium</a> (still 4.1), then <a href="../group.html?g=newton">slopes, pulleys and lifts</a> (4.4), which use the same resolving.</p>';
+    } });
+
+  /* ---------- navigation (step kept in the URL, so refreshing resumes) ---------- */
+  var cur = 0, title = document.getElementById('title'), body = document.getElementById('body');
+  var back = document.getElementById('back'), next = document.getElementById('next'), prog = document.getElementById('progress');
+  STEPS.forEach(function () { prog.appendChild(document.createElement('i')); });
+  function go(i, focus) {
+    cur = Math.max(0, Math.min(STEPS.length - 1, i));
+    var st = STEPS[cur];
+    document.getElementById('stepno').textContent = 'Step ' + (cur + 1) + ' of ' + STEPS.length;
+    title.textContent = st.title; body.innerHTML = '';
+    if (st.fig) draw(st.fig, st.m || EX.m, st.a || EX.a, st.b || EX.b);
+    st.body(body);
+    prog.querySelectorAll('i').forEach(function (x, k) { x.classList.toggle('done', k <= cur); });
+    back.disabled = cur === 0; next.disabled = cur === STEPS.length - 1;
+    history.replaceState(null, '', location.pathname + location.search + '#step=' + (cur + 1));
+    if (focus) title.focus();
+  }
+  back.addEventListener('click', function () { go(cur - 1, true); });
+  next.addEventListener('click', function () { go(cur + 1, true); });
+  var m = /step=(\d+)/.exec(location.hash);
+  go(m ? Number(m[1]) - 1 : 0, false);
+
+  /* theme */
+  try { var th = localStorage.getItem('sim-theme'); if (th) document.documentElement.setAttribute('data-theme', th); } catch (e) { /* ignore */ }
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var d = document.documentElement, c = d.getAttribute('data-theme');
+    var dark = c ? c === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    d.setAttribute('data-theme', dark ? 'light' : 'dark'); try { localStorage.setItem('sim-theme', dark ? 'light' : 'dark'); } catch (e) { /* ignore */ }
+  });
+})();
+</script>
+</body>
+</html>

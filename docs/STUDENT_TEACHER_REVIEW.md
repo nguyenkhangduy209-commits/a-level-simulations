@@ -130,6 +130,18 @@ Identify a force or graph feature → choose a method → complete a calculation
 
 Ask students new to mechanics to finish the Learn sequence unaided on a phone. Note where they hesitate, pick the wrong control, or misread the diagram.
 
+## Status of the recommendations
+
+| # | Recommendation | Status |
+|---|---|---|
+| 1 | Learn sequence for 4.1 | **Done:** `sim/learn/equilibrium.html`. 11 steps on the real 9709/43 O/N 21 Q2: forces, weight with g = 10, tension, axes, a sin/cos prediction, equations revealed line by line, solving, checks (including an animated triangle of forces), predict-then-test slider, practice with hints that spot specific mistakes (sin/cos swapped, g = 9.81, T₁/T₂ swapped), and a handoff to 9709/41 O/N 23 Q2 in the full simulation. The step is kept in the URL, so refreshing resumes. |
+| 2 | Separate Learn from Explore | **Started:** the Learn page is separate; existing pages are unchanged as Explore / Teach. More Learn topics to follow. |
+| 3 | Exam-mode reveal for touch and keyboard | **Done** in `core/ui.js` (all 37 pages): tap/click or Enter/Space reveals one line; "Reveal next line", "Reveal all", "Hide all"; count of answers shown; answers hide again when an input changes. Hover no longer reveals. |
+| 4 | "Start here" on the 9709 hub | **Done:** Learn button, five topics in syllabus-dependency order, exam conventions, and a note that 9702 is a separate course. |
+| 5 | Reduced motion | **Done:** with the system setting on, simulations show the finished state instead of auto-playing (Play still animates), and CSS transitions/animations are switched off. |
+| 6 | Scaffolded practice per topic | Open (the Learn page shows the pattern). |
+| 7 | Test with real students | Open. |
+
 ## Considered and rejected
 
 Kept out on purpose, so they are not re-proposed without a reason:
