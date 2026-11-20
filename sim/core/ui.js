@@ -100,6 +100,43 @@
     return t;
   }
 
+  /* ---------- stage tools: a floating "+ Add …" button and tap-to-place ----------
+     stageAction({ label: 'Add a ball', icon: '+', onClick }) → button over the top-right of the stage.
+     placeMode({ prompt: 'Tap the track to place the ball', onPlace(x, y), onCancel }) → the next tap on the
+     main canvas is delivered as a position (canvas px) instead of a drag; Escape cancels. */
+  function stageAction(o) {
+    if (!stage) return null;
+    var bar = stage.actions || (stage.actions = h('div', { class: 'stage-actions' }));
+    if (!bar.parentNode) stage.el.appendChild(bar);
+    var b = h('button', { type: 'button', class: 'stage-act', html: '<b>' + (o.icon || '+') + '</b><span>' + o.label + '</span>', onclick: function () { o.onClick && o.onClick(); } });
+    bar.appendChild(b);
+    return { el: b, show: function (v) { b.style.display = v ? '' : 'none'; }, label: function (t) { b.querySelector('span').textContent = t; } };
+  }
+  var placing = null;
+  function placeMode(o) {
+    if (!stage) return;
+    cancelPlace();
+    var banner = h('div', { class: 'place-banner', html: '<span>' + o.prompt + '</span>' });
+    banner.appendChild(h('button', { type: 'button', text: 'Cancel', onclick: function () { cancelPlace(true); } }));
+    stage.el.appendChild(banner); stage.el.classList.add('placing');
+    function down(e) {
+      e.stopImmediatePropagation(); e.preventDefault();
+      var r = stage.canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, cb = o.onPlace;
+      cancelPlace(false); if (cb) cb(x, y);
+    }
+    stage.canvas.addEventListener('pointerdown', down, true);
+    placing = { banner: banner, down: down, onCancel: o.onCancel };
+  }
+  function cancelPlace(user) {
+    if (!placing) return;
+    var p = placing; placing = null;
+    stage.canvas.removeEventListener('pointerdown', p.down, true);
+    if (p.banner.parentNode) p.banner.parentNode.removeChild(p.banner);
+    stage.el.classList.remove('placing');
+    if (user && p.onCancel) p.onCancel();
+  }
+  if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && placing) cancelPlace(true); });
+
   /* ---------- number editor popover (chips and draw-then-type share it) ---------- */
   var pop = null;
   function closePop(restoreFocus) {
@@ -328,42 +365,182 @@
     cb.addEventListener('change', function () { notify(); onChange && onChange(cb.checked); });
     return { get: function () { return cb.checked; }, set: function (v, silent) { cb.checked = !!v; if (!silent && onChange) onChange(!!v); }, el: lab };
   }
-  /** preset dropdown. presets: [{name, values, note}] ; apply(preset) */
+  /* ---------- scenario picker (presets) ----------
+     One button opens a grouped list instead of a long dropdown:
+       Past-paper questions (the paper reference shown as a tag) · Classic set-ups · What if…?
+     The chosen scenario stays on show with its note and a "Change" button.
+     A hidden <select> stays the source of truth, so deep links (?preset=N) and tests keep working. */
+  var PAPER_RE = /^\s*(\d{4}\/\d{2}\s+(?:[A-Z]\/[A-Z]|[A-Z]{1,2})\s*\d{2}\s+Q[\w().]+)\s*[:–-]?\s*(.*)$/;
+  var WHATIF_RE = /\?\s*$|\b(too (large|small|big)|no (valid |unique )?solution|negative|cannot|impossible|vs\.?|versus|same .*as|compar|what if|without|with air|on the moon|both .* horizontal)\b/i;
+  function scenarioGroup(name) { return PAPER_RE.test(name) ? 'paper' : WHATIF_RE.test(name) ? 'whatif' : 'classic'; }
+  var GROUP_INFO = { paper: ['Past-paper questions', 'Real exam questions, checked against the mark scheme'], classic: ['Classic set-ups', 'Standard situations to explore'], whatif: ['What if…?', 'Edge cases and comparisons to test your understanding'] };
   function presets(container, list, apply) {
-    var sel = h('select', { 'aria-label': 'Preset' });
-    sel.appendChild(h('option', { value: '', text: 'Choose a preset / exam setup…' }));
+    var sel = h('select', { 'aria-label': 'Preset', style: 'display:none' });
+    sel.appendChild(h('option', { value: '', text: 'Choose a scenario…' }));
     list.forEach(function (p, i) { sel.appendChild(h('option', { value: String(i), text: p.name })); });
-    var note = h('div', { class: 'notes', style: 'color:var(--muted);font-size:12.5px' });
-    container.appendChild(h('div', { class: 'row' }, [sel]));
-    container.appendChild(note);
+    var note = h('div', { class: 'scn-note' });
+    var cur = h('button', { type: 'button', class: 'scn-current', 'aria-expanded': 'false' });
+    var panel = h('div', { class: 'scn-panel', role: 'listbox', 'aria-label': 'Scenarios' }); panel.style.display = 'none';
+    function label(p) {
+      var m = PAPER_RE.exec(p.name);
+      return m ? '<span class="scn-ref">' + esc(m[1]) + '</span><span class="scn-name">' + esc(m[2] || 'Exam question') + '</span>' : '<span class="scn-name">' + esc(p.name) + '</span>';
+    }
+    var order = ['paper', 'classic', 'whatif'];
+    order.forEach(function (gk) {
+      var items = list.map(function (p, i) { return { p: p, i: i }; }).filter(function (x) { return scenarioGroup(x.p.name) === gk; });
+      if (!items.length) return;
+      var grp = h('div', { class: 'scn-group' }, [h('div', { class: 'scn-ghead', html: '<b>' + GROUP_INFO[gk][0] + '</b><span>' + GROUP_INFO[gk][1] + '</span>' })]);
+      items.forEach(function (x) {
+        grp.appendChild(h('button', { type: 'button', class: 'scn-item scn-' + gk, role: 'option', 'data-i': String(x.i), html: label(x.p), onclick: function () { api.select(x.i); open(false); } }));
+      });
+      panel.appendChild(grp);
+    });
+    function open(v) {
+      panel.style.display = v ? '' : 'none'; cur.setAttribute('aria-expanded', String(v)); cur.classList.toggle('open', v);
+      if (v) { var a = panel.querySelector('.scn-item.on') || panel.querySelector('.scn-item'); if (a && a.focus) try { a.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
+    }
+    cur.addEventListener('click', function () { open(panel.style.display === 'none'); });
+    function showCurrent() {
+      var i = sel.value === '' ? -1 : Number(sel.value);
+      cur.innerHTML = i < 0 ? '<span class="scn-ph">✦ Pick a scenario</span><span class="scn-count">' + list.length + ' ready-made set-ups</span>'
+        : '<span class="scn-kicker">Scenario</span>' + label(list[i]) + '<span class="scn-change">Change</span>';
+      Array.prototype.forEach.call(panel.querySelectorAll ? panel.querySelectorAll('.scn-item') : [], function (b) { b.classList.toggle('on', b.getAttribute('data-i') === sel.value); });
+    }
+    container.appendChild(sel); container.appendChild(cur); container.appendChild(panel); container.appendChild(note);
     sel.addEventListener('change', function () {
+      showCurrent();
       if (sel.value === '') { note.innerHTML = ''; return; }
       var p = list[Number(sel.value)]; note.innerHTML = p.note || ''; apply(p); notify();
     });
+    showCurrent();
     var api = { el: sel, select: function (i) { sel.value = String(i); sel.dispatchEvent(new Event('change')); },
       /** call once at the END of page setup: applies ?preset=N from the URL (used by hub deep links) */
       fromQuery: function () { var q = query.get('preset'); if (q !== null && list[Number(q)]) api.select(Number(q)); } };
     return api;
   }
 
-  /* ---------- readout: "symbol = working = result unit" ---------- */
+  /* ---------- readout: working laid out top to bottom, like a mark scheme ----------
+     eq(lhs, work, value, unit) renders
+         X  =  ΣF cos θ                     ← each " = " in work starts a new line
+            =  10 cos 23° − 15 cos 30°
+            =  9.21 − 13.0
+            =  −3.79 N                      ← the answer, highlighted
+     A plain-words work string ("displacement from O") becomes a small note beside the symbol instead of a step. */
+  var MATHWORDS = /^(sin|cos|tan|sec|cot|cosec|sqrt|max|min|log|ln|exp|and|or)$/i;
+  function stripTags(t) { return String(t).replace(/<[^>]+>/g, ''); }
+  /** is this text words (a description) rather than a formula? */
+  function isProse(t) {
+    var words = stripTags(t).match(/[A-Za-z]{3,}/g) || [];
+    return words.filter(function (w) { return !MATHWORDS.test(w); }).length >= 2;
+  }
+  /** typographic minus, outside HTML tags only */
+  function niceMinus(html) {
+    return String(html).split(/(<[^>]+>)/).map(function (part) {
+      return part.charAt(0) === '<' ? part : part.replace(/(^|[\s(=+×÷,\[])-(?=[\d.(√a-zA-Zα-ωΣ])/g, '$1−').replace(/ - /g, ' − ');
+    }).join('');
+  }
+  function sameNumber(stepHtml, v) {
+    var t = stripTags(stepHtml).replace(/−/g, '-').trim();
+    if (!/^-?[\d.]+$/.test(t) || typeof v !== 'number') return false;
+    return Math.abs(Number(t) - v) <= 1e-9 + 5e-4 * Math.abs(v);
+  }
+  /* The working is shown as a walkthrough: the result first, then the method one step at a time.
+     Each head() starts a step; everything before the first head is the summary shown above the steps.
+     The current step is kept while the readout re-renders (every animation frame), and students can
+     tap a step, use Back / Next (or ← / →), or switch to "Show all steps". */
   function Readout(container) {
-    var buf = [], el = h('div', { class: 'readout' });
+    var buf = [], el = h('div', { class: 'readout' }), page = 0, showAll = false, lastTitles = '', onDiagram = true, lastFocus = '', shownPage = -1;
     container.appendChild(el);
+    if (el.addEventListener) {
+      el.addEventListener('click', function (e) {
+        var b = e.target && e.target.closest ? e.target.closest('[data-walk]') : null; if (!b) return;
+        var w = b.getAttribute('data-walk');
+        if (w === 'prev') page--; else if (w === 'next') page++; else if (w === 'all') showAll = !showAll; else if (w === 'diag') onDiagram = !onDiagram; else page = Number(w);
+        api.render();
+        try { el.dispatchEvent(new Event('walkchange', { bubbles: true })); } catch (err) { /* old browsers */ }
+        var t = el.querySelector('.walk-page .walk-title'); if (t && w !== 'all' && t.focus) try { t.focus({ preventScroll: true }); } catch (err) { /* ignore */ }
+      });
+      el.addEventListener('keydown', function (e) {
+        if (showAll || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') || (e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName))) return;
+        page += e.key === 'ArrowRight' ? 1 : -1; api.render(); e.preventDefault();
+      });
+    }
     var api = {
       el: el,
       clear: function () { buf = []; return api; },
-      head: function (t) { buf.push('<div class="head">' + t + '</div>'); return api; },
+      head: function (t) { buf.push({ head: t }); return api; },
       /** eq('a', 'F/m = 12/3', 4, 'm s<sup>−2</sup>') — value may be a number (formatted 3 s.f.) or html string */
       eq: function (lhs, work, value, unit) {
-        var v = typeof value === 'number' ? U.sf(value) : (value === undefined ? '' : value);
-        buf.push('<div class="eq"><span class="lhs">' + lhs + '</span><span class="rhs"><span class="res">' + v + '</span>' + (unit ? ' ' + unit : '') + '</span>' +
-          (work ? '<span class="work">' + work + '</span>' : '') + '</div>');
+        var v = typeof value === 'number' ? U.sf(value) : (value === undefined ? '' : String(value));
+        // no single answer: the work is one or more whole equations (e.g. "−T₁ cos 35° + T₂ cos 40° = 0"); one per line, kept intact
+        if (v === '' && work && !isProse(String(work).split(/<br\s*\/?>/i)[0])) {
+          var eqs = String(work).split(/<br\s*\/?>/i).filter(function (x) { return stripTags(x).trim() !== ''; });
+          var hh = '<div class="eq eqn"><div class="lines">';
+          eqs.forEach(function (q, i) { hh += '<span class="lhs">' + (i === 0 ? lhs : '') + '</span><span class="rel">' + (i === 0 && lhs ? ':' : '') + '</span><span class="ex">' + niceMinus(q) + '</span>'; });
+          buf.push(hh + '</div></div>'); return api;
+        }
+        var note = '', steps = [];
+        if (work) {
+          var parts = String(work).split(' = ');
+          // a leading description ("sum of signed areas = …") becomes the note; formulas become steps
+          if (isProse(parts[0])) { note = parts.shift(); }
+          parts.forEach(function (p) { if (isProse(p) && !/\d/.test(stripTags(p))) note = note ? note + '; ' + p : p; else steps.push(p); });
+        }
+        if (steps.length && v !== '' && sameNumber(steps[steps.length - 1], value)) steps.pop();
+        var rows = steps.map(function (st) { return '<span class="rel">=</span><span class="ex">' + niceMinus(st) + '</span>'; });
+        if (v !== '') {
+          var hasRel = /\s=\s|=/.test(stripTags(v)) && typeof value !== 'number';
+          rows.push('<span class="rel">' + (hasRel ? '' : '=') + '</span><span class="ex fin"><span class="res">' + niceMinus(v) + '</span>' + (unit ? ' <span class="u">' + unit + '</span>' : '') + '</span>');
+        }
+        var html = '<div class="eq">' + (note ? '<div class="note">' + note + '</div>' : '') + '<div class="lines">';
+        rows.forEach(function (r, i) { html += '<span class="lhs">' + (i === 0 ? lhs : '') + '</span>' + r; });
+        if (!rows.length) html += '<span class="lhs">' + lhs + '</span><span class="rel"></span><span class="ex"></span>';
+        buf.push(html + '</div></div>');
         return api;
       },
       badge: function (t, kind) { buf.push('<span class="badge ' + (kind || 'info') + '">' + t + '</span>'); return api; },
       html: function (s) { buf.push(s); return api; },
-      render: function () { el.innerHTML = buf.join(''); return api; }
+      render: function () {
+        // split into the summary (before the first head) and steps
+        var top = [], steps = [], cur = null;
+        buf.forEach(function (x) {
+          if (x && x.head !== undefined) { cur = { title: x.head, items: [] }; steps.push(cur); }
+          else (cur ? cur.items : top).push(x);
+        });
+        if (steps.length < 2) { el.innerHTML = top.join('') + steps.map(function (st) { return '<div class="head">' + st.title + '</div>' + st.items.join(''); }).join(''); return api; }
+        var titles = steps.map(function (st) { return stripTags(st.title); }).join('|');
+        if (titles !== lastTitles && lastTitles) { var keep = lastTitles.split('|')[page]; var k = steps.map(function (st) { return stripTags(st.title); }).indexOf(keep); page = k >= 0 ? k : 0; }
+        lastTitles = titles;
+        page = Math.max(0, Math.min(steps.length - 1, page));
+        var n = steps.length, html = '';
+        if (top.length) html += '<div class="walk-top">' + top.join('') + '</div>';
+        html += '<div class="walk-bar"><span class="walk-label">' + (showAll ? 'All ' + n + ' steps' : 'How to get it · step ' + (page + 1) + ' of ' + n) + '</span>' +
+          '<button type="button" class="walk-all" data-walk="all">' + (showAll ? 'One step at a time' : 'Show all steps') + '</button></div>';
+        if (!showAll) html += '<button type="button" class="walk-diag' + (onDiagram ? ' on' : '') + '" data-walk="diag" aria-pressed="' + onDiagram + '"><i></i>Show each step on the simulation</button>';
+        if (!showAll) {
+          html += '<ol class="walk-steps" role="tablist">' + steps.map(function (st, i) {
+            return '<li><button type="button" role="tab" data-walk="' + i + '" aria-selected="' + (i === page) + '" class="' + (i < page ? 'done' : i === page ? 'cur' : '') + '">' +
+              '<b>' + (i + 1) + '</b><span>' + stripTags(st.title) + '</span></button></li>';
+          }).join('') + '</ol>';
+          var st = steps[page];
+          html += '<section class="walk-page' + (page !== shownPage ? ' enter' : '') + '" aria-live="polite"><h3 class="walk-title" tabindex="-1"><span class="walk-num">' + (page + 1) + '</span>' + st.title + '</h3>' + st.items.join('') + '</section>';
+          html += '<div class="walk-nav"><button type="button" class="btn" data-walk="prev"' + (page === 0 ? ' disabled' : '') + '>← Back</button>' +
+            '<span class="walk-dots" aria-hidden="true">' + steps.map(function (x, i) { return '<i class="' + (i === page ? 'on' : '') + '"></i>'; }).join('') + '</span>' +
+            (page < n - 1 ? '<button type="button" class="btn primary" data-walk="next">Next: ' + stripTags(steps[page + 1].title) + ' →</button>' : '<span class="walk-end">✓ That’s the whole method</span>') + '</div>';
+        } else {
+          html += steps.map(function (st2, i) { return '<section class="walk-page all"><h3 class="walk-title"><span class="walk-num">' + (i + 1) + '</span>' + st2.title + '</h3>' + st2.items.join('') + '</section>'; }).join('');
+        }
+        el.innerHTML = html; shownPage = showAll ? -1 : page;
+        // highlight on the diagram what this step uses (arrows/labels whose symbol matches an equation's left-hand side)
+        var keys = [];
+        if (onDiagram && !showAll) steps[page].items.forEach(function (it) { var m = /<span class="lhs">([\s\S]*?)<\/span>/.exec(it); if (m && m[1]) keys.push(stripTags(m[1])); });
+        var fk = keys.join('|');
+        if (fk !== lastFocus && SIM.view && SIM.view.setFocus) {
+          lastFocus = fk; SIM.view.setFocus(keys);
+          setTimeout(function () { themeChanged(); setTimeout(themeChanged, 30); }, 0);
+        }
+        return api;
+      }
     };
     return api;
   }
@@ -385,7 +562,7 @@
     function lines() {
       return Array.prototype.slice.call(target.querySelectorAll('.eq')).filter(function (e) {
         var r = e.querySelector('.res'); return r && String(r.textContent || '').trim() !== '';
-      });
+      });   // (only the current walkthrough step is in the page, so these are the lines the student can see)
     }
     function apply() {
       var ls = lines(), n = 0;
@@ -414,6 +591,7 @@
       var eq = hit(e); if (eq) { e.preventDefault(); flip(eq); }
     });
     if (root.MutationObserver) new MutationObserver(apply).observe(target, { childList: true, subtree: true });
+    target.addEventListener('walkchange', function () { revealed = {}; apply(); });   // a new step starts hidden
     examResets.push(function () { if (on) { revealed = {}; apply(); } });
     var t = toggle(container, { label: 'Exam mode: hide answers (tap a line to reveal it)' }, function (v) {
       on = v; revealed = {}; target.classList.toggle('exam-hidden', on); bar.style.display = on ? '' : 'none'; apply();
@@ -450,5 +628,5 @@
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
   SIM.ui = { h: h, course: course, gFor: gFor, colors: colors, onTheme: onTheme, page: page, canvas: canvas, params: params, select: select,
-    toggle: toggle, presets: presets, openEditor: openEditor, askNumber: askNumber, stageTip: stageTip, stage: function () { return stage; }, syncChips: function () { syncChips(); }, Readout: Readout, examToggle: examToggle, notes: notes, legend: legend, readHash: readHash, writeHash: writeHash, esc: esc };
+    toggle: toggle, presets: presets, openEditor: openEditor, askNumber: askNumber, stageTip: stageTip, stageAction: stageAction, placeMode: placeMode, cancelPlace: function () { cancelPlace(false); }, stage: function () { return stage; }, syncChips: function () { syncChips(); }, Readout: Readout, examToggle: examToggle, notes: notes, legend: legend, readHash: readHash, writeHash: writeHash, esc: esc };
 })(typeof self !== 'undefined' ? self : this);

@@ -166,15 +166,50 @@ select:hover { border-color: var(--accent); }
 .toggle input:checked { background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); }
 .toggle input:checked::after { transform: translateX(16px); }
 
-/* ---------- live working ---------- */
-.readout { font-size: 13.5px; }
-.readout .eq { display: grid; grid-template-columns: auto 1fr; gap: 0 8px; padding: 6px 4px; border-bottom: 1px dashed var(--line); }
-.readout .eq:last-child { border-bottom: 0; }
-.readout .eq .lhs { font-family: var(--mono); white-space: nowrap; }
-.readout .eq .rhs { font-family: var(--mono); text-align: right; overflow-wrap: anywhere; }
-.readout .eq .work { grid-column: 1 / -1; color: var(--muted); font-size: 12.5px; font-family: var(--mono); overflow-wrap: anywhere; }
-.readout .eq .res { color: var(--ink); font-weight: 750; }
-.readout .head { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 12px 0 2px; }
+/* ---------- live working: each equation reads top to bottom, "=" signs aligned ---------- */
+:root { --math: "STIX Two Text", "STIX Two Math", "Cambria Math", Cambria, "Latin Modern Roman", "Times New Roman", serif; }
+.readout { font-size: 15px; }
+.readout .eq { padding: 10px 12px; margin: 8px 0; border-radius: 12px; background: var(--panel2); border: 1px solid var(--line); }
+.readout .eq .note { font: 500 12.5px/1.35 var(--sans); color: var(--muted); margin: 0 0 4px; }
+.readout .eq .lines { display: grid; grid-template-columns: auto auto minmax(0, 1fr); column-gap: 8px; row-gap: 3px; align-items: baseline; font: 17px/1.45 var(--math); font-variant-numeric: lining-nums tabular-nums; }
+.readout .eq .lhs { justify-self: end; white-space: nowrap; font-style: italic; }
+.readout .eq.eqn .lhs { font-style: normal; font-weight: 700; }
+.readout .eq .rel { color: var(--muted); text-align: center; min-width: .8em; }
+.readout .eq .ex { overflow-wrap: anywhere; }
+.readout .eq .ex.fin { justify-self: start; padding: 1px 8px; margin-left: -8px; border-radius: 8px; background: color-mix(in srgb, var(--accent) 13%, transparent); }
+.readout .eq .res { color: var(--ink); font-weight: 700; }
+.readout .eq .u { color: var(--muted); font-size: 15px; }
+.readout .eq sub, .readout .eq sup { font-size: 70%; }
+.readout .head { font: 700 11.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 16px 0 2px; }
+.readout .head:first-child { margin-top: 4px; }
+/* walkthrough: answer first, then the method one step at a time */
+.walk-top { margin-bottom: 8px; }
+.walk-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 10px 0 6px; }
+.walk-label { font: 700 11.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.walk-all { border: 0; background: none; color: var(--accent); font: 600 13px var(--sans); cursor: pointer; min-height: var(--tap2); padding: 0 4px; }
+.walk-steps { list-style: none; margin: 0 0 8px; padding: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.walk-steps::-webkit-scrollbar { display: none; }
+.walk-steps button { display: flex; align-items: center; gap: 7px; min-height: 40px; max-width: 220px; padding: 0 12px 0 6px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel2); color: var(--muted); font: 600 12.5px var(--sans); cursor: pointer; white-space: nowrap; }
+.walk-steps button span { overflow: hidden; text-overflow: ellipsis; }
+.walk-steps button b { display: grid; place-items: center; flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--chip); color: var(--ink); font-size: 12px; }
+.walk-steps button.done b { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+.walk-steps button.cur { color: var(--ink); border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+.walk-steps button.cur b { background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); color: #fff; }
+.walk-page { border-radius: 14px; padding: 12px 12px 4px; border: 1px solid var(--line); background: var(--panel); }
+.walk-page.enter { animation: walkIn .22s ease-out; }
+.walk-page.all + .walk-page.all { margin-top: 10px; }
+@keyframes walkIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }
+.walk-title { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; font: 700 16px/1.3 var(--sans); letter-spacing: -.01em; outline: none; }
+.walk-title:first-letter { text-transform: uppercase; }
+.walk-num { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 10px; background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); color: #fff; font-size: 14px; }
+.walk-nav { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.walk-nav .btn { min-height: var(--tap); }
+.walk-nav .btn.primary { margin-left: auto; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; line-height: var(--tap); }
+.walk-dots { display: flex; gap: 5px; margin: 0 auto; }
+.walk-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+.walk-dots i.on { width: 20px; border-radius: 4px; background: var(--accent); }
+.walk-end { margin-left: auto; font: 600 13px var(--sans); color: var(--ok); }
+.readout > .badge, .walk-top .badge { font-size: 14px; padding: 8px 12px; border-radius: 12px; display: block; }
 .badge { display: inline-block; font-size: 12.5px; font-weight: 650; padding: 4px 10px; border-radius: 8px; margin: 2px 0 6px; }
 .badge.ok { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
 .badge.warn { background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn); }
@@ -207,9 +242,14 @@ select:hover { border-color: var(--accent); }
 
 .meter { height: 10px; border-radius: 5px; background: var(--grid); overflow: hidden; margin: 4px 0 2px; }
 .meter > div { height: 100%; background: var(--c-friction); }
-table.tbl { border-collapse: collapse; width: 100%; font: 12.5px var(--mono); }
-table.tbl th, table.tbl td { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: right; }
-table.tbl th:first-child, table.tbl td:first-child { text-align: left; }
+table.tbl { border-collapse: separate; border-spacing: 0; width: 100%; font: 14px/1.35 var(--sans); font-variant-numeric: tabular-nums; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+table.tbl th { font: 700 11.5px var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--panel2); padding: 9px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+table.tbl td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); font-family: var(--math); font-size: 15.5px; }
+table.tbl tr:last-child td { border-bottom: 0; }
+table.tbl tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--panel2) 60%, transparent); }
+table.tbl th:first-child, table.tbl td:first-child { text-align: left; font-style: italic; }
+table.tbl td.txt, table.tbl td .txt { font: 13px/1.3 var(--sans); color: var(--muted); text-align: left; }
+table.tbl tr.sum td, table.tbl tr.total td { font-weight: 700; background: color-mix(in srgb, var(--accent) 10%, transparent); }
 details summary { cursor: pointer; font-size: 13.5px; color: var(--muted); }
 
 /* embedded as a mode inside group.html */
@@ -239,3 +279,41 @@ body.embed main.sim { padding-top: 14px; }
   .crumbs { font-size: 13px; }
   .card { padding: 12px; border-radius: 14px; }
 }
+
+/* ---------- scenario picker (replaces the long preset dropdown) ---------- */
+.scn-current { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; width: 100%; min-height: 52px; padding: 10px 14px; border-radius: 14px; border: 1px dashed var(--line); background: var(--panel2); color: var(--ink); text-align: left; cursor: pointer; font: 600 14px var(--sans); }
+.scn-current:hover, .scn-current.open { border-color: var(--accent); border-style: solid; }
+.scn-ph { font-size: 15px; }
+.scn-count { margin-left: auto; color: var(--muted); font-weight: 500; font-size: 12.5px; }
+.scn-kicker { flex-basis: 100%; font: 700 10.5px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.scn-change { margin-left: auto; color: var(--accent); font-size: 13px; }
+.scn-panel { margin-top: 8px; max-height: 420px; overflow: auto; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); box-shadow: var(--shadow-lg); padding: 6px; }
+.scn-group + .scn-group { margin-top: 6px; border-top: 1px solid var(--line); padding-top: 6px; }
+.scn-ghead { padding: 6px 8px 4px; }
+.scn-ghead b { display: block; font: 700 11.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; }
+.scn-ghead span { font-size: 12px; color: var(--muted); }
+.scn-item { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 6px 10px; border: 0; border-radius: 10px; background: transparent; color: var(--ink); text-align: left; cursor: pointer; font: 500 14px/1.3 var(--sans); }
+.scn-item:hover, .scn-item:focus-visible { background: var(--chip); }
+.scn-item.on { background: color-mix(in srgb, var(--accent) 14%, transparent); font-weight: 650; }
+.scn-ref { flex: none; font: 700 11.5px var(--mono); color: var(--accent); background: var(--chip); border: 1px solid var(--line); border-radius: 7px; padding: 2px 6px; }
+.scn-whatif .scn-name::before { content: "?"; display: inline-grid; place-items: center; width: 18px; height: 18px; margin-right: 6px; border-radius: 50%; background: var(--chip); color: var(--accent); font-weight: 800; font-size: 11px; }
+.scn-note { font-size: 13px; color: var(--muted); margin-top: 8px; }
+.scn-note:empty { display: none; }
+
+/* ---------- step focus option, stage tools ---------- */
+.walk-diag { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 8px; min-height: var(--tap2); padding: 0 12px 0 6px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel2); color: var(--muted); font: 600 12.5px var(--sans); cursor: pointer; }
+.walk-diag i { width: 30px; height: 18px; border-radius: 999px; background: var(--line); position: relative; flex: none; }
+.walk-diag i::after { content: ""; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.walk-diag.on { color: var(--ink); border-color: var(--accent); }
+.walk-diag.on i { background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); }
+.walk-diag.on i::after { transform: translateX(12px); }
+.stage-actions { position: absolute; right: 10px; top: 10px; z-index: 4; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.stage-act { display: inline-flex; align-items: center; gap: 6px; min-height: var(--tap); padding: 0 14px 0 6px; border-radius: 999px; border: 0; background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); color: #fff; font: 650 13.5px var(--sans); cursor: pointer; box-shadow: 0 8px 22px var(--glow); }
+.stage-act b { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.2); font-size: 20px; }
+.stage-act:hover { filter: brightness(1.08); }
+.sim-stage.placing > canvas { cursor: crosshair; outline: 3px dashed var(--accent); outline-offset: -3px; }
+.place-banner { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 16px; border-radius: 999px; background: var(--ink); color: var(--bg); font: 600 14px var(--sans); box-shadow: var(--shadow-lg); white-space: nowrap; }
+.place-banner button { min-height: 34px; padding: 0 12px; border-radius: 999px; border: 0; background: rgba(127,127,127,.3); color: inherit; font: 600 13px var(--sans); cursor: pointer; }
+@media (max-width: 720px) { .stage-actions { position: static; margin-top: 8px; justify-content: flex-start; } .place-banner { white-space: normal; width: calc(100% - 24px); } }
+/* tables get the full width under the diagram instead of a squeezed grid column */
+.plots > div[style*="overflow-x"], .plots > .tblwrap { grid-column: 1 / -1; }

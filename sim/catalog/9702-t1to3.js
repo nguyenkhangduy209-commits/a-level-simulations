@@ -77,7 +77,7 @@
     tags: ['9702-3', '9702-1'],
     summary: 'Animated top view of two discs: elastic (smooth discs, impact parameter) or sticking, plus exam solvers and explosions. Trails, strobe dots, centre of mass moving uniformly, live momentum vector diagram and KE bars.',
     questionTypes: [
-      { topic: '9702-3', text: 'Elastic collision in 2-D: KE conserved, equal masses leave at 90°', preset: 0 },
+      { topic: '9702-3', text: 'Elastic collision in 2-D: KE conserved, equal masses leave at 90°', preset: 1 },
       { topic: '9702-3', text: 'Bodies stick together after moving at right angles: common velocity, KE lost', preset: 3 },
       { topic: '9702-3', text: 'Oblique collision: one final velocity given, find the other', preset: 5 },
       { topic: '9702-3', text: 'Both final directions given: find both speeds', preset: 6 },

@@ -51,7 +51,7 @@
     { key: 'm3', label: 'Mass 3', sym: 'm<sub>3</sub>', unit: 'kg', min: 0.1, max: 2000, step: 0.1, value: 1 },
     { key: 'r1', label: 'Radius of disc 1', sym: 'r<sub>1</sub>', unit: 'm', min: 0.05, max: 3, step: 0.01, value: 0.5 },
     { key: 'r2', label: 'Radius of disc 2', sym: 'r<sub>2</sub>', unit: 'm', min: 0.05, max: 3, step: 0.01, value: 0.5 },
-    { key: 'b', label: 'Impact parameter (sideways offset of the centres)', sym: 'b', unit: 'm', min: 0, max: 0.99, step: 0.001, value: 0.5 },
+    { key: 'b', label: 'Impact parameter (sideways offset of the centres)', sym: 'b', unit: 'm', min: 0, max: 0.99, step: 0.001, value: 0 },
     { key: 'u1', label: 'Speed of body 1 before', sym: 'u<sub>1</sub>', unit: 'm s<sup>−1</sup>', min: 0, max: 50, step: 0.01, value: 4 },
     { key: 'tu1', label: 'Direction of body 1 before', sym: 'α<sub>1</sub>', unit: '°', min: -180, max: 180, step: 0.5, value: 0 },
     { key: 'u2', label: 'Speed of body 2 before', sym: 'u<sub>2</sub>', unit: 'm s<sup>−1</sup>', min: 0, max: 50, step: 0.01, value: 0 },
@@ -71,11 +71,11 @@
 
   function P(o) { return Object.assign({ m1: 1, m2: 1, m3: 1, r1: 0.5, r2: 0.5, b: 0, u1: 4, tu1: 0, u2: 0, tu2: 90, v1: 3, tv1: 60, v2: 6, tv2: -30, dts: 0.2 }, o); }
   var presetCtl = ui.presets(presetCard, [
-    { name: 'Elastic, equal masses, one at rest: paths at 90°', m: 'elastic', v: P({ b: 0.5 }), note: 'b = 0.5 m with r₁ + r₂ = 1.0 m: the line of centres is at 30°. The target leaves along it at 4 cos 30° = 3.46 m s<sup>−1</sup>; the striker at 4 sin 30° = 2.00 m s<sup>−1</sup>, at 90° to the target.' },
     { name: 'Elastic, head-on (b = 0): 2.0 kg at 3.0 m s⁻¹ on 1.0 kg at rest', m: 'elastic', v: P({ m1: 2, m2: 1, u1: 3, b: 0, r1: 0.4, r2: 0.3 }), note: 'Same as the 1-D result: v₁ = 1.0, v₂ = 4.0 m s<sup>−1</sup> along the original line.' },
+    { name: 'Elastic, equal masses, one at rest: paths at 90°', m: 'elastic', v: P({ b: 0.5 }), note: 'b = 0.5 m with r₁ + r₂ = 1.0 m: the line of centres is at 30°. The target leaves along it at 4 cos 30° = 3.46 m s<sup>−1</sup>; the striker at 4 sin 30° = 2.00 m s<sup>−1</sup>, at 90° to the target.' },
     { name: 'Elastic glancing: light puck on a heavy one', m: 'elastic', v: P({ m1: 1, m2: 3, u1: 5, b: 0.6, r1: 0.5, r2: 0.5 }), note: 'Momentum and KE are both conserved; the light puck is deflected through a large angle.' },
     { name: 'Cars collide at a junction and lock together', m: 'stick', v: P({ m1: 1200, m2: 1500, u1: 15, tu1: 0, u2: 10, tu2: 90, r1: 2, r2: 2, b: 0 }), note: 'p = (18 000, 15 000) N s ⇒ v = 23 400 ÷ 2700 = 8.68 m s<sup>−1</sup> at 39.8°. KE falls from 210 kJ to 102 kJ.' },
-    { name: 'Pucks stick: 0.20 kg at 3.0 m s⁻¹ meets 0.30 kg at 2.0 m s⁻¹ at 90°', m: 'stick', v: P({ m1: 0.2, m2: 0.3, u1: 3, tu1: 0, u2: 2, tu2: 90, r1: 0.1, r2: 0.12, b: 0.05 }), note: 'p = (0.60, 0.60) N s ⇒ V = 1.70 m s<sup>−1</sup> at 45°. KE 1.50 J → 0.72 J.' },
+    { name: 'Pucks stick: 0.20 kg at 3.0 m s⁻¹ meets 0.30 kg at 2.0 m s⁻¹ at 90°', m: 'stick', v: P({ m1: 0.2, m2: 0.3, u1: 3, tu1: 0, u2: 2, tu2: 90, r1: 0.1, r2: 0.12, b: 0 }), note: 'p = (0.60, 0.60) N s ⇒ V = 1.70 m s<sup>−1</sup> at 45°. KE 1.50 J → 0.72 J.' },
     { name: '2.0 kg at 5.0 m s⁻¹ hits 3.0 kg at rest; 2.0 kg leaves at 3.0 m s⁻¹ at 60°', m: 'one', v: P({ m1: 2, m2: 3, u1: 5, tu1: 0, u2: 0, v1: 3, tv1: 60, r1: 0.4, r2: 0.45 }), note: 'x: 10 = 3.0 + 3v cos β; y: 0 = 5.20 + 3v sin β ⇒ 2.91 m s<sup>−1</sup> at 36.6° below the original line.' },
     { name: '2m at 5.0 m s⁻¹ hits 3m at rest; both leave at 30° (9702/21 M/J 24 Q3)', m: 'dirs', v: P({ m1: 2, m2: 3, u1: 5, tu1: 0, u2: 0, tv1: 30, tv2: -30, r1: 0.4, r2: 0.45 }), note: 'Take m = 1 kg (it cancels). y: 2v sin 30° = 3w sin 30°; x: 10 = (2v + 3w) cos 30° ⇒ v = 2.9, w = 1.9 m s<sup>−1</sup>.' },
     { name: 'Firework at rest: 3m at 4.0, 2m at 6.0 at 90° (9702/23 M/J 23 Q3)', m: 'explode', three: true, v: P({ m1: 3, m2: 2, m3: 1, u1: 0, tu1: 0, v1: 4, tv1: 0, v2: 6, tv2: 90, r1: 0.6 }), note: 'Total momentum stays zero: fragment C has momentum (−12m, −12m) ⇒ θ = 45°, v = 17 m s<sup>−1</sup>.' },
@@ -195,6 +195,18 @@
       var n = res.n, cp = info.contact, L = (v.r1 + v.r2) * 1.6;
       D.line(c, [vp.P(cp[0] - n[0] * L, cp[1] - n[1] * L), vp.P(cp[0] + n[0] * L, cp[1] + n[1] * L)], col.component, { dash: [6, 4], width: 1.2 });
       D.label(c, 'line of centres at impact', vp.X(cp[0] + n[0] * L), vp.Y(cp[1] + n[1] * L) - 10, col.component, { size: 11 });
+    }
+    // glancing collision: show the two parallel lines of approach and the sideways offset b between them
+    if ((info.md === 'elastic' || info.md === 'stick') && res && !res.noCollision && !now.after && v.b > 1e-6 && now.list.length === 2) {
+      var wv = DY.add(V(v.u1, v.tu1), DY.scale(V(v.u2, v.tu2), -1)), wl = Math.hypot(wv[0], wv[1]);
+      if (wl > 1e-12) {
+        var wh = [wv[0] / wl, wv[1] / wl], Lg = (vw[1] - vw[0]) + (vw[3] - vw[2]);
+        now.list.forEach(function (b) { D.line(c, [vp.P(b.x[0] - wh[0] * Lg, b.x[1] - wh[1] * Lg), vp.P(b.x[0] + wh[0] * Lg, b.x[1] + wh[1] * Lg)], b.c, { dash: [2, 5], width: 1 }); });
+        var A = now.list[0].x, B2 = now.list[1].x, ph = [-wh[1], wh[0]], off = (B2[0] - A[0]) * ph[0] + (B2[1] - A[1]) * ph[1];
+        var foot = [B2[0] - ph[0] * off, B2[1] - ph[1] * off];   // point on body 1's line level with body 2
+        D.line(c, [vp.P(foot[0], foot[1]), vp.P(B2[0], B2[1])], col.component, { width: 1.4 });
+        D.label(c, 'Glancing: the dotted lines of approach are offset sideways by b = ' + U.num(v.b, 3) + ' m (set b = 0 for head-on)', 8, vp.h - 12, col.component, { align: 'left', size: 11, bold: true });
+      }
     }
     // bodies
     var ks = hold ? hold.ks : 0.22 * Math.min(vp.w, vp.h) / info.vmax;

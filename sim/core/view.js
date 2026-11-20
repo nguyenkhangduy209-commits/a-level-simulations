@@ -42,10 +42,42 @@
   Viewport.prototype.begin = function () {
     var c = this.ctx, col = SIM.ui.colors();
     c.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    if (this === firstVp || !firstVp) { firstVp = this; hitsLast = hitsNow || (focus ? hitsLast : 0); hitsNow = 0; }
     c.fillStyle = col.panel; c.fillRect(0, 0, this.w, this.h);
     c.lineCap = 'round'; c.lineJoin = 'round';
     return c;
   };
+
+  /* ---------------- step focus: the walkthrough highlights what the current step uses ----------------
+     setFocus(['X', 'T1']) makes arrows/labels whose symbol matches glow and dims everything else.
+     Dimming only happens once a frame has actually found a match, so pages without matching
+     labels are never greyed out. */
+  var focus = null, hitsLast = 0, hitsNow = 0, firstVp = null;
+  var SUBS = { '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9', 'ₓ': 'x', 'ᵧ': 'y' };
+  function symKey(t) {
+    t = String(t || '').replace(/<[^>]+>/g, '').split(/\s=\s|=/)[0];
+    return t.replace(/[₀-₉ₓᵧ]/g, function (c) { return SUBS[c]; }).replace(/\s+/g, '').replace(/[()]/g, '').toLowerCase();
+  }
+  function setFocus(list) {
+    focus = list && list.length ? list.map(symKey).filter(function (k) { return k && k.length <= 8; }) : null;
+    if (focus && !focus.length) focus = null;
+    hitsLast = 0; hitsNow = 0;
+  }
+  /** returns 'hi' (focused), 'dim' or null for something drawn with this label */
+  function focusState(label) {
+    if (!focus) return null;
+    var k = label ? symKey(label) : '';
+    if (k && focus.indexOf(k) >= 0) { hitsNow++; return 'hi'; }
+    return hitsLast > 0 ? 'dim' : null;
+  }
+  /** label numbers: long decimals to 3 significant figures (angles keep 1 d.p.), typographic minus */
+  function tidy(text) {
+    return String(text).replace(/(^|[^\w.])(-?)(\d+\.\d{3,})(?!\s*°)(?=\D|$)/g, function (m, pre, sign, num) {
+      var v = Number(num); if (!isFinite(v)) return m;
+      var out = Number(v.toPrecision(3)); var str = Math.abs(out) >= 100 ? String(Math.round(out)) : out.toPrecision(3);
+      return pre + sign + str;
+    }).replace(/(^|[\s(=])-(?=\d)/g, '$1−');
+  }
 
   /* ---------------- primitives (screen-space unless noted) ---------------- */
   var D = {};
@@ -54,9 +86,10 @@
     opt = opt || {};
     var dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy);
     if (L < 0.5) return;
-    var head = Math.min(opt.head || 10, L * 0.45), ux = dx / L, uy = dy / L;
+    var head = Math.min(opt.head || 10, L * 0.45), ux = dx / L, uy = dy / L, fs = focusState(opt.label);
     c.save();
-    c.strokeStyle = color; c.fillStyle = color; c.lineWidth = opt.width || 2.4;
+    c.strokeStyle = color; c.fillStyle = color; c.lineWidth = (opt.width || 2.4) + (fs === 'hi' ? 1.6 : 0);
+    if (fs === 'hi') { c.shadowColor = color; c.shadowBlur = 14; } else if (fs === 'dim') c.globalAlpha = 0.28;
     if (opt.dash) c.setLineDash(opt.dash);
     c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - ux * head * 0.8, y2 - uy * head * 0.8); c.stroke();
     c.setLineDash([]);
@@ -64,7 +97,8 @@
     c.lineTo(x2 - ux * head - uy * head * 0.45, y2 - uy * head + ux * head * 0.45);
     c.lineTo(x2 - ux * head + uy * head * 0.45, y2 - uy * head - ux * head * 0.45);
     c.closePath(); if (opt.hollow) { c.lineWidth = 1.5; c.stroke(); } else c.fill();
-    if (opt.label) D.label(c, opt.label, x2 + ux * 6 + (opt.lx || 0), y2 + uy * 6 + (opt.ly || 0), color, { align: ux < -0.3 ? 'right' : ux > 0.3 ? 'left' : 'center', base: uy > 0.3 ? 'top' : uy < -0.3 ? 'bottom' : 'middle', bg: true });
+    c.shadowBlur = 0;
+    if (opt.label) D.label(c, opt.label, x2 + ux * 6 + (opt.lx || 0), y2 + uy * 6 + (opt.ly || 0), color, { align: ux < -0.3 ? 'right' : ux > 0.3 ? 'left' : 'center', base: uy > 0.3 ? 'top' : uy < -0.3 ? 'bottom' : 'middle', bg: true, fs: fs || 'none' });
     c.restore();
   };
   /** arrow from a world point in a world direction (angle rad, standard math angle) with screen length px */
@@ -73,14 +107,17 @@
   };
   D.label = function (c, text, x, y, color, opt) {
     opt = opt || {};
+    text = tidy(text);
+    var fs = opt.fs === 'none' ? null : opt.fs || (/=/.test(text) ? focusState(text) : (focus && hitsLast ? 'dim' : null));
     c.save();
-    c.font = (opt.bold ? '600 ' : '') + (opt.size || 13) + 'px ' + (opt.mono ? 'ui-monospace, Menlo, monospace' : 'system-ui, -apple-system, sans-serif');
+    if (fs === 'dim') c.globalAlpha = 0.35;
+    c.font = (opt.bold || fs === 'hi' ? '650 ' : '500 ') + ((opt.size || 13) + (fs === 'hi' ? 1.5 : 0)) + 'px ' + (opt.mono ? 'ui-monospace, Menlo, monospace' : 'Inter, system-ui, -apple-system, "Segoe UI", sans-serif');
     c.textAlign = opt.align || 'center'; c.textBaseline = opt.base || 'middle';
     if (opt.bg) {
       var m = c.measureText(text), w = m.width + 6, hgt = (opt.size || 13) + 4;
       var bx = opt.align === 'left' ? x - 3 : opt.align === 'right' ? x - w + 3 : x - w / 2;
       var by = opt.base === 'top' ? y - 2 : opt.base === 'bottom' ? y - hgt + 2 : y - hgt / 2;
-      c.fillStyle = SIM.ui.colors().panel; c.globalAlpha = 0.85; c.fillRect(bx, by, w, hgt); c.globalAlpha = 1;
+      var ga = isFinite(c.globalAlpha) ? c.globalAlpha : 1; c.fillStyle = SIM.ui.colors().panel; c.globalAlpha = 0.85 * ga; c.fillRect(bx, by, w, hgt); c.globalAlpha = ga;
     }
     c.fillStyle = color || SIM.ui.colors().ink; c.fillText(text, x, y);
     c.restore();
@@ -89,7 +126,7 @@
   D.arc = function (c, x, y, r, a0, a1, color, label) {
     c.save(); c.strokeStyle = color; c.lineWidth = 1.4;
     c.beginPath(); c.arc(x, y, r, -a0, -a1, a1 > a0); c.stroke();
-    if (label) { var am = (a0 + a1) / 2; D.label(c, label, x + Math.cos(am) * (r + 12), y - Math.sin(am) * (r + 12), color, { size: 12 }); }
+    if (label) { var am = (a0 + a1) / 2; D.label(c, label, x + Math.cos(am) * (r + 15), y - Math.sin(am) * (r + 15), color, { size: 12, bg: true, fs: 'none' }); }
     c.restore();
   };
   D.rightAngle = function (c, x, y, a, size, color) {
@@ -209,5 +246,5 @@
   /** angle (degrees, anticlockwise from +x) of the screen vector from (x0,y0) to (x,y) */
   function screenAngle(x0, y0, x, y) { var a = Math.atan2(-(y - y0), x - x0) * 180 / Math.PI; return (a + 360) % 360; }
 
-  SIM.view = { Viewport: Viewport, draw: D, forceScale: forceScale, interact: interact, screenAngle: screenAngle };
+  SIM.view = { Viewport: Viewport, draw: D, forceScale: forceScale, interact: interact, screenAngle: screenAngle, setFocus: setFocus };
 })(typeof self !== 'undefined' ? self : this);

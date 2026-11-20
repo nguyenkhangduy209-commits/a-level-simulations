@@ -92,7 +92,7 @@ function runPage(file) {
   const scan = (when) => {
     for (const e of doc._texts) {
       const t = e._html.replace(/<[^>]+>/g, ' ');
-      const bad = t.match(/\bNaN\b|\bundefined\b|\bnull\b|Infinity|\[object/);
+      const bad = t.replace(/\bnull (at|point|deflection|reading|method)\b/g, '').match(/\bNaN\b|\bundefined\b|\bnull\b|Infinity|\[object/);   // "null at 64 cm" is physics, not a bug
       if (bad) problems.push(when + ': "' + t.slice(Math.max(0, bad.index - 60), bad.index + 30).replace(/\s+/g, ' ') + '"');
     }
   };
