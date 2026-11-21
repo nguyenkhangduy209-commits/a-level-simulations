@@ -290,7 +290,7 @@
     update();
     if (made && t !== 'wire' && editKey(made)) editValue(made, editKey(made), true);
   }
-  function pos(e) { var r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+  function pos(e) { return ui.canvasPoint(cv, e); }
   var downAt = null, downHit = false, downMoved = false, hover = -1;
   cv.addEventListener('pointerdown', function (e) {
     var p = pos(e); downAt = p; downMoved = false;

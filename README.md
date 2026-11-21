@@ -13,7 +13,9 @@ No install, no build step: plain HTML + canvas + JavaScript.
 
 `index.html` is the dashboard: pick **9709 Mechanics** or **9702 AS Physics** to open that course's page (`course.html?c=9709|9702`), with a recommended start, a route through the topics, every simulation and the past-paper question types.
 
-**Changing values:** every value is a chip under the simulation. Tap it to type, use − / +, or drag the slider. On force and motion pages you can also drag the diagram directly (arrow tips, launch arrows, string ends, slopes) and draw a new force, then type its size. Design rationale: `docs/ERGONOMICS.md`.
+Open **Change values**, then select a value to type a number, use − / +, or drag the slider. Scroll on the diagram or pinch with two fingers to zoom. Drag empty space to look around. Turn on **Drag view** to pan from anywhere, or use the direction buttons. In **Resultant of forces**, click or tap a force tip to inspect it, then select it again to edit its size. **Reset view** brings the whole scene back.
+
+See [the accessibility research and usability check](docs/UI_ACCESSIBILITY_RESEARCH.md) for the design rationale.
 
 ## What is inside
 
@@ -21,7 +23,7 @@ No install, no build step: plain HTML + canvas + JavaScript.
 `learn/equilibrium.html` is a guided first lesson (9709 4.1, a particle held by two strings), one idea per step, ending with a real past-paper question. The 9709 hub's "Start here" panel links to it and lists the topics in syllabus order.
 
 ### Simulations (`sim/`)
-16 simulations, each with modes (tabs). Every parameter has a slider (snaps to whole numbers; type exact values in the box), the working is shown with your numbers to 3 s.f., each sim auto-plays when an input changes, and you can type a time to see the data at that instant. "Exam setups" presets reproduce real past-paper questions (checked against the mark schemes).
+Grouped simulations offer related activities. Animations start paused. Press **Play** to watch or enter a time to see the data at that instant. **Calculations and graphs** shows the working with your numbers to 3 s.f. Exam setups reproduce real past-paper questions and were checked against the mark schemes.
 
 | Course | Simulation | Modes |
 |---|---|---|

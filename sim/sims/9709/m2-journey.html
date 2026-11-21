@@ -623,11 +623,6 @@
   }
   function replay() { if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged(); }
   function stepFor(span, big, mid, small) { return span > 60 ? big : span > 10 ? mid : small; }
-  function stageAt(canvas, x, y) {
-    var sg = ui.stage(); if (!sg || !sg.el || !sg.el.getBoundingClientRect || canvas === cv) return { x: x, y: y };
-    var a = canvas.getBoundingClientRect(), b = sg.el.getBoundingClientRect();
-    return { x: a.left - b.left + x, y: a.top - b.top + y };
-  }
   var QSTEP = { t: 0.5, a: 0.1, v: 0.5, d: 1, T: 1 }, QUICK = { t: [5, 10, 20, 30], a: [-2, -1, 0.5, 1, 2], v: [0, 5, 10, 20], d: [10, 50, 100], T: [60, 120, 240] };
   function askStage(i, f, at, onDone, sub) {
     var st = A.stages[i]; if (!st || !f) return;
@@ -782,7 +777,7 @@
     },
     onDrop: function () { vFreeze = null; drawPlots(); replay(); },
     onTap: function (hd, x, y) {
-      var at = stageAt(pV.canvas, x, y);
+      var at = { canvas: pV.canvas, x: x, y: y };
       if (hd.id === 'u0') askU0(at); else askStage(hd.i, primary(A.stages[hd.i]), at);
     },
     onHover: function () { drawPlots(); }

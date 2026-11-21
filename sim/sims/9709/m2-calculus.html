@@ -411,11 +411,6 @@
     if (o[k] !== wp.values[k]) { wp.set(o); ui.syncChips(); }
   }
   function seekT(t) { if (clock.playing) clock.pause(); clock.seek(U.clamp(t, T0, T1) - T0); }
-  function stageAt(canvas, x, y) {
-    var st = ui.stage(); if (!st || !st.el || !st.el.getBoundingClientRect || canvas === cv) return { x: x, y: y };
-    var a = canvas.getBoundingClientRect(), b = st.el.getBoundingClientRect();
-    return { x: a.left - b.left + x, y: a.top - b.top + y };
-  }
   function askWin(k, at) {
     var sp = wp.rows[k].spec;
     ui.askNumber({ title: k === 'ta' ? 'Interval starts at t<sub>a</sub>' : 'Interval ends at t<sub>b</sub>', sub: 'Distance and displacement are found for t<sub>a</sub> ≤ t ≤ t<sub>b</sub>.',
@@ -466,7 +461,7 @@
         return hs;
       },
       onDrag: function (hd, x) { var t = invX(x); if (hd.id === 'cur') seekT(t); else setWin(hd.id, t); },
-      onTap: function (hd, x, y) { var at = stageAt(P.canvas, x, y); if (hd.id === 'cur') askTime(at); else askWin(hd.id, at); },
+      onTap: function (hd, x, y) { var at = { canvas: P.canvas, x: x, y: y }; if (hd.id === 'cur') askTime(at); else askWin(hd.id, at); },
       onHover: function () { drawPlots(); }
     });
   });

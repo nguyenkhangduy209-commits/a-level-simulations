@@ -33,8 +33,16 @@
     colorCache = o; return o;
   }
   function onTheme(fn) { themeListeners.push(fn); }
-  function themeChanged() { colorCache = null; themeListeners.forEach(function (f) { f(); }); }
+  function redraw() { themeListeners.forEach(function (f) { f(); }); }
+  function themeChanged() { colorCache = null; redraw(); }
   if (root.matchMedia) root.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', themeChanged);
+  if (query.get('embed') === '1') root.addEventListener('message', function (e) {
+    if (e.source !== root.parent || (location.protocol !== 'file:' && e.origin !== location.origin)) return;
+    var theme = e.data && e.data.simTheme;
+    if (theme !== 'light' && theme !== 'dark') return;
+    document.documentElement.setAttribute('data-theme', theme);
+    themeChanged();
+  });
 
   /* ---------- safe physics/math number parser (SI prefixes + arithmetic) ---------- */
   var SI_MUL = { G: 1e9, M: 1e6, k: 1e3, K: 1e3, c: 1e-2, m: 1e-3, u: 1e-6, 'µ': 1e-6, 'μ': 1e-6, n: 1e-9, p: 1e-12 };
@@ -131,8 +139,6 @@
       h('div', { class: 'tags' }, (opt.tags || []).map(function (t) { return h('span', { class: 'chip', text: t }); })
         .concat(opt.g ? [h('span', { class: 'chip g', html: 'g = ' + opt.g + ' m s<sup>−2</sup>' })] : [])),
       h('div', { class: 'head-actions' }, [
-        h('button', { type: 'button', class: 'data-btn', 'aria-label': 'Fetch or export data', html: '⇣ <span class="txt">Fetch Data</span>', onclick: function () { openDataHub(); } }),
-        h('button', { type: 'button', class: 'guide-btn', 'aria-label': 'Simulation guide', html: '<span class="guide-q">?</span><span class="txt">Guide</span>', onclick: function () { openGuide(); } }),
         themeButton()
       ])
     ]);
@@ -165,12 +171,149 @@
     var c = h('canvas', { class: cls || '' });
     if (!stage && /main-canvas|tall-canvas/.test(cls || '')) {
       var wrap = h('div', { class: 'sim-stage' }), dock = h('div', { class: 'dock', role: 'group', 'aria-label': 'Values in this simulation (tap to change)' });
-      wrap.appendChild(c); container.appendChild(wrap); container.appendChild(dock);
+      wrap.appendChild(h('div', { class: 'scene-window' }, [c]));
+      container.appendChild(wrap); container.appendChild(dock);
       stage = { el: wrap, canvas: c, dock: dock, chips: [] };
       if (SIM.scene && SIM.scene.mountSwitch) SIM.scene.mountSwitch(wrap);   // Real life / Diagram
       return c;
     }
     container.appendChild(c); return c;
+  }
+  function cameraTransform(c, w, hgt) {
+    var camera = stage && c === stage.canvas && stage.camera;
+    if (!camera) return [1, 0, 0];
+    var center = (1 - camera.scale) / 2;
+    return [camera.scale, (center + camera.x) * w, (center + camera.y) * hgt];
+  }
+  function canvasPoint(c, e) {
+    var r = c.getBoundingClientRect(), t = cameraTransform(c, r.width, r.height);
+    return [(e.clientX - r.left - t[1]) / t[0], (e.clientY - r.top - t[2]) / t[0]];
+  }
+  function zoomControls() {
+    var camera = stage.camera = { scale: 1, x: 0, y: 0 };
+    var canvas = stage.canvas, moving = false, drag = null, frame = null, pinch = null;
+    var level = h('span', { class: 'zoom-level', role: 'status', text: '100%' });
+    var viewBox = h('span', { class: 'camera-window' });
+    var overview = h('span', { class: 'camera-overview', 'aria-hidden': 'true' }, [viewBox]);
+    var hint = h('span', { class: 'camera-hint', text: 'Drag empty space to look around.' });
+    var directions = h('div', { class: 'view-directions', role: 'group', 'aria-label': 'Move around the enlarged simulation' });
+    function button(label, action) { return h('button', { type: 'button', class: 'btn', text: label, onclick: action }); }
+    function pan(x, y) {
+      var reach = Math.max(0, camera.scale - 1) / 2;
+      camera.x = U.clamp(x, -reach, reach);
+      camera.y = U.clamp(y, -reach, reach);
+      viewBox.style.width = viewBox.style.height = (100 / camera.scale) + '%';
+      viewBox.style.left = (100 * (reach - camera.x) / camera.scale) + '%';
+      viewBox.style.top = (100 * (reach - camera.y) / camera.scale) + '%';
+      if (frame === null) frame = root.requestAnimationFrame(function () { frame = null; redraw(); });
+    }
+    function moveView(on) {
+      moving = on;
+      move.setAttribute('aria-pressed', String(on));
+      stage.el.classList.toggle('move-view', on);
+      hint.textContent = on ? 'Drag anywhere to look around. Turn off Drag view to edit.' : 'Drag empty space to look around.';
+    }
+    function setZoom(scale, x, y) {
+      var zoomed = scale > 1, text = Math.round(scale * 100) + '%';
+      camera.scale = scale;
+      if (!zoomed) moveView(false);
+      pan(x, y);
+      if (level.textContent !== text) level.textContent = text;
+      directions.hidden = !zoomed;
+      out.setAttribute('aria-disabled', String(scale <= 0.5));
+      into.setAttribute('aria-disabled', String(scale >= 3));
+    }
+    function zoomAt(next, x, y) {
+      var scale = U.clamp(next, 0.5, 3), ratio = scale / camera.scale;
+      setZoom(scale, x + (camera.x - x) * ratio, y + (camera.y - y) * ratio);
+    }
+    camera.focus = function (x, y) {
+      setZoom(1.75, (0.5 - x) * 1.75, (0.5 - y) * 1.75);
+    };
+    camera.reset = function () {
+      setZoom(1, 0, 0);
+      canvas.dispatchEvent(new Event('simviewreset'));
+    };
+    var out = button('− Zoom out', function () { zoomAt((Math.ceil(camera.scale * 4) - 1) / 4, 0, 0); });
+    var into = button('+ Zoom in', function () { zoomAt((Math.floor(camera.scale * 4) + 1) / 4, 0, 0); });
+    var move = button('Drag view', function () { moveView(!moving); });
+    move.setAttribute('aria-pressed', 'false');
+    directions.appendChild(move);
+    [[1, 0, 'left', '←'], [-1, 0, 'right', '→'], [0, 1, 'up', '↑'], [0, -1, 'down', '↓']].forEach(function (dir) {
+      var arrow = button(dir[3], function () { pan(camera.x + dir[0] * 0.18, camera.y + dir[1] * 0.18); });
+      arrow.setAttribute('aria-label', 'View ' + dir[2]);
+      arrow.title = 'View ' + dir[2];
+      directions.appendChild(arrow);
+    });
+    directions.appendChild(overview);
+    directions.appendChild(hint);
+    stage.el.appendChild(directions);
+    setZoom(1, 0, 0);
+    canvas.addEventListener('wheel', function (e) {
+      if (e.ctrlKey || e.metaKey || e.deltaY === 0 || placing) return;
+      var r = canvas.getBoundingClientRect();
+      var delta = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? r.height : 1);
+      var scale = U.clamp(camera.scale * Math.exp(-delta * 0.0015), 0.5, 3);
+      if (scale === camera.scale) return;
+      e.preventDefault();
+      zoomAt(scale, (e.clientX - r.left) / r.width - 0.5, (e.clientY - r.top) / r.height - 0.5);
+    }, { passive: false });
+    function touchPair(touches) {
+      var a = touches[0], b = touches[1], r = canvas.getBoundingClientRect();
+      return { x: ((a.clientX + b.clientX) / 2 - r.left) / r.width - 0.5,
+        y: ((a.clientY + b.clientY) / 2 - r.top) / r.height - 0.5,
+        distance: Math.max(1, Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)) };
+    }
+    canvas.addEventListener('touchstart', function (e) {
+      if (e.targetTouches.length !== 2 || placing) return;
+      e.preventDefault();
+      var pair = touchPair(e.targetTouches);
+      pinch = { pair: pair, scale: camera.scale, x: camera.x, y: camera.y };
+      drag = null;
+      stage.el.classList.remove('dragging-view');
+      canvas.dispatchEvent(new Event('pointercancel'));
+    }, { passive: false });
+    canvas.addEventListener('touchmove', function (e) {
+      if (!pinch || e.targetTouches.length !== 2) return;
+      e.preventDefault();
+      var pair = touchPair(e.targetTouches);
+      var scale = U.clamp(pinch.scale * pair.distance / pinch.pair.distance, 0.5, 3), ratio = scale / pinch.scale;
+      setZoom(scale, pair.x + (pinch.x - pinch.pair.x) * ratio, pair.y + (pinch.y - pinch.pair.y) * ratio);
+    }, { passive: false });
+    ['touchend', 'touchcancel'].forEach(function (type) {
+      canvas.addEventListener(type, function (e) { if (!e.targetTouches.length) pinch = null; });
+    });
+    function start(e) {
+      if (pinch || drag || placing || camera.scale <= 1 || e.isPrimary === false || e.button !== 0) return;
+      var r = canvas.getBoundingClientRect();
+      drag = { id: e.pointerId, px: e.clientX, py: e.clientY, w: r.width, h: r.height, x: camera.x, y: camera.y };
+      stage.el.classList.add('dragging-view');
+      e.preventDefault(); e.stopImmediatePropagation();
+      if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+    }
+    canvas.addEventListener('pointerdown', function (e) { if (moving) start(e); }, true);
+    canvas.addEventListener('pointerdown', function (e) { if (!e.defaultPrevented) start(e); });
+    canvas.addEventListener('pointermove', function (e) {
+      if (pinch && e.pointerType === 'touch') { e.stopImmediatePropagation(); return; }
+      if (!drag || drag.id !== e.pointerId) return;
+      pan(drag.x + (e.clientX - drag.px) / drag.w, drag.y + (e.clientY - drag.py) / drag.h);
+      e.stopImmediatePropagation();
+    }, true);
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (type) {
+      canvas.addEventListener(type, function (e) {
+        if (pinch && e.pointerType === 'touch') { e.stopImmediatePropagation(); return; }
+        if (!drag || drag.id !== e.pointerId) return;
+        drag = null;
+        stage.el.classList.remove('dragging-view');
+        e.stopImmediatePropagation();
+      }, true);
+    });
+    return h('div', { class: 'scene-tools' }, [
+      h('div', { class: 'zoom-controls', role: 'group', 'aria-label': 'Simulation zoom' }, [
+        out, level, into, button('Reset view', camera.reset)
+      ]),
+      h('span', { class: 'camera-hint', text: 'Scroll or pinch to zoom.' })
+    ]);
   }
   /** a short hint over the stage, e.g. "Drag from the centre to draw a force" */
   function stageTip(text) {
@@ -205,8 +348,8 @@
     stage.el.appendChild(banner); stage.el.classList.add('placing');
     function down(e) {
       e.stopImmediatePropagation(); e.preventDefault();
-      var r = stage.canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, cb = o.onPlace;
-      cancelPlace(false); if (cb) cb(x, y);
+      var pt = canvasPoint(stage.canvas, e), cb = o.onPlace;
+      cancelPlace(false); if (cb) cb(pt[0], pt[1]);
     }
     stage.canvas.addEventListener('pointerdown', down, true);
     placing = { banner: banner, down: down, onCancel: o.onCancel };
@@ -231,7 +374,9 @@
     if (restoreFocus && p.returnFocus && p.returnFocus.focus) p.returnFocus.focus();
   }
   if (typeof document !== 'undefined' && document.addEventListener) {
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && pop) closePop(true); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && pop) { e.preventDefault(); closePop(true); }
+    });
     document.addEventListener('pointerdown', function (e) {
       if (!pop || !e.target || !e.target.closest) return;
       if (e.target.closest('.pop') || (pop.owner && pop.owner.contains && pop.owner.contains(e.target))) return;
@@ -245,7 +390,9 @@
    */
   function openEditor(o) {
     closePop(false);
-    var host = stage ? stage.el : document.body, d = o.decimals === undefined ? 2 : o.decimals, step = o.step || 1;
+    var origin = o.anchorEl || (o.at && o.at.canvas);
+    var fromPanel = origin && origin.closest('.ws-drawer');
+    var host = stage && !fromPanel ? stage.el : document.body, d = o.decimals === undefined ? 2 : o.decimals, step = o.step || 1;
     var input = h('input', { type: 'text', inputmode: 'decimal', autocomplete: 'off', 'aria-label': o.title, value: U.num(o.value, d) });
     var range = h('input', { type: 'range', min: o.min, max: o.max, step: 'any', value: o.value, 'aria-label': o.title + ' slider' });
     var cur = Number(o.value), initVal = Number(o.value);
@@ -279,7 +426,7 @@
       return b;
     }
     function done() { var v = parse(); if (input.value !== '' && isFinite(v)) set(v, 'x'); var cb = o.onDone; closePop(true); if (cb) cb(cur); }
-    var el = h('div', { class: 'pop', role: 'dialog', 'aria-label': o.title }, [
+    var el = h('div', { class: 'pop' + (fromPanel ? ' pop-from-panel' : ''), role: 'dialog', 'aria-label': stripTags(o.title) }, [
       h('button', { class: 'pop-close', type: 'button', text: '×', 'aria-label': 'Close', onclick: function () { closePop(true); if (o.onCancel) o.onCancel(); } }),
       h('p', { class: 'pop-title', html: o.title }),
       o.sub ? h('p', { class: 'pop-sub', html: o.sub }) : null,
@@ -300,14 +447,24 @@
     host.appendChild(el);
     // place next to the anchor inside the stage (desktop); CSS turns it into a bottom sheet on phones
     var hr = host.getBoundingClientRect ? host.getBoundingClientRect() : { left: 0, top: 0, width: 800, height: 450 };
-    var x, y;
-    if (o.anchorEl && o.anchorEl.getBoundingClientRect) { var ar = o.anchorEl.getBoundingClientRect(); x = ar.left - hr.left; y = ar.top - hr.top - 8; el.style.top = 'auto'; }
-    else { x = (o.at ? o.at.x : hr.width / 2) + 14; y = (o.at ? o.at.y : hr.height / 2) - 40; }
+    var x, y, at = o.at;
+    if (o.anchorEl && o.anchorEl.getBoundingClientRect) { var ar = o.anchorEl.getBoundingClientRect(); x = ar.left - hr.left; y = ar.top - hr.top - 8; }
+    else {
+      if (at && stage) {
+        var source = at.canvas || stage.canvas, cr = source.getBoundingClientRect(), t = cameraTransform(source, cr.width, cr.height);
+        at = { x: cr.left - hr.left + t[1] + at.x * t[0], y: cr.top - hr.top + t[2] + at.y * t[0] };
+      }
+      x = (at ? at.x : hr.width / 2) + 14; y = (at ? at.y : hr.height / 2) - 40;
+    }
     var w = Math.min(390, (root.innerWidth || 800) - 24);
     // beside the point, on whichever side has room, so the popover never covers what was just drawn
-    if (!o.anchorEl && o.at && x + w > hr.width - 4 && o.at.x - 14 - w >= 4) x = o.at.x - 14 - w;
+    if (!o.anchorEl && at && x + w > hr.width - 4 && at.x - 14 - w >= 4) x = at.x - 14 - w;
     x = Math.max(4, Math.min(x, hr.width - w - 4));
-    if (o.anchorEl) { el.style.left = x + 'px'; el.style.bottom = (hr.height - y) + 'px'; }
+    if (fromPanel) {
+      el.style.left = x + 'px';
+      var below = o.anchorEl ? ar.bottom + 8 : hr.top + y + 48;
+      el.style.top = Math.max(8, Math.min(below, root.innerHeight - el.offsetHeight - 8)) + 'px';
+    } else if (o.anchorEl) { el.style.left = x + 'px'; el.style.bottom = (hr.height - y) + 'px'; }
     else { el.style.left = x + 'px'; el.style.top = Math.max(4, Math.min(y, hr.height - 250)) + 'px'; }
     pop = { el: el, onClose: o.onClose, returnFocus: o.returnFocus || null, owner: o.owner || null };
     setTimeout(function () { if (input.focus) { try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); } if (input.select) input.select(); } }, 0);
@@ -773,32 +930,40 @@
   /** escape for safe HTML interpolation of user-provided text */
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
-  /* ---------- simulation-first workspace: clean hero stage + corner/fullscreen popup drawers ---------- */
+  /* ---------- shared simulation workspace ---------- */
   var wsDrawers = [];
   function makeDrawer(cls, title, allowFullscreen, onOpen) {
     var body = h('div', { class: 'ws-dbody' });
-    var fsBtn = allowFullscreen ? h('button', { type: 'button', class: 'ws-dbtn', text: '⛶ Fullscreen', title: 'Toggle fullscreen', onclick: function () {
+    var fsBtn = allowFullscreen ? h('button', { type: 'button', class: 'ws-dbtn', text: 'Expand', 'aria-pressed': 'false', onclick: function () {
       var fs = box.classList.toggle('fullscreen');
-      fsBtn.textContent = fs ? '🗗 Restore' : '⛶ Fullscreen';
+      fsBtn.textContent = fs ? 'Restore size' : 'Expand';
+      fsBtn.setAttribute('aria-pressed', String(fs));
       if (onOpen) onOpen();
     } }) : null;
-    var box = h('section', { class: 'ws-drawer ' + cls, role: 'dialog', 'aria-label': title }, [
+    var close = h('button', { type: 'button', class: 'ws-dbtn', text: 'Close', 'aria-label': 'Close ' + title, onclick: function () { setOpen(false, true); } });
+    var box = h('section', { id: 'panel-' + cls, class: 'ws-drawer ' + cls, role: 'dialog', 'aria-label': title }, [
       h('div', { class: 'ws-dhead' }, [
         h('h3', { text: title }),
         fsBtn,
-        h('button', { type: 'button', class: 'ws-dbtn', text: '×', 'aria-label': 'Close ' + title, onclick: function () { setOpen(false); } })
+        close
       ]),
       body
     ]);
     box.hidden = true;
     var pill = null;
-    function setOpen(v) {
+    function setOpen(v, focus) {
+      if (v) wsDrawers.forEach(function (drawer) { if (drawer.el !== box && drawer.isOpen()) drawer.setOpen(false); });
       box.hidden = !v;
-      if (pill) pill.classList.toggle('on', v);
-      if (v && onOpen) onOpen();
+      if (pill) pill.setAttribute('aria-expanded', String(v));
+      if (v) { syncChips(); if (onOpen) onOpen(); }
+      if (focus) (v ? close : pill).focus();
     }
     document.body.appendChild(box);
-    var d = { el: box, body: body, isOpen: function () { return !box.hidden; }, setOpen: setOpen, toggle: function () { setOpen(box.hidden); }, bindPill: function (p) { pill = p; } };
+    var d = { el: box, body: body, isOpen: function () { return !box.hidden; }, setOpen: setOpen, toggle: function () { setOpen(box.hidden, true); }, bindPill: function (p) {
+      pill = p;
+      p.setAttribute('aria-controls', box.id);
+      p.setAttribute('aria-expanded', 'false');
+    } };
     wsDrawers.push(d);
     return d;
   }
@@ -809,56 +974,51 @@
     function fireResize() {
       setTimeout(function () { if (typeof root.dispatchEvent === 'function') root.dispatchEvent(new Event('resize')); }, 20);
     }
-    var dData = makeDrawer('top-left', '⚙ Data & Parameters', true, fireResize);
-    var dExplain = makeDrawer('bottom-left', '💡 Explanations & Legend', true, fireResize);
-    var dCalc = makeDrawer('calc-box', '📊 Calculations & Graphs', true, fireResize);
-
-    var cnt = visibleParams().length;
-    var bData = h('button', { type: 'button', class: 'ws-pill', html: '⚙ <span class="ws-lbl">Data &amp; Setup</span>' + (cnt ? '<span class="ws-cnt">' + cnt + '</span>' : ''), onclick: function () { dData.toggle(); } });
-    var bExp = h('button', { type: 'button', class: 'ws-pill', html: '💡 <span class="ws-lbl">Explain</span>', onclick: function () { dExplain.toggle(); } });
-    var bCalc = h('button', { type: 'button', class: 'ws-pill primary', html: '📊 <span class="ws-lbl">Calculations &amp; Graphs</span>', onclick: function () { dCalc.toggle(); } });
-    dData.bindPill(bData); dExplain.bindPill(bExp); dCalc.bindPill(bCalc);
-
-    // Mount floating corner triggers directly over the full-screen stage
-    var tl = h('div', { class: 'ws-corner tl' }, [bData]);
-    var bl = h('div', { class: 'ws-corner bl' });
-    var br = h('div', { class: 'ws-corner br' });
-    if (refs.explain.length) bl.appendChild(bExp);
-    if (refs.calc.length) br.appendChild(bCalc);
-    if (query.get('embed') === '1') {
-      tl.appendChild(h('button', { type: 'button', class: 'ws-pill', html: '⇣ <span class="ws-lbl">Fetch Data</span>', onclick: openDataHub }));
-      tl.appendChild(h('button', { type: 'button', class: 'ws-pill', html: '? <span class="ws-lbl">Guide</span>', onclick: openGuide }));
+    var legends = refs.left.querySelectorAll('.legend'), plots = refs.left.querySelectorAll('.plots');
+    var start = h('div', { class: 'workspace-actions', role: 'group', 'aria-label': 'Getting started' });
+    var actions = h('div', { class: 'workspace-actions workspace-more', role: 'group', 'aria-label': 'More simulation tools' });
+    function addPanel(parent, css, title, contents) {
+      if (!contents.length) return;
+      var drawer = makeDrawer(css, title, true, fireResize);
+      var button = h('button', { type: 'button', class: 'btn', text: title, onclick: drawer.toggle });
+      drawer.bindPill(button);
+      parent.appendChild(button);
+      contents.forEach(function (el) { drawer.body.appendChild(el); });
     }
-    stage.el.appendChild(tl);
-    if (bl.children.length) stage.el.appendChild(bl);
-    if (br.children.length) stage.el.appendChild(br);
-
-    dData.body.appendChild(stage.dock);
-    refs.setup.forEach(function (c) { dData.body.appendChild(c); });
-    if (refs.left && refs.left.querySelectorAll) {
-      Array.prototype.slice.call(refs.left.querySelectorAll('.legend')).forEach(function (lg) {
-        if (!bl.children.length) bl.appendChild(bExp);
-        if (!bl.parentNode) stage.el.appendChild(bl);
-        dExplain.body.appendChild(lg);
-      });
-      Array.prototype.slice.call(refs.left.querySelectorAll('.plots')).forEach(function (pl) { dCalc.body.appendChild(pl); });
-    }
-    refs.explain.forEach(function (c) { dExplain.body.appendChild(c); });
-    refs.calc.forEach(function (c) { dCalc.body.appendChild(c); });
+    addPanel(start, 'top-left', 'Change values', [stage.dock].concat(refs.setup));
+    start.appendChild(h('button', { type: 'button', class: 'btn', text: 'How to use', onclick: openGuide }));
+    addPanel(actions, 'bottom-left', 'What to look for', Array.prototype.slice.call(legends).concat(refs.explain));
+    addPanel(actions, 'calc-box', 'Calculations and graphs', Array.prototype.slice.call(plots).concat(refs.calc));
+    actions.appendChild(h('button', { type: 'button', class: 'btn', text: 'Import or export data', onclick: openDataHub }));
+    if (stage.actions) start.appendChild(stage.actions);
+    var look = stage.el.querySelector('.look-switch');
+    if (look) actions.appendChild(look);
+    var animated = SIM.anim && SIM.anim.clocks && SIM.anim.clocks.length;
+    var intro = h('p', { class: 'workspace-intro', text: animated
+      ? 'Press Play if available. Try changing one number and watch what happens.'
+      : 'Change one number and watch what happens.' });
+    var card = stage.el.parentNode;
+    var playback = card.querySelectorAll('.anim');
+    card.insertBefore(h('div', { class: 'workspace-start' }, [intro].concat(Array.prototype.slice.call(playback), start)), stage.el);
+    card.insertBefore(zoomControls(), stage.el);
+    card.appendChild(actions);
     fireResize();
   }
 
   /* ---------- dock quick-entry & universal modals (? Guide, Quick Edit All, Fetch Data Hub) ---------- */
-  var dockToolsAdded = false, activeModal = null;
+  var dockToolsAdded = false, activeModal = null, modalTrigger = null;
   function closeModal() {
     if (!activeModal) return;
     if (activeModal.parentNode) activeModal.parentNode.removeChild(activeModal);
     activeModal = null;
+    if (modalTrigger) modalTrigger.focus();
+    modalTrigger = null;
   }
   if (typeof document !== 'undefined' && document.addEventListener) {
     document.addEventListener('keydown', function (e) {
+      if (e.defaultPrevented) return;
       if (e.key === 'Escape' && activeModal) { closeModal(); return; }
-      if (e.key === 'Escape') { var closed = false; wsDrawers.forEach(function (d) { if (d.isOpen()) { d.setOpen(false); closed = true; } }); if (closed) return; }
+      if (e.key === 'Escape') { var open = wsDrawers.filter(function (d) { return d.isOpen(); })[0]; if (open) { open.setOpen(false, true); return; } }
       if (e.target && /INPUT|SELECT|TEXTAREA|BUTTON/.test(e.target.tagName || '')) return;
       if (activeModal || pop) return;
       if (e.key === '?' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); openGuide(); return; }
@@ -867,18 +1027,30 @@
   }
   function openModal(title, bodyEl) {
     closeModal();
+    modalTrigger = document.activeElement;
     var back = h('div', { class: 'sim-modal-back', role: 'dialog', 'aria-modal': 'true', 'aria-label': title });
+    var close = h('button', { type: 'button', class: 'sim-modal-close', text: '×', 'aria-label': 'Close', onclick: closeModal });
     var box = h('div', { class: 'sim-modal' }, [
       h('div', { class: 'sim-modal-head' }, [
         h('h2', { text: title }),
-        h('button', { type: 'button', class: 'sim-modal-close', text: '×', 'aria-label': 'Close', onclick: closeModal })
+        close
       ]),
       h('div', { class: 'sim-modal-body' }, [bodyEl])
     ]);
     back.appendChild(box);
     back.addEventListener('click', function (e) { if (e.target === back) closeModal(); });
+    back.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      var stops = Array.prototype.filter.call(box.querySelectorAll('a[href], button, input, select, textarea, [tabindex="0"]'), function (el) {
+        return !el.disabled && el.getClientRects().length;
+      });
+      var first = stops[0], last = stops[stops.length - 1];
+      if (e.shiftKey && e.target === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && e.target === last) { e.preventDefault(); first.focus(); }
+    });
     document.body.appendChild(back);
     activeModal = back;
+    close.focus();
     return box;
   }
   function ensureDockTools() {
@@ -887,10 +1059,6 @@
     dockToolsAdded = true;
     var bEdit = h('button', { type: 'button', class: 'pchip dock-act', text: '✎ Edit all', title: 'Edit all parameters at once', onclick: openQuickEntry });
     stage.dock.appendChild(bEdit);
-    if (query.get('embed') === '1') {
-      stage.dock.appendChild(h('button', { type: 'button', class: 'pchip dock-act', text: '⇣ Fetch Data', title: 'Extract from question or export data', onclick: openDataHub }));
-      stage.dock.appendChild(h('button', { type: 'button', class: 'pchip dock-act', text: '? Guide', title: 'How to use this simulation', onclick: openGuide }));
-    }
   }
   function visibleParams() {
     return allDocked.filter(function (r) { return !r.locked && r.vis && r.chip && r.chip.style.display !== 'none'; });
@@ -928,7 +1096,7 @@
     if (inputs[0] && inputs[0].focus) setTimeout(function () { inputs[0].focus(); if (inputs[0].select) inputs[0].select(); }, 20);
   }
   function openGuide() {
-    var tipTxt = stage && stage.tip && stage.tip.textContent ? stage.tip.textContent : 'Drag handles directly on the simulation canvas or tap parameter chips below.';
+    var tipTxt = stage && stage.tip ? stage.tip.textContent : '';
     var vis = visibleParams();
     var wrap = h('div', {}), tabs = h('div', { class: 'sim-tabs' }), pane = h('div', {});
     var b1 = h('button', { type: 'button', class: 'sim-tab on', text: '🧭 How to use' });
@@ -939,11 +1107,12 @@
         pane.innerHTML =
           '<p style="margin-top:0"><b>Current simulation:</b> ' + esc(document.title || 'Physics / Mechanics Simulation') + '</p>' +
           '<div class="guide-grid">' +
-            '<div class="guide-card"><h3><span class="guide-num">1</span>Interact on the Canvas</h3><p style="margin:0;color:var(--muted)">' + esc(tipTxt) + '</p></div>' +
-            '<div class="guide-card"><h3><span class="guide-num">2</span>Enter Data Easily</h3><p style="margin:0;color:var(--muted)">Tap any chip under the stage, or click <b>✎ Edit all</b> to type everything in one grid. Type SI prefixes like <code>4.7k</code>, <code>15m</code>, <code>200u</code> or math like <code>2*pi</code>, <code>1/4</code>.</p></div>' +
-            '<div class="guide-card"><h3><span class="guide-num">3</span>Fetch &amp; Export Data</h3><p style="margin:0;color:var(--muted)">Click <b>⇣ Fetch Data</b> to paste an exam question (auto-extracts values &amp; converts units!) or export live results &amp; time-series tables as CSV, JSON, or Markdown.</p></div>' +
-            '<div class="guide-card"><h3><span class="guide-num">4</span>Learn &amp; Test Yourself</h3><p style="margin:0;color:var(--muted)">Switch between <b>Real life</b> and <b>Diagram</b> on the stage. Step through <b>Live working</b> below, or toggle <b>Exam mode</b> to hide answers and check your own working.</p></div>' +
+            '<div class="guide-card"><h3><span class="guide-num">1</span>Change one value</h3><p>Open <b>Change values</b>. Select a value and type a new number. If you see a list of examples, you can choose one to load its values.</p></div>' +
+            '<div class="guide-card"><h3><span class="guide-num">2</span>Watch the result</h3><p>Close the panel to see the whole picture. If there is a <b>Play</b> button, press it to watch. <b>Pause</b> stops the motion and <b>Restart</b> returns to the beginning.</p></div>' +
+            '<div class="guide-card"><h3><span class="guide-num">3</span>Look closer</h3><p>Scroll on the diagram with your mouse or pinch with two fingers to zoom. Drag empty space to look around. Turn on <b>Drag view</b> to move the view from anywhere, or use the arrow buttons. <b>Reset view</b> brings the whole scene back.</p></div>' +
+            '<div class="guide-card"><h3><span class="guide-num">4</span>Read the working</h3><p>Open <b>Calculations and graphs</b> to see how the results were worked out. Use <b>What to look for</b> for the diagram key and tips, where available.</p></div>' +
           '</div>' +
+          (tipTxt ? '<p>' + esc(tipTxt) + '</p>' : '') +
           (vis.length ? '<p style="margin:10px 0 6px"><b>Editable values on this page:</b> ' + vis.map(function (r) { return '<code>' + esc(r.labelText) + '</code>'; }).join(' · ') + '</p>' : '') +
           '<p style="margin:8px 0 0;color:var(--muted)"><b>Shortcuts:</b> <span class="guide-kbd">Space</span> play/pause · <span class="guide-kbd">?</span> guide · <span class="guide-kbd">↑</span>/<span class="guide-kbd">↓</span> nudge chip (<span class="guide-kbd">Shift</span> ×10) · <span class="guide-kbd">←</span>/<span class="guide-kbd">→</span> step working · <span class="guide-kbd">Esc</span> close</p>';
       } else {
@@ -1229,6 +1398,6 @@
     ]));
   }
 
-  SIM.ui = { redraw: themeChanged, h: h, course: course, gFor: gFor, colors: colors, onTheme: onTheme, page: page, canvas: canvas, params: params, select: select,
+  SIM.ui = { redraw: themeChanged, h: h, course: course, gFor: gFor, colors: colors, onTheme: onTheme, page: page, canvas: canvas, cameraTransform: cameraTransform, canvasPoint: canvasPoint, params: params, select: select,
     toggle: toggle, presets: presets, openEditor: openEditor, askNumber: askNumber, parseNum: parseNum, stageTip: stageTip, stageAction: stageAction, placeMode: placeMode, cancelPlace: function () { cancelPlace(false); }, stage: function () { return stage; }, syncChips: function () { syncChips(); }, Readout: Readout, examToggle: examToggle, notes: notes, legend: legend, readHash: readHash, writeHash: writeHash, esc: esc };
 })(typeof self !== 'undefined' ? self : this);

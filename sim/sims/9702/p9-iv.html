@@ -427,12 +427,12 @@
     prm.set(o);
     if (ui.syncChips) ui.syncChips();
   }
-  function ask(k, x, y, title, sub, quick) {
+  function ask(k, x, y, title, sub, quick, canvas) {
     var sp = prm.rows[k].spec;
     ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step), decimals: Math.max(decOf(sp.step), 2),
-      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
+      unit: sp.unit, at: { canvas: canvas, x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); } });
   }
-  function askV(x, y) { var m = RANGE[comp.get()]; ask('V', x, y, 'p.d. across the component V', 'Negative values reverse the supply.', m <= 1 ? [-0.5, 0, 0.6, 0.7] : [-m / 2, 0, m / 2, m]); }
+  function askV(x, y, canvas) { var m = RANGE[comp.get()]; ask('V', x, y, 'p.d. across the component V', 'Negative values reverse the supply.', m <= 1 ? [-0.5, 0, 0.6, 0.7] : [-m / 2, 0, m / 2, m], canvas); }
   var COMPKEY = { metal: ['R', 'Resistance R', 'Constant at constant temperature (ohmic).', [2, 6, 10, 50]], thermistor: ['T', 'Temperature of the thermistor T', 'NTC: higher temperature ⇒ lower resistance.', [0, 25, 50, 80]],
     ldr: ['Lx', 'Light intensity on the LDR', 'Brighter light ⇒ lower resistance.', [2, 20, 50, 90]] };
   var ix = SIM.view.interact(cv, {
@@ -468,7 +468,7 @@
       return [{ id: 'pt', x: p[0] * k, y: p[1] * k }];
     },
     onDrag: function (h, x) { var b = pIV.box, m = RANGE[comp.get()]; setVal('V', -m + (x / plotK() - b.L) / b.W * 2 * m, vStep()); },
-    onTap: function () { askV(vp.X(knobX()), vp.Y(KNOB.y)); },   // the editor lives on the main stage
+    onTap: function (h, x, y) { askV(x, y, pIV.canvas); },
     onHover: function () { drawPlots(); }
   });
   /** grab ring on the plot point, drawn in the plot's own coordinates */

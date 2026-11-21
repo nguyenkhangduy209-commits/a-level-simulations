@@ -44,6 +44,8 @@
     c.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     if (this === firstVp || !firstVp) { firstVp = this; hitsLast = hitsNow || (focus ? hitsLast : 0); hitsNow = 0; }
     c.fillStyle = col.panel; c.fillRect(0, 0, this.w, this.h);
+    var camera = SIM.ui.cameraTransform(this.canvas, this.w, this.h);
+    c.transform(camera[0], 0, 0, camera[0], camera[1], camera[2]);
     c.lineCap = 'round'; c.lineJoin = 'round';
     return c;
   };
@@ -98,7 +100,15 @@
     c.lineTo(x2 - ux * head + uy * head * 0.45, y2 - uy * head - ux * head * 0.45);
     c.closePath(); if (opt.hollow) { c.lineWidth = 1.5; c.stroke(); } else c.fill();
     c.shadowBlur = 0;
-    if (opt.label) D.label(c, opt.label, x2 + ux * 6 + (opt.lx || 0), y2 + uy * 6 + (opt.ly || 0), color, { align: ux < -0.3 ? 'right' : ux > 0.3 ? 'left' : 'center', base: uy > 0.3 ? 'top' : uy < -0.3 ? 'bottom' : 'middle', bg: true, fs: fs || 'none' });
+    if (opt.label) {
+      var strong = opt.strongLabel, gap = strong ? 11 : 6;
+      D.label(c, opt.label, x2 + ux * gap + (opt.lx || 0), y2 + uy * gap + (opt.ly || 0), strong ? SIM.ui.colors().ink : color, {
+        align: ux < -0.3 ? 'right' : ux > 0.3 ? 'left' : 'center',
+        base: uy > 0.3 ? 'top' : uy < -0.3 ? 'bottom' : 'middle',
+        bg: true, solid: strong, bold: strong, size: strong ? 15 : 13,
+        font: strong ? 'system-ui, sans-serif' : null, fs: fs || 'none'
+      });
+    }
     c.restore();
   };
   /** arrow from a world point in a world direction (angle rad, standard math angle) with screen length px */
@@ -111,13 +121,14 @@
     var fs = opt.fs === 'none' ? null : opt.fs || (/=/.test(text) ? focusState(text) : (focus && hitsLast ? 'dim' : null));
     c.save();
     if (fs === 'dim') c.globalAlpha = 0.35;
-    c.font = (opt.bold || fs === 'hi' ? '700 ' : '500 ') + ((opt.size || 13) + (fs === 'hi' ? 1.5 : 0)) + 'px Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+    c.font = (opt.bold || fs === 'hi' ? '700 ' : '500 ') + ((opt.size || 13) + (fs === 'hi' ? 1.5 : 0)) + 'px ' +
+      (opt.font || 'Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif');
     c.textAlign = opt.align || 'center'; c.textBaseline = opt.base || 'middle';
     if (opt.bg) {
       var m = c.measureText(text), w = m.width + 6, hgt = (opt.size || 13) + 4;
       var bx = opt.align === 'left' ? x - 3 : opt.align === 'right' ? x - w + 3 : x - w / 2;
       var by = opt.base === 'top' ? y - 2 : opt.base === 'bottom' ? y - hgt + 2 : y - hgt / 2;
-      var ga = isFinite(c.globalAlpha) ? c.globalAlpha : 1; c.fillStyle = SIM.ui.colors().panel; c.globalAlpha = 0.85 * ga; c.fillRect(bx, by, w, hgt); c.globalAlpha = ga;
+      var ga = isFinite(c.globalAlpha) ? c.globalAlpha : 1; c.fillStyle = SIM.ui.colors().panel; c.globalAlpha = (opt.solid ? 1 : 0.85) * ga; c.fillRect(bx, by, w, hgt); c.globalAlpha = ga;
     }
     c.fillStyle = color || SIM.ui.colors().ink; c.fillText(text, x, y);
     c.restore();
@@ -199,7 +210,7 @@
      Handles snap nothing themselves: the page decides (e.g. round an angle to 1°). */
   function interact(canvas, opt) {
     var drag = null, hover = null, drawing = null, TAP = 6;
-    function pos(e) { var r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+    function pos(e) { return SIM.ui.canvasPoint(canvas, e); }
     function hit(x, y, touch) {
       var hs = (opt.handles && opt.handles()) || [], best = null, bd = Infinity, pad = touch ? 8 : 2;
       hs.forEach(function (h) {
@@ -224,7 +235,7 @@
       }
     }
     canvas.addEventListener('pointerdown', function (e) {
-      if (e.button !== undefined && e.button !== 0) return;
+      if (e.isPrimary === false || (e.button !== undefined && e.button !== 0)) return;
       var p = pos(e), h = hit(p[0], p[1], e.pointerType === 'touch');
       if (h) { drag = { h: h, x0: p[0], y0: p[1], moved: false }; canvas.style.cursor = 'grabbing'; }
       else if (opt.canDraw && opt.canDraw(p[0], p[1])) drawing = { x0: p[0], y0: p[1], moved: false };
@@ -232,18 +243,36 @@
       e.preventDefault(); if (canvas.setPointerCapture) try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
     });
     canvas.addEventListener('pointermove', function (e) {
+      if (e.isPrimary === false) return;
       var p = pos(e);
       if (drag) { if (!drag.moved && Math.hypot(p[0] - drag.x0, p[1] - drag.y0) < TAP) return; drag.moved = true; if (opt.onDrag) opt.onDrag(drag.h, p[0], p[1], e); return; }
       if (drawing) { if (!drawing.moved && Math.hypot(p[0] - drawing.x0, p[1] - drawing.y0) < TAP) return; drawing.moved = true; if (opt.onDraw) opt.onDraw(drawing.x0, drawing.y0, p[0], p[1]); return; }
       if (e.pointerType !== 'touch') setHover(hit(p[0], p[1], false));
     });
     function end(e) {
+      if (e.isPrimary === false) return;
       var p = pos(e);
       if (drag) { var d = drag; drag = null; canvas.style.cursor = hover ? 'grab' : ''; if (d.moved) { if (opt.onDrop) opt.onDrop(d.h, p[0], p[1]); } else if (opt.onTap) opt.onTap(d.h, p[0], p[1]); }
       if (drawing) { var w = drawing; drawing = null; if (w.moved && opt.onDrawEnd) opt.onDrawEnd(w.x0, w.y0, p[0], p[1]); }
     }
     canvas.addEventListener('pointerup', end);
-    canvas.addEventListener('pointercancel', function () { drag = null; drawing = null; });
+    if (opt.touchClick && opt.onTap) {
+      var lastTouchPointer = -Infinity;
+      canvas.addEventListener('pointerup', function (e) {
+        if (e.pointerType === 'touch') lastTouchPointer = performance.now();
+      }, true);
+      canvas.addEventListener('click', function (e) {
+        // A browser can deliver a touch-generated click without a preceding pointer event.
+        if (e.pointerType !== 'touch' || performance.now() - lastTouchPointer < 500) return;
+        var p = pos(e), h = hit(p[0], p[1], true);
+        if (h) opt.onTap(h, p[0], p[1]);
+      });
+    }
+    canvas.addEventListener('pointercancel', function () {
+      var inProgress = drag || drawing;
+      drag = null; drawing = null;
+      if (inProgress && opt.onCancel) opt.onCancel();
+    });
     canvas.addEventListener('pointerleave', function (e) { if (!drag && !drawing && e.pointerType !== 'touch') setHover(null); });
     return {
       isDragging: function () { return !!drag || !!drawing; },

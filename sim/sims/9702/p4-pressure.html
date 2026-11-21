@@ -312,7 +312,7 @@
   }
   function worldY(y) { return vp.toWorld(0, y)[1]; }
   var downY = 0;   // where the pointer went down (the drag keeps that offset from the grabbed edge)
-  if (cv.addEventListener) cv.addEventListener('pointerdown', function (e) { var r = cv.getBoundingClientRect ? cv.getBoundingClientRect() : { top: 0 }; downY = e.clientY - r.top; });
+  if (cv.addEventListener) cv.addEventListener('pointerdown', function (e) { downY = ui.canvasPoint(cv, e)[1]; });
   ix = SIM.view.interact(cv, {
     handles: function () {
       if (!geo) return [];

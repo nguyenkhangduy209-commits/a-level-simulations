@@ -12,8 +12,8 @@
     var h = SIM.ui.h, self = this;
     this.t = 0; this.duration = opt.duration || 5; this.playing = false; this.speed = opt.speed || 1; this.onFrame = opt.onFrame; this.loop = !!opt.loop;
     this.playBtn = h('button', { class: 'btn primary', text: '▶ Play', onclick: function () { self.toggle(); } });
-    var reset = h('button', { class: 'btn', text: '⟲ Reset', onclick: function () { self.pause(); self.seek(0); } });
-    var end = h('button', { class: 'btn', text: '⇥ End', title: 'Jump to end', onclick: function () { self.pause(); self.seek(self.duration); } });
+    var reset = h('button', { class: 'btn', text: 'Restart', onclick: function () { self.pause(); self.seek(0); } });
+    var end = h('button', { class: 'btn', text: 'Jump to end', onclick: function () { self.pause(); self.seek(self.duration); } });
     this.scrub = h('input', { type: 'range', min: 0, max: 1000, value: 0, 'aria-label': 'Time' });
     this.scrub.addEventListener('input', function () { self.pause(); self.seek(self.duration * Number(self.scrub.value) / 1000); });
     var sp = h('select', { 'aria-label': 'Playback speed' });
@@ -30,10 +30,15 @@
     };
     this.tBox.addEventListener('change', go);
     this.tBox.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
-    var goWrap = h('label', { class: 'goto' }, [h('span', { text: 'Go to t =' }), this.tBox, h('span', { text: 's' })]);
-    container.appendChild(h('div', { class: 'anim' }, [this.playBtn, reset, end, this.scrub, sp, this.tLabel, goWrap]));
+    var goWrap = h('label', { class: 'goto' }, [h('span', { text: 'Go to time' }), this.tBox, h('span', { text: 's' })]);
+    var speedWrap = h('label', { class: 'goto' }, [h('span', { text: 'Speed' }), sp]);
+    var timing = h('details', { class: 'playback-details' }, [
+      h('summary', { text: 'Time and speed' }),
+      h('div', { class: 'playback-options' }, [end, this.scrub, this.tLabel, speedWrap, goWrap])
+    ]);
+    container.appendChild(h('div', { class: 'anim', role: 'group', 'aria-label': 'Playback' }, [this.playBtn, reset, timing]));
     this._raf = null; this._last = 0;
-    this.autoplay = opt.autoplay !== false;
+    this.autoplay = opt.autoplay === true;
     clocks.push(this);
     // start playing automatically once the page has drawn its first frame
     // (with "reduce motion" switched on, show the finished state instead; Play still animates)

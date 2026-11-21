@@ -26,6 +26,17 @@
   var sceneCard = pg.card('left');
   var cv = ui.canvas(sceneCard, 'main-canvas');
   var vp = new SIM.view.Viewport(cv, { pad: 18 });
+  var inspected = 'all', forceButtons = new Map();
+  var forceSummary = ui.h('p', { class: 'force-summary', role: 'status' });
+  var forceList = ui.h('div', { class: 'force-list', role: 'group', 'aria-label': 'Choose a force' });
+  var prevForce = ui.h('button', { type: 'button', class: 'btn', text: 'Previous force', onclick: function () { stepForce(-1); } });
+  var nextForce = ui.h('button', { type: 'button', class: 'btn', text: 'Next force', onclick: function () { stepForce(1); } });
+  var stage = ui.stage();
+  stage.el.insertBefore(ui.h('section', { class: 'force-inspector', 'aria-label': 'Inspect forces' }, [
+    ui.h('div', { class: 'force-inspector-head' }, [ui.h('h2', { text: 'Inspect forces' }), prevForce, nextForce]),
+    forceList, forceSummary
+  ]), cv.parentNode);
+  cv.addEventListener('simviewreset', function () { inspected = 'all'; syncForceList(); });
   ui.legend(sceneCard, [
     { color: 'var(--c-s1)', label: 'F₁' }, { color: 'var(--c-s2)', label: 'F₂' }, { color: 'var(--c-s3)', label: 'F₃' },
     { color: 'var(--c-s4)', label: 'F₄' }, { color: 'var(--c-tension)', label: 'F₅' },
@@ -201,7 +212,7 @@
     blocks.forEach(function (b, j) { if (j < n) { hv['F' + j] = b.p.values.F; hv['th' + j] = b.p.values.th; hv['c' + j] = b.p.values.c; hv['t' + j] = b.type.get(); } });
     ui.writeHash(hv);
     if (addBtn) addBtn.show(n < NMAX);
-    drawScene(); drawPolygon(); drawTable(); readout();
+    drawScene(); syncForceList(); drawPolygon(); drawTable(); readout();
   }
 
   /* ---------- drawing helpers ---------- */
@@ -224,6 +235,57 @@
     var hide = exam.get() && fd.unknown;
     var base = fname(fd.j) + (fd.mult ? ' = ' + (fd.c === 1 ? '' : U.num(fd.c, 3)) + 'F' : '');
     return hide ? base : base + ' = ' + U.num(fd.mag, 3) + ' N';
+  }
+  function forceOptions() {
+    var items = [{ id: 'all', name: 'All forces' }];
+    if (!scene) return items;
+    scene.list.forEach(function (fd) {
+      var hidden = exam.get() && fd.unknown;
+      items.push({ id: String(fd.j), name: 'Force ' + (fd.j + 1), force: fd,
+        summary: hidden ? fname(fd.j) + ' · Unknown in exam mode' : valueLabel(fd) + ' · ' + U.dp(FO.norm360(fd.th), 1) + '° from +x' });
+    });
+    if (M.res && !exam.get()) items.push({ id: 'resultant', name: 'Resultant', force: { mag: M.res.R, th: M.res.dir },
+      summary: 'R = ' + U.num(M.res.R, 3) + ' N' + (M.res.R > 0 ? ' · ' + U.dp(FO.norm360(M.res.dir), 1) + '° from +x' : ' · The forces balance') });
+    return items;
+  }
+  function syncForceList() {
+    var items = forceOptions();
+    if (items.map(function (item) { return item.id; }).join() !== Array.from(forceButtons.keys()).join()) {
+      forceList.textContent = '';
+      forceButtons.clear();
+      items.forEach(function (item) {
+        var b = ui.h('button', { type: 'button', class: 'btn', text: item.name, onclick: function () { inspectForce(item.id); } });
+        forceButtons.set(item.id, b);
+        forceList.appendChild(b);
+      });
+    }
+    var index = items.findIndex(function (item) { return item.id === inspected; });
+    if (index < 0) { inspected = 'all'; index = 0; drawScene(); }
+    forceButtons.forEach(function (b, id) { b.setAttribute('aria-pressed', String(id === inspected)); });
+    prevForce.setAttribute('aria-disabled', String(index <= 1));
+    nextForce.setAttribute('aria-disabled', String(index === items.length - 1));
+    forceSummary.textContent = items[index].summary || 'Choose a force to bring its arrow into view.';
+  }
+  function inspectForce(id) {
+    var item = forceOptions().find(function (entry) { return entry.id === id; });
+    if (!item) return;
+    inspected = id;
+    if (stage.camera) {
+      if (!item.force) stage.camera.reset();
+      else {
+        var ang = U.rad(item.force.th || 0), distance = item.force.mag * scene.k * 0.72;
+        stage.camera.focus((scene.ox + Math.cos(ang) * distance) / vp.w, (scene.oy - Math.sin(ang) * distance) / vp.h);
+      }
+    }
+    syncForceList();
+    drawScene();
+  }
+  function stepForce(delta) {
+    var items = forceOptions(), index = items.findIndex(function (item) { return item.id === inspected; }) + delta;
+    if (index < 1 || index >= items.length) return;
+    inspectForce(items[index].id);
+    var button = forceButtons.get(items[index].id);
+    if (button.scrollIntoView) button.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }
   function arcFor(c, x, y, r, th, color, label) {
     var a = FO.norm360(th), d = FO.dirInfo(a);
@@ -257,18 +319,24 @@
         D.line(c, [[ox + ux * k, oy], [ox + ux * k, oy - uy * k], [ox, oy - uy * k]], color, { dash: [2, 4], width: 1 });
       }
       if (Math.abs(fd.mag) > 1e-9) {
-        D.arrowPolar(c, ox, oy, ang, fd.mag * k, color, { label: valueLabel(fd), dash: fd.mag < 0 ? [6, 4] : null });
+        var selected = inspected === String(fd.j);
+        D.arrowPolar(c, ox, oy, ang, fd.mag * k, color, { label: selected || inspected === 'all' ? valueLabel(fd) : null,
+          strongLabel: true, width: selected ? 4.5 : 2.4, dash: fd.mag < 0 ? [6, 4] : null });
         var lab = exam.get() && M.unk.some(function (u) { return u.kind === 'th' && u.i === fd.j; }) ? 'θ' + SUB[fd.j] : null;
-        arcFor(c, ox, oy, 22 + 9 * idx, fd.th, color, lab);
+        if (selected || inspected === 'all') arcFor(c, ox, oy, 22 + 9 * idx, fd.th, color, lab);
       }
     });
     if (M.res && M.res.R > 0) {
       var rx = M.res.X * k, ry = M.res.Y * k;
-      if (Math.abs(rx) > 0.5) D.arrow(c, ox, oy, ox + rx, oy, col.component, { dash: [5, 4], width: 1.6, label: exam.get() ? 'X' : 'X = ' + U.num(M.res.X, 3) });
-      if (Math.abs(ry) > 0.5) D.arrow(c, ox, oy, ox, oy - ry, col.component, { dash: [5, 4], width: 1.6, label: exam.get() ? 'Y' : 'Y = ' + U.num(M.res.Y, 3) });
+      var showR = inspected === 'all' || inspected === 'resultant';
+      if (showR && Math.abs(rx) > 0.5) D.arrow(c, ox, oy, ox + rx, oy, col.component, { dash: [5, 4], width: 1.6, label: exam.get() ? 'X' : 'X = ' + U.num(M.res.X, 3) });
+      if (showR && Math.abs(ry) > 0.5) D.arrow(c, ox, oy, ox, oy - ry, col.component, { dash: [5, 4], width: 1.6, label: exam.get() ? 'Y' : 'Y = ' + U.num(M.res.Y, 3) });
       D.line(c, [[ox + rx, oy], [ox + rx, oy - ry], [ox, oy - ry]], col.component, { dash: [2, 4], width: 1 });
-      D.arrowPolar(c, ox, oy, U.rad(M.res.dir), M.res.R * k, col.resultant, { width: 3.4, label: exam.get() ? 'R' : 'R = ' + U.num(M.res.R, 3) + ' N' });
-      arcFor(c, ox, oy, 16 + 9 * fl.length + 10, M.res.dir, col.resultant, exam.get() ? 'β' : null);
+      D.arrowPolar(c, ox, oy, U.rad(M.res.dir), M.res.R * k, col.resultant, {
+        width: inspected === 'resultant' ? 5 : 3.4, strongLabel: true,
+        label: showR ? (exam.get() ? 'R' : 'R = ' + U.num(M.res.R, 3) + ' N') : null
+      });
+      if (showR) arcFor(c, ox, oy, 16 + 9 * fl.length + 10, M.res.dir, col.resultant, exam.get() ? 'β' : null);
     }
     if (!real) D.particle(c, ox, oy, 4, {});
     scene = { ox: ox, oy: oy, k: k, list: fl };
@@ -667,15 +735,24 @@
     } });
   }
   var ix = SIM.view.interact(cv, {
+    touchClick: true,
     handles: function () {
       if (!scene) return [];
-      return scene.list.filter(function (fd) { return canEditDir(fd.j) && Math.abs(fd.mag) > 1e-9; }).map(function (fd) {
+      return scene.list.filter(function (fd) { return Math.abs(fd.mag) > 1e-9; }).map(function (fd) {
         var a = U.rad(fd.th); return { id: 'f' + fd.j, j: fd.j, x: scene.ox + Math.cos(a) * fd.mag * scene.k, y: scene.oy - Math.sin(a) * fd.mag * scene.k, color: forceColor(ui.colors(), fd.j) };
       });
     },
-    onDrag: function (hd, x, y) { blocks[hd.j].p.set({ th: snapAngle(SIM.view.screenAngle(scene.ox, scene.oy, x, y)) }); },
-    onTap: function (hd, x, y) { if (canEditMag(hd.j)) askMag(hd.j, x, y); },
-    canDraw: function (x, y) { return !!scene && top.values.n < NMAX && Math.hypot(x - scene.ox, y - scene.oy) > 4; },
+    onDrag: function (hd, x, y) {
+      if (canEditDir(hd.j)) blocks[hd.j].p.set({ th: snapAngle(SIM.view.screenAngle(scene.ox, scene.oy, x, y)) });
+    },
+    onTap: function (hd, x, y) {
+      if (inspected !== String(hd.j)) inspectForce(String(hd.j));
+      else if (canEditMag(hd.j)) askMag(hd.j, x, y);
+    },
+    canDraw: function (x, y) {
+      return !!scene && (!stage.camera || stage.camera.scale <= 1) && top.values.n < NMAX && Math.hypot(x - scene.ox, y - scene.oy) > 4;
+    },
+    onCancel: function () { if (preview) { preview = null; drawScene(); } },
     onDraw: function (x0, y0, x, y) { preview = { x: x, y: y, th: snapAngle(SIM.view.screenAngle(scene.ox, scene.oy, x, y)) }; drawScene(); },
     onDrawEnd: function (x0, y0, x, y) {
       if (!preview) return;
@@ -693,7 +770,7 @@
     if (o.bottom) { t.style.top = 'auto'; t.style.bottom = '10px'; } else t.style.maxWidth = 'calc(100% - ' + o.right + 'px)';
   }
   addBtn = ui.stageAction({ label: 'Add a force', icon: '+', onClick: startAdd });
-  tipClear(ui.stageTip('Press + Add a force, tap where it should point, then type its size · drag a tip to turn a force · tap a tip to change its size or remove it'), { right: 195 });
+  tipClear(ui.stageTip('Tap or click a force tip to inspect it. Select the same tip again to edit its size. Drag a tip to turn the force.'), { right: 195 });
 
   ui.onTheme(function () { drawScene(); drawPolygon(); });
   vp.onResize = drawScene; vp2.onResize = drawPolygon;

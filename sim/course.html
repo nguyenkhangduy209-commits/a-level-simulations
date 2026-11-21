@@ -8,15 +8,15 @@
 <link rel="stylesheet" href="assets/theme.css">
 <style>
   .wrap { max-width: 1180px; margin: 0 auto; padding: 22px 20px 70px; }
-  .hero { position: relative; overflow: hidden; border-radius: 26px; padding: 30px 30px 26px; background: linear-gradient(135deg, #5146e5, #9a3ff0); color: #fff; box-shadow: var(--shadow-lg); }
-  :root[data-course="9702"] .hero { background: linear-gradient(135deg, #0b8f8a, #0e74c4); }
+  .hero { position: relative; overflow: hidden; border-radius: 24px; padding: 30px 30px 26px; background: linear-gradient(135deg, #392eab, #6328a6); color: #fff; box-shadow: var(--shadow-lg); }
+  :root[data-course="9702"] .hero { background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); }
   .hero::after { content: ""; position: absolute; inset: 0; background: radial-gradient(500px 220px at 85% 10%, rgba(255,255,255,.25), transparent 70%); pointer-events: none; }
   .hero .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
   .hero h1 { font-size: clamp(26px, 4vw, 40px); margin: 4px 0 6px; letter-spacing: -.03em; line-height: 1.1; }
   .hero p { margin: 0; max-width: 640px; opacity: .92; }
   .hero .facts { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
   .hero .fact { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; backdrop-filter: blur(6px); }
-  .hero .switch { position: absolute; right: 18px; top: 18px; z-index: 1; color: #fff; text-decoration: none; font-size: 13px; font-weight: 600; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); border-radius: 999px; padding: 8px 14px; min-height: 36px; display: inline-flex; align-items: center; }
+  .hero .switch { position: absolute; right: 18px; top: 18px; z-index: 1; color: #fff; text-decoration: none; font-size: .95rem; font-weight: 650; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.6); border-radius: 12px; padding: 8px 14px; min-height: var(--tap); display: inline-flex; align-items: center; }
   .hero .switch:hover { background: rgba(255,255,255,.26); }
   @media (max-width: 640px) { .hero .switch { position: static; margin-bottom: 12px; } .hero { padding: 22px 18px; } }
   .hero svg.deco { position: absolute; right: -20px; bottom: -30px; width: 340px; opacity: .22; pointer-events: none; }
@@ -24,6 +24,7 @@
   .toolbar { display: flex; gap: 10px; align-items: center; margin: 22px 0 6px; flex-wrap: wrap; }
   .search { flex: 1 1 260px; min-height: var(--tap); font: 15px var(--sans); padding: 0 16px 0 42px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 14px 50% / 18px; color: var(--ink); box-shadow: var(--shadow); }
   .search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--glow); }
+  .toolbar label { font-weight: 650; }
 
   .start { margin: 18px 0 4px; display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 16px; }
   @media (max-width: 860px) { .start { grid-template-columns: minmax(0, 1fr); } }
@@ -49,21 +50,21 @@
   @media (max-width: 760px) { .topic { grid-template-columns: minmax(0, 1fr); } }
   .topic .tref { display: inline-block; font: 700 12px var(--mono); color: var(--accent); background: var(--chip); border-radius: 8px; padding: 3px 8px; margin-bottom: 6px; }
   .topic .tname { font-weight: 750; font-size: 16px; letter-spacing: -.01em; }
-  .sims { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .sims { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 12px; }
   .simcard { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s, border-color .15s; display: flex; flex-direction: column; }
   .simcard:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 16px 40px var(--glow); }
   .simcard .ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--chip); color: var(--accent); margin-bottom: 10px; }
   .simcard .ico svg { width: 22px; height: 22px; }
   .simcard h3 { margin: 0 0 4px; font-size: 16px; }
-  .simcard h3 a { color: var(--ink); text-decoration: none; }
+  .simcard h3 a { color: var(--accent); text-underline-offset: .18em; }
   .simcard h3 a::after { content: ""; position: absolute; inset: 0; border-radius: 18px; }
-  .simcard p { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+  .simcard p { margin: 0 0 12px; font-size: .95rem; color: var(--muted); }
   .modechips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; position: relative; z-index: 1; }
-  .modechips a { font-size: 12.5px; text-decoration: none; color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 999px; padding: 0 10px; min-height: 32px; display: inline-flex; align-items: center; }
+  .modechips a { font-size: .9rem; text-decoration: none; color: var(--ink); background: var(--chip); border: 1px solid var(--control-line); border-radius: 10px; padding: 0 10px; min-height: var(--tap); display: inline-flex; align-items: center; }
   .modechips a:hover { border-color: var(--accent); color: var(--accent); }
   .alsoin { font-size: 13px; color: var(--muted); padding: 2px 2px; grid-column: 1 / -1; }
   .empty { color: var(--muted); font-size: 13px; }
-  .types { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; align-items: start; }
+  .types { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: 10px; align-items: start; }
   .types details { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 4px 14px; box-shadow: var(--shadow); }
   .types details[open] { border-color: var(--accent); }
   .types summary { font-size: 14px; color: var(--ink); font-weight: 650; min-height: var(--tap); display: flex; align-items: center; gap: 6px; }
@@ -97,10 +98,10 @@
 </header>
 <div class="wrap">
   <section class="hero" id="hero"></section>
-  <div class="toolbar"><input class="search" type="search" placeholder="Search simulations and question types, e.g. pulley, friction, projectile…" aria-label="Search"></div>
+  <div class="toolbar"><label for="course-search">Search this course</label><input id="course-search" class="search" type="search" placeholder="Try pulley, friction or projectile"></div>
   <div id="start"></div>
   <h2 class="section">Simulations by syllabus topic</h2>
-  <p class="lede">Open a simulation, then change the values right on the diagram: tap a value chip or drag what you see.</p>
+  <p class="lede">Choose a topic or use search to find a simulation. Each one has a short guide and controls to change values.</p>
   <div id="list"></div>
   <h2 class="section" id="ppHead">Past Paper 4 questions by type</h2>
   <p class="lede" id="ppNote"></p>
