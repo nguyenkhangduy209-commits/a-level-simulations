@@ -96,7 +96,7 @@
       var T = TYPES[p.t];
       var s = isFree(p) ? (T.code + fmtN(p.x1) + ',' + fmtN(p.y1) + '>' + fmtN(p.x2) + ',' + fmtN(p.y2)) : (T.code + p.x + '.' + p.y + p.d);
       T.vals.forEach(function (k) { s += '_' + fmtN(p.v[k]); });
-      return s + (p.rev ? '_r' : '');
+      return s + (p.rev ? '_r' : '') + (p.col ? '_c' + p.col.replace(/^#/, '') : '');
     }).join('~');
   }
   function decode(str) {
@@ -116,12 +116,39 @@
       var T = TYPES[p.t], vi = 0;
       q.slice(1).forEach(function (z) {
         if (z === 'r') p.rev = true;
+        else if (/^c[0-9a-fA-F]{3,8}$/.test(z)) p.col = '#' + z.slice(1);
         else if (z !== '' && isFinite(Number(z)) && vi < T.vals.length) p.v[T.vals[vi++]] = Math.max(0, Number(z));
       });
       var k = ekey(p);
       if (at[k] !== undefined) out[at[k]] = p; else { at[k] = out.length; out.push(p); }
     });
     return out;
+  }
+
+  /* ---------------- Tinkercad helpers: EIA 4-band resistor color code & multimeter probe ---------------- */
+  var BAND_COLS = [
+    { name: 'Black', hex: '#1e293b' }, { name: 'Brown', hex: '#78350f' }, { name: 'Red', hex: '#dc2626' },
+    { name: 'Orange', hex: '#f97316' }, { name: 'Yellow', hex: '#eab308' }, { name: 'Green', hex: '#16a34a' },
+    { name: 'Blue', hex: '#2563eb' }, { name: 'Violet', hex: '#7c3aed' }, { name: 'Grey', hex: '#64748b' },
+    { name: 'White', hex: '#f8fafc' }
+  ];
+  var BAND_GOLD = { name: 'Gold', hex: '#d4af37' };
+  var BAND_SILVER = { name: 'Silver', hex: '#cbd5e1' };
+  function resistorBands(R) {
+    if (!(R > 0) || !isFinite(R)) return [BAND_COLS[0], BAND_COLS[0], BAND_COLS[0], BAND_GOLD];
+    if (R < 1) {
+      var sigSub = Math.round(R * 100);
+      var d1s = Math.floor(sigSub / 10) % 10, d2s = sigSub % 10;
+      return [BAND_COLS[d1s], BAND_COLS[d2s], BAND_SILVER, BAND_GOLD];
+    }
+    var exp = Math.floor(Math.log10(R));
+    var mult = exp - 1;
+    var two = Math.round(R / Math.pow(10, mult));
+    if (two >= 100) { two = Math.round(two / 10); mult += 1; }
+    if (two < 10 && mult > -2) { two *= 10; mult -= 1; }
+    var d1 = Math.floor(two / 10) % 10, d2 = two % 10;
+    var multBand = mult === -1 ? BAND_GOLD : mult === -2 ? BAND_SILVER : BAND_COLS[Math.max(0, Math.min(9, mult))];
+    return [BAND_COLS[d1], BAND_COLS[d2], multBand, BAND_GOLD];
   }
 
   /* ---------------- names: R₁, R₂, E₁, A₁ … ---------------- */
@@ -243,6 +270,7 @@
       break;
     }
     out.netOf = st.netOf; out.netList = st.netList;
+    out.Vnet = st.sol && st.sol.V ? st.sol.V.slice() : [];
     var na = st.na, nb = st.nb;
     function issue(kind, text, idx) { out.issues.push({ kind: kind, text: text, parts: idx || [] }); }
     function list(idx) { return idx.map(function (i) { return nm[i]; }).join(', '); }
@@ -360,6 +388,59 @@
     if (parts.some(function (p) { return p.t === 'therm' || p.t === 'ldr'; })) issue('info', 'Thermistor / LDR resistance comes from an illustrative model curve (it falls as temperature / light intensity rises).');
 
     out.method = method(parts, out, st, nm);
+    return out;
+  }
+
+  /** Virtual Digital Multimeter measurement between any two circuit coordinates [x, y] */
+  function probeMeasure(parts, res, dotA, dotB, env) {
+    var out = { ok: false, V: 0, I: 0, R: Infinity };
+    if (!parts || !parts.length || !res || res.empty || res.fatal || !dotA || !dotB) return out;
+    var ka = dkey(dotA[0], dotA[1]), kb = dkey(dotB[0], dotB[1]);
+    var na = res.netOf ? res.netOf[ka] : undefined;
+    var nb = res.netOf ? res.netOf[kb] : undefined;
+    if (na === undefined || nb === undefined || !res.Vnet) return out;
+    out.ok = true;
+    out.V = (res.Vnet[na] || 0) - (res.Vnet[nb] || 0);
+    // Find current flowing directly between dotA and dotB if a component sits across those nets
+    var directI = 0, directFound = false;
+    parts.forEach(function (p, i) {
+      var e = ends(p), pka = dkey(e[0][0], e[0][1]), pkb = dkey(e[1][0], e[1][1]);
+      var pna = res.netOf[pka], pnb = res.netOf[pkb];
+      if ((pna === na && pnb === nb) || (pna === nb && pnb === na) || ((pka === ka && pkb === kb) || (pka === kb && pkb === ka))) {
+        directI = pna === na ? res.parts[i].I : -res.parts[i].I;
+        directFound = true;
+      }
+    });
+    if (!directFound) {
+      // Fallback: current entering/leaving dotA from all connected non-wire components
+      parts.forEach(function (p, i) {
+        var e = ends(p), pka = dkey(e[0][0], e[0][1]), pkb = dkey(e[1][0], e[1][1]);
+        if (pka === ka) directI += res.parts[i].I;
+        else if (pkb === ka) directI -= res.parts[i].I;
+      });
+    }
+    out.I = Math.abs(directI);
+    if (na === nb) { out.R = 0; return out; }
+    // Passive equivalent resistance R_AB: replace sources with internal resistance r (or tiny 1e-6 Ω wire) and excite with 1 V test source
+    var passive = [], hasIdealShort = false;
+    parts.forEach(function (p) {
+      var e = ends(p);
+      if (isSource(p)) {
+        if (p.v.r > 0) passive.push(makeFree('res', e[0][0], e[0][1], e[1][0], e[1][1], { R: p.v.r }));
+        else passive.push(makeFree('wire', e[0][0], e[0][1], e[1][0], e[1][1]));
+      } else {
+        passive.push(JSON.parse(JSON.stringify(p)));
+      }
+    });
+    passive.push(makeFree('cell', dotA[0], dotA[1], dotB[0], dotB[1], { E: 1, r: 0 }));
+    var testRes = analyse(passive, env || {});
+    if (testRes && !testRes.fatal) {
+      var Itest = Math.abs(testRes.parts[passive.length - 1].Iout);
+      out.R = Itest > 1e-11 ? (1 / Itest) : Infinity;
+      if (out.R > 1e9) out.R = Infinity;
+    } else if (testRes && testRes.fatal) {
+      out.R = 0;
+    }
     return out;
   }
 
@@ -508,5 +589,5 @@
   }
 
   return { W: W, H: H, TYPES: TYPES, ends: ends, endB: endB, dkey: dkey, coordsOfKey: coordsOfKey, ekey: ekey, inGrid: inGrid, isFree: isFree, make: make, makeFree: makeFree, build: build, edgesOf: edgesOf,
-    encode: encode, decode: decode, names: names, rName: rName, sub: sub, isSource: isSource, resistance: resistance, analyse: analyse };
+    encode: encode, decode: decode, names: names, rName: rName, sub: sub, isSource: isSource, resistance: resistance, resistorBands: resistorBands, probeMeasure: probeMeasure, analyse: analyse };
 });

@@ -4,11 +4,36 @@
 <meta charset="utf-8">
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Question &amp; Screenshot Solver — A Level Physics &amp; Mechanics</title>
+<title>AI Question, Past-Paper Archive &amp; Mark-Scheme Solver — A Level Physics &amp; Mechanics</title>
 <link rel="stylesheet" href="assets/theme.css">
 <link rel="stylesheet" href="assets/app.css">
 <script src="core/progress.js"></script>
+<script src="core/util.js"></script>
+<script src="engine/phys-circuits.js"></script>
+<script src="engine/phys-circuit-builder.js"></script>
+<script src="data/p4-questions.js"></script>
+<script src="data/p4-ms.js"></script>
 <script src="core/solver.js"></script>
+<style>
+  .arch-card { margin-top: 16px; }
+  .arch-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .arch-chip { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel2); color: var(--muted); font: 700 12px var(--sans); cursor: pointer; transition: .12s; }
+  .arch-chip:hover { border-color: var(--accent); color: var(--ink); }
+  .arch-chip.on { background: color-mix(in srgb, var(--accent) 18%, var(--panel2)); border-color: var(--accent); color: var(--accent); }
+  .arch-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; max-height: 360px; overflow-y: auto; padding-right: 4px; }
+  .arch-item { display: flex; flex-direction: column; justify-content: space-between; gap: 8px; padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel2); cursor: pointer; text-align: left; transition: border-color .12s, transform .12s; }
+  .arch-item:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .arch-item-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+  .arch-ref { font: 800 12.5px var(--sans); color: var(--accent); }
+  .arch-badges { display: inline-flex; gap: 4px; align-items: center; }
+  .arch-tag { font: 700 10.5px var(--sans); padding: 2px 7px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); color: var(--muted); }
+  .arch-tag.ms { border-color: rgba(34,197,94,.45); color: #4ade80; background: rgba(34,197,94,.12); }
+  .arch-txt { font: 500 12px/1.45 var(--sans); color: var(--ink); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .ms-ref-box { padding: 12px 14px; border-radius: 14px; border: 1.5px solid rgba(34,197,94,.42); background: color-mix(in srgb, #22c55e 9%, var(--panel2)); margin-bottom: 12px; }
+  .ms-ref-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; font: 800 13px var(--sans); color: #4ade80; margin-bottom: 6px; }
+  .ms-ref-body { font: 600 12.5px/1.5 var(--sans); color: var(--ink); overflow-wrap: anywhere; }
+  .sim-refs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; margin-top: 10px; }
+</style>
 </head>
 <body>
 <script>
@@ -20,32 +45,35 @@
   var shell = P.mountShell({
     active: 'solver',
     greetPrefix: 'Question Studio · ',
-    title: 'AI Screenshot Solver',
+    title: 'AI & Past-Paper Solver',
     editableName: false,
-    subtitle: 'Drop a past-paper screenshot or paste a question — automatically launches the live simulation & step-by-step working'
+    subtitle: 'Solve any screenshot, question, or folder past paper — synced with official Cambridge mark schemes & Tinkercad circuits'
   });
 
-  var curImg = '', curResult = null, samples = S.getSamples();
+  var curImg = '', curResult = null, forcedRefItem = null, samples = S.getSamples();
+  var bank = S.getBank ? S.getBank() : [];
+  var archFilter = { syl: 'all', cat: 'all', q: '' };
 
   function aiBadgeHtml() {
     var hasKey = !!S.getApiKey();
-    return hasKey
+    return (hasKey
       ? '<span class="solver-badge-ai ready">🤖 Gemini Vision AI Ready</span>'
-      : '<span class="solver-badge-ai">⚡ Smart Physics Solver + OCR Ready</span>';
+      : '<span class="solver-badge-ai">⚡ Smart Solver + OCR Ready</span>') +
+      '<span class="solver-badge-ai ready">📚 ' + bank.length + ' Folder Past Papers &amp; MS Indexed</span>';
   }
 
   shell.content.innerHTML =
     '<div class="solver-hero">' +
-    '  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap" id="aiBadgeHost">' + aiBadgeHtml() + '</div>' +
+    '  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap" id="aiBadgeHost">' + aiBadgeHtml() + '</div>' +
     '  <div style="display:flex;gap:8px;flex-wrap:wrap">' +
     '    <button type="button" class="pill-btn" id="toggleAiBtn">⚙ AI API Settings</button>' +
-    '    <a class="pill-btn gold" href="group.html?g=forces-p">⚖ Moments Sim →</a>' +
+    '    <a class="pill-btn gold" href="sims/9702/p10-builder.html">🔌 Tinkercad Circuit Builder →</a>' +
     '  </div>' +
     '</div>' +
     '<div class="panel-card" id="aiKeyDrawer" hidden style="margin-bottom:16px">' +
-    '  <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('spark') + '</span><div><h2>Optional Gemini Vision AI Key</h2><small>Stored locally in your browser (never leaves your device except direct Google Gemini requests)</small></div></div></div>' +
+    '  <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('spark') + '</span><div><h2>Optional Gemini Vision AI Key</h2><small>Stored locally in your browser — enhances image &amp; circuit diagram reading alongside local mark schemes</small></div></div></div>' +
     '  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
-    '    <input type="password" class="solver-in" id="geminiKeyIn" style="flex:1;min-width:220px" placeholder="Paste Gemini API key (optional — works offline/free without key too!)">' +
+    '    <input type="password" class="solver-in" id="geminiKeyIn" style="flex:1;min-width:220px" placeholder="Paste Gemini API key (optional — works 100% offline with local past papers &amp; OCR!)">' +
     '    <button type="button" class="pill-btn gold" id="saveKeyBtn">Save Key</button>' +
     '    <button type="button" class="pill-btn" id="clearKeyBtn">Clear Key</button>' +
     '  </div>' +
@@ -53,7 +81,7 @@
     '<div class="solver-grid">' +
     '  <div style="display:flex;flex-direction:column;gap:14px">' +
     '    <section class="panel-card">' +
-    '      <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('solver') + '</span><div><h2>1. Screenshot or Question</h2><small>Drop, browse, or press Ctrl+V</small></div></div></div>' +
+    '      <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('solver') + '</span><div><h2>1. Question or Screenshot</h2><small>Paste text, paper code (e.g. 9709/42 F/M 18 Q1), or image</small></div></div></div>' +
     '      <div class="solver-drop" id="dropZone">' +
     '        <input type="file" id="imgInput" accept="image/*">' +
     '        <div style="font-size:24px;margin-bottom:4px">📸</div>' +
@@ -62,30 +90,38 @@
     '        <img class="solver-preview" id="imgPreview" alt="Uploaded physics question screenshot" hidden>' +
     '      </div>' +
     '      <div style="margin-top:12px">' +
-    '        <label style="display:block;font:700 12px var(--sans);color:var(--muted);margin-bottom:6px">Question text (auto-filled by OCR or edit manually)</label>' +
-    '        <textarea class="solver-ta" id="qTextIn" placeholder="Paste or type a 9709 / 9702 question (e.g. A uniform 4 m plank pivoted at 2 m has 300 N at 0.5 m and unknown force X at 3 m. Find X.)"></textarea>' +
+    '        <label style="display:block;font:700 12px var(--sans);color:var(--muted);margin-bottom:6px">Question text or paper reference</label>' +
+    '        <textarea class="solver-ta" id="qTextIn" placeholder="Paste any 9709 / 9702 question, paper code (e.g. 9702/22 M/J 26 Q3), or circuit question..."></textarea>' +
     '      </div>' +
     '      <div style="margin-top:10px">' +
     '        <label style="display:block;font:700 12px var(--sans);color:var(--muted);margin-bottom:5px">Unknown x you want to find (optional)</label>' +
-    '        <input type="text" class="solver-in" id="askHintIn" placeholder="e.g. Force X, tension T, weight W, max height">' +
+    '        <input type="text" class="solver-in" id="askHintIn" placeholder="e.g. Force X, Resistance R, Tension T, acceleration a">' +
     '      </div>' +
     '      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">' +
-    '        <button type="button" class="pill-btn gold" id="analyzeBtn" style="flex:1;justify-content:center;min-height:42px">⚡ Analyze &amp; Launch Simulation</button>' +
+    '        <button type="button" class="pill-btn gold" id="analyzeBtn" style="flex:1;justify-content:center;min-height:42px">⚡ Solve &amp; Launch Simulation</button>' +
     '        <button type="button" class="pill-btn" id="resetBtn">Reset</button>' +
     '      </div>' +
     '      <div id="solverStatus" style="margin-top:8px;font-size:12.5px;color:var(--accent);font-weight:600"></div>' +
-    '      <div style="margin-top:14px;font:700 11.5px var(--sans);color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Try Past-Paper Samples (Includes Diagram Screenshot)</div>' +
+    '      <div style="margin-top:14px;font:700 11.5px var(--sans);color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Quick Past-Paper Demos</div>' +
     '      <div class="solver-samples" id="samplesHost"></div>' +
     '    </section>' +
     '  </div>' +
     '  <div style="display:flex;flex-direction:column;gap:14px" id="outputHost">' +
-    '    <section class="panel-card" id="emptyState" style="text-align:center;padding:38px 20px">' +
+    '    <section class="panel-card" id="emptyState" style="text-align:center;padding:34px 20px">' +
     '      <div style="font-size:36px;margin-bottom:10px">🧠</div>' +
-    '      <h2 style="margin:0 0 6px;font-size:18px">Ready to Simulate Your Question</h2>' +
-    '      <p style="margin:0 auto;max-width:460px;color:var(--muted);font-size:13.5px">Upload or paste any Cambridge 9709 / 9702 question screenshot, or pick one of the sample problems on the left. We will automatically build the live simulation, highlight unknown <b>x</b>, and animate the step-by-step working.</p>' +
+    '      <h2 style="margin:0 0 6px;font-size:18px">Ready to Solve &amp; Reference Past Papers</h2>' +
+    '      <p style="margin:0 auto;max-width:500px;color:var(--muted);font-size:13.5px">Pick any of the <b>' + bank.length + ' real Cambridge past papers</b> below from your folder, paste a paper reference or question, or drop a screenshot. The solver matches official mark schemes and configures the live simulation (or builds the Tinkercad circuit automatically!).</p>' +
     '    </section>' +
     '  </div>' +
-    '</div>';
+    '</div>' +
+    '<section class="panel-card arch-card">' +
+    '  <div class="panel-head">' +
+    '    <div class="panel-title"><span class="kpi-badge">📚</span><div><h2>Folder Past-Paper &amp; Mark-Scheme Browser</h2><small>Real 2018–2026 Cambridge 9709 Paper 4, 9702 Paper 2 (AS) &amp; 9702 Paper 4 papers from your local folder</small></div></div>' +
+    '    <input type="search" class="solver-in" id="archSearch" style="width:min(340px,100%);min-height:36px" placeholder="Search paper ref (e.g. 9709/42, F/M 18) or keyword…">' +
+    '  </div>' +
+    '  <div class="arch-filters" id="archFilters"></div>' +
+    '  <div class="arch-list" id="archList"></div>' +
+    '</section>';
 
   var badgeHost = shell.content.querySelector('#aiBadgeHost');
   var aiDrawer = shell.content.querySelector('#aiKeyDrawer');
@@ -100,6 +136,9 @@
   var statusEl = shell.content.querySelector('#solverStatus');
   var samplesHost = shell.content.querySelector('#samplesHost');
   var outputHost = shell.content.querySelector('#outputHost');
+  var archSearch = shell.content.querySelector('#archSearch');
+  var archFilters = shell.content.querySelector('#archFilters');
+  var archList = shell.content.querySelector('#archList');
 
   keyIn.value = S.getApiKey();
   shell.content.querySelector('#toggleAiBtn').onclick = function () { aiDrawer.hidden = !aiDrawer.hidden; };
@@ -107,13 +146,13 @@
     S.setApiKey(keyIn.value);
     badgeHost.innerHTML = aiBadgeHtml();
     aiDrawer.hidden = true;
-    statusEl.textContent = S.getApiKey() ? 'Gemini Vision AI key saved locally!' : 'Cleared key — using built-in smart solver.';
+    statusEl.textContent = S.getApiKey() ? 'Gemini Vision AI key saved locally!' : 'Cleared key — using built-in smart solver + mark schemes.';
   };
   shell.content.querySelector('#clearKeyBtn').onclick = function () {
     keyIn.value = '';
     S.setApiKey('');
     badgeHost.innerHTML = aiBadgeHtml();
-    statusEl.textContent = 'Using built-in Smart Solver + OCR.';
+    statusEl.textContent = 'Using built-in Smart Solver + local Past-Paper Mark Schemes.';
   };
 
   function setImage(dataUrl) {
@@ -132,6 +171,7 @@
     var rd = new FileReader();
     rd.onload = function () {
       setImage(String(rd.result || ''));
+      forcedRefItem = null;
       statusEl.textContent = 'Screenshot attached (' + (file.name || 'clipboard image') + ') — analyzing…';
       runAnalysis();
     };
@@ -155,28 +195,61 @@
     }
   });
 
+  function loadBankItem(item) {
+    if (!item) return;
+    forcedRefItem = item;
+    setImage('');
+    qTextIn.value = item.r + ' ' + item.t;
+    askHintIn.value = '';
+    Array.prototype.forEach.call(samplesHost.children, function (el) { el.classList.remove('on'); });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    runAnalysis();
+  }
+
   function renderOutput(res) {
     curResult = res;
     var theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
     var url = S.buildSimUrl(res, { theme: theme, autoSolve: false });
     var keys = Object.keys(res.params || {});
 
+    var refBannerHtml = '';
+    if (res.matchedRef) {
+      refBannerHtml =
+        '<div class="ms-ref-box">' +
+        '  <div class="ms-ref-title">' +
+        '    <span>✓ Matched Past Paper: ' + esc(res.matchedRef.ref) + ' (' + esc(res.matchedRef.marks) + ' marks)</span>' +
+        '    <span class="arch-tag">' + esc(res.matchedRef.qtype || res.matchedRef.topic) + '</span>' +
+        '  </div>' +
+        '  <div class="ms-ref-body">' + (res.matchedRef.ms ? '<b>Official Mark Scheme:</b> ' + esc(res.matchedRef.ms) : 'Paper located in folder archive.') + '</div>' +
+        '</div>';
+    }
+
+    var simRefsHtml = '';
+    if (res.similarRefs && res.similarRefs.length) {
+      simRefsHtml =
+        '<section class="panel-card">' +
+        '  <div class="panel-head"><div class="panel-title"><span class="kpi-badge">🔎</span><div><h2>Similar Folder Past-Paper References</h2><small>Click any reference paper to solve &amp; load its mark scheme</small></div></div></div>' +
+        '  <div class="sim-refs-grid" id="simRefsHost"></div>' +
+        '</section>';
+    }
+
     outputHost.innerHTML =
       '<section class="panel-card">' +
       '  <div class="panel-head">' +
-      '    <div class="panel-title"><span class="kpi-badge">' + svg(res.sim.id) + '</span><div><h2>' + esc(res.title || res.sim.title) + '</h2><small>' + esc(res.sim.syllabus) + ' · ' + (res.usedAi ? 'Solved by Gemini Vision AI' : 'Solved by Built-in Physics Engine') + '</small></div></div>' +
+      '    <div class="panel-title"><span class="kpi-badge">' + svg(res.sim.id) + '</span><div><h2>' + esc(res.title || res.sim.title) + '</h2><small>' + esc(res.sim.syllabus) + ' · ' + (res.usedAi ? 'Solved by Gemini Vision AI' : 'Solved by Physics Engine + Folder MS') + '</small></div></div>' +
       '    <div style="display:flex;gap:8px;flex-wrap:wrap">' +
       '      <button type="button" class="pill-btn gold" id="frameCalcBtn">⚡ Calculate x</button>' +
       '      <button type="button" class="pill-btn" id="framePlayBtn">▶ Play Animated Steps</button>' +
       '      <a class="pill-btn" id="openFullLink" href="' + esc(url.replace('&embed=1', '')) + '">Full View ↗</a>' +
       '    </div>' +
       '  </div>' +
+      refBannerHtml +
       '  <div class="solver-frame-wrap"><iframe id="simIframe" title="Live Question Simulation" src="' + esc(url) + '"></iframe></div>' +
       '  <div style="margin-top:12px;font:700 11.5px var(--sans);color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Extracted Simulation Parameters (Editable Live)</div>' +
       '  <div class="solver-param-grid" id="paramChips"></div>' +
       '</section>' +
       '<section class="panel-card">' +
-      '  <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('spark') + '</span><div><h2>Step-by-Step Working Out</h2><small>Synchronized with Cambridge mark scheme style</small></div></div></div>' +
+      '  <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('spark') + '</span><div><h2>Step-by-Step Working Out</h2><small>Synced with Cambridge mark scheme style &amp; live stage</small></div></div></div>' +
       '  <div class="solver-steps">' +
       (res.steps || []).map(function (st, idx) {
         return '<div class="solver-step">' +
@@ -187,11 +260,13 @@
       }).join('') +
       '  </div>' +
       (res.finalAnswer ? '<div class="solver-answer">✓ Answer: ' + esc(res.finalAnswer) + '</div>' : '') +
-      '</section>';
+      '</section>' +
+      simRefsHtml;
 
     var frame = outputHost.querySelector('#simIframe');
     var fullLink = outputHost.querySelector('#openFullLink');
     var paramHost = outputHost.querySelector('#paramChips');
+    var simRefsHost = outputHost.querySelector('#simRefsHost');
 
     keys.forEach(function (k) {
       var isX = res.unknownKey === k;
@@ -204,6 +279,7 @@
       inp.addEventListener('change', function () {
         var nv = Number(inp.value);
         res.params[k] = isFinite(nv) ? nv : inp.value;
+        res.circuitHash = null;
         var nextUrl = S.buildSimUrl(res, { theme: theme });
         frame.src = nextUrl;
         fullLink.href = nextUrl.replace('&embed=1', '');
@@ -211,15 +287,25 @@
       paramHost.appendChild(box);
     });
 
+    if (simRefsHost && res.similarRefs) {
+      res.similarRefs.forEach(function (refItem) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'arch-item';
+        btn.innerHTML =
+          '<div class="arch-item-head"><span class="arch-ref">' + esc(refItem.r) + '</span>' +
+          '<span class="arch-badges">' + (refItem.ms ? '<span class="arch-tag ms">MS</span>' : '') + '<span class="arch-tag">' + esc(refItem.m) + 'm</span></span></div>' +
+          '<div class="arch-txt">' + esc(refItem.t) + '</div>';
+        btn.onclick = function () { loadBankItem(refItem); };
+        simRefsHost.appendChild(btn);
+      });
+    }
+
     outputHost.querySelector('#frameCalcBtn').onclick = function () {
-      if (frame && frame.contentWindow) {
-        frame.contentWindow.postMessage({ type: 'sim-calc-x' }, '*');
-      }
+      if (frame && frame.contentWindow) frame.contentWindow.postMessage({ type: 'sim-calc-x' }, '*');
     };
     outputHost.querySelector('#framePlayBtn').onclick = function () {
-      if (frame && frame.contentWindow) {
-        frame.contentWindow.postMessage({ type: 'sim-play-studio' }, '*');
-      }
+      if (frame && frame.contentWindow) frame.contentWindow.postMessage({ type: 'sim-play-studio' }, '*');
     };
   }
 
@@ -228,25 +314,25 @@
     var txt = qTextIn.value.trim();
     var hint = askHintIn.value.trim();
     if (!txt && !curImg) {
-      statusEl.textContent = 'Drop a screenshot or enter question text first.';
+      statusEl.textContent = 'Drop a screenshot, enter question text, or pick a folder past paper below.';
       return;
     }
     analyzeBtn.disabled = true;
-    statusEl.textContent = apiKey ? '🤖 Analyzing screenshot & diagram with Gemini Vision AI…' : '⚡ Extracting physics quantities & generating simulation…';
+    statusEl.textContent = apiKey ? '🤖 Analyzing with Gemini Vision AI + local mark-scheme references…' : '⚡ Matching local past-paper archive & solving…';
 
     var work = apiKey
       ? S.analyzeWithGemini(apiKey, curImg, txt, hint).catch(function (err) {
-          statusEl.textContent = 'AI fallback (' + (err && err.message ? err.message : 'offline') + ') — solving with Smart Engine…';
-          return S.analyzeLocally(txt, curImg, hint, function (msg) { statusEl.textContent = msg; });
+          statusEl.textContent = 'AI fallback (' + (err && err.message ? err.message : 'offline') + ') — solving locally…';
+          return S.analyzeLocally(txt, curImg, hint, function (msg) { statusEl.textContent = msg; }, forcedRefItem);
         })
-      : S.analyzeLocally(txt, curImg, hint, function (msg) { statusEl.textContent = msg; });
+      : S.analyzeLocally(txt, curImg, hint, function (msg) { statusEl.textContent = msg; }, forcedRefItem);
 
     work.then(function (res) {
       analyzeBtn.disabled = false;
       if (res.ocrText && !qTextIn.value.trim()) qTextIn.value = res.ocrText;
-      statusEl.textContent = '✓ Mapped to ' + res.sim.title + ' · unknown x = ' + (res.unknownLabel || res.unknownKey || 'ready');
+      statusEl.textContent = '✓ Mapped to ' + res.sim.title + (res.matchedRef ? ' · Matched ' + res.matchedRef.ref : '');
       renderOutput(res);
-      if (P.addXp) P.addXp(15, 'Solved custom question');
+      if (P.addXp) P.addXp(15, 'Solved past paper / custom question');
     }).catch(function (err) {
       analyzeBtn.disabled = false;
       statusEl.textContent = (err && err.message) ? err.message : 'Could not analyze input yet — try pasting question text cleanly.';
@@ -259,6 +345,7 @@
     btn.className = 'solver-sample';
     btn.innerHTML = '<small>' + esc(smp.badge) + '</small>' + esc(smp.label);
     btn.onclick = function () {
+      forcedRefItem = null;
       Array.prototype.forEach.call(samplesHost.children, function (el) { el.classList.remove('on'); });
       btn.classList.add('on');
       setImage(smp.img);
@@ -269,8 +356,67 @@
     samplesHost.appendChild(btn);
   });
 
+  /* ---------- Folder Past-Paper Archive Browser ---------- */
+  var ARCHIVE_TABS = [
+    { id: 'all', label: 'All Papers (' + bank.length + ')', syl: 'all', cat: 'all' },
+    { id: '9709', label: '9709 Mechanics P4', syl: '9709', cat: 'all' },
+    { id: '9702-p2', label: '9702 AS Physics P2', syl: '9702-p2', cat: 'all' },
+    { id: 'circuits', label: '⚡ Circuits & Electricity', syl: 'all', cat: 'circuits' },
+    { id: 'forces', label: '⚖️ Forces & Moments', syl: 'all', cat: 'forces' },
+    { id: 'dynamics', label: '🚡 Pulleys & Slopes', syl: 'all', cat: 'dynamics' },
+    { id: 'kinematics', label: '🚀 Kinematics & Energy', syl: 'all', cat: 'kinematics' },
+    { id: 'waves', label: '🌊 Waves & Modern', syl: 'all', cat: 'waves' }
+  ];
+  var activeTab = 'all';
+  function renderArchive() {
+    var items = S.searchBank ? S.searchBank({ syllabus: archFilter.syl, category: archFilter.cat, query: archFilter.q, limit: 48 }) : [];
+    archList.innerHTML = '';
+    if (!items.length) {
+      archList.innerHTML = '<div style="grid-column:1/-1;padding:18px;text-align:center;color:var(--muted);font-size:13px">No matching folder papers found. Try another keyword or clear filters.</div>';
+      return;
+    }
+    items.forEach(function (it) {
+      var card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'arch-item';
+      card.innerHTML =
+        '<div class="arch-item-head">' +
+        '  <span class="arch-ref">' + esc(it.r) + '</span>' +
+        '  <span class="arch-badges">' +
+        (it.ms ? '<span class="arch-tag ms">✓ MS</span>' : '') +
+        (it.sim ? '<span class="arch-tag">' + esc(it.sim) + '</span>' : '') +
+        '    <span class="arch-tag">' + esc(it.m) + 'm</span>' +
+        '  </span>' +
+        '</div>' +
+        '<div class="arch-txt">' + esc(it.t) + '</div>';
+      card.onclick = function () { loadBankItem(it); };
+      archList.appendChild(card);
+    });
+  }
+  ARCHIVE_TABS.forEach(function (tb) {
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'arch-chip' + (tb.id === activeTab ? ' on' : '');
+    chip.textContent = tb.label;
+    chip.onclick = function () {
+      activeTab = tb.id;
+      archFilter.syl = tb.syl;
+      archFilter.cat = tb.cat;
+      Array.prototype.forEach.call(archFilters.children, function (el, idx) { el.classList.toggle('on', ARCHIVE_TABS[idx].id === activeTab); });
+      renderArchive();
+    };
+    archFilters.appendChild(chip);
+  });
+  archSearch.addEventListener('input', function () {
+    archFilter.q = archSearch.value.trim();
+    renderArchive();
+  });
+  renderArchive();
+
+  qTextIn.addEventListener('input', function () { forcedRefItem = null; });
   analyzeBtn.onclick = runAnalysis;
   resetBtn.onclick = function () {
+    forcedRefItem = null;
     setImage('');
     qTextIn.value = '';
     askHintIn.value = '';
@@ -278,7 +424,6 @@
     Array.prototype.forEach.call(samplesHost.children, function (el) { el.classList.remove('on'); });
   };
 
-  // Auto-load first sample on initial visit if query string specifies ?sample=1
   var q = new URLSearchParams(location.search);
   if (q.get('sample')) {
     var sIdx = Math.max(0, Math.min(samples.length - 1, Number(q.get('sample')) - 1 || 0));

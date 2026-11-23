@@ -720,13 +720,27 @@
     return String(str || '').replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
   }
   function ringHtml(pct, iconId, mastered, started) {
-    var r = 24, circ = 2 * Math.PI * r, off = circ * (1 - Math.max(0, Math.min(100, pct)) / 100);
+    var r = 34, circ = 2 * Math.PI * r, off = circ * (1 - Math.max(0, Math.min(100, pct)) / 100);
     return '<div class="ring-wrap">' +
-      '<svg class="ring-svg" viewBox="0 0 58 58"><circle class="ring-bg" cx="29" cy="29" r="' + r + '"/>' +
-      '<circle class="ring-fg" cx="29" cy="29" r="' + r + '" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '"/></svg>' +
+      '<svg class="ring-svg" viewBox="0 0 82 82"><circle class="ring-bg" cx="41" cy="41" r="' + r + '"/>' +
+      '<circle class="ring-fg" cx="41" cy="41" r="' + r + '" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '"/></svg>' +
       '<div class="ring-core">' + svg(iconId) + '</div>' +
       (mastered ? '<span class="tile-star" title="Mastered">★</span>' : '') +
       '</div>';
+  }
+  function bindCardTilt(container) {
+    if (!container || typeof container.addEventListener !== 'function') return;
+    if (root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    container.addEventListener('pointermove', function (e) {
+      var tile = e.target && e.target.closest ? e.target.closest('.icon-tile, .hero-spotlight, .tele-card') : null;
+      if (!tile) return;
+      var rc = tile.getBoundingClientRect();
+      if (!rc.width || !rc.height) return;
+      var px = ((e.clientX - rc.left) / rc.width) * 100;
+      var py = ((e.clientY - rc.top) / rc.height) * 100;
+      tile.style.setProperty('--mx', px.toFixed(1) + '%');
+      tile.style.setProperty('--my', py.toFixed(1) + '%');
+    });
   }
   function miniRingHtml(pct) {
     var r = 8.5, circ = 2 * Math.PI * r, off = circ * (1 - Math.max(0, Math.min(100, pct)) / 100);
@@ -1088,15 +1102,19 @@
       }).join('') +
       '  <button type="button" id="sideCoachBtn"><span class="nav-ico">' + svg('spark') + '</span><span>Newton Coach</span></button>' +
       '</nav>' +
-      '<div class="pomo-card">' +
-      '  <div class="pomo-head"><span>Focus Timer</span><span id="pomoMode">25m Sprint</span></div>' +
-      '  <div class="pomo-time" id="pomoTime">25:00</div>' +
-      '  <div class="pomo-btns"><button type="button" class="primary" id="pomoToggle">Start</button><button type="button" id="pomoReset">Reset</button></div>' +
-      '</div>' +
-      '<div class="side-card">' +
+      '<div class="side-pod">' +
       '  <div class="side-rank"><span class="spark">' + svg('trophy') + '</span><div><div id="sideRankName">' + esc(sum.rank.name) + '</div><small style="color:var(--muted)" id="sideXpNum">' + sum.xp + ' XP</small></div></div>' +
-      '  <div class="side-xp-row"><span>Next rank</span><span id="sideXpPct">' + sum.pctToNext + '%</span></div>' +
+      '  <div class="side-xp-row" style="margin:2px 0"><span>Next rank</span><span id="sideXpPct">' + sum.pctToNext + '%</span></div>' +
       '  <div class="xp-bar"><div id="sideXpBar" style="width:' + sum.pctToNext + '%"></div></div>' +
+      '  <div class="side-pod-foot">' +
+      '    <button type="button" class="side-sprint-btn" id="pomoExpandBtn" title="Toggle Focus Sprint Timer">⏱ <span id="pomoMiniTime">25:00</span> Sprint ▾</button>' +
+      '    <a href="' + prefix + 'vault.html" style="font:700 11.5px var(--sans);color:var(--accent);text-decoration:none">Vault →</a>' +
+      '  </div>' +
+      '  <div class="pomo-card pomo-drawer" id="pomoDrawer" hidden style="padding:10px;border-radius:14px">' +
+      '    <div class="pomo-head"><span>Focus Timer</span><span id="pomoMode">25m Sprint</span></div>' +
+      '    <div class="pomo-time" id="pomoTime" style="font-size:20px;margin:2px 0 6px">25:00</div>' +
+      '    <div class="pomo-btns"><button type="button" class="primary" id="pomoToggle">Start</button><button type="button" id="pomoReset">Reset</button></div>' +
+      '  </div>' +
       '</div>';
 
     var main = document.createElement('div');
@@ -1163,15 +1181,21 @@
       island.outerHTML +
       '<div class="top-actions">' +
       '  <div class="cmd-search-wrap">' +
-      '    <input type="search" class="cmd-search" id="cmdSearchIn" placeholder="Search topics, forces, waves…" aria-label="Search curriculum">' +
+      '    <input type="search" class="cmd-search" id="cmdSearchIn" placeholder="Search topics, waves, forces…" aria-label="Search curriculum">' +
+      '    <span class="cmd-kbd">⌘K</span>' +
       '    <div class="cmd-results" id="cmdSearchRes" hidden></div>' +
       '  </div>' +
       '  <span class="pill-btn" id="topStreakPill" title="Active study streak">🔥 <b>' + sum.streak + '</b>d</span>' +
-      '  <button type="button" class="pill-btn" id="exportReportBtn">⇣ Report</button>' +
-      '  <button type="button" class="pill-btn ui-studio-trigger" id="uiStudioBtn" title="Switch Navigation Layout, Theme & Effects">🎨 UI Studio</button>' +
-      '  <button type="button" class="icon-circle" id="soundToggleBtn" aria-label="Toggle sound effects" title="Toggle chimes">' + (s.sound ? '🔊' : '🔇') + '</button>' +
-      '  <button type="button" class="icon-circle" id="themeToggleBtn" aria-label="Switch Obsidian Dark or Warm Cream Light theme" title="Toggle Obsidian / Cream theme">◐</button>' +
-      '  <a class="avatar-pill" href="' + prefix + 'vault.html" title="Open Secret Vault & Profile"><span class="avatar-dot">' + esc(s.name.charAt(0).toUpperCase()) + '</span><span id="topRankName">' + esc(sum.rank.name) + '</span></a>' +
+      '  <div class="quick-pop-wrap">' +
+      '    <button type="button" class="pill-btn ui-studio-trigger" id="quickMenuBtn" aria-expanded="false" title="Appearance, Audio &amp; Progress Report">⚙ Studio &amp; Settings ▾</button>' +
+      '    <div class="quick-pop" id="quickPop" hidden>' +
+      '      <button type="button" class="quick-pop-row" id="uiStudioBtn"><span>🎨 UI &amp; Navigation Studio</span><small style="color:var(--accent)">Customize</small></button>' +
+      '      <button type="button" class="quick-pop-row" id="themeToggleBtn"><span>◐ Obsidian / Cream Theme</span><small style="color:var(--muted)">Switch</small></button>' +
+      '      <button type="button" class="quick-pop-row" id="soundToggleBtn"><span>' + (s.sound ? '🔊' : '🔇') + ' Sound Chimes</span><small style="color:var(--muted)">' + (s.sound ? 'On' : 'Muted') + '</small></button>' +
+      '      <button type="button" class="quick-pop-row" id="exportReportBtn"><span>⇣ Export Markdown Report</span><small style="color:var(--muted)">.md</small></button>' +
+      '    </div>' +
+      '  </div>' +
+      '  <a class="avatar-pill" href="' + prefix + 'vault.html" title="Open Secret Vault &amp; Profile"><span class="avatar-dot">' + esc(s.name.charAt(0).toUpperCase()) + '</span><span id="topRankName">' + esc(sum.rank.name) + '</span></a>' +
       '</div>';
 
     var content = document.createElement('main');
@@ -1253,17 +1277,34 @@
     orbit.querySelector('#orbitCoachBtn').onclick = toggleCoach;
     if (liveIsland && liveIsland.querySelector('#islandCoachBtn')) liveIsland.querySelector('#islandCoachBtn').onclick = toggleCoach;
 
-    topbar.querySelector('#uiStudioBtn').onclick = openUiStudio;
+    var quickBtn = topbar.querySelector('#quickMenuBtn'), quickPop = topbar.querySelector('#quickPop');
+    if (quickBtn && quickPop) {
+      quickBtn.onclick = function (e) {
+        e.stopPropagation();
+        var next = quickPop.hidden;
+        quickPop.hidden = !next;
+        quickBtn.setAttribute('aria-expanded', String(next));
+      };
+      document.addEventListener('click', function (e) {
+        if (!quickBtn.contains(e.target) && !quickPop.contains(e.target)) {
+          quickPop.hidden = true; quickBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+    topbar.querySelector('#uiStudioBtn').onclick = function () { if (quickPop) quickPop.hidden = true; openUiStudio(); };
     dock.querySelector('#dockUiBtn').onclick = openUiStudio;
     orbit.querySelector('#orbitUiBtn').onclick = function () { closeOrbit(); openUiStudio(); };
     if (liveIsland && liveIsland.querySelector('#islandUiBtn')) liveIsland.querySelector('#islandUiBtn').onclick = openUiStudio;
 
-    topbar.querySelector('#exportReportBtn').onclick = exportReport;
+    topbar.querySelector('#exportReportBtn').onclick = function () { if (quickPop) quickPop.hidden = true; exportReport(); };
     topbar.querySelector('#soundToggleBtn').onclick = function () {
       var on = toggleSound();
-      topbar.querySelector('#soundToggleBtn').textContent = on ? '🔊' : '🔇';
+      topbar.querySelector('#soundToggleBtn').innerHTML = '<span>' + (on ? '🔊' : '🔇') + ' Sound Chimes</span><small style="color:var(--muted)">' + (on ? 'On' : 'Muted') + '</small>';
     };
     topbar.querySelector('#themeToggleBtn').onclick = toggleTheme;
+    document.addEventListener('keydown', function (e) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k' && cmdIn) { e.preventDefault(); cmdIn.focus(); }
+    });
     var cmdIn = topbar.querySelector('#cmdSearchIn'), cmdRes = topbar.querySelector('#cmdSearchRes');
     if (cmdIn && cmdRes) {
       cmdIn.addEventListener('input', function () {
@@ -1291,11 +1332,17 @@
       };
     }
 
-    // Working 25-minute Pomodoro timer
+    // Collapsible Working 25-minute Pomodoro timer
+    var pomoExpandBtn = side.querySelector('#pomoExpandBtn'), pomoDrawer = side.querySelector('#pomoDrawer'), pomoMiniTime = side.querySelector('#pomoMiniTime');
+    if (pomoExpandBtn && pomoDrawer) {
+      pomoExpandBtn.onclick = function () { pomoDrawer.hidden = !pomoDrawer.hidden; };
+    }
     var pomoSec = 1500, pomoTimer = null;
     function drawPomo() {
       var m = String(Math.floor(pomoSec / 60)).padStart(2, '0'), sec = String(pomoSec % 60).padStart(2, '0');
-      side.querySelector('#pomoTime').textContent = m + ':' + sec;
+      var txt = m + ':' + sec;
+      side.querySelector('#pomoTime').textContent = txt;
+      if (pomoMiniTime) pomoMiniTime.textContent = txt;
     }
     side.querySelector('#pomoToggle').onclick = function () {
       var btn = side.querySelector('#pomoToggle');
@@ -1342,6 +1389,7 @@
     exportReport: exportReport, resetProgress: resetProgress,
     playChime: playChime, burstConfetti: burstConfetti, celebrate: celebrate,
     openQuestModal: openQuestModal, createCoachWidget: createCoachWidget, mountShell: mountShell,
+    bindCardTilt: bindCardTilt,
     getUiPrefs: getUiPrefs, setUiPrefs: setUiPrefs, applyUiPrefs: applyUiPrefs, openUiStudio: openUiStudio
   };
 })(typeof self !== 'undefined' ? self : this);

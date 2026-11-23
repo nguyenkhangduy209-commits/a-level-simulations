@@ -19,114 +19,151 @@
   var shell = P.mountShell({
     active: 'dashboard',
     greetPrefix: 'Hi, ',
-    subtitle: 'Welcome back — ignite nodes across 9709 Mechanics & 9702 AS Physics to unlock secret sandbox toys.'
+    subtitle: 'Your interactive Cambridge 9709 Mechanics & 9702 Physics workspace'
   });
   var root = shell.content;
-  var atlasFilter = 'all';
+  var atlasFilter = 'all', atlasCompact = false, activeWorkspace = 'atlas';
 
   root.innerHTML =
-    '<section class="kpi-grid" id="kpiGrid"></section>' +
-    '<section class="panel-card" aria-label="Icon Progress Atlas">' +
-    '  <div class="panel-head">' +
-    '    <div class="panel-title">' +
-    '      <span class="kpi-badge">' + svg('map') + '</span>' +
-    '      <div><h2>Icon Progress Atlas</h2><small>Tap any icon to inspect mastery, launch the simulation, or claim +50 XP via Mastery Quest</small></div>' +
-    '    </div>' +
-    '    <div class="filter-pills" id="atlasFilters">' +
-    '      <button type="button" class="on" data-f="all">All (17)</button>' +
-    '      <button type="button" data-f="9709">9709 Mechanics</button>' +
-    '      <button type="button" data-f="9702">9702 AS Physics</button>' +
-    '      <button type="button" data-f="mastered">Mastered</button>' +
-    '    </div>' +
+    '<section class="hero-bento">' +
+    '  <div class="hero-spotlight" id="heroSpotlight">' +
+    '    <canvas class="hero-stage-cv" id="heroStageCv"></canvas>' +
+    '    <div class="hero-content" id="heroContent"></div>' +
+    '    <div class="hero-ctas" id="heroCtas"></div>' +
     '  </div>' +
-    '  <div class="icon-atlas" id="iconAtlas"></div>' +
+    '  <div class="tele-stack" id="teleStack"></div>' +
     '</section>' +
-    '<div class="bento-grid">' +
-    '  <div class="bento-col">' +
-    '    <section class="panel-card">' +
-    '      <div class="panel-head">' +
-    '        <div class="panel-title"><span class="kpi-badge">' + svg('kinematics2d') + '</span><div><h2>Continue Learning</h2><small>Interactive sims &amp; guided lessons</small></div></div>' +
-    '        <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="pill-btn gold" href="solver.html">📸 AI Screenshot Solver</a><a class="pill-btn" href="course.html?c=9709">Browse Courses →</a></div>' +
+    '<div class="ws-tabs" role="tablist" aria-label="Dashboard Workspaces" id="wsTabs">' +
+    '  <button type="button" class="ws-tab on" data-ws="atlas" role="tab" aria-selected="true">🗺️ Curriculum Atlas <span class="ws-tab-cnt">17</span></button>' +
+    '  <button type="button" class="ws-tab" data-ws="analytics" role="tab" aria-selected="false">📈 Analytics &amp; Streak</button>' +
+    '  <button type="button" class="ws-tab" data-ws="vault" role="tab" aria-selected="false">🏆 Vault, Badges &amp; Coach</button>' +
+    '</div>' +
+    '<div class="ws-panel" id="ws-atlas">' +
+    '  <section class="panel-card" aria-label="Icon Progress Atlas">' +
+    '    <div class="panel-head">' +
+    '      <div class="panel-title">' +
+    '        <span class="kpi-badge" style="width:40px;height:40px">' + svg('map') + '</span>' +
+    '        <div><h2>Topic Progress Atlas</h2><small>Click any card to explore simulations, view your relic, or claim +50 XP via Mastery Quest</small></div>' +
     '      </div>' +
-    '      <div class="cont-list" id="contList"></div>' +
-    '    </section>' +
-    '    <div id="dashCoachHost"></div>' +
-    '  </div>' +
-    '  <div class="bento-col">' +
-    '    <section class="panel-card">' +
-    '      <div class="panel-head">' +
-    '        <div class="panel-title"><span class="kpi-badge">' + svg('spark') + '</span><div><h2>Radial Atlas Tree Preview</h2><small id="nextUnlockLbl">Next secret unlock</small></div></div>' +
-    '        <a class="pill-btn gold" href="map.html">Open Tree Map →</a>' +
+    '      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
+    '        <div class="filter-pills" id="atlasFilters">' +
+    '          <button type="button" class="on" data-f="all">All (17)</button>' +
+    '          <button type="button" data-f="9709">9709 Mechanics</button>' +
+    '          <button type="button" data-f="9702">9702 AS Physics</button>' +
+    '          <button type="button" data-f="mastered">Mastered</button>' +
+    '        </div>' +
+    '        <button type="button" class="pill-btn" id="atlasDensityBtn" title="Switch between Large Expressive Cards and Compact Icons">⊞ Compact</button>' +
     '      </div>' +
-    '      <div style="position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);height:190px;background:radial-gradient(circle at 25% 50%,rgba(45,212,191,.16),#070c0e 70%)">' +
-    '        <canvas id="miniMapCv" style="width:100%;height:100%;display:block"></canvas>' +
-    '        <a href="map.html" style="position:absolute;right:12px;bottom:12px" class="pill-btn">Explore 17 Nodes ↗</a>' +
-    '      </div>' +
-    '      <div id="unlockSegBar" style="margin-top:12px"></div>' +
-    '    </section>' +
-    '    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">' +
+    '    </div>' +
+    '    <div class="icon-atlas" id="iconAtlas"></div>' +
+    '  </section>' +
+    '  <section class="panel-card" style="margin-top:18px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap">' +
+    '    <div style="flex:1;min-width:240px">' +
+    '      <div class="panel-title"><span class="kpi-badge" style="width:38px;height:38px">' + svg('spark') + '</span><div><h2>Radial Constellation Map</h2><small id="nextUnlockLbl">Visual progression path across all 17 nodes</small></div></div>' +
+    '      <div id="unlockSegBar" style="margin-top:12px;max-width:460px"></div>' +
+    '    </div>' +
+    '    <div style="position:relative;width:min(380px,100%);height:110px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:radial-gradient(circle at 25% 50%,rgba(45,212,191,.16),#070c0e 70%)">' +
+    '      <canvas id="miniMapCv" style="width:100%;height:100%;display:block"></canvas>' +
+    '      <a href="map.html" style="position:absolute;right:10px;bottom:10px" class="pill-btn gold">Open Full Map →</a>' +
+    '    </div>' +
+    '  </section>' +
+    '</div>' +
+    '<div class="ws-panel" id="ws-analytics" hidden>' +
+    '  <div class="bento-grid" style="margin-top:0">' +
+    '    <div class="bento-col">' +
     '      <section class="panel-card">' +
-    '        <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('trophy') + '</span><div><h2>Atlas Breakdown</h2><small>Mastery distribution</small></div></div></div>' +
+    '        <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('trophy') + '</span><div><h2>Mastery Distribution</h2><small>Across 17 A-Level units</small></div></div></div>' +
     '        <div id="donutBox"></div>' +
     '      </section>' +
     '      <section class="panel-card">' +
-    '        <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('energy-p') + '</span><div><h2>Weekly Activity</h2><small>Last 7 days</small></div></div></div>' +
-    '        <div class="bar-chart" id="weeklyBars"></div>' +
+    '        <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('kinematics2d') + '</span><div><h2>Recently Explored</h2><small>Jump straight back in</small></div></div><a class="pill-btn" href="course.html?c=9709">Courses →</a></div>' +
+    '        <div class="cont-list" id="contList"></div>' +
     '      </section>' +
     '    </div>' +
-    '    <section class="panel-card">' +
-    '      <div class="panel-head">' +
-    '        <div class="panel-title"><span class="kpi-badge">' + svg('uncertainty') + '</span><div><h2>Course Engagement</h2><small>12-week simulation &amp; quest activity</small></div></div>' +
-    '        <div class="heat-legend"><span><i style="background:var(--grid)"></i>Low</span><span><i style="background:color-mix(in srgb,var(--accent) 40%,var(--grid))"></i>Medium</span><span><i style="background:color-mix(in srgb,var(--accent) 75%,var(--grid))"></i>High</span><span><i style="background:var(--accent)"></i>Best</span></div>' +
-    '      </div>' +
-    '      <div class="heatmap-wrap">' +
-    '        <div class="heat-days"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>' +
-    '        <div class="heatmap" id="heatmapGrid"></div>' +
-    '      </div>' +
-    '    </section>' +
+    '    <div class="bento-col">' +
+    '      <section class="panel-card">' +
+    '        <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('energy-p') + '</span><div><h2>Weekly Learning Velocity</h2><small>Actions recorded over last 7 days</small></div></div></div>' +
+    '        <div class="bar-chart" id="weeklyBars" style="height:160px"></div>' +
+    '      </section>' +
+    '      <section class="panel-card">' +
+    '        <div class="panel-head">' +
+    '          <div class="panel-title"><span class="kpi-badge">' + svg('uncertainty') + '</span><div><h2>12-Week Engagement</h2><small>Simulations &amp; Mastery Quests</small></div></div>' +
+    '          <div class="heat-legend"><span><i style="background:var(--grid)"></i>Low</span><span><i style="background:color-mix(in srgb,var(--accent) 40%,var(--grid))"></i>Med</span><span><i style="background:var(--accent)"></i>High</span></div>' +
+    '        </div>' +
+    '        <div class="heatmap-wrap">' +
+    '          <div class="heat-days"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>' +
+    '          <div class="heatmap" id="heatmapGrid"></div>' +
+    '        </div>' +
+    '      </section>' +
+    '    </div>' +
     '  </div>' +
     '</div>' +
-    '<div class="bottom-bento">' +
-    '  <section class="panel-card">' +
-    '    <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('trophy') + '</span><div><h2>Earned Icon Badges</h2><small id="badgeCountLbl">Unlock milestones</small></div></div></div>' +
-    '    <div class="badge-grid" id="badgeGrid"></div>' +
-    '  </section>' +
-    '  <section class="panel-card">' +
-    '    <div class="panel-head">' +
-    '      <div class="panel-title"><span class="kpi-badge">' + svg('vault') + '</span><div><h2>Secret Vault &amp; Certificates</h2><small>Interactive physics toys, relics &amp; desk skins</small></div></div>' +
-    '      <a class="pill-btn gold" href="vault.html">Open Vault →</a>' +
+    '<div class="ws-panel" id="ws-vault" hidden>' +
+    '  <div class="bottom-bento" style="margin-top:0;align-items:start">' +
+    '    <div style="display:flex;flex-direction:column;gap:18px">' +
+    '      <section class="panel-card">' +
+    '        <div class="panel-head">' +
+    '          <div class="panel-title"><span class="kpi-badge">' + svg('vault') + '</span><div><h2>Secret Sandbox Vault</h2><small>Unlock physics toys &amp; desk themes</small></div></div>' +
+    '          <a class="pill-btn gold" href="vault.html">Open Vault →</a>' +
+    '        </div>' +
+    '        <div id="vaultPreview" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px"></div>' +
+    '      </section>' +
+    '      <section class="panel-card">' +
+    '        <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('trophy') + '</span><div><h2>Earned Badges</h2><small id="badgeCountLbl">Unlock milestones</small></div></div></div>' +
+    '        <div class="badge-grid" id="badgeGrid"></div>' +
+    '      </section>' +
     '    </div>' +
-    '    <div id="vaultPreview" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px"></div>' +
-    '  </section>' +
+    '    <div id="dashCoachHost"></div>' +
+    '  </div>' +
     '</div>';
 
+  if (P.bindCardTilt) P.bindCardTilt(root);
   P.createCoachWidget(document.getElementById('dashCoachHost'), { prefix: '' });
 
-  function renderKpis(s, sum) {
-    var stackIcons = P.NODES.slice(0, 4).map(function (n) { return '<span>' + svg(n.id) + '</span>'; }).join('');
+  function getFocusNode(s) {
+    var rec = [];
+    try { rec = JSON.parse(localStorage.getItem('recent-sims') || '[]'); } catch (e) { rec = []; }
+    for (var i = 0; i < rec.length; i++) {
+      var m = /g=([^&]+)/.exec(rec[i].url || '');
+      var n = m ? P.findNode(m[1]) : null;
+      if (n) return n;
+    }
+    var unmastered = P.NODES.filter(function (n) { return !P.getNodeProgress(n.id, s).mastered; });
+    return unmastered[0] || P.NODES[0];
+  }
+
+  function renderHeroAndTele(s, sum) {
+    var fn = getFocusNode(s);
+    var fp = P.getNodeProgress(fn.id, s);
     var pctAll = Math.round((sum.masteredCount / sum.totalNodes) * 100);
-    document.getElementById('kpiGrid').innerHTML =
-      '<div class="kpi-card">' +
-      '  <div class="kpi-head"><span class="kpi-badge">' + svg('spark') + '</span><span>Total XP &amp; Rank</span></div>' +
-      '  <div class="kpi-val-row"><span class="kpi-num">' + sum.xp + '</span><span class="kpi-delta">' + esc(sum.rank.name) + '</span></div>' +
-      '  <div class="xp-bar"><div style="width:' + sum.pctToNext + '%"></div></div>' +
-      '  <div class="kpi-sub">' + (sum.nextRank ? (sum.nextRank.minXp - s.xp) + ' XP to ' + esc(sum.nextRank.name) : 'Max rank achieved!') + '</div>' +
+
+    document.getElementById('heroContent').innerHTML =
+      '<div class="hero-eyebrow">' + svg(fn.id) + '<span>' + (fp.started ? 'CONTINUE YOUR ODYSSEY · ' + fp.pct + '% COMPLETE' : 'RECOMMENDED NEXT MISSION') + ' · ' + esc(fn.syllabus) + '</span></div>' +
+      '<h2>' + esc(fn.title) + '</h2>' +
+      '<p>Unlock the <b>' + esc(fn.relic.name) + '</b> — ' + esc(fn.relic.fact) + '</p>' +
+      '<div style="max-width:440px">' + P.segBarHtml(fp.pct, 24) + '</div>';
+
+    document.getElementById('heroCtas').innerHTML =
+      '<a class="hero-btn-lg primary" href="' + fn.url + '">▶ Launch Simulation</a>' +
+      '<button type="button" class="hero-btn-lg" id="heroQuestBtn">★ ' + (fp.mastered ? 'Replay Quest' : 'Mastery Quest (+50 XP)') + '</button>' +
+      '<a class="hero-btn-lg" href="solver.html">📸 Past-Paper AI Solver</a>';
+
+    document.getElementById('heroQuestBtn').onclick = function () {
+      P.openQuestModal(fn.id, function () { renderAll(); });
+    };
+
+    document.getElementById('teleStack').innerHTML =
+      '<div class="tele-card">' +
+      '  <div class="tele-meta"><span class="tele-lbl">Total XP &amp; Rank</span><div class="tele-big">' + sum.xp + '</div><div class="kpi-sub"><span class="kpi-delta">' + esc(sum.rank.name) + '</span><span>' + (sum.nextRank ? (sum.nextRank.minXp - s.xp) + ' XP to next' : 'Max Rank!') + '</span></div></div>' +
+      '  <span class="kpi-badge" style="width:48px;height:48px">' + svg('spark') + '</span>' +
       '</div>' +
-      '<div class="kpi-card">' +
-      '  <div class="kpi-head"><span class="kpi-badge">' + svg('forces') + '</span><span>In Progress Topics</span></div>' +
-      '  <div class="kpi-val-row"><span class="kpi-num">' + sum.startedCount + '</span><div class="mini-stack">' + stackIcons + '</div></div>' +
-      '  <div class="kpi-sub"><span class="kpi-delta">' + (sum.startedCount + sum.masteredCount) + '/' + sum.totalNodes + '</span><span>explored across both courses</span></div>' +
+      '<div class="tele-card">' +
+      '  <div class="tele-meta"><span class="tele-lbl">Atlas Mastery Progress</span><div class="tele-big">' + sum.masteredCount + '<span style="font-size:18px;color:var(--muted)"> / ' + sum.totalNodes + '</span></div><div class="kpi-sub"><span class="kpi-delta">' + pctAll + '% Mastered</span><span>' + sum.startedCount + ' active topics</span></div></div>' +
+      '  ' + P.miniRingHtml(pctAll) +
       '</div>' +
-      '<div class="kpi-card">' +
-      '  <div class="kpi-head"><span class="kpi-badge">' + svg('trophy') + '</span><span>Mastered Nodes</span></div>' +
-      '  <div class="kpi-val-row"><span class="kpi-num">' + sum.masteredCount + '</span><span class="kpi-delta">' + pctAll + '% Atlas</span></div>' +
-      P.segBarHtml(pctAll, 20) +
-      '  <div class="kpi-sub">Pass a node quest (+50 XP) to ignite gold</div>' +
-      '</div>' +
-      '<div class="kpi-card">' +
-      '  <div class="kpi-head"><span class="kpi-badge">' + svg('vault') + '</span><span>Badges &amp; Unlocks</span></div>' +
-      '  <div class="kpi-val-row"><span class="kpi-num">' + sum.badgesEarned.length + '<small style="font-size:15px;color:var(--muted)">/' + P.BADGES.length + '</small></span><span class="kpi-delta">' + sum.unlockedToysCount + '/4 Toys</span></div>' +
-      '  <div class="kpi-sub">' + sum.unlockedRelicsCount + ' relics collected in Trophy Cabinet</div>' +
+      '<div class="tele-card">' +
+      '  <div class="tele-meta"><span class="tele-lbl">Secret Vault &amp; Relics</span><div class="tele-big">' + sum.unlockedToysCount + '<span style="font-size:18px;color:var(--muted)"> / 4</span></div><div class="kpi-sub"><span class="kpi-delta">' + sum.badgesEarned.length + ' Badges</span><span>' + sum.unlockedRelicsCount + ' relics found</span></div></div>' +
+      '  <span class="kpi-badge" style="width:48px;height:48px">' + svg('vault') + '</span>' +
       '</div>';
   }
 
@@ -141,19 +178,19 @@
     back.innerHTML =
       '<div class="sim-modal" role="dialog" aria-modal="true">' +
       '  <div class="sim-modal-head">' +
-      '    <span class="kpi-badge" style="width:32px;height:32px">' + svg(node.id) + '</span>' +
+      '    <span class="kpi-badge" style="width:36px;height:36px">' + svg(node.id) + '</span>' +
       '    <h2>' + esc(node.title) + '</h2>' +
       '    <button type="button" class="sim-modal-close" id="mClose">×</button>' +
       '  </div>' +
       '  <div class="sim-modal-body">' +
-      '    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px">' +
+      '    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px">' +
       P.ringHtml(p.pct, node.id, p.mastered, p.started) +
       '      <div style="flex:1;min-width:180px">' +
-      '        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px"><span class="chip">' + esc(node.syllabus) + '</span><span class="chip">' + p.pct + '% Mastery</span></div>' +
-      '        <div style="font-size:13px;color:var(--muted)">Relic: <b>' + esc(node.relic.name) + '</b> — ' + esc(node.relic.fact) + '</div>' +
+      '        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span class="chip">' + esc(node.syllabus) + '</span><span class="chip">' + p.pct + '% Mastery</span></div>' +
+      '        <div style="font-size:13.5px;color:var(--muted)">Relic: <b>' + esc(node.relic.name) + '</b> — ' + esc(node.relic.fact) + '</div>' +
       '      </div>' +
       '    </div>' +
-      '    <div class="chk-list" style="margin-bottom:14px">' +
+      '    <div class="chk-list" style="margin-bottom:16px">' +
       modes.map(function (m, idx) {
         var done = p.modesVisited.indexOf(m.id) >= 0 || p.mastered;
         var href = node.id === 'learn-eq' ? node.url : 'group.html?g=' + node.id + '&m=' + m.id;
@@ -163,7 +200,7 @@
           '<span class="chk-stat">' + (done ? '✓ Explored' : 'Open →') + '</span></a>';
       }).join('') +
       '    </div>' +
-      '    <div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      '    <div style="display:flex;gap:10px;flex-wrap:wrap">' +
       '      <a class="btn primary" href="' + node.url + '">Launch Simulation →</a>' +
       '      <button type="button" class="btn" id="mQuest">' + (p.mastered ? 'Replay Mastery Quest' : '★ Take Mastery Quest (+50 XP)') + '</button>' +
       '      <a class="btn" href="map.html?focus=' + node.id + '">Locate on Map</a>' +
@@ -181,6 +218,7 @@
 
   function renderAtlas(s) {
     var host = document.getElementById('iconAtlas');
+    host.className = 'icon-atlas' + (atlasCompact ? ' compact' : '');
     host.innerHTML = '';
     var list = P.NODES.filter(function (n) {
       var p = P.getNodeProgress(n.id, s);
@@ -190,7 +228,7 @@
       return true;
     });
     if (!list.length) {
-      host.innerHTML = '<p style="grid-column:1/-1;color:var(--muted);margin:8px 0">No mastered nodes in this filter yet — tap a node to launch its Mastery Quest!</p>';
+      host.innerHTML = '<p style="grid-column:1/-1;color:var(--muted);margin:8px 0">No mastered nodes in this filter yet — tap any topic card to launch its Mastery Quest!</p>';
       return;
     }
     list.forEach(function (n) {
@@ -199,9 +237,16 @@
       btn.type = 'button';
       btn.className = 'icon-tile ' + (p.mastered ? 'mastered' : p.started ? 'started' : 'locked');
       btn.innerHTML =
+        '<div class="tile-top">' +
         P.ringHtml(p.pct, n.id, p.mastered, p.started) +
-        '<span class="tile-name">' + esc(n.short) + '</span>' +
-        '<span class="tile-meta">' + (p.mastered ? 'Mastered' : p.started ? p.pct + '% · In progress' : n.course) + '</span>';
+        '  <span class="tile-syl">' + esc(n.syllabus) + '</span>' +
+        '</div>' +
+        '<div class="tile-name">' + esc(n.title) + '</div>' +
+        '<div class="tile-desc">' + esc(n.relic.fact) + '</div>' +
+        '<div class="tile-foot">' +
+        '  <span class="tile-meta">' + (p.mastered ? '★ Mastered' : p.started ? p.pct + '% Active' : 'Not started') + '</span>' +
+        '  <span class="tile-launch">Launch →</span>' +
+        '</div>';
       btn.onclick = function () { openNodePopover(n); };
       host.appendChild(btn);
     });
@@ -225,17 +270,12 @@
     var box = document.getElementById('contList');
     box.innerHTML = picks.slice(0, 2).map(function (n) {
       var p = P.getNodeProgress(n.id, s);
-      var miniSvg = n.course === '9709'
-        ? '<svg width="88" height="58" viewBox="0 0 90 60" fill="none" stroke="var(--accent)" stroke-width="2.2"><path d="M8 52 H82 V14 Z" fill="color-mix(in srgb,var(--accent) 14%,transparent)"/><rect x="44" y="21" width="16" height="12" rx="2" transform="rotate(-27 52 27)" fill="var(--panel)"/></svg>'
-        : '<svg width="88" height="58" viewBox="0 0 90 60" fill="none" stroke="var(--accent)" stroke-width="2.2"><path d="M6 50 Q 45 -4 84 50" stroke-dasharray="4 4"/><circle cx="45" cy="23" r="4" fill="var(--accent)"/></svg>';
       return '<a class="cont-card" href="' + n.url + '">' +
-        '  <div class="cont-art">' +
+        '  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">' +
         '    <div><span class="chip">' + esc(n.syllabus) + '</span><h3 style="margin:6px 0 0;font-size:15.5px">' + esc(n.title) + '</h3></div>' +
-        miniSvg +
+        P.miniRingHtml(p.pct) +
         '  </div>' +
-        '  <div class="cont-tags">' + n.tags.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>' +
         P.segBarHtml(p.pct, 24) +
-        '  <div class="cont-foot"><span>Progress: ' + P.miniRingHtml(p.pct) + '</span><span style="color:var(--accent);font-weight:700">Continue →</span></div>' +
         '</a>';
     }).join('');
   }
@@ -275,27 +315,74 @@
 
     document.getElementById('vaultPreview').innerHTML = P.TOYS.map(function (t) {
       var ok = P.isToyUnlocked(t, s, sum);
-      return '<a href="vault.html?toy=' + t.id + '" style="text-decoration:none;color:var(--ink);padding:12px;border-radius:16px;border:1px solid var(--line);background:var(--panel2);display:flex;flex-direction:column;gap:6px">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between"><span class="kpi-badge" style="width:28px;height:28px">' + svg(ok ? 'spark' : 'vault') + '</span><span class="chip">' + (ok ? 'Unlocked' : t.reqXp + ' XP') + '</span></div>' +
-        '<b style="font-size:13px">' + esc(t.name) + '</b><small style="font-size:11.5px;color:var(--muted)">' + (ok ? 'Tap to play →' : 'Or solve bonus riddle') + '</small></a>';
+      return '<a href="vault.html?toy=' + t.id + '" style="text-decoration:none;color:var(--ink);padding:14px;border-radius:18px;border:1px solid var(--line);background:var(--panel2);display:flex;flex-direction:column;gap:7px">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between"><span class="kpi-badge" style="width:32px;height:32px">' + svg(ok ? 'spark' : 'vault') + '</span><span class="chip">' + (ok ? 'Unlocked' : t.reqXp + ' XP') + '</span></div>' +
+        '<b style="font-size:14px">' + esc(t.name) + '</b><small style="font-size:12px;color:var(--muted)">' + (ok ? 'Tap to play →' : 'Or solve bonus riddle') + '</small></a>';
     }).join('');
+  }
+
+  /* Live Ambient Wave & Vector Animation inside Hero Spotlight */
+  var heroPhase = 0, heroRaf = 0;
+  function paintHeroCanvas() {
+    var cv = document.getElementById('heroStageCv');
+    if (!cv || !cv.getContext) return;
+    var W = cv.clientWidth || 720, H = cv.clientHeight || 280, dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+    var c = cv.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, W, H);
+    // Harmonic standing wave + orbiting vector particles along right side
+    var ox = W * 0.78, oy = H * 0.5;
+    c.save();
+    for (var ring = 0; ring < 2; ring++) {
+      c.beginPath();
+      c.ellipse(ox, oy, 74 + ring * 34, 28 + ring * 14, ring === 0 ? 0.32 : -0.32, 0, Math.PI * 2);
+      c.strokeStyle = ring === 0 ? 'rgba(250,204,21,0.22)' : 'rgba(45,212,191,0.22)';
+      c.lineWidth = 1.5; c.stroke();
+      var ang = heroPhase * (ring === 0 ? 0.9 : -0.7) + ring * 1.4;
+      var rx = (74 + ring * 34) * Math.cos(ang), ry = (28 + ring * 14) * Math.sin(ang);
+      var rot = ring === 0 ? 0.32 : -0.32;
+      var px = ox + rx * Math.cos(rot) - ry * Math.sin(rot);
+      var py = oy + rx * Math.sin(rot) + ry * Math.cos(rot);
+      c.beginPath(); c.arc(px, py, 4.5, 0, Math.PI * 2);
+      c.fillStyle = ring === 0 ? '#facc15' : '#2dd4bf'; c.fill();
+    }
+    c.beginPath();
+    for (var x = W * 0.35; x <= W; x += 4) {
+      var y = H * 0.80 + Math.sin(x * 0.025 - heroPhase * 1.6) * 14 * Math.sin((x - W * 0.35) / (W * 0.65) * Math.PI);
+      if (x === W * 0.35) c.moveTo(x, y); else c.lineTo(x, y);
+    }
+    c.strokeStyle = 'rgba(250,204,21,0.18)'; c.lineWidth = 2; c.stroke();
+    c.restore();
+  }
+  function startHeroLoop() {
+    if (heroRaf || typeof requestAnimationFrame !== 'function') return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { paintHeroCanvas(); return; }
+    var last = 0;
+    function tick(now) {
+      heroRaf = 0;
+      if (last) heroPhase += (now - last) * 0.0012;
+      last = now;
+      paintHeroCanvas();
+      heroRaf = requestAnimationFrame(tick);
+    }
+    heroRaf = requestAnimationFrame(tick);
   }
 
   function paintMiniMap() {
     var cv = document.getElementById('miniMapCv');
     if (!cv || !cv.getContext) return;
-    var W = cv.clientWidth || 500, H = cv.clientHeight || 190, dpr = Math.min(2, window.devicePixelRatio || 1);
+    var W = cv.clientWidth || 380, H = cv.clientHeight || 110, dpr = Math.min(2, window.devicePixelRatio || 1);
     cv.width = W * dpr; cv.height = H * dpr;
     var c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0);
     var s = P.getState();
     c.clearRect(0, 0, W, H);
-    // Image 2 Radial Bézier Tree mini-preview
     var cx = W * 0.14, cy = H * 0.5;
     var hubs = [{ x: W * 0.42, y: H * 0.30, c: '#facc15' }, { x: W * 0.42, y: H * 0.70, c: '#2dd4bf' }];
     hubs.forEach(function (hb) {
       c.beginPath(); c.moveTo(cx, cy);
       c.bezierCurveTo(cx + W * 0.14, cy, hb.x - W * 0.12, hb.y, hb.x, hb.y);
-      c.strokeStyle = hb.c; c.globalAlpha = 0.55; c.lineWidth = 2; c.stroke();
+      c.strokeStyle = hb.c; c.globalAlpha = 0.55; c.lineWidth = 1.8; c.stroke();
     });
     var mIdx = 0, pIdx = 0;
     P.NODES.forEach(function (n) {
@@ -303,38 +390,46 @@
       var hb = n.course === '9709' ? hubs[0] : hubs[1];
       var i = n.course === '9709' ? mIdx++ : pIdx++;
       var tot = n.course === '9709' ? 7 : 10;
-      var nx = W * 0.86, ny = (n.course === '9709' ? 14 : H * 0.52) + (i / Math.max(1, tot - 1)) * (H * 0.40);
+      var nx = W * 0.86, ny = (n.course === '9709' ? 10 : H * 0.54) + (i / Math.max(1, tot - 1)) * (H * 0.36);
       c.beginPath(); c.moveTo(hb.x, hb.y);
       c.bezierCurveTo(hb.x + W * 0.2, hb.y, nx - W * 0.2, ny, nx, ny);
       c.strokeStyle = p.mastered ? '#facc15' : p.started ? '#2dd4bf' : 'rgba(148,163,184,0.22)';
       c.globalAlpha = p.mastered ? 0.88 : p.started ? 0.55 : 0.35;
-      c.lineWidth = p.mastered ? 1.8 : 1.1; c.stroke();
+      c.lineWidth = p.mastered ? 1.6 : 1; c.stroke();
       c.globalAlpha = 1;
-      c.beginPath(); c.arc(nx, ny, p.mastered ? 4.5 : 3, 0, Math.PI * 2);
+      c.beginPath(); c.arc(nx, ny, p.mastered ? 3.5 : 2.5, 0, Math.PI * 2);
       c.fillStyle = p.mastered ? '#facc15' : p.started ? '#2dd4bf' : 'rgba(148,163,184,0.5)';
       c.fill();
     });
     c.globalAlpha = 1;
-    hubs.forEach(function (hb) {
-      c.beginPath(); c.arc(hb.x, hb.y, 7, 0, Math.PI * 2); c.fillStyle = hb.c; c.fill();
-    });
-    var og = c.createRadialGradient(cx, cy, 2, cx, cy, 22);
-    og.addColorStop(0, '#5eead4'); og.addColorStop(0.5, 'rgba(45,212,191,.35)'); og.addColorStop(1, 'transparent');
-    c.fillStyle = og; c.beginPath(); c.arc(cx, cy, 22, 0, Math.PI * 2); c.fill();
+    hubs.forEach(function (hb) { c.beginPath(); c.arc(hb.x, hb.y, 5, 0, Math.PI * 2); c.fillStyle = hb.c; c.fill(); });
   }
 
   function renderAll() {
     var s = P.getState(), sum = P.getSummary(s);
-    renderKpis(s, sum);
+    renderHeroAndTele(s, sum);
     renderAtlas(s);
     renderContinue(s);
     renderHeatmapAndBars(s, sum);
     renderBadgesAndVault(s, sum);
     paintMiniMap();
-    var sr = document.getElementById('sideRankName'), sx = document.getElementById('sideXpNum');
-    if (sr) sr.textContent = sum.rank.name;
-    if (sx) sx.textContent = sum.xp + ' XP';
+    startHeroLoop();
   }
+
+  document.querySelectorAll('#wsTabs .ws-tab').forEach(function (tab) {
+    tab.onclick = function () {
+      activeWorkspace = tab.getAttribute('data-ws');
+      document.querySelectorAll('#wsTabs .ws-tab').forEach(function (t) {
+        var on = t === tab;
+        t.classList.toggle('on', on);
+        t.setAttribute('aria-selected', String(on));
+      });
+      ['atlas', 'analytics', 'vault'].forEach(function (id) {
+        document.getElementById('ws-' + id).hidden = (id !== activeWorkspace);
+      });
+      if (activeWorkspace === 'atlas') paintMiniMap();
+    };
+  });
 
   document.querySelectorAll('#atlasFilters button').forEach(function (b) {
     b.onclick = function () {
@@ -345,8 +440,14 @@
     };
   });
 
+  document.getElementById('atlasDensityBtn').onclick = function () {
+    atlasCompact = !atlasCompact;
+    this.textContent = atlasCompact ? '▤ Large Cards' : '⊞ Compact';
+    renderAtlas(P.getState());
+  };
+
   window.addEventListener('sim-progress-change', renderAll);
-  window.addEventListener('resize', paintMiniMap);
+  window.addEventListener('resize', function () { paintMiniMap(); paintHeroCanvas(); });
   renderAll();
 })();
 </script>

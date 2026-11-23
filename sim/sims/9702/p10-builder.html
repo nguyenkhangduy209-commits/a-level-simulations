@@ -9,6 +9,7 @@
 <script src="../../core/util.js"></script>
 <script src="../../core/ui.js"></script>
 <script src="../../core/view.js"></script>
+<script src="../../core/scene.js"></script>
 <script src="../../engine/phys-circuits.js"></script>
 <script src="../../engine/phys-circuit-builder.js"></script>
 <style>
@@ -24,6 +25,42 @@
   .cb-tbl td.txt { white-space: nowrap; }
   .cb-tbl tr.sel td { background: color-mix(in srgb, var(--accent) 12%, transparent); }
   .cb-tbl tr.bad td:first-child { color: var(--warn); }
+
+  /* Tinkercad workbench controls & floating inspector */
+  .tk-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel2); color: var(--ink); font: 700 12px var(--sans); cursor: pointer; transition: .12s; }
+  .tk-btn:hover { border-color: var(--accent); }
+  .tk-btn.sim-on { background: linear-gradient(135deg, #22c55e, #10b981); color: #052e16; border-color: transparent; box-shadow: 0 4px 16px rgba(34,197,94,.28); }
+  .tk-btn.sim-off { background: color-mix(in srgb, var(--panel2) 90%, transparent); color: var(--ink); }
+  .tk-btn.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--panel2)); color: var(--accent); }
+  .tk-swatches { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel2); }
+  .tk-swatch { width: 16px; height: 16px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; transition: transform .12s; }
+  .tk-swatch:hover { transform: scale(1.15); }
+  .tk-swatch.on { border-color: #fff; box-shadow: 0 0 0 2px var(--accent); }
+  .tk-dmm-modes { display: inline-flex; border-radius: 999px; overflow: hidden; border: 1px solid var(--line); background: var(--panel2); }
+  .tk-dmm-modes button { border: 0; background: transparent; color: var(--muted); font: 800 11.5px var(--sans); padding: 5px 10px; cursor: pointer; }
+  .tk-dmm-modes button.on { background: #eab308; color: #1a1204; }
+
+  .tk-inspector {
+    position: absolute; top: 64px; right: 14px; z-index: 16; width: 256px; max-width: calc(100% - 28px);
+    padding: 12px 13px; border-radius: 16px; border: 1.5px solid color-mix(in srgb, var(--accent) 40%, var(--line));
+    background: color-mix(in srgb, var(--panel) 94%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 14px 36px rgba(0,0,0,.38); color: var(--ink); font-family: var(--sans);
+  }
+  .tk-inspector[hidden] { display: none; }
+  .tk-ins-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 9px; }
+  .tk-ins-title { font: 800 13.5px var(--sans); }
+  .tk-ins-sub { font-size: 11px; color: var(--muted); }
+  .tk-ins-row { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
+  .tk-ins-row input, .tk-ins-row select {
+    padding: 6px 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2); color: var(--ink); font: 700 13px var(--sans);
+  }
+  .tk-bands { display: flex; align-items: center; gap: 5px; margin-top: 8px; padding: 6px 9px; border-radius: 10px; background: color-mix(in srgb, var(--panel2) 80%, transparent); border: 1px solid var(--line); font-size: 11px; color: var(--muted); }
+  .tk-band-dot { width: 10px; height: 18px; border-radius: 3px; border: 1px solid rgba(255,255,255,.22); flex-shrink: 0; }
+  .tk-ins-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tk-ins-actions button { flex: 1 1 auto; min-height: 30px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel2); color: var(--ink); font: 700 11.5px var(--sans); cursor: pointer; padding: 4px 8px; }
+  .tk-ins-actions button:hover { border-color: var(--accent); }
+  .tk-ins-actions button.is-x { background: linear-gradient(135deg, #facc15, #2dd4bf); color: #05110f; border-color: transparent; font-weight: 800; }
+  .tk-ins-actions button.danger:hover { border-color: var(--warn); color: var(--warn); }
 </style>
 </head>
 <body>
@@ -45,8 +82,72 @@
   var pal = ui.h('div', { class: 'cb-pal', role: 'toolbar', 'aria-label': 'Circuit parts' });
   sceneCard.appendChild(pal);
   var viewRow = ui.h('div', { class: 'cb-row' }); sceneCard.appendChild(viewRow);
+  var simRunning = true, showBreadboard = true, dmmOn = false, dmmMode = 'V', wireCol = '#ef4444';
+  var WIRE_COLORS = [
+    { name: 'Red', hex: '#ef4444' },
+    { name: 'Black', hex: '#475569' },
+    { name: 'Green', hex: '#22c55e' },
+    { name: 'Yellow', hex: '#eab308' },
+    { name: 'Blue', hex: '#3b82f6' },
+    { name: 'Orange', hex: '#f97316' },
+    { name: 'Purple', hex: '#a855f7' }
+  ];
+  var simBtn = ui.h('button', { type: 'button', class: 'tk-btn sim-on', text: '⏹ Stop Simulation',
+    title: 'Toggle live Tinkercad circuit simulation & current flow animation',
+    onclick: function () {
+      simRunning = !simRunning;
+      simBtn.className = 'tk-btn ' + (simRunning ? 'sim-on' : 'sim-off');
+      simBtn.textContent = simRunning ? '⏹ Stop Simulation' : '▶ Start Simulation';
+      if (simRunning) startAnim();
+      drawScene();
+    }
+  });
+  var bbBtn = ui.h('button', { type: 'button', class: 'tk-btn on', text: '🟩 Breadboard',
+    title: 'Show solderless breadboard rails & green node connectivity on hover',
+    onclick: function () { showBreadboard = !showBreadboard; bbBtn.classList.toggle('on', showBreadboard); drawScene(); }
+  });
+  var dmmBtn = ui.h('button', { type: 'button', class: 'tk-btn', text: '📟 Multimeter Probe',
+    title: 'Place draggable Digital Multimeter with + / − probes on the circuit',
+    onclick: function () { dmmOn = !dmmOn; dmmBtn.classList.toggle('on', dmmOn); dmmModeWrap.hidden = !dmmOn; drawScene(); }
+  });
+  var dmmModeWrap = ui.h('div', { class: 'tk-dmm-modes', hidden: true });
+  ['V', 'A', 'Ω'].forEach(function (md) {
+    var b = ui.h('button', { type: 'button', text: md, class: md === dmmMode ? 'on' : '',
+      onclick: function () {
+        dmmMode = md;
+        Array.prototype.forEach.call(dmmModeWrap.children, function (c, idx) { c.classList.toggle('on', ['V', 'A', 'Ω'][idx] === dmmMode); });
+        drawScene();
+      }
+    });
+    dmmModeWrap.appendChild(b);
+  });
+  var swWrap = ui.h('div', { class: 'tk-swatches', title: 'Wire color' });
+  swWrap.appendChild(ui.h('span', { text: 'Wire:', style: 'font:700 11px var(--sans);color:var(--muted);margin-right:2px' }));
+  WIRE_COLORS.forEach(function (wc) {
+    var sw = ui.h('button', { type: 'button', class: 'tk-swatch' + (wc.hex === wireCol ? ' on' : ''), title: wc.name + ' wire',
+      style: 'background:' + wc.hex,
+      onclick: function () {
+        wireCol = wc.hex;
+        Array.prototype.forEach.call(swWrap.querySelectorAll('.tk-swatch'), function (el) { el.classList.remove('on'); });
+        sw.classList.add('on');
+        if (sel && sel.t === 'wire') { pushUndo(); sel.col = wireCol; update(); }
+        renderInspector();
+      }
+    });
+    swWrap.appendChild(sw);
+  });
+  viewRow.appendChild(simBtn);
+  viewRow.appendChild(bbBtn);
+  viewRow.appendChild(dmmBtn);
+  viewRow.appendChild(dmmModeWrap);
+  viewRow.appendChild(swWrap);
   var showIV = ui.toggle(viewRow, { label: 'Show I and V beside each part', value: true }, function () { drawScene(); });
   var freeMode = ui.toggle(viewRow, { label: 'Free draw (anywhere, not locked to grid)', value: true }, function () { drawScene(); });
+
+  /* Floating Tinkercad Component Inspector Card inside the stage */
+  var stageHost = cv.parentElement || sceneCard;
+  var inspector = ui.h('div', { class: 'tk-inspector', id: 'cbInspector', hidden: true });
+  stageHost.appendChild(inspector);
 
   var presetCard = pg.card('right', 'Ready-made circuits');
   var envCard = pg.card('right', 'Thermistor and LDR');
@@ -122,10 +223,12 @@
   function update() {
     res = CB.analyse(parts, env());
     if (sel && parts.indexOf(sel) < 0) sel = null;
+    if (unknownPartIdx >= parts.length) unknownPartIdx = -1;
     var hasT = parts.some(function (p) { return p.t === 'therm'; }), hasL = parts.some(function (p) { return p.t === 'ldr'; });
     prm.show('T', hasT); prm.show('L', hasL);
     envNote.innerHTML = hasT || hasL ? 'Resistance from an illustrative model: it falls as the temperature / light intensity rises.' : 'Add a thermistor or LDR to the circuit to control it from here.';
-    drawScene(); table(); readout(); syncActions();
+    drawScene(); table(); readout(); syncActions(); renderInspector();
+    if (simRunning && res && !res.fatal && res.anyCurrent) startAnim();
     ui.writeHash({ c: CB.encode(parts), T: prm.values.T, L: prm.values.L });
   }
 
@@ -232,7 +335,117 @@
 
   /* ---------- placing parts ---------- */
   var tool = null, pend = null, preview = null;
-  function put(t, e) { var i = partAt(e), np = P(t, e.x, e.y, e.d); if (i >= 0) parts[i] = np; else parts.push(np); return np; }
+  var probePos = [3, 1], probeNeg = [7, 4], hoverDot = null, animPhase = 0, animRaf = 0, unknownPartIdx = -1;
+  function escHtml(s) { return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function renderInspector() {
+    if (!inspector) return;
+    if (!sel || parts.indexOf(sel) < 0) { inspector.hidden = true; return; }
+    var idx = parts.indexOf(sel), p = sel, r = res && res.parts ? res.parts[idx] : null;
+    var k = editKey(p), name = nm(idx) || (p.t === 'wire' ? 'Wire' : TY[p.t].label);
+    var isX = unknownPartIdx === idx;
+    var html = '<div class="tk-ins-head"><div><div class="tk-ins-title">' + escHtml(name) + ' · ' + escHtml(TY[p.t].label) + '</div>' +
+      (r && !res.fatal ? '<div class="tk-ins-sub">I = ' + escHtml(eng(Math.abs(r.I), 'A')) + ' · V = ' + escHtml(eng(Math.abs(TY[p.t].polar && p.t !== 'diode' ? r.Vt : r.V), 'V')) + ' · P = ' + escHtml(eng(r.P || 0, 'W')) + '</div>' : '<div class="tk-ins-sub">Edit properties</div>') +
+      '</div><button type="button" id="tkInsClose" style="border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px" aria-label="Close inspector">×</button></div>';
+
+    if (k === 'R' || k === 'E' || k === 'max') {
+      var val = p.v[k];
+      var unitList = k === 'R' ? [{ label: 'mΩ', f: 0.001 }, { label: 'Ω', f: 1 }, { label: 'kΩ', f: 1000 }, { label: 'MΩ', f: 1e6 }]
+        : k === 'E' ? [{ label: 'mV', f: 0.001 }, { label: 'V', f: 1 }]
+        : [{ label: 'mA', f: 0.001 }, { label: 'A', f: 1 }];
+      var curScale = 1;
+      if (k === 'R') {
+        if (val >= 1e6) curScale = 1e6;
+        else if (val >= 1000) curScale = 1000;
+        else if (val > 0 && val < 1) curScale = 0.001;
+      }
+      var dispVal = Number((val / curScale).toPrecision(4));
+      html += '<div class="tk-ins-row"><label style="font-size:11.5px;color:var(--muted);min-width:46px">' + (k === 'R' ? 'Res.' : k === 'E' ? 'e.m.f.' : 'Max') + '</label>' +
+        '<input type="number" step="any" min="0" id="tkValIn" value="' + escHtml(dispVal) + '" style="flex:1;min-width:0">' +
+        '<select id="tkUnitSel">' + unitList.map(function (u) { return '<option value="' + u.f + '"' + (u.f === curScale ? ' selected' : '') + '>' + u.label + '</option>'; }).join('') + '</select></div>';
+    }
+    if (p.t === 'res') {
+      var bands = CB.resistorBands(p.v.R);
+      html += '<div class="tk-bands"><span style="flex:1">4-Band Code: <b>' + escHtml(bands.map(function (b) { return b.name[0] + b.name.slice(1, 3); }).join('·')) + '</b></span>' +
+        bands.map(function (b) { return '<span class="tk-band-dot" title="' + escHtml(b.name) + '" style="background:' + b.hex + '"></span>'; }).join('') + '</div>';
+    }
+    if (p.t === 'cell' || p.t === 'battery') {
+      html += '<div class="tk-ins-row"><label style="font-size:11.5px;color:var(--muted);min-width:46px">Int. r</label>' +
+        '<input type="number" step="0.1" min="0" id="tkIntRIn" value="' + escHtml(p.v.r || 0) + '" style="flex:1;min-width:0"><span style="font-size:11.5px;color:var(--muted)">Ω</span></div>';
+    }
+    if (p.t === 'wire') {
+      html += '<div class="tk-ins-row" style="justify-content:space-between"><span style="font-size:11.5px;color:var(--muted)">Wire Color</span><div style="display:flex;gap:5px">' +
+        WIRE_COLORS.map(function (wc) {
+          var on = (p.col || wireCol) === wc.hex;
+          return '<button type="button" class="tk-swatch' + (on ? ' on' : '') + '" data-wcol="' + wc.hex + '" style="background:' + wc.hex + '" title="' + wc.name + '"></button>';
+        }).join('') + '</div></div>';
+    }
+    html += '<div class="tk-ins-actions">';
+    if (k === 'R' || k === 'E') {
+      html += '<button type="button" id="tkSetXBtn" class="' + (isX ? 'is-x' : '') + '">' + (isX ? 'x = Unknown ✓' : 'Set as x') + '</button>';
+    }
+    if (TY[p.t].polar) html += '<button type="button" id="tkRevBtn">⇄ Reverse</button>';
+    if (p.t === 'switch') html += '<button type="button" id="tkTogBtn">' + (p.v.on > 0 ? '⏻ Open' : '⏻ Close') + '</button>';
+    html += '<button type="button" id="tkDelBtn" class="danger">🗑 Delete</button></div>';
+
+    inspector.innerHTML = html;
+    inspector.hidden = false;
+    inspector.querySelector('#tkInsClose').onclick = function () { sel = null; syncActions(); renderInspector(); drawScene(); table(); };
+    var valIn = inspector.querySelector('#tkValIn'), unitSel = inspector.querySelector('#tkUnitSel');
+    if (valIn && unitSel) {
+      var applyVal = function () {
+        var n = Number(valIn.value) * Number(unitSel.value);
+        if (isFinite(n) && n >= 0) { pushUndo(); p.v[k] = n; update(); }
+      };
+      valIn.addEventListener('change', applyVal);
+      unitSel.addEventListener('change', applyVal);
+    }
+    var intRIn = inspector.querySelector('#tkIntRIn');
+    if (intRIn) {
+      intRIn.addEventListener('change', function () {
+        var n = Math.max(0, Number(intRIn.value) || 0);
+        pushUndo(); p.v.r = n; update();
+      });
+    }
+    Array.prototype.forEach.call(inspector.querySelectorAll('[data-wcol]'), function (btn) {
+      btn.onclick = function () { pushUndo(); p.col = btn.getAttribute('data-wcol'); wireCol = p.col; update(); };
+    });
+    var setXBtn = inspector.querySelector('#tkSetXBtn');
+    if (setXBtn) {
+      setXBtn.onclick = function () {
+        if (unknownPartIdx === idx) {
+          unknownPartIdx = -1;
+          if (ui.clearMarkedX) ui.clearMarkedX();
+        } else {
+          unknownPartIdx = idx;
+          if (ui.markAsX) ui.markAsX('part_' + idx, { label: (nm(idx) || TY[p.t].label) + ' (' + (k === 'R' ? 'Resistance' : 'e.m.f.') + ')' });
+        }
+        renderInspector(); drawScene();
+      };
+    }
+    var revBtn = inspector.querySelector('#tkRevBtn');
+    if (revBtn) revBtn.onclick = function () { pushUndo(); p.rev = !p.rev; update(); };
+    var togBtn = inspector.querySelector('#tkTogBtn');
+    if (togBtn) togBtn.onclick = function () { pushUndo(); p.v.on = p.v.on > 0 ? 0 : 1; update(); };
+    inspector.querySelector('#tkDelBtn').onclick = delSel;
+  }
+  if (inspector && inspector.addEventListener) {
+    ['pointerdown', 'mousedown', 'click'].forEach(function (ev) { inspector.addEventListener(ev, function (e) { e.stopPropagation(); }); });
+  }
+  function startAnim() {
+    if (animRaf || !simRunning || typeof requestAnimationFrame !== 'function') return;
+    if (SIM.anim && SIM.anim.reducedMotion && SIM.anim.reducedMotion()) return;
+    var last = 0;
+    function tick(now) {
+      animRaf = 0;
+      if (!simRunning) return;
+      if (last) animPhase = (animPhase + (now - last) * 0.001) % 1000;
+      last = now;
+      if (res && !res.fatal && res.anyCurrent && (!SIM.scene || SIM.scene.real())) drawScene();
+      if (simRunning) animRaf = requestAnimationFrame(tick);
+    }
+    animRaf = requestAnimationFrame(tick);
+  }
+  function put(t, e) { var i = partAt(e), np = P(t, e.x, e.y, e.d); if (t === 'wire') np.col = wireCol; if (i >= 0) parts[i] = np; else parts.push(np); return np; }
   /** place along the dots from A to B: wires everywhere free; a part goes on the middle edge */
   function placePath(t, edges) {
     if (!edges.length) return null;
@@ -264,6 +477,7 @@
     pushUndo();
     splitWiresAt(A); splitWiresAt(B);
     var np = CB.makeFree(t, A[0], A[1], B[0], B[1]);
+    if (t === 'wire') np.col = wireCol;
     parts.push(np);
     return np;
   }
@@ -307,11 +521,19 @@
       drawScene(); return;
     }
     if (downAt && Math.hypot(p[0] - downAt[0], p[1] - downAt[1]) >= 6) downMoved = true;
+    // Track hovered breadboard / grid node for Tinkercad green connectivity rings
+    if (!pend && showBreadboard) {
+      var nd = freeMode.get() ? freePoint(p[0], p[1]) : nearestDot(p[0], p[1]);
+      var q = G(nd[0], nd[1]);
+      var nextDot = Math.hypot(q[0] - p[0], q[1] - p[1]) < 16 ? nd : null;
+      var changed = (nextDot === null) !== (hoverDot === null) || (nextDot && hoverDot && (nextDot[0] !== hoverDot[0] || nextDot[1] !== hoverDot[1]));
+      if (changed) { hoverDot = nextDot; drawScene(); }
+    }
   });
   function up(e) {
     var p = pos(e);
     if (pend) { finishPend(p[0], p[1]); return; }
-    if (downAt && !downMoved && !downHit && sel) { sel = null; syncActions(); drawScene(); table(); }
+    if (downAt && !downMoved && !downHit && sel) { sel = null; syncActions(); renderInspector(); drawScene(); table(); }
     downAt = null;
   }
   cv.addEventListener('pointerup', up);
@@ -326,6 +548,11 @@
   function hr() { return U.clamp(vp.scale * 0.36, 12, 22); }
   function handles() {
     var r = hr(), hs = parts.map(function (p, i) { var m = mid(p); return { id: 'p' + i, i: i, x: m[0], y: m[1], r: r, hidden: true }; });
+    if (dmmOn) {
+      var qPos = G(probePos[0], probePos[1]), qNeg = G(probeNeg[0], probeNeg[1]);
+      hs.unshift({ id: 'probeNeg', probe: 'neg', x: qNeg[0], y: qNeg[1], r: 15, color: '#334155', label: '−', hint: 'Drag Black (−) Multimeter probe' });
+      hs.unshift({ id: 'probePos', probe: 'pos', x: qPos[0], y: qPos[1], r: 15, color: '#ef4444', label: '+', hint: 'Drag Red (+) Multimeter probe' });
+    }
     if (sel && freeMode.get()) {
       var si = parts.indexOf(sel);
       if (si >= 0) {
@@ -372,8 +599,24 @@
       if (p.t === 'switch') { pushUndo(); p.v.on = p.v.on > 0 ? 0 : 1; }
       sel = p; update();
     },
-    onDrag: function (h, x, y) { if (h.end !== undefined) { moveEnd(h, x, y, false); return; } if (downAt) wireDrag(downAt[0], downAt[1], x, y, false); },
-    onDrop: function (h, x, y) { if (h.end !== undefined) { moveEnd(h, x, y, true); return; } if (downAt) wireDrag(downAt[0], downAt[1], x, y, true); },
+    onDrag: function (h, x, y) {
+      if (h.probe) {
+        var pt = freeMode.get() ? freePoint(x, y) : nearestDot(x, y);
+        if (h.probe === 'pos') probePos = pt; else probeNeg = pt;
+        drawScene(); return;
+      }
+      if (h.end !== undefined) { moveEnd(h, x, y, false); return; }
+      if (downAt) wireDrag(downAt[0], downAt[1], x, y, false);
+    },
+    onDrop: function (h, x, y) {
+      if (h.probe) {
+        var pt = freeMode.get() ? freePoint(x, y) : nearestDot(x, y);
+        if (h.probe === 'pos') probePos = pt; else probeNeg = pt;
+        drawScene(); return;
+      }
+      if (h.end !== undefined) { moveEnd(h, x, y, true); return; }
+      if (downAt) wireDrag(downAt[0], downAt[1], x, y, true);
+    },
     canDraw: function () { return !tool; },
     onDraw: function (x0, y0, x, y) { wireDrag(x0, y0, x, y, false); },
     onDrawEnd: function (x0, y0, x, y) { wireDrag(x0, y0, x, y, true); },
@@ -484,56 +727,255 @@
         if (o.blown) { c.strokeStyle = col.warn; ln(10, 12, 17, 12); ln(23, 12, 30, 12); } else ln(10, 12, 30, 12); break;
     }
   }
+  function rrect(c, x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2));
+    c.beginPath();
+    if (c.roundRect) c.roundRect(x, y, w, h, r);
+    else c.rect(x, y, w, h);
+  }
+  function drawRealComponent(c, p, L, col, o, r) {
+    var s = L / 40, u = vp.scale;
+    // Axial silver leads
+    c.strokeStyle = '#94a3b8'; c.lineWidth = Math.max(2, s * 1.4);
+    c.beginPath(); c.moveTo(-L / 2, 0); c.lineTo(L / 2, 0); c.stroke();
+    switch (p.t) {
+      case 'cell':
+      case 'battery': {
+        var bw = p.t === 'battery' ? 28 * s : 22 * s, bh = p.t === 'battery' ? 16 * s : 12 * s;
+        rrect(c, -bw / 2 - 2 * s, -bh * 0.25, 3 * s, bh * 0.5, 1.5); c.fillStyle = '#e2e8f0'; c.fill(); // + nub
+        rrect(c, -bw / 2, -bh / 2, bw, bh, 3 * s); c.fillStyle = '#1e293b'; c.fill();
+        rrect(c, -bw / 2, -bh / 2, bw * 0.34, bh, 3 * s); c.fillStyle = '#d97706'; c.fill(); // copper top
+        rrect(c, -bw / 2, -bh / 2, bw, bh, 3 * s); c.strokeStyle = 'rgba(255,255,255,.28)'; c.lineWidth = 1.2; c.stroke();
+        c.fillStyle = '#fef3c7'; c.font = '800 ' + Math.max(8, 5.5 * s) + 'px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.fillText('+', -bw * 0.32, 0);
+        c.fillStyle = '#94a3b8'; c.fillText('−', bw * 0.32, 0);
+        break;
+      }
+      case 'res': {
+        var rw = 20 * s, rh = 8.4 * s, bands = CB.resistorBands(p.v.R);
+        rrect(c, -rw / 2, -rh / 2, rw, rh, rh * 0.38);
+        c.fillStyle = '#e7d2ad'; c.fill();
+        c.strokeStyle = 'rgba(120,90,45,.65)'; c.lineWidth = 1.1; c.stroke();
+        var bx = [-rw * 0.28, -rw * 0.08, rw * 0.10, rw * 0.30];
+        bands.forEach(function (bd, bi) {
+          c.fillStyle = bd.hex;
+          c.fillRect(bx[bi] - 1.3 * s, -rh / 2 + 0.6, 2.6 * s, rh - 1.2);
+        });
+        break;
+      }
+      case 'var': {
+        var vw = 18 * s, vh = 14 * s;
+        rrect(c, -vw / 2, -vh / 2, vw, vh, 3 * s);
+        c.fillStyle = '#1d4ed8'; c.fill(); c.strokeStyle = '#93c5fd'; c.lineWidth = 1.2; c.stroke();
+        c.beginPath(); c.arc(0, 0, 4.4 * s, 0, 7); c.fillStyle = '#e2e8f0'; c.fill();
+        c.strokeStyle = '#1e293b'; c.lineWidth = 1.8; c.beginPath(); c.moveTo(-2.5 * s, 2.5 * s); c.lineTo(2.5 * s, -2.5 * s); c.stroke();
+        break;
+      }
+      case 'lamp': {
+        var br = 8.5 * s, glowAmt = o.glow || 0;
+        if (simRunning && glowAmt > 0) {
+          c.save();
+          var gradG = c.createRadialGradient ? c.createRadialGradient(0, 0, br * 0.2, 0, 0, br * (2.2 + glowAmt * 1.4)) : null;
+          if (gradG && gradG.addColorStop) {
+            gradG.addColorStop(0, 'rgba(253,224,71,' + (0.35 + glowAmt * 0.45) + ')');
+            gradG.addColorStop(0.55, 'rgba(245,158,11,' + (glowAmt * 0.22) + ')');
+            gradG.addColorStop(1, 'rgba(245,158,11,0)');
+            c.fillStyle = gradG;
+          } else { c.globalAlpha = 0.35; c.fillStyle = '#fde047'; }
+          c.beginPath(); c.arc(0, 0, br * 3.4, 0, 7); c.fill(); c.restore();
+        }
+        c.beginPath(); c.arc(0, 0, br, 0, 7);
+        c.fillStyle = simRunning && glowAmt > 0 ? 'rgba(254,240,138,' + (0.35 + glowAmt * 0.55) + ')' : 'rgba(148,163,184,.25)';
+        c.fill(); c.strokeStyle = '#cbd5e1'; c.lineWidth = 1.6; c.stroke();
+        c.beginPath(); c.arc(0, 0, br * 0.42, 0, 7); c.strokeStyle = simRunning && glowAmt > 0 ? '#f59e0b' : '#64748b'; c.lineWidth = 1.5; c.stroke();
+        // Tinkercad overload warning if dissipated power exceeds 25 W
+        if (simRunning && r && r.P > 25) {
+          c.fillStyle = '#ef4444'; c.beginPath(); c.arc(br * 0.9, -br * 0.9, 4.5 * s, 0, 7); c.fill();
+          c.fillStyle = '#fff'; c.font = '900 ' + Math.max(8, 5 * s) + 'px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.fillText('!', br * 0.9, -br * 0.9);
+        }
+        break;
+      }
+      case 'switch': {
+        rrect(c, -11 * s, -5 * s, 22 * s, 10 * s, 3 * s);
+        c.fillStyle = '#334155'; c.fill(); c.strokeStyle = '#94a3b8'; c.lineWidth = 1.2; c.stroke();
+        var on = p.v.on > 0;
+        rrect(c, on ? 1 * s : -9 * s, -3.5 * s, 8 * s, 7 * s, 2 * s);
+        c.fillStyle = on ? '#22c55e' : '#ef4444'; c.fill();
+        break;
+      }
+      case 'amm':
+      case 'volt': {
+        var mw = 21 * s, mh = 13 * s;
+        rrect(c, -mw / 2, -mh / 2, mw, mh, 3 * s);
+        c.fillStyle = p.t === 'amm' ? '#0f172a' : '#1e1b4b'; c.fill();
+        c.strokeStyle = p.t === 'amm' ? '#38bdf8' : '#a78bfa'; c.lineWidth = 1.6; c.stroke();
+        break;
+      }
+      case 'diode': {
+        var dw = 15 * s, dh = 8 * s;
+        rrect(c, -dw / 2, -dh / 2, dw, dh, 2 * s);
+        c.fillStyle = '#0f172a'; c.fill(); c.strokeStyle = '#475569'; c.lineWidth = 1.2; c.stroke();
+        c.fillStyle = '#cbd5e1'; c.fillRect(dw * 0.2, -dh / 2 + 0.5, 3 * s, dh - 1);
+        break;
+      }
+      case 'fuse': {
+        var fw = 18 * s, fh = 7 * s;
+        rrect(c, -fw / 2, -fh / 2, fw, fh, 2 * s);
+        c.fillStyle = 'rgba(226,232,240,.18)'; c.fill(); c.strokeStyle = '#cbd5e1'; c.lineWidth = 1.2; c.stroke();
+        c.fillStyle = '#94a3b8'; c.fillRect(-fw / 2, -fh / 2, 3 * s, fh); c.fillRect(fw / 2 - 3 * s, -fh / 2, 3 * s, fh);
+        c.strokeStyle = o.blown ? '#ef4444' : '#fbbf24'; c.lineWidth = 1.4;
+        c.beginPath();
+        if (o.blown) { c.moveTo(-fw * 0.3, 0); c.lineTo(-2 * s, -2 * s); c.moveTo(2 * s, 2 * s); c.lineTo(fw * 0.3, 0); }
+        else { c.moveTo(-fw * 0.35, 0); c.lineTo(fw * 0.35, 0); }
+        c.stroke();
+        break;
+      }
+      case 'therm': {
+        c.beginPath(); c.arc(0, 0, 6.5 * s, 0, 7);
+        c.fillStyle = '#b45309'; c.fill(); c.strokeStyle = '#fcd34d'; c.lineWidth = 1.3; c.stroke();
+        break;
+      }
+      case 'ldr': {
+        c.beginPath(); c.arc(0, 0, 7.2 * s, 0, 7);
+        c.fillStyle = '#d97706'; c.fill(); c.strokeStyle = '#fef3c7'; c.lineWidth = 1.4; c.stroke();
+        c.strokeStyle = '#78350f'; c.lineWidth = 1.2;
+        c.beginPath(); c.moveTo(-4 * s, -2 * s); c.lineTo(4 * s, -2 * s); c.lineTo(-4 * s, 0); c.lineTo(4 * s, 2 * s); c.stroke();
+        break;
+      }
+    }
+  }
   function drawScene() {
     if (!res) return;
     var col = ui.colors(), c, Ln = col['object-line'];
+    var real = !SIM.scene || SIM.scene.real();
     vp.fit(-0.65, W - 1 + 0.65, -(H - 1) - 0.62, 1.3);
     c = vp.begin();
     var u = vp.scale, bad = problemSet(), Imax = 0, Plamp = 0, kirch = activeMethod() === 'kirchhoff';
     parts.forEach(function (p, i) { var r = res.parts[i]; if (!res.fatal) Imax = Math.max(Imax, Math.abs(r.I)); if (p.t === 'lamp') Plamp = Math.max(Plamp, r.P || 0); });
-    // grid dots
-    c.fillStyle = col.muted; c.globalAlpha = 0.5;
-    for (var gy = 0; gy < H; gy++) for (var gx = 0; gx < W; gx++) { var q = G(gx, gy); c.beginPath(); c.arc(q[0], q[1], Math.max(1.6, u * 0.035), 0, 7); c.fill(); }
+
+    // Tinkercad Workbench Solderless Breadboard Backing in Real-life mode
+    if (real) {
+      var bbTL = G(-0.38, -0.35), bbBR = G(W - 1 + 0.38, H - 1 + 0.35);
+      c.save();
+      c.fillStyle = SIM.scene.dark() ? '#0c131d' : '#f1ede4';
+      rrect(c, bbTL[0] - 12, bbTL[1] - 12, bbBR[0] - bbTL[0] + 24, bbBR[1] - bbTL[1] + 24, 16);
+      c.fill();
+      if (showBreadboard) {
+        c.fillStyle = SIM.scene.dark() ? 'rgba(226,232,240,.05)' : 'rgba(255,255,255,.78)';
+        c.strokeStyle = SIM.scene.dark() ? 'rgba(148,163,184,.2)' : 'rgba(100,116,139,.26)';
+        c.lineWidth = 1.5;
+        rrect(c, bbTL[0], bbTL[1], bbBR[0] - bbTL[0], bbBR[1] - bbTL[1], 10);
+        c.fill(); c.stroke();
+        // Top (+) Red power rail & Bottom (-) Blue power rail stripes (Tinkercad signature)
+        var yTopRail = G(0, 0)[1] - u * 0.22, yBotRail = G(0, H - 1)[1] + u * 0.22;
+        c.strokeStyle = 'rgba(239,68,68,.55)'; c.lineWidth = 2;
+        c.beginPath(); c.moveTo(bbTL[0] + 18, yTopRail); c.lineTo(bbBR[0] - 18, yTopRail); c.stroke();
+        c.strokeStyle = 'rgba(59,130,246,.55)';
+        c.beginPath(); c.moveTo(bbTL[0] + 18, yBotRail); c.lineTo(bbBR[0] - 18, yBotRail); c.stroke();
+        // Central breadboard IC groove
+        var yMid = (G(0, 2)[1] + G(0, 3)[1]) / 2;
+        c.fillStyle = SIM.scene.dark() ? 'rgba(0,0,0,.38)' : 'rgba(148,163,184,.22)';
+        c.fillRect(bbTL[0] + 8, yMid - 4, bbBR[0] - bbTL[0] - 16, 8);
+      }
+      c.restore();
+    }
+
+    // Grid holes + Tinkercad Green Connected-Net Highlight on hover
+    var hoverNet = hoverDot && res.netOf ? res.netOf[CB.dkey(hoverDot[0], hoverDot[1])] : undefined;
+    for (var gy = 0; gy < H; gy++) {
+      for (var gx = 0; gx < W; gx++) {
+        var q = G(gx, gy), dotNet = res.netOf ? res.netOf[CB.dkey(gx, gy)] : undefined;
+        var isConnectedGreen = showBreadboard && hoverNet !== undefined && dotNet === hoverNet;
+        if (isConnectedGreen) {
+          c.save();
+          c.fillStyle = 'rgba(34,197,94,.28)'; c.beginPath(); c.arc(q[0], q[1], Math.max(6, u * 0.14), 0, 7); c.fill();
+          c.strokeStyle = '#22c55e'; c.lineWidth = 2; c.stroke();
+          c.restore();
+        }
+        c.fillStyle = isConnectedGreen ? '#4ade80' : col.muted;
+        c.globalAlpha = real && showBreadboard ? 0.72 : 0.5;
+        c.beginPath(); c.arc(q[0], q[1], Math.max(1.8, u * (real && showBreadboard ? 0.048 : 0.035)), 0, 7); c.fill();
+      }
+    }
     c.globalAlpha = 1;
-    // parts
+
+    // parts & insulated color wires
     parts.forEach(function (p, i) {
       var e = CB.ends(p), A = G(e[0][0], e[0][1]), B = G(e[1][0], e[1][1]), L = Math.hypot(B[0] - A[0], B[1] - A[1]), r = res.parts[i];
       var mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, I = res.fatal ? 0 : r.I;
-      // halos: selected / hovered / problem
-      var halo = p === sel ? [col.accent, 0.3] : bad[i] ? [col.warn, 0.22] : i === hover ? [col.accent, 0.14] : null;
-      if (halo) { c.save(); c.globalAlpha = halo[1]; c.strokeStyle = halo[0]; c.lineWidth = Math.max(10, u * 0.4); c.beginPath(); c.moveTo(A[0], A[1]); c.lineTo(B[0], B[1]); c.stroke(); c.restore(); }
+      var isUnknownX = unknownPartIdx === i;
+      // halos: unknown x gold / selected / hovered / problem
+      var halo = isUnknownX ? ['#fbbf24', 0.36] : p === sel ? [col.accent, 0.3] : bad[i] ? [col.warn, 0.22] : i === hover ? [col.accent, 0.14] : null;
+      if (halo) { c.save(); c.globalAlpha = halo[1]; c.strokeStyle = halo[0]; c.lineWidth = Math.max(10, u * 0.42); c.beginPath(); c.moveTo(A[0], A[1]); c.lineTo(B[0], B[1]); c.stroke(); c.restore(); }
+
+      var wireStroke = p.t === 'wire' ? (p.col || (real ? '#22c55e' : Ln)) : Ln;
       c.save(); c.translate(mx, my); c.rotate(Math.atan2(B[1] - A[1], B[0] - A[0]));
       if (TY[p.t].polar && p.rev) c.scale(-1, 1);
       var symLen = p.t === 'wire' ? L : Math.min(L, u * 1.15);
       if (p.t !== 'wire' && L > symLen + 1) {
-        c.strokeStyle = Ln; c.lineWidth = 2; c.beginPath();
+        c.strokeStyle = real ? '#94a3b8' : Ln; c.lineWidth = 2; c.beginPath();
         c.moveTo(-L / 2, 0); c.lineTo(-symLen / 2, 0);
         c.moveTo(symLen / 2, 0); c.lineTo(L / 2, 0);
         c.stroke();
       }
-      symbol(c, p, symLen, col, Ln, { glow: p.t === 'lamp' && Plamp > 0 ? (r.P || 0) / Plamp : 0, on: r.on, blown: r.blown });
+      if (real && p.t !== 'wire') {
+        drawRealComponent(c, p, symLen, col, { glow: p.t === 'lamp' && Plamp > 0 ? (r.P || 0) / Plamp : 0, on: r.on, blown: r.blown }, r);
+      } else if (real && p.t === 'wire') {
+        c.save(); c.lineCap = 'round';
+        c.strokeStyle = wireStroke; c.lineWidth = 4.2;
+        c.beginPath(); c.moveTo(-L / 2, 0); c.lineTo(L / 2, 0); c.stroke();
+        c.strokeStyle = 'rgba(255,255,255,.32)'; c.lineWidth = 1.2;
+        c.beginPath(); c.moveTo(-L / 2, 0); c.lineTo(L / 2, 0); c.stroke();
+        c.restore();
+      } else {
+        symbol(c, p, symLen, col, wireStroke, { glow: p.t === 'lamp' && Plamp > 0 ? (r.P || 0) / Plamp : 0, on: r.on, blown: r.blown });
+      }
       c.restore();
-      if (p.t === 'amm' || p.t === 'volt') D.label(c, p.t === 'amm' ? 'A' : 'V', mx, my, Ln, { bold: true, size: U.clamp(symLen * 0.24, 10, 15), fs: 'none' });
-      // current on wires: brighter and thicker for more current, with an arrowhead
+
+      if (p.t === 'amm' || p.t === 'volt') {
+        var meterTxt = real && !res.fatal && simRunning ? eng(r.reading, p.t === 'amm' ? 'A' : 'V') : (p.t === 'amm' ? 'A' : 'V');
+        var mColor = real ? (p.t === 'amm' ? '#38bdf8' : '#c4b5fd') : Ln;
+        D.label(c, meterTxt, mx, my, mColor, { bold: true, size: U.clamp(symLen * 0.21, 9.5, 13.5), fs: 'none' });
+      }
+
+      // Live current arrows + Tinkercad glowing animated flow particles
       var aI = Math.abs(I), fr = Imax > 0 ? aI / Imax : 0;
-      if (p.t === 'wire' || r.link) {
-        if (aI > 1e-9 && fr > 1e-4) {
+      if (simRunning && !res.fatal && aI > 1e-9 && fr > 1e-4) {
+        if ((p.t === 'wire' || r.link) && !real) {
           c.save(); c.globalAlpha = 0.3 + 0.7 * fr; c.strokeStyle = col.applied; c.lineWidth = 2 + 2.5 * fr;
           if (p.t === 'wire') { c.beginPath(); c.moveTo(A[0], A[1]); c.lineTo(B[0], B[1]); c.stroke(); }
           c.restore();
-          if (p.t === 'wire') arrowAt(c, A, B, I > 0 ? 1 : -1, col.applied, Math.max(5, Math.min(8, u * 0.12)));
+        }
+        if (p.t === 'wire' && L > 8) {
+          if (!real) arrowAt(c, A, B, I > 0 ? 1 : -1, col.applied, Math.max(5, Math.min(8, u * 0.12)));
+          // Animated glowing charge particles streaming along wires
+          var gap = 24, speed = (40 + 130 * fr) * (I > 0 ? 1 : -1);
+          var off = (((animPhase * speed) % gap) + gap) % gap;
+          c.save();
+          c.fillStyle = real ? '#facc15' : col.applied;
+          c.strokeStyle = 'rgba(0,0,0,.35)'; c.lineWidth = 1;
+          for (var dist = off; dist < L; dist += gap) {
+            var frac = dist / L;
+            c.beginPath(); c.arc(A[0] + (B[0] - A[0]) * frac, A[1] + (B[1] - A[1]) * frac, real ? 2.6 : 2.1, 0, 7);
+            c.fill(); c.stroke();
+          }
+          c.restore();
         }
       }
     });
+
     // junction dots and loose ends
     Object.keys(res.dotDeg).forEach(function (k) {
       var n = res.dotDeg[k], pt = CB.coordsOfKey(k), q = G(pt[0], pt[1]);
-      if (n >= 3) { c.fillStyle = Ln; c.beginPath(); c.arc(q[0], q[1], Math.max(3, u * 0.06), 0, 7); c.fill(); }
+      if (n >= 3) { c.fillStyle = real ? '#22c55e' : Ln; c.beginPath(); c.arc(q[0], q[1], Math.max(3.2, u * 0.065), 0, 7); c.fill(); }
       else if (n === 1) { c.strokeStyle = col.warn; c.lineWidth = 2; c.beginPath(); c.arc(q[0], q[1], Math.max(5, u * 0.1), 0, 7); c.stroke(); }
     });
+
     // labels
     var fs = U.clamp(u * 0.19, 9.5, 12);
     parts.forEach(function (p, i) { if (p.t !== 'wire') labelPart(c, p, i, col, fs, u); });
+
     // Kirchhoff junction names
     if (kirch && res.method && res.method.kirchhoff) res.method.kirchhoff.junctions.forEach(function (j, ji) {
       var dots = res.netList[j.net] || [], best = dots[0], bd = -1;
@@ -542,10 +984,44 @@
       var pt = CB.coordsOfKey(best), q = G(pt[0], pt[1]);
       D.label(c, 'J' + CB.sub(ji + 1), q[0] + 0.2 * u, q[1] - 0.2 * u, col.accent, { bold: true, size: fs + 1, bg: true, align: 'left', fs: 'none' });
     });
+
+    // Tinkercad Digital Multimeter Probe Tool on Workbench
+    if (dmmOn) {
+      var mPos = G(probePos[0], probePos[1]), mNeg = G(probeNeg[0], probeNeg[1]);
+      var probeData = CB.probeMeasure(parts, res, probePos, probeNeg, env());
+      var dmmW = 148, dmmH = 66, dmmX = vp.w - dmmW - 18, dmmY = vp.h - dmmH - 72;
+      c.save();
+      // Flexible Red (+) and Black (−) silicone leads
+      c.lineCap = 'round';
+      c.strokeStyle = '#ef4444'; c.lineWidth = 3;
+      c.beginPath(); c.moveTo(dmmX + dmmW * 0.28, dmmY + dmmH);
+      c.quadraticCurveTo((dmmX + mPos[0]) * 0.5, Math.max(dmmY + dmmH + 18, mPos[1] + 24), mPos[0], mPos[1]); c.stroke();
+      c.strokeStyle = '#64748b'; c.lineWidth = 3;
+      c.beginPath(); c.moveTo(dmmX + dmmW * 0.72, dmmY + dmmH);
+      c.quadraticCurveTo((dmmX + mNeg[0]) * 0.5, Math.max(dmmY + dmmH + 22, mNeg[1] + 28), mNeg[0], mNeg[1]); c.stroke();
+      // Handheld Yellow/Charcoal Digital Multimeter Case
+      rrect(c, dmmX, dmmY, dmmW, dmmH, 10);
+      c.fillStyle = '#eab308'; c.fill(); c.strokeStyle = '#713f12'; c.lineWidth = 2; c.stroke();
+      rrect(c, dmmX + 8, dmmY + 7, dmmW - 16, 34, 6);
+      c.fillStyle = '#0f172a'; c.fill();
+      var lcdTxt = '—';
+      if (!simRunning) lcdTxt = 'STOPPED';
+      else if (res.fatal) lcdTxt = 'SHORT!';
+      else if (!probeData.ok) lcdTxt = 'CLIP NODE';
+      else if (dmmMode === 'V') lcdTxt = eng(probeData.V, 'V');
+      else if (dmmMode === 'A') lcdTxt = eng(probeData.I, 'A');
+      else lcdTxt = isFinite(probeData.R) ? eng(probeData.R, 'Ω') : 'OL (∞ Ω)';
+      c.fillStyle = '#4ade80'; c.font = '800 15px monospace'; c.textAlign = 'right'; c.textBaseline = 'middle';
+      c.fillText(lcdTxt, dmmX + dmmW - 14, dmmY + 24);
+      c.fillStyle = '#1e293b'; c.font = '800 10.5px sans-serif'; c.textAlign = 'left';
+      c.fillText('MULTIMETER · ' + (dmmMode === 'V' ? 'DC VOLTS' : dmmMode === 'A' ? 'CURRENT' : 'RESISTANCE'), dmmX + 10, dmmY + 53);
+      c.restore();
+    }
+
     // drag preview
     if (preview) {
       var pts = (preview.free ? [preview.a, preview.b] : [preview.a, [preview.b[0], preview.a[1]], preview.b]).map(function (g) { return G(g[0], g[1]); });
-      D.line(c, pts, col.accent, { width: 3, dash: [6, 5] });
+      D.line(c, pts, preview.t === 'wire' ? wireCol : col.accent, { width: 3.5, dash: [6, 5] });
       [preview.a, preview.b].forEach(function (g) { var q2 = G(g[0], g[1]); c.fillStyle = col.accent; c.beginPath(); c.arc(q2[0], q2[1], 5, 0, 7); c.fill(); });
     }
     if (res.empty) D.label(c, 'Pick a part below, then tap between two dots', vp.w / 2, vp.h / 2, col.muted, { size: 14, bg: true, fs: 'none' });
@@ -558,11 +1034,11 @@
     c.save(); c.fillStyle = color; c.beginPath(); c.moveTo(mx + ux * s, my + uy * s); c.lineTo(mx - ux * s - uy * s * 0.8, my - uy * s + ux * s * 0.8); c.lineTo(mx - ux * s + uy * s * 0.8, my - uy * s - ux * s * 0.8); c.closePath(); c.fill(); c.restore();
   }
   function nameLine(p, i) {
-    var n = nm(i), r = res.parts[i];
+    var n = nm(i), r = res.parts[i], xTag = unknownPartIdx === i ? ' = x' : '';
     switch (p.t) {
-      case 'cell': case 'battery': return n + ' = ' + eng(p.v.E, 'V') + (p.v.r > 0 ? ', r = ' + eng(p.v.r, 'Ω') : '');
-      case 'res': case 'var': case 'lamp': return n + ' = ' + eng(p.v.R, 'Ω');
-      case 'therm': case 'ldr': return n + ' = ' + eng(r.R, 'Ω');
+      case 'cell': case 'battery': return n + xTag + ' = ' + eng(p.v.E, 'V') + (p.v.r > 0 ? ', r = ' + eng(p.v.r, 'Ω') : '');
+      case 'res': case 'var': case 'lamp': return n + xTag + ' = ' + eng(p.v.R, 'Ω');
+      case 'therm': case 'ldr': return n + xTag + ' = ' + eng(r.R, 'Ω');
       case 'amm': return n + ' reads ' + (res.fatal ? '—' : eng(r.reading, 'A'));
       case 'volt': return n + ' reads ' + (res.fatal ? '—' : eng(r.reading, 'V'));
       case 'switch': return n + (p.v.on > 0 ? ' closed' : ' open');
@@ -574,11 +1050,11 @@
   function labelPart(c, p, i, col, fs, u) {
     var e = CB.ends(p), A = G(e[0][0], e[0][1]), B = G(e[1][0], e[1][1]), mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, horiz = Math.abs(B[0] - A[0]) >= Math.abs(B[1] - A[1]), r = res.parts[i];
     var meter = p.t === 'amm' || p.t === 'volt', off = 0.36 * u, lh = fs + 3;
-    var nameCol = meter ? col.accent : col.ink;
+    var nameCol = unknownPartIdx === i ? '#fbbf24' : meter ? col.accent : col.ink;
     // name on one side (meters: below / right, so a meter next to a part does not hide its values), I and V on the other
     var nSide = meter ? 1 : -1;
-    if (horiz) D.label(c, nameLine(p, i), mx, my + nSide * off, nameCol, { size: fs, bg: true, base: nSide > 0 ? 'top' : 'bottom', bold: meter });
-    else D.label(c, nameLine(p, i), mx + off, my, nameCol, { size: fs, bg: true, align: 'left', bold: meter });
+    if (horiz) D.label(c, nameLine(p, i), mx, my + nSide * off, nameCol, { size: fs, bg: true, base: nSide > 0 ? 'top' : 'bottom', bold: meter || unknownPartIdx === i });
+    else D.label(c, nameLine(p, i), mx + off, my, nameCol, { size: fs, bg: true, align: 'left', bold: meter || unknownPartIdx === i });
     if (!showIV.get() || res.fatal || meter || p.t === 'wire') return;
     var I = r.I, V = Math.abs(r.V), lines = [];
     if (p.t === 'switch' || p.t === 'fuse') { if (V > 1e-9) lines.push([eng(V, 'V') + ' across', col.s1]); else if (Math.abs(I) > 1e-12) lines.push([eng(Math.abs(I), 'A'), col.applied]); }
@@ -774,16 +1250,70 @@
   }
 
   ui.onTheme(drawScene);
+  if (SIM.scene && SIM.scene.onChange) SIM.scene.onChange(drawScene);
   vp.onResize = drawScene;
-  ui.stageTip('Tap a part to change it · drag along the dots to draw wires · pick a part below to add it');
+  ui.stageTip('Tap a part to inspect & customize · drag ends to rewire · try Real life Breadboard & Multimeter Probe');
+
+  // Register interactive Solve-for-x calculator for any unknown resistor or cell in the Tinkercad workbench
+  if (ui.registerXCalculator) {
+    ui.registerXCalculator(function (mark) {
+      var idx = unknownPartIdx >= 0 ? unknownPartIdx : (mark && /^part_(\d+)$/.test(mark.key) ? Number(RegExp.$1) : -1);
+      var target = parts[idx];
+      if (!target || (target.t !== 'res' && target.t !== 'var' && target.t !== 'lamp' && target.t !== 'cell' && target.t !== 'battery')) return;
+      var paramKey = (target.t === 'cell' || target.t === 'battery') ? 'E' : 'R';
+      var curI = Math.abs(res && res.parts && res.parts[idx] ? res.parts[idx].I : 0.25);
+      ui.askNumber({
+        title: 'Calculate unknown ' + (nm(idx) || TY[target.t].label) + ' = x',
+        sub: 'Enter the target current I (A) through ' + (nm(idx) || 'this part') + ' required by the question:',
+        value: Number((curI * 0.8 || 0.2).toPrecision(3)),
+        min: 0.0001, max: 100, step: 0.01, decimals: 4, unit: 'A',
+        quick: [0.1, 0.2, 0.5, 1.0],
+        onInput: function (targetI) {
+          if (!(targetI > 0)) return;
+          // Numerical bisection solve for parameter in [0.01, 50000]
+          var lo = 0.01, hi = paramKey === 'E' ? 500 : 100000, best = target.v[paramKey];
+          function evalAt(val) {
+            var copy = JSON.parse(JSON.stringify(parts));
+            copy[idx].v[paramKey] = val;
+            var r = CB.analyse(copy, env());
+            return r && !r.fatal && r.parts[idx] ? Math.abs(r.parts[idx].I) : NaN;
+          }
+          var fLo = evalAt(lo), fHi = evalAt(hi);
+          if (isFinite(fLo) && isFinite(fHi)) {
+            var inc = fHi > fLo;
+            for (var it = 0; it < 44; it++) {
+              var midV = 0.5 * (lo + hi), fM = evalAt(midV);
+              if (!isFinite(fM)) break;
+              if ((inc && fM < targetI) || (!inc && fM > targetI)) lo = midV; else hi = midV;
+            }
+            best = Number((0.5 * (lo + hi)).toPrecision(4));
+          }
+          pushUndo();
+          target.v[paramKey] = best;
+          unknownPartIdx = -1;
+          if (ui.clearMarkedX) ui.clearMarkedX();
+          update();
+          R.badge('Solved unknown x: ' + (nm(idx) || TY[target.t].label) + ' = ' + eng(best, paramKey === 'E' ? 'V' : 'Ω') + ' gives I = ' + eng(targetI, 'A') + '.', 'ok').render();
+        }
+      });
+    });
+  }
 
   /* start: the shared set-up in the URL, otherwise a ready-built series circuit */
   var hsh = ui.readHash();
   if (typeof hsh.T === 'number' || typeof hsh.L === 'number') prm.set({ T: typeof hsh.T === 'number' ? U.clamp(hsh.T, -10, 100) : 25, L: typeof hsh.L === 'number' ? U.clamp(hsh.L, 0, 100) : 20 }, true);
   if (typeof hsh.c === 'string' && CB.decode(hsh.c).length) { parts = CB.decode(hsh.c); update(); }
   else presetCtl.select(0);
+  if (typeof hsh.markX === 'string' && /^part_(\d+)$/.test(hsh.markX)) {
+    var xi = Number(RegExp.$1);
+    if (parts[xi]) {
+      unknownPartIdx = xi;
+      if (ui.markAsX) ui.markAsX('part_' + xi, { label: (nm(xi) || TY[parts[xi].t].label) + ' = x' });
+    }
+  }
   undo = [];
   syncActions();
+  renderInspector();
   presetCtl.fromQuery();
 })();
 </script>
