@@ -50,13 +50,15 @@
     var cv = document.createElement('canvas');
     cv.id = 'ambientFxCanvas';
     cv.className = 'ambient-fx-canvas';
+    cv.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:0';
     cv.setAttribute('aria-hidden', 'true');
     document.body.insertBefore(cv, document.body.firstChild);
     fxState.cv = cv;
     var ctx = cv.getContext('2d');
     var N = 26;
     function seed() {
-      var W = root.innerWidth || 1280, H = root.innerHeight || 800;
+      var W = Math.max(320, Math.min(2560, root.innerWidth || 1280));
+      var H = Math.max(240, Math.min(1600, root.innerHeight || 800));
       cv.width = W; cv.height = H;
       if (!fxState.pts.length) {
         for (var i = 0; i < N; i++) {

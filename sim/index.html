@@ -5,10 +5,10 @@
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>A Level Atlas · Interactive Physics &amp; Mechanics Dashboard</title>
-<link rel="stylesheet" href="assets/theme.css">
-<link rel="stylesheet" href="assets/app.css">
-<script src="catalog/groups.js"></script>
-<script src="core/progress.js"></script>
+<link rel="stylesheet" href="assets/theme.css?v=20261123c">
+<link rel="stylesheet" href="assets/app.css?v=20261123c">
+<script src="catalog/groups.js?v=20261123c"></script>
+<script src="core/progress.js?v=20261123c"></script>
 </head>
 <body>
 <script>
@@ -22,12 +22,12 @@
     subtitle: 'Your interactive Cambridge 9709 Mechanics & 9702 Physics workspace'
   });
   var root = shell.content;
-  var atlasFilter = 'all', atlasCompact = false, activeWorkspace = 'atlas';
+  var atlasFilter = 'all', activeWorkspace = 'atlas', dockedNodeId = null, fleetOpen = false;
 
   root.innerHTML =
     '<section class="hero-bento">' +
-    '  <div class="hero-spotlight" id="heroSpotlight">' +
-    '    <canvas class="hero-stage-cv" id="heroStageCv"></canvas>' +
+    '  <div class="hero-spotlight" id="heroSpotlight" style="position:relative;overflow:hidden">' +
+    '    <canvas class="hero-stage-cv" id="heroStageCv" style="position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none"></canvas>' +
     '    <div class="hero-content" id="heroContent"></div>' +
     '    <div class="hero-ctas" id="heroCtas"></div>' +
     '  </div>' +
@@ -39,33 +39,40 @@
     '  <button type="button" class="ws-tab" data-ws="vault" role="tab" aria-selected="false">🏆 Vault, Badges &amp; Coach</button>' +
     '</div>' +
     '<div class="ws-panel" id="ws-atlas">' +
-    '  <section class="panel-card" aria-label="Icon Progress Atlas">' +
-    '    <div class="panel-head">' +
-    '      <div class="panel-title">' +
-    '        <span class="kpi-badge" style="width:40px;height:40px">' + svg('map') + '</span>' +
-    '        <div><h2>Topic Progress Atlas</h2><small>Click any card to explore simulations, view your relic, or claim +50 XP via Mastery Quest</small></div>' +
-    '      </div>' +
-    '      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
-    '        <div class="filter-pills" id="atlasFilters">' +
-    '          <button type="button" class="on" data-f="all">All (17)</button>' +
-    '          <button type="button" data-f="9709">9709 Mechanics</button>' +
-    '          <button type="button" data-f="9702">9702 AS Physics</button>' +
-    '          <button type="button" data-f="mastered">Mastered</button>' +
+    '  <section class="starship-deck" aria-label="USS Newton Starship Navigation Bridge">' +
+    '    <div class="cockpit-bezel">' +
+    '      <div class="cockpit-hud-top">' +
+    '        <div class="ship-callsign"><span class="ship-status-dot"></span><span>USS NEWTON // ORBITAL BRIDGE</span></div>' +
+    '        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
+    '          <div class="sector-pills" id="atlasFilters">' +
+    '            <button type="button" class="on" data-f="all">🌌 All Sectors (17)</button>' +
+    '            <button type="button" data-f="9709">☀️ 9709 Mechanics</button>' +
+    '            <button type="button" data-f="9702">🪐 9702 AS Physics</button>' +
+    '            <button type="button" data-f="mastered">★ Colonized</button>' +
+    '          </div>' +
+    '          <button type="button" class="helm-btn" id="fleetToggleBtn" style="min-height:30px;padding:0 10px" title="Toggle compact fleet list">⊞ Fleet</button>' +
     '        </div>' +
-    '        <button type="button" class="pill-btn" id="atlasDensityBtn" title="Switch between Large Expressive Cards and Compact Icons">⊞ Compact</button>' +
+    '      </div>' +
+    '      <div class="cockpit-viewport" id="cockpitViewport" style="position:relative;flex:1;min-height:410px;overflow:hidden">' +
+    '        <canvas id="starshipBridgeCv" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas>' +
+    '        <div class="cockpit-reticle"></div>' +
+    '        <div class="planet-layer" id="planetLayer"></div>' +
+    '      </div>' +
+    '      <div class="cockpit-helm-bar">' +
+    '        <div style="display:flex;gap:7px;flex-wrap:wrap">' +
+    '          <button type="button" class="helm-btn" id="helmPrevBtn">◀ Prev</button>' +
+    '          <button type="button" class="helm-btn" id="helmRandBtn">🎲 Wormhole Jump</button>' +
+    '          <button type="button" class="helm-btn" id="helmNextBtn">Next ▶</button>' +
+    '        </div>' +
+    '        <span class="helm-telemetry" id="helmTelemetry">SCANNING ORBITAL TRACKS…</span>' +
+    '        <a class="helm-btn" href="map.html" style="text-decoration:none;border-color:rgba(250,204,21,.4);color:#fde68a">Constellation Map ↗</a>' +
     '      </div>' +
     '    </div>' +
-    '    <div class="icon-atlas" id="iconAtlas"></div>' +
+    '    <aside class="target-console" id="targetLockConsole" aria-live="polite"></aside>' +
     '  </section>' +
-    '  <section class="panel-card" style="margin-top:18px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap">' +
-    '    <div style="flex:1;min-width:240px">' +
-    '      <div class="panel-title"><span class="kpi-badge" style="width:38px;height:38px">' + svg('spark') + '</span><div><h2>Radial Constellation Map</h2><small id="nextUnlockLbl">Visual progression path across all 17 nodes</small></div></div>' +
-    '      <div id="unlockSegBar" style="margin-top:12px;max-width:460px"></div>' +
-    '    </div>' +
-    '    <div style="position:relative;width:min(380px,100%);height:110px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:radial-gradient(circle at 25% 50%,rgba(45,212,191,.16),#070c0e 70%)">' +
-    '      <canvas id="miniMapCv" style="width:100%;height:100%;display:block"></canvas>' +
-    '      <a href="map.html" style="position:absolute;right:10px;bottom:10px" class="pill-btn gold">Open Full Map →</a>' +
-    '    </div>' +
+    '  <section class="panel-card fleet-drawer" id="fleetDrawer" hidden style="margin-top:18px" aria-label="Fleet Manifest">' +
+    '    <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('map') + '</span><div><h2>Starship Fleet Manifest</h2><small>Click any node to fly USS Newton directly to that planet</small></div></div><button type="button" class="pill-btn" id="fleetCloseBtn">Close ×</button></div>' +
+    '    <div class="icon-atlas compact" id="iconAtlas"></div>' +
     '  </section>' +
     '</div>' +
     '<div class="ws-panel" id="ws-analytics" hidden>' +
@@ -167,89 +174,292 @@
       '</div>';
   }
 
-  function openNodePopover(node) {
-    var s = P.getState(), p = P.getNodeProgress(node.id, s);
-    var grp = (window.SIM_GROUPS || []).filter(function (g) { return g.id === node.id; })[0];
-    var modes = (grp && grp.modes) || node.modes || [{ id: 'main', label: node.title }];
-    var old = document.getElementById('atlasNodeModal');
-    if (old) old.remove();
-    var back = document.createElement('div');
-    back.id = 'atlasNodeModal'; back.className = 'sim-modal-back';
-    back.innerHTML =
-      '<div class="sim-modal" role="dialog" aria-modal="true">' +
-      '  <div class="sim-modal-head">' +
-      '    <span class="kpi-badge" style="width:36px;height:36px">' + svg(node.id) + '</span>' +
-      '    <h2>' + esc(node.title) + '</h2>' +
-      '    <button type="button" class="sim-modal-close" id="mClose">×</button>' +
-      '  </div>' +
-      '  <div class="sim-modal-body">' +
-      '    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px">' +
-      P.ringHtml(p.pct, node.id, p.mastered, p.started) +
-      '      <div style="flex:1;min-width:180px">' +
-      '        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span class="chip">' + esc(node.syllabus) + '</span><span class="chip">' + p.pct + '% Mastery</span></div>' +
-      '        <div style="font-size:13.5px;color:var(--muted)">Relic: <b>' + esc(node.relic.name) + '</b> — ' + esc(node.relic.fact) + '</div>' +
-      '      </div>' +
-      '    </div>' +
-      '    <div class="chk-list" style="margin-bottom:16px">' +
-      modes.map(function (m, idx) {
-        var done = p.modesVisited.indexOf(m.id) >= 0 || p.mastered;
-        var href = node.id === 'learn-eq' ? node.url : 'group.html?g=' + node.id + '&m=' + m.id;
-        return '<a class="chk-row ' + (done ? 'done' : '') + '" href="' + href + '">' +
-          '<span class="chk-num">' + String(idx + 1).padStart(2, '0') + '</span>' +
-          '<span>' + esc(m.label) + '</span>' +
-          '<span class="chk-stat">' + (done ? '✓ Explored' : 'Open →') + '</span></a>';
-      }).join('') +
-      '    </div>' +
-      '    <div style="display:flex;gap:10px;flex-wrap:wrap">' +
-      '      <a class="btn primary" href="' + node.url + '">Launch Simulation →</a>' +
-      '      <button type="button" class="btn" id="mQuest">' + (p.mastered ? 'Replay Mastery Quest' : '★ Take Mastery Quest (+50 XP)') + '</button>' +
-      '      <a class="btn" href="map.html?focus=' + node.id + '">Locate on Map</a>' +
-      '    </div>' +
-      '  </div>' +
-      '</div>';
-    back.onclick = function (e) { if (e.target === back) back.remove(); };
-    back.querySelector('#mClose').onclick = function () { back.remove(); };
-    back.querySelector('#mQuest').onclick = function () {
-      back.remove();
-      P.openQuestModal(node.id, function () { renderAll(); });
-    };
-    document.body.appendChild(back);
+  /* ---------- USS Newton Starship Flight Engine & Orbital Planet Positions ---------- */
+  var filteredPlanets = [], planetCoords = {}, starField = [], exhaust = [];
+  for (var si = 0; si < 95; si++) {
+    starField.push({ x: Math.random(), y: Math.random(), r: 0.6 + Math.random() * 1.5, a: 0.25 + Math.random() * 0.75, sp: 0.2 + Math.random() * 0.8 });
   }
+  var ship = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5, vx: 0, vy: 0, ang: -0.4, warp: 0, hoverId: null };
 
-  function renderAtlas(s) {
-    var host = document.getElementById('iconAtlas');
-    host.className = 'icon-atlas' + (atlasCompact ? ' compact' : '');
-    host.innerHTML = '';
-    var list = P.NODES.filter(function (n) {
+  function getFilteredNodes(s) {
+    return P.NODES.filter(function (n) {
       var p = P.getNodeProgress(n.id, s);
       if (atlasFilter === '9709') return n.course === '9709';
       if (atlasFilter === '9702') return n.course === '9702';
       if (atlasFilter === 'mastered') return p.mastered;
       return true;
     });
-    if (!list.length) {
-      host.innerHTML = '<p style="grid-column:1/-1;color:var(--muted);margin:8px 0">No mastered nodes in this filter yet — tap any topic card to launch its Mastery Quest!</p>';
+  }
+
+  function computePlanetCoords(list) {
+    planetCoords = {};
+    var mech = list.filter(function (n) { return n.course === '9709'; });
+    var phys = list.filter(function (n) { return n.course === '9702'; });
+    mech.forEach(function (n, i) {
+      var ang = -Math.PI * 0.72 + (i / Math.max(1, mech.length)) * Math.PI * 2;
+      planetCoords[n.id] = { x: 0.50 + Math.cos(ang) * 0.23, y: 0.50 + Math.sin(ang) * 0.20, ring: '9709' };
+    });
+    phys.forEach(function (n, i) {
+      var ang = -Math.PI * 0.86 + (i / Math.max(1, phys.length)) * Math.PI * 2;
+      planetCoords[n.id] = { x: 0.50 + Math.cos(ang) * 0.40, y: 0.50 + Math.sin(ang) * 0.37, ring: '9702' };
+    });
+  }
+
+  function engageWarpAndGo(url) {
+    ship.warp = 1;
+    P.playChime('unlock');
+    setTimeout(function () { window.location.href = url; }, 340);
+  }
+
+  function dockPlanet(nodeId, flySound) {
+    var list = filteredPlanets.length ? filteredPlanets : P.NODES;
+    var node = list.filter(function (n) { return n.id === nodeId; })[0] || list[0];
+    if (!node) return;
+    dockedNodeId = node.id;
+    var c = planetCoords[node.id];
+    if (c) {
+      // Dock smoothly in orbit slightly offset from planet center so the beacon stays unobstructed
+      var dx = c.x - 0.5, dy = c.y - 0.5, d = Math.hypot(dx, dy) || 1;
+      ship.tx = c.x - (dx / d) * 0.055;
+      ship.ty = c.y - (dy / d) * 0.055;
+    }
+    if (flySound) P.playChime('step');
+    document.querySelectorAll('#planetLayer .planet-beacon').forEach(function (el) {
+      el.classList.toggle('active', el.getAttribute('data-id') === node.id);
+    });
+    renderTargetConsole(P.getState(), node);
+  }
+
+  function renderTargetConsole(s, node) {
+    var host = document.getElementById('targetLockConsole');
+    if (!host) return;
+    if (!node) {
+      host.innerHTML = '<div style="text-align:center;padding:30px 10px;color:var(--muted)">No planets in this sector filter yet. Select <b>All Sectors</b> to explore!</div>';
       return;
     }
-    list.forEach(function (n) {
-      var p = P.getNodeProgress(n.id, s);
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'icon-tile ' + (p.mastered ? 'mastered' : p.started ? 'started' : 'locked');
-      btn.innerHTML =
-        '<div class="tile-top">' +
-        P.ringHtml(p.pct, n.id, p.mastered, p.started) +
-        '  <span class="tile-syl">' + esc(n.syllabus) + '</span>' +
-        '</div>' +
-        '<div class="tile-name">' + esc(n.title) + '</div>' +
-        '<div class="tile-desc">' + esc(n.relic.fact) + '</div>' +
-        '<div class="tile-foot">' +
-        '  <span class="tile-meta">' + (p.mastered ? '★ Mastered' : p.started ? p.pct + '% Active' : 'Not started') + '</span>' +
-        '  <span class="tile-launch">Launch →</span>' +
-        '</div>';
-      btn.onclick = function () { openNodePopover(n); };
-      host.appendChild(btn);
+    var p = P.getNodeProgress(node.id, s);
+    var grp = (window.SIM_GROUPS || []).filter(function (g) { return g.id === node.id; })[0];
+    var modes = (grp && grp.modes) || node.modes || [{ id: 'main', label: node.title }];
+    var telem = document.getElementById('helmTelemetry');
+    if (telem) telem.textContent = 'LOCKED: ' + node.short.toUpperCase() + ' · SHIELD ' + p.pct + '% · ' + (p.mastered ? 'COLONIZED' : 'EXPLORABLE');
+
+    host.innerHTML =
+      '<div class="target-lock-head">' +
+      P.ringHtml(p.pct, node.id, p.mastered, p.started) +
+      '  <div style="min-width:0;flex:1">' +
+      '    <span class="target-coord">' + esc(node.syllabus) + ' · ' + (p.mastered ? '★ SECTOR MASTERED' : 'ORBITAL LOCK') + '</span>' +
+      '    <h3>' + esc(node.title) + '</h3>' +
+      '  </div>' +
+      '</div>' +
+      '<div class="target-relic"><b>Artifact Scanner · ' + esc(node.relic.name) + ':</b> ' + esc(node.relic.fact) + '</div>' +
+      '<div>' +
+      '  <div style="font:750 11px var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:7px">Docking Bays (' + modes.length + ' Simulations)</div>' +
+      '  <div class="bay-list">' +
+      modes.map(function (m, idx) {
+        var done = p.modesVisited.indexOf(m.id) >= 0 || p.mastered;
+        var href = node.id === 'learn-eq' ? node.url : 'group.html?g=' + node.id + '&m=' + m.id;
+        return '<a class="bay-item" href="' + href + '"><span style="display:flex;align-items:center;gap:8px;min-width:0"><span class="bay-num">' + String(idx + 1).padStart(2, '0') + '</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(m.label) + '</span></span><span style="font-size:12px;color:' + (done ? 'var(--ok)' : 'var(--accent)') + ';font-weight:750;flex:none">' + (done ? '✓' : 'Go →') + '</span></a>';
+      }).join('') +
+      '  </div>' +
+      '</div>' +
+      '<div class="warp-cta-row">' +
+      '  <button type="button" class="warp-btn" id="engageWarpBtn">🚀 ENGAGE WARP LAUNCH</button>' +
+      '  <div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      '    <button type="button" class="btn" id="consoleQuestBtn" style="flex:1">' + (p.mastered ? 'Replay Quest' : '★ Mastery Quest (+50 XP)') + '</button>' +
+      '    <a class="btn" href="solver.html" style="flex:1">📸 AI Solver</a>' +
+      '  </div>' +
+      '</div>';
+
+    host.querySelector('#engageWarpBtn').onclick = function () { engageWarpAndGo(node.url); };
+    host.querySelector('#consoleQuestBtn').onclick = function () {
+      P.openQuestModal(node.id, function () { renderAll(); });
+    };
+  }
+
+  function renderAtlas(s) {
+    filteredPlanets = getFilteredNodes(s);
+    computePlanetCoords(filteredPlanets);
+    var layer = document.getElementById('planetLayer');
+    if (layer) {
+      layer.innerHTML = '';
+      filteredPlanets.forEach(function (n) {
+        var c = planetCoords[n.id], p = P.getNodeProgress(n.id, s);
+        if (!c) return;
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-id', n.id);
+        b.className = 'planet-beacon ' + (n.course === '9709' ? 'c-9709 ' : 'c-9702 ') + (p.mastered ? 'mastered' : p.started ? 'started' : 'locked');
+        b.style.left = (c.x * 100).toFixed(2) + '%';
+        b.style.top = (c.y * 100).toFixed(2) + '%';
+        b.title = n.title + ' (' + p.pct + '%)';
+        b.innerHTML = svg(n.id) + '<span class="planet-tag">' + esc(n.short) + ' · ' + p.pct + '%</span>';
+        b.onmouseenter = function () { ship.hoverId = n.id; };
+        b.onmouseleave = function () { if (ship.hoverId === n.id) ship.hoverId = null; };
+        b.onclick = function () { dockPlanet(n.id, true); };
+        layer.appendChild(b);
+      });
+    }
+
+    // Optional compact Fleet Manifest Drawer
+    var host = document.getElementById('iconAtlas');
+    if (host) {
+      host.innerHTML = '';
+      filteredPlanets.forEach(function (n) {
+        var p = P.getNodeProgress(n.id, s);
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'icon-tile ' + (p.mastered ? 'mastered' : p.started ? 'started' : 'locked');
+        btn.innerHTML = P.ringHtml(p.pct, n.id, p.mastered, p.started) + '<div class="tile-name">' + esc(n.short) + '</div><div class="tile-meta">' + p.pct + '%</div>';
+        btn.onclick = function () { dockPlanet(n.id, true); };
+        host.appendChild(btn);
+      });
+    }
+
+    var focus = filteredPlanets.filter(function (n) { return n.id === dockedNodeId; })[0] || getFocusNode(s);
+    if (filteredPlanets.indexOf(focus) < 0) focus = filteredPlanets[0] || null;
+    if (focus) dockPlanet(focus.id, false);
+    else renderTargetConsole(s, null);
+  }
+
+  var bridgePhase = 0, bridgeRaf = 0;
+  function paintStarshipBridge() {
+    var cv = document.getElementById('starshipBridgeCv');
+    if (!cv || !cv.getContext) return;
+    var host = cv.parentElement || cv;
+    var W = Math.max(280, Math.min(1800, host.clientWidth || 780));
+    var H = Math.max(240, Math.min(900, host.clientHeight || 420));
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+    var c = cv.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, W, H);
+
+    // 1. Parallax & Warp Starfield
+    if (ship.warp > 0) ship.warp = Math.min(2.6, ship.warp * 1.12);
+    starField.forEach(function (st) {
+      var sx = ((st.x + bridgePhase * 0.004 * st.sp) % 1) * W, sy = st.y * H;
+      c.save();
+      c.globalAlpha = st.a;
+      if (ship.warp > 0.1) {
+        var dx = sx - W * 0.5, dy = sy - H * 0.5;
+        c.strokeStyle = '#e0f2fe'; c.lineWidth = st.r * 1.4;
+        c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx + dx * 0.18 * ship.warp, sy + dy * 0.18 * ship.warp); c.stroke();
+      } else {
+        c.fillStyle = st.sp > 0.65 ? '#bae6fd' : '#fde68a';
+        c.beginPath(); c.arc(sx, sy, st.r, 0, Math.PI * 2); c.fill();
+      }
+      c.restore();
     });
+
+    // 2. Dual Sector Orbital Rings + Core Star Sun
+    var cx = W * 0.5, cy = H * 0.5;
+    c.save();
+    // Radar sweep beam
+    var sweepAng = bridgePhase * 0.7;
+    var grd = c.createRadialGradient(cx, cy, 8, cx, cy, Math.max(W, H) * 0.48);
+    grd.addColorStop(0, 'rgba(250, 204, 21, 0.24)');
+    grd.addColorStop(0.5, 'rgba(56, 189, 248, 0.06)');
+    grd.addColorStop(1, 'transparent');
+    c.fillStyle = grd;
+    c.beginPath(); c.moveTo(cx, cy); c.arc(cx, cy, Math.max(W, H) * 0.5, sweepAng, sweepAng + 0.42); c.closePath(); c.fill();
+
+    // Inner 9709 Mechanics Orbit + Outer 9702 Physics Orbit
+    c.setLineDash([5, 6]);
+    c.strokeStyle = 'rgba(250, 204, 21, 0.26)'; c.lineWidth = 1.4;
+    c.beginPath(); c.ellipse(cx, cy, W * 0.23, H * 0.20, 0, 0, Math.PI * 2); c.stroke();
+    c.strokeStyle = 'rgba(45, 212, 191, 0.24)';
+    c.beginPath(); c.ellipse(cx, cy, W * 0.40, H * 0.37, 0, 0, Math.PI * 2); c.stroke();
+    c.setLineDash([]);
+
+    // Hyperlanes between adjacent planets in active list
+    c.strokeStyle = 'rgba(148, 163, 184, 0.16)'; c.lineWidth = 1.1;
+    filteredPlanets.forEach(function (n) {
+      var a = planetCoords[n.id]; if (!a) return;
+      (n.prereqs || []).forEach(function (pid) {
+        var b = planetCoords[pid]; if (!b) return;
+        c.beginPath(); c.moveTo(a.x * W, a.y * H); c.lineTo(b.x * W, b.y * H); c.stroke();
+      });
+    });
+
+    // Core Central Sun Beacon
+    var sun = c.createRadialGradient(cx, cy, 2, cx, cy, 28);
+    sun.addColorStop(0, '#fef08a'); sun.addColorStop(0.4, 'rgba(250,204,21,0.55)'); sun.addColorStop(1, 'transparent');
+    c.fillStyle = sun; c.beginPath(); c.arc(cx, cy, 28, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#fef9c3'; c.beginPath(); c.arc(cx, cy, 6.5, 0, Math.PI * 2); c.fill();
+    c.font = '800 9.5px sans-serif'; c.fillStyle = 'rgba(254,240,138,.8)'; c.textAlign = 'center';
+    c.fillText('A-LEVEL CORE', cx, cy + 20);
+
+    // 3. Docked Planet Targeting Reticle + Mastery Equatorial Arc
+    var s = P.getState();
+    filteredPlanets.forEach(function (n) {
+      var pt = planetCoords[n.id]; if (!pt) return;
+      var p = P.getNodeProgress(n.id, s), px = pt.x * W, py = pt.y * H;
+      if (p.pct > 0) {
+        c.beginPath();
+        c.arc(px, py, 29, -Math.PI / 2, -Math.PI / 2 + (p.pct / 100) * Math.PI * 2);
+        c.strokeStyle = p.mastered ? '#4ade80' : '#facc15'; c.lineWidth = 2.6; c.lineCap = 'round'; c.stroke();
+      }
+      if (n.id === dockedNodeId) {
+        // Animated rotating docking target ring + trajectory arc from core
+        c.strokeStyle = 'rgba(250, 204, 21, 0.52)'; c.lineWidth = 1.4; c.setLineDash([4, 4]);
+        c.beginPath(); c.moveTo(cx, cy); c.quadraticCurveTo((cx + px) * 0.5, cy * 0.65 + py * 0.35, px, py); c.stroke();
+        c.setLineDash([]);
+        c.save(); c.translate(px, py); c.rotate(bridgePhase * 1.4);
+        c.strokeStyle = '#facc15'; c.lineWidth = 1.6;
+        for (var k = 0; k < 4; k++) {
+          c.rotate(Math.PI / 2);
+          c.beginPath(); c.arc(0, 0, 35, -0.35, 0.35); c.stroke();
+        }
+        c.restore();
+      }
+    });
+
+    // 4. Fly USS Newton Starship Smoothly Across Orbits
+    var dxS = ship.tx - ship.x, dyS = ship.ty - ship.y, distS = Math.hypot(dxS, dyS);
+    if (distS > 0.001) {
+      ship.vx = ship.vx * 0.78 + dxS * 0.16;
+      ship.vy = ship.vy * 0.78 + dyS * 0.16;
+      ship.x += ship.vx; ship.y += ship.vy;
+      ship.ang = Math.atan2(ship.vy * H, ship.vx * W);
+      exhaust.push({ x: ship.x * W, y: ship.y * H, life: 1, r: 3.5 });
+    }
+    for (var ei = exhaust.length - 1; ei >= 0; ei--) {
+      exhaust[ei].life -= 0.045;
+      if (exhaust[ei].life <= 0) { exhaust.splice(ei, 1); continue; }
+      c.fillStyle = 'rgba(56, 189, 248, ' + (exhaust[ei].life * 0.55) + ')';
+      c.beginPath(); c.arc(exhaust[ei].x, exhaust[ei].y, exhaust[ei].r * exhaust[ei].life, 0, Math.PI * 2); c.fill();
+    }
+
+    var sxP = ship.x * W, syP = ship.y * H;
+    c.save();
+    c.translate(sxP, syP);
+    c.rotate(ship.ang);
+    // Twin plasma ion thruster flame
+    var flame = 8 + Math.sin(bridgePhase * 22) * 3 + Math.min(18, distS * 120);
+    c.fillStyle = '#38bdf8';
+    c.beginPath(); c.moveTo(-10, -4); c.lineTo(-10 - flame, 0); c.lineTo(-10, 4); c.closePath(); c.fill();
+    // Delta Starship Fuselage (USS Newton)
+    c.fillStyle = '#f8fafc'; c.strokeStyle = '#facc15'; c.lineWidth = 1.6;
+    c.beginPath(); c.moveTo(15, 0); c.lineTo(-9, -9); c.lineTo(-5, 0); c.lineTo(-9, 9); c.closePath();
+    c.fill(); c.stroke();
+    // Cockpit canopy glow
+    c.fillStyle = '#38bdf8'; c.beginPath(); c.ellipse(3, 0, 4.5, 2.2, 0, 0, Math.PI * 2); c.fill();
+    c.restore();
+    c.restore();
+  }
+
+  function startBridgeLoop() {
+    if (bridgeRaf || typeof requestAnimationFrame !== 'function') return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { paintStarshipBridge(); return; }
+    var last = 0;
+    function tick(now) {
+      bridgeRaf = 0;
+      if (last) bridgePhase += (now - last) * 0.0014;
+      last = now;
+      if (activeWorkspace === 'atlas') paintStarshipBridge();
+      bridgeRaf = requestAnimationFrame(tick);
+    }
+    bridgeRaf = requestAnimationFrame(tick);
   }
 
   function renderContinue(s) {
@@ -305,13 +515,19 @@
     }).join('');
 
     var nextToy = P.TOYS.filter(function (t) { return !P.isToyUnlocked(t, s, sum); })[0];
-    document.getElementById('nextUnlockLbl').textContent = nextToy
-      ? 'Next Secret Toy: ' + nextToy.name + ' (' + sum.xp + '/' + nextToy.reqXp + ' XP)'
-      : 'All 4 Secret Sandbox Toys Unlocked!';
+    var unlockEl = document.getElementById('nextUnlockLbl');
+    if (unlockEl) {
+      unlockEl.textContent = nextToy
+        ? 'Next Secret Toy: ' + nextToy.name + ' (' + sum.xp + '/' + nextToy.reqXp + ' XP)'
+        : 'All 4 Secret Sandbox Toys Unlocked!';
+    }
     var nextPct = nextToy ? Math.min(100, Math.round((sum.xp / nextToy.reqXp) * 100)) : 100;
-    document.getElementById('unlockSegBar').innerHTML =
-      '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px"><span>Unlock Milestone</span><b>' + nextPct + '%</b></div>' +
-      P.segBarHtml(nextPct, 24);
+    var segEl = document.getElementById('unlockSegBar');
+    if (segEl) {
+      segEl.innerHTML =
+        '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px"><span>Unlock Milestone</span><b>' + nextPct + '%</b></div>' +
+        P.segBarHtml(nextPct, 24);
+    }
 
     document.getElementById('vaultPreview').innerHTML = P.TOYS.map(function (t) {
       var ok = P.isToyUnlocked(t, s, sum);
@@ -326,7 +542,10 @@
   function paintHeroCanvas() {
     var cv = document.getElementById('heroStageCv');
     if (!cv || !cv.getContext) return;
-    var W = cv.clientWidth || 720, H = cv.clientHeight || 280, dpr = Math.min(2, window.devicePixelRatio || 1);
+    var host = cv.parentElement || cv;
+    var W = Math.max(260, Math.min(1800, host.clientWidth || 720));
+    var H = Math.max(180, Math.min(700, host.clientHeight || 280));
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
     if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
     var c = cv.getContext('2d');
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -412,9 +631,34 @@
     renderContinue(s);
     renderHeatmapAndBars(s, sum);
     renderBadgesAndVault(s, sum);
-    paintMiniMap();
+    paintStarshipBridge();
+    startBridgeLoop();
     startHeroLoop();
   }
+
+  function stepPlanet(delta) {
+    if (!filteredPlanets.length) return;
+    var idx = filteredPlanets.findIndex(function (n) { return n.id === dockedNodeId; });
+    if (idx < 0) idx = 0;
+    var next = filteredPlanets[(idx + delta + filteredPlanets.length) % filteredPlanets.length];
+    if (next) dockPlanet(next.id, true);
+  }
+  document.getElementById('helmPrevBtn').onclick = function () { stepPlanet(-1); };
+  document.getElementById('helmNextBtn').onclick = function () { stepPlanet(1); };
+  document.getElementById('helmRandBtn').onclick = function () {
+    if (!filteredPlanets.length) return;
+    var picks = filteredPlanets.filter(function (n) { return n.id !== dockedNodeId; });
+    var chosen = (picks.length ? picks : filteredPlanets)[Math.floor(Math.random() * (picks.length ? picks.length : filteredPlanets.length))];
+    if (chosen) dockPlanet(chosen.id, true);
+  };
+  document.getElementById('fleetToggleBtn').onclick = function () {
+    fleetOpen = !fleetOpen;
+    document.getElementById('fleetDrawer').hidden = !fleetOpen;
+  };
+  document.getElementById('fleetCloseBtn').onclick = function () {
+    fleetOpen = false;
+    document.getElementById('fleetDrawer').hidden = true;
+  };
 
   document.querySelectorAll('#wsTabs .ws-tab').forEach(function (tab) {
     tab.onclick = function () {
@@ -427,7 +671,7 @@
       ['atlas', 'analytics', 'vault'].forEach(function (id) {
         document.getElementById('ws-' + id).hidden = (id !== activeWorkspace);
       });
-      if (activeWorkspace === 'atlas') paintMiniMap();
+      if (activeWorkspace === 'atlas') paintStarshipBridge();
     };
   });
 
@@ -437,17 +681,12 @@
       b.classList.add('on');
       atlasFilter = b.getAttribute('data-f');
       renderAtlas(P.getState());
+      paintStarshipBridge();
     };
   });
 
-  document.getElementById('atlasDensityBtn').onclick = function () {
-    atlasCompact = !atlasCompact;
-    this.textContent = atlasCompact ? '▤ Large Cards' : '⊞ Compact';
-    renderAtlas(P.getState());
-  };
-
   window.addEventListener('sim-progress-change', renderAll);
-  window.addEventListener('resize', function () { paintMiniMap(); paintHeroCanvas(); });
+  window.addEventListener('resize', function () { paintStarshipBridge(); paintHeroCanvas(); });
   renderAll();
 })();
 </script>

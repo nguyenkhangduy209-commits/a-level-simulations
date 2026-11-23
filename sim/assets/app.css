@@ -2086,3 +2086,313 @@ body.app-body {
 .ui-swatch.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--glow); }
 .ui-fx-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
 
+/* ============================================================================
+   USS Newton · Starship Navigation Bridge & Holographic Orbital Sector Deck
+   ============================================================================ */
+.starship-deck {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.95fr);
+  gap: 20px;
+  align-items: stretch;
+}
+@media (max-width: 1120px) {
+  .starship-deck { grid-template-columns: minmax(0, 1fr); }
+}
+
+.cockpit-bezel {
+  position: relative;
+  border-radius: 28px;
+  border: 1.5px solid color-mix(in srgb, var(--accent2) 34%, var(--line));
+  background: radial-gradient(700px 420px at 50% 48%, #0c1724 0%, #050a11 70%, #020509 100%);
+  color: #e2e8f0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 550px;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, .48), 0 0 0 1px rgba(255, 255, 255, .06) inset;
+}
+.cockpit-hud-top {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  background: linear-gradient(180deg, rgba(6, 12, 20, .88), rgba(6, 12, 20, .35));
+  border-bottom: 1px solid rgba(56, 189, 248, .18);
+  backdrop-filter: blur(10px);
+}
+.ship-callsign {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 800 13px var(--sans);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #f8fafc;
+}
+.ship-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+  animation: radarPulse 2s ease-in-out infinite;
+}
+@keyframes radarPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: .65; }
+}
+.sector-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.sector-pills button {
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, .28);
+  background: rgba(15, 23, 42, .72);
+  color: #cbd5e1;
+  font: 700 11.5px var(--sans);
+  cursor: pointer;
+  transition: .14s;
+}
+.sector-pills button:hover {
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+.sector-pills button.on {
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  color: #0f172a;
+  border-color: transparent;
+  box-shadow: 0 0 16px rgba(250, 204, 21, .36);
+}
+
+.cockpit-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 410px;
+  overflow: hidden;
+  cursor: crosshair;
+}
+.cockpit-viewport canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.cockpit-reticle {
+  position: absolute;
+  inset: 14px;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    linear-gradient(to right, rgba(56, 189, 248, .42) 14px, transparent 14px) 0 0 / 24px 2px no-repeat,
+    linear-gradient(to bottom, rgba(56, 189, 248, .42) 14px, transparent 14px) 0 0 / 2px 24px no-repeat,
+    linear-gradient(to left, rgba(56, 189, 248, .42) 14px, transparent 14px) 100% 0 / 24px 2px no-repeat,
+    linear-gradient(to bottom, rgba(56, 189, 248, .42) 14px, transparent 14px) 100% 0 / 2px 24px no-repeat,
+    linear-gradient(to right, rgba(56, 189, 248, .42) 14px, transparent 14px) 0 100% / 24px 2px no-repeat,
+    linear-gradient(to top, rgba(56, 189, 248, .42) 14px, transparent 14px) 0 100% / 2px 24px no-repeat,
+    linear-gradient(to left, rgba(56, 189, 248, .42) 14px, transparent 14px) 100% 100% / 24px 2px no-repeat,
+    linear-gradient(to top, rgba(56, 189, 248, .42) 14px, transparent 14px) 100% 100% / 2px 24px no-repeat;
+}
+
+.planet-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+.planet-beacon {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  padding: 0;
+  border: 2px solid rgba(148, 163, 184, .38);
+  background: radial-gradient(circle at 32% 28%, rgba(56, 189, 248, .35), rgba(15, 23, 42, .92) 72%);
+  color: #e2e8f0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform .2s cubic-bezier(.22, 1.3, .36, 1), border-color .16s, box-shadow .16s, opacity .2s;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .55);
+}
+.planet-beacon.c-9709 {
+  border-color: rgba(250, 204, 21, .45);
+  background: radial-gradient(circle at 32% 28%, rgba(250, 204, 21, .32), rgba(22, 18, 8, .92) 72%);
+  color: #fde68a;
+}
+.planet-beacon.mastered {
+  border-color: #4ade80;
+  box-shadow: 0 0 22px rgba(74, 222, 128, .42);
+}
+.planet-beacon.locked { opacity: .78; }
+.planet-beacon:hover {
+  transform: translate(-50%, -50%) scale(1.18);
+  z-index: 9;
+  opacity: 1;
+}
+.planet-beacon.active {
+  transform: translate(-50%, -50%) scale(1.26);
+  border-color: #facc15;
+  box-shadow: 0 0 0 5px rgba(250, 204, 21, .22), 0 0 28px rgba(250, 204, 21, .65);
+  z-index: 10;
+  opacity: 1;
+}
+.planet-beacon svg { width: 21px; height: 21px; }
+.planet-tag {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(5, 10, 18, .92);
+  border: 1px solid rgba(148, 163, 184, .32);
+  color: #f8fafc;
+  font: 700 10.5px var(--sans);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s;
+}
+.planet-beacon:hover .planet-tag,
+.planet-beacon.active .planet-tag {
+  opacity: 1;
+  border-color: #facc15;
+}
+.planet-pct-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.cockpit-helm-bar {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  background: linear-gradient(0deg, rgba(6, 12, 20, .94), rgba(6, 12, 20, .65));
+  border-top: 1px solid rgba(56, 189, 248, .18);
+}
+.helm-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 36px; padding: 0 13px; border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, .28);
+  background: rgba(15, 23, 42, .85); color: #e2e8f0;
+  font: 700 12px var(--sans); cursor: pointer; transition: .14s;
+}
+.helm-btn:hover { border-color: #facc15; color: #facc15; transform: translateY(-1px); }
+.helm-telemetry {
+  font: 700 11.5px ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #38bdf8;
+  letter-spacing: .04em;
+}
+
+/* Right-hand Target Lock Briefing Console */
+.target-console {
+  position: relative;
+  border-radius: 28px;
+  border: 1.5px solid color-mix(in srgb, var(--accent) 34%, var(--line));
+  background:
+    radial-gradient(400px 200px at 80% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 68%),
+    var(--panel);
+  padding: 22px 24px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.target-lock-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.target-coord {
+  font: 800 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.target-console h3 {
+  margin: 4px 0 2px;
+  font: 850 22px/1.15 var(--sans);
+  letter-spacing: -.02em;
+}
+.target-relic {
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  font: 500 13px/1.45 var(--sans);
+  color: var(--muted);
+}
+.target-relic b { color: var(--ink); }
+.bay-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: 175px;
+  overflow-y: auto;
+}
+.bay-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  color: var(--ink);
+  text-decoration: none;
+  font: 650 13px var(--sans);
+  transition: border-color .14s, transform .14s;
+}
+.bay-item:hover { border-color: var(--accent); transform: translateX(3px); }
+.bay-num {
+  font: 800 11px ui-monospace, monospace;
+  color: var(--accent);
+  padding: 2px 7px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.warp-cta-row {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.warp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  border-radius: 16px;
+  border: 0;
+  background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+  color: var(--accent-ink);
+  font: 800 14.5px var(--sans);
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 10px 28px var(--glow);
+  transition: transform .15s, box-shadow .15s;
+}
+.warp-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 34px var(--glow); }
+.fleet-drawer[hidden] { display: none !important; }
+
+
