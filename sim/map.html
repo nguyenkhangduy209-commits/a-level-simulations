@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physics Atlas Map · Radial Tree &amp; Constellation</title>
+<link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="assets/app.css">
+<script src="catalog/groups.js"></script>
+<script src="core/progress.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var P = window.SIM_PROGRESS, esc = P.esc, svg = P.svg;
+  var shell = P.mountShell({
+    active: 'map',
+    editableName: false,
+    title: 'Physics Atlas Map',
+    subtitle: 'Image-2 Radial Node Tree & Constellation Atlas — click any node to inspect mastery, ask Newton, or claim +50 XP.'
+  });
+  var root = shell.content;
+  var viewMode = 'tree'; // 'tree' (Image 2 radial Bézier) or 'constellation'
+  var realm = 'all';
+  var selectedId = new URLSearchParams(location.search).get('focus') || null;
+
+  var GATES = [
+    { toyId: 'orbital', label: 'Orbital Sandbox', pos: { x: 34, y: 7 } },
+    { toyId: 'pendulum', label: 'Chaos Pendulum', pos: { x: 74, y: 12 } },
+    { toyId: 'ripples', label: 'Ripple Synth', pos: { x: 50, y: 49 } },
+    { toyId: 'collider', label: 'Particle Collider', pos: { x: 86, y: 92 } }
+  ];
+
+  root.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px">' +
+    '  <div class="filter-pills" id="realmFilters">' +
+    '    <button type="button" class="on" data-r="all">All Atlas (17)</button>' +
+    '    <button type="button" data-r="9709">9709 Mechanics</button>' +
+    '    <button type="button" data-r="9702">9702 AS Physics</button>' +
+    '  </div>' +
+    '  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+    '    <span class="pill-btn" id="mapStatsPill">0/17 Mastered · 0 XP</span>' +
+    '    <a class="pill-btn gold" href="vault.html">Open Secret Vault →</a>' +
+    '  </div>' +
+    '</div>' +
+    '<section class="map-stage" aria-label="Interactive curriculum atlas" style="height:auto;min-height:820px;background:radial-gradient(circle at 18% 50%, rgba(45,212,191,.16), #060b0d 65%)">' +
+    '  <canvas id="mapCanvas"></canvas>' +
+    '  <div class="tree-toolbar" role="toolbar" aria-label="Map view">' +
+    '    <button type="button" id="modeTreeBtn" class="on">' + svg('spark') + ' Radial Tree</button>' +
+    '    <button type="button" id="modeConstBtn">' + svg('map') + ' Constellation</button>' +
+    '    <button type="button" id="quickQuestBtn">★ Quick Quest</button>' +
+    '  </div>' +
+    '  <div class="map-nodes" id="mapNodes"></div>' +
+    '  <aside class="map-inspector" id="mapInspector" hidden></aside>' +
+    '</section>';
+
+  function treeLayout(vis, s) {
+    var hasIns = !!selectedId;
+    var core = { x: hasIns ? 8 : 11, y: 52 };
+    var cats = [
+      { id: 'cat-9709', title: '9709 Mechanics', sub: 'Paper 4 Topics', x: hasIns ? 25 : 30, y: realm === '9702' ? 20 : realm === '9709' ? 52 : 30, course: '9709' },
+      { id: 'cat-9702', title: '9702 AS Physics', sub: 'Topics 1–11', x: hasIns ? 25 : 30, y: realm === '9709' ? 80 : realm === '9702' ? 52 : 72, course: '9702' }
+    ].filter(function (c) { return realm === 'all' || c.course === realm; });
+
+    var nodes = [];
+    var mList = vis.filter(function (n) { return n.course === '9709'; });
+    var pList = vis.filter(function (n) { return n.course === '9702'; });
+    var placeFan = function (list, y0, y1) {
+      list.forEach(function (n, idx) {
+        var frac = list.length > 1 ? idx / (list.length - 1) : 0.5;
+        var base = hasIns ? 52 : 66;
+        var arcX = base - Math.sin(frac * Math.PI) * 5;
+        var y = y0 + frac * (y1 - y0);
+        nodes.push({ node: n, x: arcX, y: y, catId: 'cat-' + n.course });
+      });
+    };
+    if (realm === 'all') { placeFan(mList, 11, 43); placeFan(pList, 50, 94); }
+    else if (realm === '9709') placeFan(mList, 14, 88);
+    else placeFan(pList, 13, 92);
+
+    return { core: core, cats: cats, nodes: nodes };
+  }
+
+  function constPos(n) {
+    if (realm === '9709') return { x: n.pos.x * 1.18 + 2, y: (n.pos.y - 8) * 1.9 + 12 };
+    if (realm === '9702') return { x: n.pos.x, y: (n.pos.y - 52) * 1.95 + 10 };
+    return n.pos;
+  }
+
+  function renderNodes() {
+    var s = P.getState(), sum = P.getSummary(s);
+    document.getElementById('mapStatsPill').textContent = sum.masteredCount + '/' + sum.totalNodes + ' Mastered · ' + sum.xp + ' XP';
+    var box = document.getElementById('mapNodes');
+    box.innerHTML = '';
+    var vis = P.NODES.filter(function (n) { return realm === 'all' || n.course === realm; });
+
+    if (viewMode === 'tree') {
+      var L = treeLayout(vis, s);
+      var orb = document.createElement('div');
+      orb.className = 'tree-core-orb';
+      orb.style.left = L.core.x + '%'; orb.style.top = L.core.y + '%';
+      orb.innerHTML = '<div><div style="font-size:16px;font-weight:800;color:var(--accent)">' + sum.masteredCount + '/' + sum.totalNodes + '</div><span>A-Level Core</span></div>';
+      box.appendChild(orb);
+
+      L.cats.forEach(function (cat) {
+        var count = vis.filter(function (n) { return n.course === cat.course; }).length;
+        var card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'tree-card';
+        card.style.left = cat.x + '%'; card.style.top = cat.y + '%';
+        card.innerHTML = '<span class="kpi-badge" style="width:32px;height:32px">' + svg(cat.course === '9709' ? 'mech' : 'phys') + '</span>' +
+          '<div><b style="font-size:13px;display:block">' + esc(cat.title) + '</b><small style="font-size:11px;color:var(--muted)">' + count + ' simulations</small></div>';
+        card.onclick = function () {
+          realm = realm === cat.course ? 'all' : cat.course;
+          document.querySelectorAll('#realmFilters button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-r') === realm); });
+          renderNodes();
+        };
+        box.appendChild(card);
+      });
+
+      L.nodes.forEach(function (item) {
+        var n = item.node, p = P.getNodeProgress(n.id, s);
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tree-card ' + (p.mastered ? 'mastered' : '') + (selectedId === n.id ? ' selected' : '');
+        btn.style.left = item.x + '%'; btn.style.top = item.y + '%';
+        btn.innerHTML =
+          '<span class="nav-ico" style="width:30px;height:30px;border-radius:9px">' + svg(n.id) + '</span>' +
+          '<div style="min-width:0;flex:1"><b style="font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(n.short) + '</b>' +
+          '<small style="font-size:10.5px;color:' + (p.mastered ? 'var(--accent)' : 'var(--muted)') + '">' + (p.mastered ? '★ Mastered' : p.pct + '% mastery') + '</small></div>';
+        btn.onclick = function () { selectedId = n.id; renderNodes(); renderInspector(); };
+        box.appendChild(btn);
+      });
+      return;
+    }
+
+    // Constellation View
+    vis.forEach(function (n) {
+      var p = P.getNodeProgress(n.id, s), pos = constPos(n);
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'map-node ' + (p.mastered ? 'mastered' : p.started ? 'started' : 'locked');
+      btn.style.left = Math.max(7, Math.min(93, pos.x)) + '%';
+      btn.style.top = Math.max(12, Math.min(90, pos.y)) + '%';
+      if (selectedId === n.id) btn.style.zIndex = '6';
+      btn.innerHTML = P.ringHtml(p.pct, n.id, p.mastered, p.started) + '<span class="m-lbl">' + esc(n.short) + '</span>';
+      btn.onclick = function () { selectedId = n.id; renderInspector(); };
+      box.appendChild(btn);
+    });
+    if (realm === 'all') {
+      GATES.forEach(function (g) {
+        var toy = P.TOYS.filter(function (t) { return t.id === g.toyId; })[0];
+        if (!toy) return;
+        var open = P.isToyUnlocked(toy, s, sum);
+        var a = document.createElement('a');
+        a.className = 'map-gate ' + (open ? 'open' : '');
+        a.href = 'vault.html?toy=' + toy.id;
+        a.style.left = g.pos.x + '%'; a.style.top = g.pos.y + '%';
+        a.innerHTML = (open ? '🔓 ' : '🔒 ') + esc(g.label) + (open ? '' : ' (' + toy.reqXp + ' XP)');
+        box.appendChild(a);
+      });
+    }
+  }
+
+  function renderInspector() {
+    var ins = document.getElementById('mapInspector');
+    if (!selectedId) { ins.hidden = true; return; }
+    var node = P.findNode(selectedId);
+    if (!node) { ins.hidden = true; return; }
+    var s = P.getState(), p = P.getNodeProgress(node.id, s);
+    var grp = (window.SIM_GROUPS || []).filter(function (g) { return g.id === node.id; })[0];
+    var modes = (grp && grp.modes) || node.modes || [{ id: 'main', label: node.title }];
+
+    // Build Image-2 style vertical spectrum bars reflecting mastery percentage
+    var barsHtml = '<div class="eq-bars">';
+    var totalBars = 18, filledBars = Math.round((p.pct / 100) * totalBars);
+    for (var b = 0; b < totalBars; b++) {
+      var hPx = 12 + Math.round(Math.abs(Math.sin(b * 0.7)) * 22);
+      barsHtml += '<i class="' + (b < filledBars ? 'on' : '') + '" style="height:' + hPx + 'px"></i>';
+    }
+    barsHtml += '</div>';
+
+    ins.hidden = false;
+    ins.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px">' +
+      '  <span class="kpi-badge" style="width:36px;height:36px">' + svg(node.id) + '</span>' +
+      '  <div style="flex:1;min-width:0"><span style="font-size:11px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em">' + esc(node.syllabus) + '</span><h3 style="margin:2px 0 0;font-size:17px">' + esc(node.title) + '</h3></div>' +
+      '  <button type="button" class="icon-circle" id="insClose" style="width:32px;height:32px" aria-label="Close inspector">×</button>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border-radius:16px;border:1px solid var(--line);background:var(--panel2)">' +
+      '  <div><div style="font-size:11px;color:var(--muted);font-weight:700">MASTERY RATE</div><div style="font-size:28px;font-weight:800;line-height:1.1">' + p.pct + '%</div></div>' +
+      barsHtml +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">' +
+      '  <div style="padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--panel2)"><b style="font-size:18px;display:block">' + modes.length + '</b><small style="font-size:11px;color:var(--muted)">Sim Modes</small></div>' +
+      '  <div style="padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--panel2)"><b style="font-size:18px;display:block">' + (p.mastered ? 'Unlocked' : '+50 XP') + '</b><small style="font-size:11px;color:var(--muted)">' + esc(node.relic.name) + '</small></div>' +
+      '</div>' +
+      '<div class="chk-list">' +
+      modes.map(function (m, idx) {
+        var done = p.modesVisited.indexOf(m.id) >= 0 || p.mastered;
+        var href = node.id === 'learn-eq' ? node.url : 'group.html?g=' + node.id + '&m=' + m.id;
+        return '<a class="chk-row ' + (done ? 'done' : '') + '" href="' + href + '">' +
+          '<span class="chk-num">' + String(idx + 1).padStart(2, '0') + '</span>' +
+          '<span>' + esc(m.label) + '</span>' +
+          '<span class="chk-stat">' + (done ? 'Done ✓' : 'Open →') + '</span></a>';
+      }).join('') +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px">' +
+      '  <button type="button" class="btn primary" id="insQuest" style="justify-content:center;min-height:42px">' + (p.mastered ? '★ Replay Mastery Quest' : '★ Attempt Mastery Quest (+50 XP)') + '</button>' +
+      '  <a class="btn" href="' + node.url + '" style="justify-content:center;min-height:40px">Launch Simulation →</a>' +
+      '</div>' +
+      '<form class="coach-input-row" id="insAskForm" style="margin-top:auto">' +
+      '  <input type="text" id="insAskIn" placeholder="Ask Newton about ' + esc(node.short) + '…" autocomplete="off">' +
+      '  <button type="submit" class="coach-send" aria-label="Ask Newton">➤</button>' +
+      '</form>';
+
+    ins.querySelector('#insClose').onclick = function () { selectedId = null; ins.hidden = true; renderNodes(); };
+    ins.querySelector('#insQuest').onclick = function () {
+      P.openQuestModal(node.id, function () { renderNodes(); renderInspector(); });
+    };
+    ins.querySelector('#insAskForm').onsubmit = function (e) {
+      e.preventDefault();
+      var txt = ins.querySelector('#insAskIn').value.trim();
+      ins.querySelector('#insAskIn').value = '';
+      shell.openCoach();
+      if (txt) {
+        var ci = document.getElementById('coachIn');
+        if (ci) { ci.value = txt; ci.form && ci.form.dispatchEvent(new Event('submit', { cancelable: true })); }
+      }
+    };
+  }
+
+  /* Animated Canvas drawing Radial Bézier Curves OR Constellation Star-Routes */
+  var cv = document.getElementById('mapCanvas'), ctx = cv.getContext('2d');
+  var stars = [];
+  for (var i = 0; i < 80; i++) stars.push({ x: Math.random(), y: Math.random(), r: 0.7 + Math.random() * 1.4, ph: Math.random() * 6.28 });
+  var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function drawMap(now) {
+    var W = cv.clientWidth || 900, H = cv.clientHeight || 540, dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    var t = (now || 0) * 0.001, s = P.getState();
+    var isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    var vis = P.NODES.filter(function (n) { return realm === 'all' || n.course === realm; });
+
+    stars.forEach(function (st) {
+      ctx.fillStyle = isLight ? 'rgba(180,120,10,' + (0.16 + 0.12 * Math.sin(t * 1.4 + st.ph)) + ')' : 'rgba(45,212,191,' + (0.15 + 0.2 * Math.sin(t * 1.5 + st.ph)) + ')';
+      ctx.beginPath(); ctx.arc(st.x * W, st.y * H, st.r, 0, Math.PI * 2); ctx.fill();
+    });
+
+    if (viewMode === 'tree') {
+      var L = treeLayout(vis, s);
+      var cx = L.core.x * 0.01 * W, cy = L.core.y * 0.01 * H;
+      // Core -> Category curves
+      L.cats.forEach(function (cat) {
+        var tx = cat.x * 0.01 * W, ty = cat.y * 0.01 * H;
+        ctx.save(); ctx.beginPath(); ctx.moveTo(cx, cy);
+        ctx.bezierCurveTo(cx + W * 0.09, cy, tx - W * 0.09, ty, tx, ty);
+        ctx.strokeStyle = cat.course === '9709' ? 'rgba(250,204,21,0.55)' : 'rgba(45,212,191,0.55)';
+        ctx.lineWidth = 2.4; ctx.stroke(); ctx.restore();
+      });
+      // Category -> Topic Node Bézier curves
+      L.nodes.forEach(function (item) {
+        var cat = L.cats.filter(function (c) { return c.id === item.catId; })[0];
+        if (!cat) return;
+        var p = P.getNodeProgress(item.node.id, s);
+        var ax = cat.x * 0.01 * W, ay = cat.y * 0.01 * H, bx = item.x * 0.01 * W, by = item.y * 0.01 * H;
+        ctx.save(); ctx.beginPath(); ctx.moveTo(ax, ay);
+        ctx.bezierCurveTo(ax + W * 0.16, ay, bx - W * 0.16, by, bx, by);
+        if (p.mastered) { ctx.strokeStyle = 'rgba(250,204,21,0.82)'; ctx.lineWidth = 2.4; }
+        else if (p.started || selectedId === item.node.id) { ctx.strokeStyle = 'rgba(45,212,191,0.7)'; ctx.lineWidth = 2; }
+        else { ctx.strokeStyle = isLight ? 'rgba(24,24,27,0.16)' : 'rgba(148,210,198,0.22)'; ctx.lineWidth = 1.4; }
+        ctx.stroke(); ctx.restore();
+      });
+    } else {
+      vis.forEach(function (n) {
+        var p = P.getNodeProgress(n.id, s), bPos = constPos(n);
+        var bx = Math.max(7, Math.min(93, bPos.x)) * 0.01 * W, by = Math.max(12, Math.min(90, bPos.y)) * 0.01 * H;
+        (n.prereqs || []).forEach(function (pid) {
+          var pn = P.findNode(pid); if (!pn || (realm !== 'all' && pn.course !== realm)) return;
+          var aPos = constPos(pn);
+          var ax = Math.max(7, Math.min(93, aPos.x)) * 0.01 * W, ay = Math.max(12, Math.min(90, aPos.y)) * 0.01 * H;
+          var pp = P.getNodeProgress(pid, s);
+          ctx.save(); ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
+          if (p.mastered || pp.mastered) { ctx.strokeStyle = 'rgba(250,204,21,0.75)'; ctx.lineWidth = 2.5; }
+          else if (p.started || pp.started) { ctx.strokeStyle = 'rgba(45,212,191,0.55)'; ctx.lineWidth = 2; }
+          else { ctx.setLineDash([5, 6]); ctx.strokeStyle = isLight ? 'rgba(24,24,27,0.16)' : 'rgba(255,255,255,0.14)'; ctx.lineWidth = 1.5; }
+          ctx.stroke(); ctx.restore();
+        });
+      });
+    }
+    if (!still && !document.hidden) requestAnimationFrame(drawMap);
+  }
+
+  document.getElementById('modeTreeBtn').onclick = function () {
+    viewMode = 'tree';
+    document.getElementById('modeTreeBtn').classList.add('on');
+    document.getElementById('modeConstBtn').classList.remove('on');
+    renderNodes(); if (still) drawMap(0);
+  };
+  document.getElementById('modeConstBtn').onclick = function () {
+    viewMode = 'constellation';
+    document.getElementById('modeConstBtn').classList.add('on');
+    document.getElementById('modeTreeBtn').classList.remove('on');
+    renderNodes(); if (still) drawMap(0);
+  };
+  document.getElementById('quickQuestBtn').onclick = function () {
+    P.openQuestModal(selectedId || 'forces', function () { renderNodes(); renderInspector(); });
+  };
+  document.querySelectorAll('#realmFilters button').forEach(function (b) {
+    b.onclick = function () {
+      document.querySelectorAll('#realmFilters button').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on'); realm = b.getAttribute('data-r'); renderNodes(); if (still) drawMap(0);
+    };
+  });
+
+  window.addEventListener('sim-progress-change', function () { renderNodes(); renderInspector(); });
+  window.addEventListener('resize', function () { if (still) drawMap(0); });
+  renderNodes(); renderInspector();
+  if (still) drawMap(0); else requestAnimationFrame(drawMap);
+})();
+</script>
+</body>
+</html>

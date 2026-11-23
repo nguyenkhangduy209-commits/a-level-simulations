@@ -97,24 +97,25 @@
     if (!ch) return;
     var col = ui.colors(), v = prm.values, c, W, H;
     vp.fit(0, 1, 0, 0.5625); c = vp.begin(); W = vp.w; H = vp.h;
-    // spectrum bar (log scale 1e-14 … 1e4 m)
-    var L0 = -14, L1 = 4, bx = 20, bw = W - 40, by = 30, bh = 26;
+    // spectrum bar (log scale 1e-14 … 1e4 m), clear below floating top HUD pills & stage-tip in ws-clean
+    var isWs = typeof document !== 'undefined' && document.body && document.body.classList && document.body.classList.contains('ws-clean');
+    var L0 = -14, L1 = 4, bx = 20, bw = W - 40, by = isWs ? 132 : 30, bh = 26;
     function BX(lg) { return bx + (lg - L0) / (L1 - L0) * bw; }
     var colsR = [col.s4, col.s3, col.s2, col.ok, col.warn, col.s1, col.accent];
     WV.EM.forEach(function (r, i) {
       var a = Math.max(L0, Math.log10(r.lo)), b = Math.min(L1, Math.log10(r.hi));
       c.save(); c.fillStyle = colsR[i % colsR.length]; c.globalAlpha = 0.35; c.fillRect(BX(a), by + (i % 2) * bh / 2, BX(b) - BX(a), bh / 2); c.restore();
-      D.label(c, r.name, (BX(a) + BX(b)) / 2, by + bh + 10 + (i % 2) * 12, col.ink, { size: 10 });
+      D.label(c, r.name, (BX(a) + BX(b)) / 2, by + bh + 10 + (i % 2) * 12, col.ink, { size: 10, avoidHud: false });
     });
     // visible rainbow strip
     var va = BX(Math.log10(4e-7)), vb = BX(Math.log10(7e-7));
     if (c.createLinearGradient) { var gr = c.createLinearGradient(va, 0, vb, 0); ['#7a00ff', '#0040ff', '#00c0ff', '#00d000', '#ffe000', '#ff8000', '#ff0000'].forEach(function (cc, i) { gr.addColorStop(i / 6, cc); }); c.save(); c.fillStyle = gr; c.fillRect(va, by - 6, Math.max(2, vb - va), 6); c.restore(); }
-    for (var e = L0; e <= L1; e += 2) { D.line(c, [[BX(e), by + bh], [BX(e), by + bh + 3]], col.muted, { width: 1 }); D.label(c, '10^' + e, BX(e), by - 14, col.muted, { size: 9 }); }
+    for (var e = L0; e <= L1; e += 2) { D.line(c, [[BX(e), by + bh], [BX(e), by + bh + 3]], col.muted, { width: 1 }); D.label(c, '10^' + e, BX(e), by - 14, col.muted, { size: 9, avoidHud: false }); }
     var cx = BX(v.logL);
     D.line(c, [[cx, by - 8], [cx, by + bh + 4]], col.accent, { width: 2.5 });
-    D.label(c, 'λ / m (log scale)', W - 20, by + bh + 40, col.muted, { align: 'right', size: 10 });
+    D.label(c, 'λ / m (log scale)', W - 20, by + bh + 40, col.muted, { align: 'right', size: 10, avoidHud: false });
     // polarisation beam
-    var y0 = H * 0.68, n = ch.steps.length, segs = n + 1, sx = 40, sw = W - 80, seg = sw / segs, amp0 = Math.min(42, H * 0.15);
+    var y0 = Math.max(H * 0.68, by + bh + 108), n = ch.steps.length, segs = n + 1, sx = 40, sw = W - 80, seg = sw / segs, amp0 = Math.min(42, H * 0.15);
     scene = { BX: BX, bx: bx, bw: bw, by: by, bh: bh, L0: L0, L1: L1, y0: y0, sx: sx, seg: seg, amp0: amp0 };
     var RL = real();
     if (RL) polBench(c, v, y0, sx, sw, seg, amp0);

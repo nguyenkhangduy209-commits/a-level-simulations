@@ -6,20 +6,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Course</title>
 <link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="assets/app.css">
 <style>
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 22px 20px 70px; }
-  .hero { position: relative; overflow: hidden; border-radius: 26px; padding: 30px 30px 26px; background: linear-gradient(135deg, #5146e5, #9a3ff0); color: #fff; box-shadow: var(--shadow-lg); }
-  :root[data-course="9702"] .hero { background: linear-gradient(135deg, #0b8f8a, #0e74c4); }
-  .hero::after { content: ""; position: absolute; inset: 0; background: radial-gradient(500px 220px at 85% 10%, rgba(255,255,255,.25), transparent 70%); pointer-events: none; }
-  .hero .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
-  .hero h1 { font-size: clamp(26px, 4vw, 40px); margin: 4px 0 6px; letter-spacing: -.03em; line-height: 1.1; }
-  .hero p { margin: 0; max-width: 640px; opacity: .92; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 0 48px; }
+  .hero { position: relative; overflow: hidden; border-radius: 26px; padding: 28px 28px 24px; background: radial-gradient(460px 200px at 85% 0%, rgba(250, 204, 21, .24), transparent 72%), var(--panel); border: 1px solid var(--line); color: var(--ink); box-shadow: var(--shadow-lg); }
+  :root[data-course="9702"] .hero { background: radial-gradient(460px 200px at 85% 0%, rgba(56, 189, 248, .22), transparent 72%), var(--panel); }
+  .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.08), transparent 55%); pointer-events: none; }
+  .hero .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  .hero h1 { font-size: clamp(26px, 4vw, 38px); margin: 4px 0 6px; letter-spacing: -.03em; line-height: 1.1; }
+  .hero p { margin: 0; max-width: 640px; color: var(--muted); }
   .hero .facts { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
-  .hero .fact { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; backdrop-filter: blur(6px); }
-  .hero .switch { position: absolute; right: 18px; top: 18px; z-index: 1; color: #fff; text-decoration: none; font-size: 13px; font-weight: 600; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); border-radius: 999px; padding: 8px 14px; min-height: 36px; display: inline-flex; align-items: center; }
-  .hero .switch:hover { background: rgba(255,255,255,.26); }
+  .hero .fact { background: var(--panel2); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; }
+  .hero .switch { position: absolute; right: 18px; top: 18px; z-index: 1; color: var(--ink); text-decoration: none; font-size: 13px; font-weight: 650; background: var(--panel2); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; min-height: 36px; display: inline-flex; align-items: center; }
+  .hero .switch:hover { border-color: var(--accent); color: var(--accent); }
   @media (max-width: 640px) { .hero .switch { position: static; margin-bottom: 12px; } .hero { padding: 22px 18px; } }
-  .hero svg.deco { position: absolute; right: -20px; bottom: -30px; width: 340px; opacity: .22; pointer-events: none; }
+  .hero svg.deco { position: absolute; right: -20px; bottom: -30px; width: 320px; opacity: .16; color: var(--accent); pointer-events: none; }
 
   .toolbar { display: flex; gap: 10px; align-items: center; margin: 22px 0 6px; flex-wrap: wrap; }
   .search { flex: 1 1 260px; min-height: var(--tap); font: 15px var(--sans); padding: 0 16px 0 42px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 14px 50% / 18px; color: var(--ink); box-shadow: var(--shadow); }
@@ -40,7 +41,7 @@
   .path li a { display: block; min-height: 64px; border: 1px solid var(--line); border-radius: 14px; padding: 10px 10px 10px 44px; text-decoration: none; color: var(--muted); font-size: 12.5px; background: var(--panel2); transition: border-color .15s, transform .15s; }
   .path li a:hover { border-color: var(--accent); transform: translateY(-1px); }
   .path li a b { display: block; color: var(--ink); font-size: 14px; }
-  .path li::before { content: counter(s); position: absolute; left: 10px; top: 12px; width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); color: #fff; font-weight: 800; font-size: 12px; display: grid; place-items: center; z-index: 1; }
+  .path li::before { content: counter(s); position: absolute; left: 10px; top: 12px; width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); color: var(--accent-ink); font-weight: 800; font-size: 12px; display: grid; place-items: center; z-index: 1; }
   .rules { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
 
   h2.section { font-size: 20px; letter-spacing: -.02em; margin: 34px 0 4px; }
@@ -52,8 +53,8 @@
   .sims { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
   .simcard { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s, border-color .15s; display: flex; flex-direction: column; }
   .simcard:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 16px 40px var(--glow); }
-  .simcard .ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--chip); color: var(--accent); margin-bottom: 10px; }
-  .simcard .ico svg { width: 22px; height: 22px; }
+  .simcard .ico { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: var(--chip); color: var(--accent); margin-bottom: 10px; border: 1px solid var(--line); }
+  .simcard .ico svg { width: 25px; height: 25px; }
   .simcard h3 { margin: 0 0 4px; font-size: 16px; }
   .simcard h3 a { color: var(--ink); text-decoration: none; }
   .simcard h3 a::after { content: ""; position: absolute; inset: 0; border-radius: 18px; }
@@ -88,14 +89,10 @@
 <script src="catalog/9702-t8to11.js"></script>
 <!-- tagged past-paper Paper 4 questions (generated by tools/papers) -->
 <script src="data/p4-questions.js"></script>
+<script src="core/progress.js"></script>
 </head>
 <body>
-<header class="sim-head">
-  <a class="brand" href="index.html" aria-label="Dashboard"><span class="logo" id="logo"></span><span>A Level Sims</span></a>
-  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Dashboard</a><span class="sep">›</span><span id="crumbCourse"></span></nav>
-  <button class="theme-btn" id="themeBtn" aria-label="Switch light or dark theme">◐ <span style="margin-left:6px">Theme</span></button>
-</header>
-<div class="wrap">
+<div class="wrap" id="courseWrap">
   <section class="hero" id="hero"></section>
   <div class="toolbar"><input class="search" type="search" placeholder="Search simulations and question types, e.g. pulley, friction, projectile…" aria-label="Search"></div>
   <div id="start"></div>
@@ -109,12 +106,10 @@
 <script>
 (function () {
   'use strict';
-  var ui = SIM.ui, h = ui.h, esc = ui.esc;
+  var ui = SIM.ui, h = ui.h, esc = ui.esc, P = window.SIM_PROGRESS;
   var q0 = new URLSearchParams(location.search).get('c');
   var C = q0 === '9702' ? '9702' : '9709';
   document.documentElement.setAttribute('data-course', C);
-  try { var th0 = localStorage.getItem('sim-theme'); if (th0) document.documentElement.setAttribute('data-theme', th0); } catch (e) { /* ignore */ }
-
   var COURSES = {
     '9709': { name: '9709 Mechanics', full: 'Mathematics 9709 · Paper 4 Mechanics', blurb: 'Forces, motion, momentum, Newton’s laws and energy, each one a simulation you can touch, with real past-paper set-ups.',
       facts: ['g = 10 m s⁻²', '1 h 15 min · 50 marks', 'Answers to 3 s.f.'], other: '9702' },
@@ -122,16 +117,17 @@
       facts: ['g = 9.81 m s⁻²', '2025–2027 syllabus', 'Topics 1–11'], other: '9709' }
   };
   var co = COURSES[C];
-  document.title = co.name + ' · A Level Sims';
-  document.getElementById('crumbCourse').textContent = co.name;
-  document.getElementById('logo').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18c3-9 8-12 16-12"/><circle cx="4" cy="18" r="1.6" fill="#fff"/><path d="M15 6h5v5"/></svg>';
+  var shell = P.mountShell({ active: 'course-' + C, editableName: false, title: co.name, subtitle: co.full });
+  shell.content.appendChild(document.getElementById('courseWrap'));
+  document.title = co.name + ' · A Level Atlas';
   var DECO = C === '9709'
-    ? '<svg class="deco" viewBox="0 0 200 140" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M10 130 L190 130 L190 40 Z"/><rect x="110" y="70" width="34" height="24" transform="rotate(-27 127 82)"/><circle cx="190" cy="40" r="10"/><path d="M190 50 V110"/><rect x="180" y="110" width="20" height="20"/></svg>'
-    : '<svg class="deco" viewBox="0 0 200 140" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M10 120 Q 70 -10 130 120"/><path d="M10 70 q 15 -25 30 0 t 30 0 t 30 0 t 30 0 t 30 0 t 30 0"/><circle cx="10" cy="120" r="5" fill="#fff"/></svg>';
+    ? '<svg class="deco" viewBox="0 0 200 140" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M10 130 L190 130 L190 40 Z"/><rect x="110" y="70" width="34" height="24" transform="rotate(-27 127 82)"/><circle cx="190" cy="40" r="10"/><path d="M190 50 V110"/><rect x="180" y="110" width="20" height="20"/></svg>'
+    : '<svg class="deco" viewBox="0 0 200 140" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M10 120 Q 70 -10 130 120"/><path d="M10 70 q 15 -25 30 0 t 30 0 t 30 0 t 30 0 t 30 0 t 30 0"/><circle cx="10" cy="120" r="5" fill="currentColor"/></svg>';
   document.getElementById('hero').innerHTML =
     '<a class="switch" href="course.html?c=' + co.other + '">Switch to ' + COURSES[co.other].name + ' →</a>' + DECO +
     '<div class="eyebrow">' + esc(co.full) + '</div><h1>' + esc(co.name) + '</h1><p>' + esc(co.blurb) + '</p>' +
-    '<div class="facts">' + co.facts.map(function (f) { return '<span class="fact">' + esc(f) + '</span>'; }).join('') + '</div>';
+    '<div class="facts">' + co.facts.map(function (f) { return '<span class="fact">' + esc(f) + '</span>'; }).join('') +
+    '<a class="pill-btn gold" style="min-height:32px;font-size:12.5px" href="map.html">View Realm on Map →</a></div>';
 
   var TOPICS = {
     '9709': [
@@ -221,7 +217,19 @@
       gs.forEach(function (g) {
         var chips = h('div', { class: 'modechips' });
         if (g.modes.length > 1) g.modes.forEach(function (m) { chips.appendChild(h('a', { href: groupUrl(g, m), text: m.label })); });
-        sims.appendChild(h('div', { class: 'simcard' }, [h('div', { class: 'ico', html: icon(g.id) }), h('h3', {}, [h('a', { href: groupUrl(g), text: g.title })]), h('p', { text: g.summary }), chips]));
+        var prog = P.getNodeProgress(g.id);
+        var qBtn = h('button', { type: 'button', class: 'pill-btn', style: 'min-height:30px;padding:0 10px;font-size:11.5px;position:relative;z-index:2', text: prog.mastered ? '★ Mastered' : '★ Quest +50', onclick: function (ev) {
+          ev.preventDefault(); ev.stopPropagation();
+          P.openQuestModal(g.id, render);
+        } });
+        var headRow = h('div', { style: 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px' }, [
+          h('div', { class: 'ico', style: 'margin-bottom:0', html: icon(g.id) }),
+          h('div', { style: 'display:flex;align-items:center;gap:6px' }, [
+            h('span', { html: P.miniRingHtml(prog.pct) }),
+            qBtn
+          ])
+        ]);
+        sims.appendChild(h('div', { class: 'simcard' }, [headRow, h('h3', {}, [h('a', { href: groupUrl(g), text: g.title })]), h('p', { text: g.summary }), chips]));
       });
       if (also.length) {
         var line = h('div', { class: 'alsoin' }, [document.createTextNode(gs.length ? 'Also used here: ' : 'Covered in: ')]);
@@ -260,11 +268,7 @@
 
   try { localStorage.setItem('hub-course', C); } catch (e) { /* ignore */ }
   document.querySelector('.search').addEventListener('input', function (e) { state.q = e.target.value.trim(); render(); });
-  document.getElementById('themeBtn').addEventListener('click', function () {
-    var d = document.documentElement, cur = d.getAttribute('data-theme');
-    var dark = cur ? cur === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-    d.setAttribute('data-theme', dark ? 'light' : 'dark'); try { localStorage.setItem('sim-theme', dark ? 'light' : 'dark'); } catch (e) { /* ignore */ }
-  });
+  window.addEventListener('sim-progress-change', render);
   render();
 })();
 </script>

@@ -12,9 +12,12 @@
     this.resize();
   }
   Plot.prototype.resize = function () {
-    var r = this.canvas.getBoundingClientRect(), dpr = root.devicePixelRatio || 1;
-    var w = Math.max(80, r.width), h = Math.max(60, r.height || r.width * 0.75);
-    this.canvas.width = Math.round(w * dpr); this.canvas.height = Math.round(h * dpr);
+    var r = this.canvas.getBoundingClientRect(), dpr = Math.min(2, root.devicePixelRatio || 1);
+    if (r.width < 10) return;
+    var w = Math.min(2000, Math.max(80, r.width)), h = Math.min(1400, Math.max(60, r.height || w * 0.75));
+    if (this.canvas.width !== Math.round(w * dpr) || this.canvas.height !== Math.round(h * dpr)) {
+      this.canvas.width = Math.round(w * dpr); this.canvas.height = Math.round(h * dpr);
+    }
     this.w = w; this.h = h; this.dpr = dpr;
   };
   /**
@@ -62,7 +65,7 @@
     function py(y) { return T + (Y1 - y) / (Y1 - Y0) * H; }
     this.px = px; this.py = py; this.box = { L: L, T: T, W: W, H: H };
     // grid
-    var FONT_SANS = 'Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+    var FONT_SANS = '"Plus Jakarta Sans", "Inter", system-ui, -apple-system, sans-serif';
     c.font = '500 11.5px ' + FONT_SANS; c.lineWidth = 1;
     xt.ticks.forEach(function (t) {
       if (t < X0 - 1e-9 || t > X1 + 1e-9) return;
@@ -75,10 +78,11 @@
       c.fillStyle = col.muted; c.textAlign = 'right'; c.textBaseline = 'middle'; c.fillText(U.num(t, 6), L - 5, py(t));
     });
     // axes (y = 0 line emphasised)
-    c.strokeStyle = col.muted; c.lineWidth = 1.2;
+    c.strokeStyle = col.ink; c.globalAlpha = 0.42; c.lineWidth = 1.4;
     var zy = Y0 <= 0 && Y1 >= 0 ? py(0) : T + H;
     c.beginPath(); c.moveTo(L, zy); c.lineTo(L + W, zy); c.stroke();
     c.beginPath(); c.moveTo(px(Math.max(X0, Math.min(0, X1))), T); c.lineTo(px(Math.max(X0, Math.min(0, X1))), T + H); c.stroke();
+    c.globalAlpha = 1;
     // labels
     c.fillStyle = col.ink; c.font = '600 12.5px ' + FONT_SANS;
     c.textAlign = 'right'; c.textBaseline = 'bottom'; c.fillText(xLabel, L + W, T + H + B - 2);
@@ -103,7 +107,7 @@
           }
         }
       }
-      c.strokeStyle = s.color || col.s1; c.lineWidth = s.width || 2; c.setLineDash(s.dash || []);
+      c.strokeStyle = s.color || col.s1; c.lineWidth = s.width || 2.4; c.setLineDash(s.dash || []);
       c.beginPath(); var pen = false;
       pts.forEach(function (p) {
         if (!isFinite(p[1])) { pen = false; return; }
@@ -124,11 +128,16 @@
       if (m.label) { c.textAlign = 'left'; c.textBaseline = 'bottom'; c.font = '600 11.5px ' + FONT_SANS; c.fillText(m.label, px(m.x) + 5, py(m.y) - 3); }
     });
     if (spec.cursor !== undefined && isFinite(spec.cursor)) {
-      c.strokeStyle = col.accent; c.lineWidth = 1.5; c.beginPath(); c.moveTo(px(spec.cursor), T); c.lineTo(px(spec.cursor), T + H); c.stroke();
+      c.save();
+      c.strokeStyle = col.accent; c.lineWidth = 1.8; c.shadowColor = col.accent; c.shadowBlur = 8;
+      c.beginPath(); c.moveTo(px(spec.cursor), T); c.lineTo(px(spec.cursor), T + H); c.stroke();
+      c.shadowBlur = 0;
       (spec.series || []).forEach(function (s) {
         if (!s.fn) return; var y = s.fn(spec.cursor); if (!isFinite(y)) return;
-        c.fillStyle = s.color || col.s1; c.beginPath(); c.arc(px(spec.cursor), py(y), 4, 0, Math.PI * 2); c.fill();
+        c.fillStyle = s.color || col.s1; c.beginPath(); c.arc(px(spec.cursor), py(y), 5, 0, Math.PI * 2); c.fill();
+        c.strokeStyle = col.panel; c.lineWidth = 1.5; c.stroke();
       });
+      c.restore();
     }
     c.restore();
     // title: top-right beside the y label if there is room, otherwise a caption inside the plot (never on top of the y label)

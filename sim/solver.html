@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Question &amp; Screenshot Solver — A Level Physics &amp; Mechanics</title>
+<link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="assets/app.css">
+<script src="core/progress.js"></script>
+<script src="core/solver.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var P = window.SIM_PROGRESS, S = SIM.SOLVER, svg = P.svg;
+  var esc = function (s) { return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+
+  var shell = P.mountShell({
+    active: 'solver',
+    greetPrefix: 'Question Studio · ',
+    title: 'AI Screenshot Solver',
+    editableName: false,
+    subtitle: 'Drop a past-paper screenshot or paste a question — automatically launches the live simulation & step-by-step working'
+  });
+
+  var curImg = '', curResult = null, samples = S.getSamples();
+
+  function aiBadgeHtml() {
+    var hasKey = !!S.getApiKey();
+    return hasKey
+      ? '<span class="solver-badge-ai ready">🤖 Gemini Vision AI Ready</span>'
+      : '<span class="solver-badge-ai">⚡ Smart Physics Solver + OCR Ready</span>';
+  }
+
+  shell.content.innerHTML =
+    '<div class="solver-hero">' +
+    '  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap" id="aiBadgeHost">' + aiBadgeHtml() + '</div>' +
+    '  <div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    '    <button type="button" class="pill-btn" id="toggleAiBtn">⚙ AI API Settings</button>' +
+    '    <a class="pill-btn gold" href="group.html?g=forces-p">⚖ Moments Sim →</a>' +
+    '  </div>' +
+    '</div>' +
+    '<div class="panel-card" id="aiKeyDrawer" hidden style="margin-bottom:16px">' +
+    '  <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('spark') + '</span><div><h2>Optional Gemini Vision AI Key</h2><small>Stored locally in your browser (never leaves your device except direct Google Gemini requests)</small></div></div></div>' +
+    '  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
+    '    <input type="password" class="solver-in" id="geminiKeyIn" style="flex:1;min-width:220px" placeholder="Paste Gemini API key (optional — works offline/free without key too!)">' +
+    '    <button type="button" class="pill-btn gold" id="saveKeyBtn">Save Key</button>' +
+    '    <button type="button" class="pill-btn" id="clearKeyBtn">Clear Key</button>' +
+    '  </div>' +
+    '</div>' +
+    '<div class="solver-grid">' +
+    '  <div style="display:flex;flex-direction:column;gap:14px">' +
+    '    <section class="panel-card">' +
+    '      <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('solver') + '</span><div><h2>1. Screenshot or Question</h2><small>Drop, browse, or press Ctrl+V</small></div></div></div>' +
+    '      <div class="solver-drop" id="dropZone">' +
+    '        <input type="file" id="imgInput" accept="image/*">' +
+    '        <div style="font-size:24px;margin-bottom:4px">📸</div>' +
+    '        <div style="font:700 13.5px var(--sans)">Drop past-paper screenshot or click to upload</div>' +
+    '        <div style="font-size:12px;color:var(--muted);margin-top:2px">Supports clipboard paste (Ctrl+V / Cmd+V)</div>' +
+    '        <img class="solver-preview" id="imgPreview" alt="Uploaded physics question screenshot" hidden>' +
+    '      </div>' +
+    '      <div style="margin-top:12px">' +
+    '        <label style="display:block;font:700 12px var(--sans);color:var(--muted);margin-bottom:6px">Question text (auto-filled by OCR or edit manually)</label>' +
+    '        <textarea class="solver-ta" id="qTextIn" placeholder="Paste or type a 9709 / 9702 question (e.g. A uniform 4 m plank pivoted at 2 m has 300 N at 0.5 m and unknown force X at 3 m. Find X.)"></textarea>' +
+    '      </div>' +
+    '      <div style="margin-top:10px">' +
+    '        <label style="display:block;font:700 12px var(--sans);color:var(--muted);margin-bottom:5px">Unknown x you want to find (optional)</label>' +
+    '        <input type="text" class="solver-in" id="askHintIn" placeholder="e.g. Force X, tension T, weight W, max height">' +
+    '      </div>' +
+    '      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">' +
+    '        <button type="button" class="pill-btn gold" id="analyzeBtn" style="flex:1;justify-content:center;min-height:42px">⚡ Analyze &amp; Launch Simulation</button>' +
+    '        <button type="button" class="pill-btn" id="resetBtn">Reset</button>' +
+    '      </div>' +
+    '      <div id="solverStatus" style="margin-top:8px;font-size:12.5px;color:var(--accent);font-weight:600"></div>' +
+    '      <div style="margin-top:14px;font:700 11.5px var(--sans);color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Try Past-Paper Samples (Includes Diagram Screenshot)</div>' +
+    '      <div class="solver-samples" id="samplesHost"></div>' +
+    '    </section>' +
+    '  </div>' +
+    '  <div style="display:flex;flex-direction:column;gap:14px" id="outputHost">' +
+    '    <section class="panel-card" id="emptyState" style="text-align:center;padding:38px 20px">' +
+    '      <div style="font-size:36px;margin-bottom:10px">🧠</div>' +
+    '      <h2 style="margin:0 0 6px;font-size:18px">Ready to Simulate Your Question</h2>' +
+    '      <p style="margin:0 auto;max-width:460px;color:var(--muted);font-size:13.5px">Upload or paste any Cambridge 9709 / 9702 question screenshot, or pick one of the sample problems on the left. We will automatically build the live simulation, highlight unknown <b>x</b>, and animate the step-by-step working.</p>' +
+    '    </section>' +
+    '  </div>' +
+    '</div>';
+
+  var badgeHost = shell.content.querySelector('#aiBadgeHost');
+  var aiDrawer = shell.content.querySelector('#aiKeyDrawer');
+  var keyIn = shell.content.querySelector('#geminiKeyIn');
+  var dropZone = shell.content.querySelector('#dropZone');
+  var imgInput = shell.content.querySelector('#imgInput');
+  var imgPreview = shell.content.querySelector('#imgPreview');
+  var qTextIn = shell.content.querySelector('#qTextIn');
+  var askHintIn = shell.content.querySelector('#askHintIn');
+  var analyzeBtn = shell.content.querySelector('#analyzeBtn');
+  var resetBtn = shell.content.querySelector('#resetBtn');
+  var statusEl = shell.content.querySelector('#solverStatus');
+  var samplesHost = shell.content.querySelector('#samplesHost');
+  var outputHost = shell.content.querySelector('#outputHost');
+
+  keyIn.value = S.getApiKey();
+  shell.content.querySelector('#toggleAiBtn').onclick = function () { aiDrawer.hidden = !aiDrawer.hidden; };
+  shell.content.querySelector('#saveKeyBtn').onclick = function () {
+    S.setApiKey(keyIn.value);
+    badgeHost.innerHTML = aiBadgeHtml();
+    aiDrawer.hidden = true;
+    statusEl.textContent = S.getApiKey() ? 'Gemini Vision AI key saved locally!' : 'Cleared key — using built-in smart solver.';
+  };
+  shell.content.querySelector('#clearKeyBtn').onclick = function () {
+    keyIn.value = '';
+    S.setApiKey('');
+    badgeHost.innerHTML = aiBadgeHtml();
+    statusEl.textContent = 'Using built-in Smart Solver + OCR.';
+  };
+
+  function setImage(dataUrl) {
+    curImg = dataUrl || '';
+    if (curImg) {
+      imgPreview.src = curImg;
+      imgPreview.hidden = false;
+    } else {
+      imgPreview.removeAttribute('src');
+      imgPreview.hidden = true;
+    }
+  }
+
+  function handleFile(file) {
+    if (!file || !file.type || file.type.indexOf('image/') !== 0) return;
+    var rd = new FileReader();
+    rd.onload = function () {
+      setImage(String(rd.result || ''));
+      statusEl.textContent = 'Screenshot attached (' + (file.name || 'clipboard image') + ') — analyzing…';
+      runAnalysis();
+    };
+    rd.readAsDataURL(file);
+  }
+
+  imgInput.addEventListener('change', function () {
+    if (imgInput.files && imgInput.files[0]) handleFile(imgInput.files[0]);
+  });
+  dropZone.addEventListener('dragover', function (e) { e.preventDefault(); dropZone.classList.add('drag'); });
+  dropZone.addEventListener('dragleave', function () { dropZone.classList.remove('drag'); });
+  dropZone.addEventListener('drop', function (e) {
+    e.preventDefault(); dropZone.classList.remove('drag');
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+  document.addEventListener('paste', function (e) {
+    if (!e.clipboardData || !e.clipboardData.items) return;
+    for (var i = 0; i < e.clipboardData.items.length; i++) {
+      var it = e.clipboardData.items[i];
+      if (it.type && it.type.indexOf('image/') === 0) { handleFile(it.getAsFile()); break; }
+    }
+  });
+
+  function renderOutput(res) {
+    curResult = res;
+    var theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    var url = S.buildSimUrl(res, { theme: theme, autoSolve: false });
+    var keys = Object.keys(res.params || {});
+
+    outputHost.innerHTML =
+      '<section class="panel-card">' +
+      '  <div class="panel-head">' +
+      '    <div class="panel-title"><span class="kpi-badge">' + svg(res.sim.id) + '</span><div><h2>' + esc(res.title || res.sim.title) + '</h2><small>' + esc(res.sim.syllabus) + ' · ' + (res.usedAi ? 'Solved by Gemini Vision AI' : 'Solved by Built-in Physics Engine') + '</small></div></div>' +
+      '    <div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      '      <button type="button" class="pill-btn gold" id="frameCalcBtn">⚡ Calculate x</button>' +
+      '      <button type="button" class="pill-btn" id="framePlayBtn">▶ Play Animated Steps</button>' +
+      '      <a class="pill-btn" id="openFullLink" href="' + esc(url.replace('&embed=1', '')) + '">Full View ↗</a>' +
+      '    </div>' +
+      '  </div>' +
+      '  <div class="solver-frame-wrap"><iframe id="simIframe" title="Live Question Simulation" src="' + esc(url) + '"></iframe></div>' +
+      '  <div style="margin-top:12px;font:700 11.5px var(--sans);color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Extracted Simulation Parameters (Editable Live)</div>' +
+      '  <div class="solver-param-grid" id="paramChips"></div>' +
+      '</section>' +
+      '<section class="panel-card">' +
+      '  <div class="panel-head"><div class="panel-title"><span class="kpi-badge">' + svg('spark') + '</span><div><h2>Step-by-Step Working Out</h2><small>Synchronized with Cambridge mark scheme style</small></div></div></div>' +
+      '  <div class="solver-steps">' +
+      (res.steps || []).map(function (st, idx) {
+        return '<div class="solver-step">' +
+          '<div class="solver-step-head"><span class="solver-step-num">' + (idx + 1) + '</span><span>' + esc(st.title) + '</span></div>' +
+          '<div class="solver-step-eq">' + esc(st.equation) + '</div>' +
+          (st.explanation ? '<div class="solver-step-why">' + esc(st.explanation) + '</div>' : '') +
+          '</div>';
+      }).join('') +
+      '  </div>' +
+      (res.finalAnswer ? '<div class="solver-answer">✓ Answer: ' + esc(res.finalAnswer) + '</div>' : '') +
+      '</section>';
+
+    var frame = outputHost.querySelector('#simIframe');
+    var fullLink = outputHost.querySelector('#openFullLink');
+    var paramHost = outputHost.querySelector('#paramChips');
+
+    keys.forEach(function (k) {
+      var isX = res.unknownKey === k;
+      var meta = (res.sim.params || []).find(function (p) { return p.key === k; });
+      var box = document.createElement('div');
+      box.className = 'solver-pbox' + (isX ? ' is-x' : '');
+      box.innerHTML = '<label><span>' + esc(meta ? meta.label : k) + '</span><span>' + (isX ? '<b>x</b>' : esc(meta && meta.unit ? meta.unit : '')) + '</span></label>' +
+        '<input type="text" value="' + esc(res.params[k]) + '" aria-label="Parameter ' + esc(k) + '">';
+      var inp = box.querySelector('input');
+      inp.addEventListener('change', function () {
+        var nv = Number(inp.value);
+        res.params[k] = isFinite(nv) ? nv : inp.value;
+        var nextUrl = S.buildSimUrl(res, { theme: theme });
+        frame.src = nextUrl;
+        fullLink.href = nextUrl.replace('&embed=1', '');
+      });
+      paramHost.appendChild(box);
+    });
+
+    outputHost.querySelector('#frameCalcBtn').onclick = function () {
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage({ type: 'sim-calc-x' }, '*');
+      }
+    };
+    outputHost.querySelector('#framePlayBtn').onclick = function () {
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage({ type: 'sim-play-studio' }, '*');
+      }
+    };
+  }
+
+  function runAnalysis() {
+    var apiKey = S.getApiKey();
+    var txt = qTextIn.value.trim();
+    var hint = askHintIn.value.trim();
+    if (!txt && !curImg) {
+      statusEl.textContent = 'Drop a screenshot or enter question text first.';
+      return;
+    }
+    analyzeBtn.disabled = true;
+    statusEl.textContent = apiKey ? '🤖 Analyzing screenshot & diagram with Gemini Vision AI…' : '⚡ Extracting physics quantities & generating simulation…';
+
+    var work = apiKey
+      ? S.analyzeWithGemini(apiKey, curImg, txt, hint).catch(function (err) {
+          statusEl.textContent = 'AI fallback (' + (err && err.message ? err.message : 'offline') + ') — solving with Smart Engine…';
+          return S.analyzeLocally(txt, curImg, hint, function (msg) { statusEl.textContent = msg; });
+        })
+      : S.analyzeLocally(txt, curImg, hint, function (msg) { statusEl.textContent = msg; });
+
+    work.then(function (res) {
+      analyzeBtn.disabled = false;
+      if (res.ocrText && !qTextIn.value.trim()) qTextIn.value = res.ocrText;
+      statusEl.textContent = '✓ Mapped to ' + res.sim.title + ' · unknown x = ' + (res.unknownLabel || res.unknownKey || 'ready');
+      renderOutput(res);
+      if (P.addXp) P.addXp(15, 'Solved custom question');
+    }).catch(function (err) {
+      analyzeBtn.disabled = false;
+      statusEl.textContent = (err && err.message) ? err.message : 'Could not analyze input yet — try pasting question text cleanly.';
+    });
+  }
+
+  samples.forEach(function (smp) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'solver-sample';
+    btn.innerHTML = '<small>' + esc(smp.badge) + '</small>' + esc(smp.label);
+    btn.onclick = function () {
+      Array.prototype.forEach.call(samplesHost.children, function (el) { el.classList.remove('on'); });
+      btn.classList.add('on');
+      setImage(smp.img);
+      qTextIn.value = smp.text;
+      askHintIn.value = smp.askX || '';
+      runAnalysis();
+    };
+    samplesHost.appendChild(btn);
+  });
+
+  analyzeBtn.onclick = runAnalysis;
+  resetBtn.onclick = function () {
+    setImage('');
+    qTextIn.value = '';
+    askHintIn.value = '';
+    statusEl.textContent = '';
+    Array.prototype.forEach.call(samplesHost.children, function (el) { el.classList.remove('on'); });
+  };
+
+  // Auto-load first sample on initial visit if query string specifies ?sample=1
+  var q = new URLSearchParams(location.search);
+  if (q.get('sample')) {
+    var sIdx = Math.max(0, Math.min(samples.length - 1, Number(q.get('sample')) - 1 || 0));
+    if (samplesHost.children[sIdx]) samplesHost.children[sIdx].click();
+  }
+})();
+</script>
+</body>
+</html>

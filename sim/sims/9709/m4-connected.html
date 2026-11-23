@@ -378,7 +378,7 @@
       }
     }
     if (G.ks < 1) D.label(c, 'motion drawn at ' + U.sf(G.ks, 2) + '× scale', vp.w - 8, 12, col.muted, { align: 'right', size: 11 });
-    D.label(c, 'positive: ' + built.positive, 8, vp.h - 10, col.muted, { align: 'left', size: 11 });
+    D.label(c, 'positive: ' + built.positive, 14, vp.h - 68, col.muted, { align: 'left', size: 11, bg: true });
     if (st.stopped) D.label(c, 'model stopped', vp.w / 2, 14, col.warn, { bold: true });
     if (ix) ix.paint(c);
   }

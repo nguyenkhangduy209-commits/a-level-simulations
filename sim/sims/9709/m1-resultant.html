@@ -220,7 +220,14 @@
     });
     return out;
   }
+  function isMarkedForce(j) {
+    var mx = ui.getMarkedX ? ui.getMarkedX() : null;
+    if (!mx) return false;
+    if (mx.meta && mx.meta.j !== undefined) return mx.meta.j === j;
+    return mx.key === ('F' + j) || mx.key === ('F' + (j + 1));
+  }
   function valueLabel(fd) {
+    if (isMarkedForce(fd.j)) return fname(fd.j) + ' = x ?';
     var hide = exam.get() && fd.unknown;
     var base = fname(fd.j) + (fd.mult ? ' = ' + (fd.c === 1 ? '' : U.num(fd.c, 3)) + 'F' : '');
     return hide ? base : base + ' = ' + U.num(fd.mag, 3) + ' N';
@@ -237,19 +244,21 @@
   function drawScene() {
     if (!M) return;
     var col = ui.colors(), c;
-    vp.fit(-1.25, 1.25, -1.25, 1.25); c = vp.begin();
-    var ox = vp.X(0), oy = vp.Y(0), L = Math.min(vp.w, vp.h) * 0.4, real = SC.real();
+    vp.fit(-1.45, 1.45, -1.25, 1.65); c = vp.begin();
+    var ox = vp.X(0), oy = vp.Y(0), L = Math.min(vp.w, vp.h) * 0.28, real = SC.real();
     var fl = drawList();
     if (real) realScene(c, col, ox, oy, L, fl);
     D.line(c, [[vp.X(-1.25) - 200, oy], [vp.X(1.25) + 200, oy]], real ? 'rgba(255,255,255,.75)' : col.grid, { dash: [4, 4] });
     D.line(c, [[ox, vp.Y(1.25) - 50], [ox, vp.Y(-1.25) + 50]], real ? 'rgba(255,255,255,.75)' : col.grid, { dash: [4, 4] });
-    D.label(c, '+x', Math.min(vp.w - 14, ox + L + 30), oy - 10, real ? col.ink : col.muted, { size: 11, bg: real });
-    D.label(c, '+y', ox + 14, Math.max(10, oy - L - 22), real ? col.ink : col.muted, { size: 11, bg: real });
+    D.label(c, '+x', Math.min(vp.w - 14, ox + L + 86), oy + 14, real ? col.ink : col.muted, { size: 11, bg: real });
+    D.label(c, '+y', ox + 30, Math.max(54, oy - L - 48), real ? col.ink : col.muted, { size: 11, bg: real });
     var mags = fl.map(function (x) { return x.mag; });
     if (M.res && M.res.R > 0) mags.push(M.res.R);
     var k = SIM.view.forceScale(mags, L);
     fl.forEach(function (fd, idx) {
-      var color = forceColor(col, fd.j), ang = U.rad(fd.th);
+      var mxF = isMarkedForce(fd.j);
+      var xGold = (typeof document !== 'undefined' && document.documentElement && document.documentElement.getAttribute('data-theme') === 'light') ? '#c98a00' : '#fbbf24';
+      var color = mxF ? xGold : forceColor(col, fd.j), ang = U.rad(fd.th);
       if (compsAll.get() && Math.abs(fd.mag) > 1e-9) {
         var ux = Math.cos(ang) * fd.mag, uy = Math.sin(ang) * fd.mag;
         if (Math.abs(ux) > 1e-9) D.arrow(c, ox, oy, ox + ux * k, oy, color, { dash: [4, 4], width: 1.2, head: 7 });
@@ -257,17 +266,26 @@
         D.line(c, [[ox + ux * k, oy], [ox + ux * k, oy - uy * k], [ox, oy - uy * k]], color, { dash: [2, 4], width: 1 });
       }
       if (Math.abs(fd.mag) > 1e-9) {
-        D.arrowPolar(c, ox, oy, ang, fd.mag * k, color, { label: valueLabel(fd), dash: fd.mag < 0 ? [6, 4] : null });
+        D.arrowPolar(c, ox, oy, ang, fd.mag * k, color, { label: valueLabel(fd), dash: mxF || fd.mag < 0 ? [6, 4] : null });
         var lab = exam.get() && M.unk.some(function (u) { return u.kind === 'th' && u.i === fd.j; }) ? 'θ' + SUB[fd.j] : null;
         arcFor(c, ox, oy, 22 + 9 * idx, fd.th, color, lab);
       }
     });
     if (M.res && M.res.R > 0) {
       var rx = M.res.X * k, ry = M.res.Y * k;
-      if (Math.abs(rx) > 0.5) D.arrow(c, ox, oy, ox + rx, oy, col.component, { dash: [5, 4], width: 1.6, label: exam.get() ? 'X' : 'X = ' + U.num(M.res.X, 3) });
-      if (Math.abs(ry) > 0.5) D.arrow(c, ox, oy, ox, oy - ry, col.component, { dash: [5, 4], width: 1.6, label: exam.get() ? 'Y' : 'Y = ' + U.num(M.res.Y, 3) });
-      D.line(c, [[ox + rx, oy], [ox + rx, oy - ry], [ox, oy - ry]], col.component, { dash: [2, 4], width: 1 });
-      D.arrowPolar(c, ox, oy, U.rad(M.res.dir), M.res.R * k, col.resultant, { width: 3.4, label: exam.get() ? 'R' : 'R = ' + U.num(M.res.R, 3) + ' N' });
+      var showX = Math.abs(M.res.X) > 0.04 * M.res.R, showY = Math.abs(M.res.Y) > 0.04 * M.res.R;
+      if (showX && Math.abs(rx) > 0.5) {
+        D.arrow(c, ox, oy, ox + rx, oy, col.component, { dash: [5, 4], width: 1.6 });
+        if (showY) D.label(c, exam.get() ? 'X' : 'X = ' + U.num(M.res.X, 3), ox + rx * 0.5, oy + (M.res.Y >= 0 ? 16 : -16), col.component, { size: 12, bg: true });
+      }
+      if (showY && Math.abs(ry) > 0.5) {
+        D.arrow(c, ox, oy, ox, oy - ry, col.component, { dash: [5, 4], width: 1.6 });
+        if (showX) D.label(c, exam.get() ? 'Y' : 'Y = ' + U.num(M.res.Y, 3), ox + (M.res.X <= 0 ? 14 : -14), oy - ry * 0.42, col.component, { size: 12, bg: true, align: M.res.X <= 0 ? 'left' : 'right' });
+      }
+      if (showX && showY) D.line(c, [[ox + rx, oy], [ox + rx, oy - ry], [ox, oy - ry]], col.component, { dash: [2, 4], width: 1 });
+      var rAng = U.rad(M.res.dir), rTipX = ox + Math.cos(rAng) * M.res.R * k, rTipY = oy - Math.sin(rAng) * M.res.R * k;
+      D.arrow(c, ox, oy, rTipX, rTipY, col.resultant, { width: 3.4 });
+      D.label(c, exam.get() ? 'R' : 'R = ' + U.num(M.res.R, 3) + ' N', rTipX + (M.res.X <= 0 ? -12 : 12), rTipY - (M.res.Y >= 0 ? 8 : -8), col.resultant, { bold: true, bg: true, align: M.res.X <= 0 ? 'right' : 'left' });
       arcFor(c, ox, oy, 16 + 9 * fl.length + 10, M.res.dir, col.resultant, exam.get() ? 'β' : null);
     }
     if (!real) D.particle(c, ox, oy, 4, {});
@@ -283,7 +301,7 @@
     else if (!M.eff) msg = { t: 'No valid solution: unknown force not drawn', col: col.warn };
     else if (M.res && M.res.nearEquilibrium) msg = { t: 'R is under 0.5% of ΣF: approximately in equilibrium', col: col.ok };
     if (msg) D.label(c, msg.t, vp.w / 2, 14, msg.col, { bold: true, bg: true });
-    D.label(c, real ? 'seen from above · angles anticlockwise from +x' : 'angles anticlockwise from +x', 8, vp.h - 10, real ? col.ink : col.muted, { align: 'left', size: 11, bg: real });
+    D.label(c, real ? 'seen from above · angles anticlockwise from +x' : 'angles anticlockwise from +x', 14, vp.h - 68, real ? col.ink : col.muted, { align: 'left', size: 11, bg: real });
   }
 
   /* ---------- real-life scenarios (seen from above): Harbour tugboats, Space drones, Heavy-lift winches, or Lawn tug-of-war ---------- */
@@ -292,10 +310,10 @@
     var dk = SC.dark(), w = vp.w, h = vp.h, i;
     c.save();
     var g = c.createLinearGradient(0, 0, w, h);
-    g.addColorStop(0, dk ? '#09223a' : '#7ec8e3'); g.addColorStop(0.5, dk ? '#0d3152' : '#56b4d3'); g.addColorStop(1, dk ? '#081e34' : '#3a96c4');
+    g.addColorStop(0, dk ? '#040c14' : '#7ec8e3'); g.addColorStop(0.5, dk ? '#071421' : '#56b4d3'); g.addColorStop(1, dk ? '#040a11' : '#3a96c4');
     c.fillStyle = g; c.fillRect(0, 0, w, h);
     // subtle water ripples
-    c.strokeStyle = dk ? 'rgba(160,220,255,0.08)' : 'rgba(255,255,255,0.22)'; c.lineWidth = 1.4;
+    c.strokeStyle = dk ? 'rgba(140,210,255,0.08)' : 'rgba(255,255,255,0.22)'; c.lineWidth = 1.4;
     var s = 13;
     for (i = 0; i < Math.round(w * h / 7500); i++) {
       s = (s * 1664525 + 1013904223) >>> 0; var rx = (s / 4294967296) * w;
@@ -369,8 +387,8 @@
   function craneYard(c) {
     var dk = SC.dark(), w = vp.w, h = vp.h;
     c.save();
-    c.fillStyle = dk ? '#1f2433' : '#e6e8ef'; c.fillRect(0, 0, w, h);
-    c.strokeStyle = dk ? 'rgba(255,255,255,0.05)' : 'rgba(20,24,38,0.06)'; c.lineWidth = 1;
+    c.fillStyle = dk ? '#090e13' : '#e6e8ef'; c.fillRect(0, 0, w, h);
+    c.strokeStyle = dk ? 'rgba(165,220,212,0.06)' : 'rgba(20,24,38,0.06)'; c.lineWidth = 1;
     for (var x = 0; x < w; x += 36) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, h); c.stroke(); }
     for (var y = 0; y < h; y += 36) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); }
     c.restore();
@@ -387,7 +405,7 @@
   function lawn(c) {
     var dk = SC.dark(), w = vp.w, h = vp.h, i;
     c.save();
-    var g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, dk ? '#3d5c48' : '#bfe3b4'); g.addColorStop(1, dk ? '#35513f' : '#a9d8a0');
+    var g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, dk ? '#15271c' : '#bfe3b4'); g.addColorStop(1, dk ? '#0d1a12' : '#a9d8a0');
     c.fillStyle = g; c.fillRect(0, 0, w, h);
     c.fillStyle = dk ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.18)';   // soft mowing stripes
     for (i = -h; i < w; i += 64) { c.beginPath(); c.moveTo(i, 0); c.lineTo(i + 32, 0); c.lineTo(i + 32 + h * 0.5, h); c.lineTo(i + h * 0.5, h); c.closePath(); c.fill(); }
@@ -427,7 +445,7 @@
       var tE = Infinity;
       if (ux > 1e-9) tE = Math.min(tE, (vp.w - m - ox) / ux); if (ux < -1e-9) tE = Math.min(tE, (m - ox) / ux);
       if (uy > 1e-9) tE = Math.min(tE, (vp.h - m - oy) / uy); if (uy < -1e-9) tE = Math.min(tE, (m - oy) / uy);
-      var R = Math.max(s * 2.2, Math.min(tE, L + 36)), x = ox + ux * R, y = oy + uy * R;
+      var R = Math.max(s * 2.2, Math.min(tE, L + 48)), x = ox + ux * R, y = oy + uy * R;
       if (kind === 'space') {
         c.save(); c.strokeStyle = fc; c.globalAlpha = 0.55; c.lineWidth = 2; c.setLineDash([5, 4]);
         c.beginPath(); c.moveTo(ox + ux * 14, oy + uy * 14); c.lineTo(x - ux * s * 0.7, y - uy * s * 0.7); c.stroke(); c.restore();
@@ -443,6 +461,7 @@
         SC.rope(c, [[ox + ux * 8, oy + uy * 8], [x - ux * s * 0.85, y - uy * s * 0.85]], { width: 2.6 });
         topPerson(c, x, y, ux, uy, s, SC.shade(fc, SC.dark() ? -0.25 : 0.45));
       }
+      if (c._labelBoxes) c._labelBoxes.push({ x: x - s - 4, y: y - s - 4, w: s * 2 + 8, h: s * 2 + 8 });
     });
     if (kind === 'harbour') {
       var resAng = M && M.res && M.res.R > 1e-6 ? -U.rad(M.res.dir) : 0;
@@ -624,12 +643,60 @@
     acts.insertBefore(ui.h('button', { class: 'btn', type: 'button', text: label, onclick: function () { if (ed && ed.close) ed.close(); fn(); } }), acts.firstChild || null);
   }
   function askMag(j, x, y, title) {
-    var b = blocks[j], mult = b.type.get() === 'mult';
+    var b = blocks[j], mult = b.type.get() === 'mult', pk = mult ? 'c' : 'F';
     var ed = ui.askNumber({ title: title || ('Size of force F' + SUB[j]), sub: mult ? 'This force is c × F. Type the multiple c.' : 'Type the magnitude in newtons.',
       value: mult ? b.p.values.c : b.p.values.F, min: 0, max: mult ? 10 : 200, step: mult ? 0.5 : 1, decimals: 2, unit: mult ? '× F' : 'N', at: { x: x, y: y },
       quick: mult ? [1, 2, 3] : [5, 10, 20, 50],
+      paramRow: b.p.rows[pk], paramKey: pk, paramCtl: b.p, paramSym: 'F' + SUB[j], meta: { j: j, mult: mult },
       onInput: function (v) { unlockAll(); b.p.set(mult ? { c: v } : { F: v }); } });
     if (Math.round(top.values.n) > 2) popAction(ed, 'Remove F' + SUB[j], function () { removeForce(j); });
+  }
+  if (ui.registerXCalculator) {
+    ui.registerXCalculator(function (mx, opt) {
+      var j = mx && mx.meta && mx.meta.j !== undefined ? mx.meta.j : -1;
+      if (j < 0 && mx && mx.row) {
+        for (var q = 0; q < blocks.length; q++) {
+          if (blocks[q].p && (blocks[q].p.rows.F === mx.row || blocks[q].p.rows.th === mx.row || blocks[q].p.rows.c === mx.row)) { j = q; break; }
+        }
+      }
+      if (j < 0 || j >= Math.round(top.values.n)) { ui.openSolveForX({ preselectRow: mx && mx.row }); return; }
+      unlockAll();
+      var n = Math.round(top.values.n), list = [];
+      for (var ii = 0; ii < n; ii++) {
+        var bb = blocks[ii];
+        list.push({ F: bb.p.values.F, th: bb.p.values.th, c: bb.type.get() === 'mult' ? bb.p.values.c : null });
+      }
+      var sol = FO.solveEquilibrium(list, kp.values.k, [{ kind: 'F', i: j }, { kind: 'th', i: j }]);
+      if (!sol || !sol.solutions || !sol.solutions.length) { ui.openSolveForX({ preselectRow: mx && mx.row }); return; }
+      var goalVals = sol.solutions[0].vals, goalF = goalVals[0], goalTh = goalVals[1];
+      var origF = blocks[j].p.values.F, origTh = blocks[j].p.values.th;
+      var dTh = ((goalTh - origTh + 540) % 360) - 180;
+      ui.clearMarkedX();
+      ui.animateParam(0, 1, opt && opt.immediate ? 0 : 520, function (p) {
+        blocks[j].type.set('N', true);
+        blocks[j].p.set({ F: origF + (goalF - origF) * p, th: (origTh + dTh * p + 360) % 360 }, true);
+        M = { n: n, list: list.map(function (item, idx) { return idx === j ? { F: blocks[j].p.values.F, th: blocks[j].p.values.th, c: null } : item; }), k: kp.values.k, mode: 'resultant', unk: [], eff: null, sol: null, con: null };
+        M.eff = { list: M.list, k: kp.values.k }; M.res = FO.resultant(M.list, kp.values.k);
+        drawScene(); drawPolygon();
+      }, function () {
+        modeSel.set('solve', true);
+        u1Sel.set('F' + j, true); u2Sel.set('th' + j, true); solSel.set('0', true);
+        update();
+        ui.openStepStudio({
+          autoPlay: true,
+          solveX: {
+            paramLabel: 'Equilibrium Force F' + (j + 1) + ' (magnitude & angle)',
+            paramSym: 'F' + (j + 1),
+            unit: 'N @ ' + U.dp(goalTh, 1) + '°',
+            solvedVal: U.sf(goalF),
+            targetSym: 'R (equilibrium)',
+            targetVal: '0',
+            targetUnit: 'N',
+            actualVal: '0'
+          }
+        });
+      });
+    });
   }
   /** remove force j: later forces move down one place so F₁, F₂, … stay in order */
   function removeForce(j) {
@@ -710,6 +777,13 @@
   }
   update();
   presetCtl.fromQuery();
+  if (hsh.markX && /^F(\d)$/.test(String(hsh.markX)) && ui.markAsX) {
+    var mxj = Number(RegExp.$1);
+    if (mxj < Math.round(top.values.n)) {
+      ui.markAsX(blocks[mxj].p.rows.F, { key: 'F' + mxj, sym: 'F' + SUB[mxj], label: 'Force F' + SUB[mxj], meta: { j: mxj, mult: false } });
+      if (String(hsh.autoSolve) === '1' && ui.calculateMarkedX) setTimeout(function () { ui.calculateMarkedX({ immediate: true }); }, 160);
+    }
+  }
 })();
 </script>
 </body>

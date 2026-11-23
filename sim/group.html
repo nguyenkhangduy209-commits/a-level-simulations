@@ -6,16 +6,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simulation</title>
 <link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="assets/app.css">
 <script src="catalog/groups.js"></script>
+<script src="core/progress.js"></script>
 </head>
 <body>
 <div class="group-shell">
   <header class="sim-head">
-    <a class="brand" href="index.html" aria-label="Dashboard"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18c3-9 8-12 16-12"/><circle cx="4" cy="18" r="1.6" fill="#fff"/><path d="M15 6h5v5"/></svg></span></a>
-    <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Dashboard</a><span class="sep">›</span><a id="gCourse" href="course.html">Course</a><span class="sep">›</span></nav>
+    <a class="brand" href="index.html" aria-label="Dashboard"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-ink, #111217)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18c3-9 8-12 16-12"/><circle cx="4" cy="18" r="1.6" fill="var(--accent-ink, #111217)"/><path d="M15 6h5v5"/></svg></span></a>
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Dashboard</a><span class="sep">›</span><a href="map.html">Map</a><span class="sep">›</span><a id="gCourse" href="course.html">Course</a><span class="sep">›</span></nav>
     <h1 id="gTitle">Simulation</h1>
     <div class="tags" id="gTags"></div>
-    <button class="theme-btn" id="themeBtn" aria-label="Switch light or dark theme">◐ <span style="margin-left:6px">Theme</span></button>
+    <div class="head-actions">
+      <span id="gProgRing" class="chip" style="display:inline-flex;align-items:center;gap:6px"></span>
+      <button type="button" class="data-btn" id="questBtn">★ <span class="txt">Quest (+50 XP)</span></button>
+      <button class="theme-btn" id="themeBtn" aria-label="Switch light or dark theme">◐ <span style="margin-left:6px">Theme</span></button>
+    </div>
   </header>
   <nav class="modes" id="modes" role="tablist" aria-label="Modes"></nav>
   <iframe id="frame" title="Simulation"></iframe>
@@ -32,9 +38,17 @@
     '9702-1': '1 Quantities & units', '9702-2': '2 Kinematics', '9702-3': '3 Dynamics', '9702-4': '4 Forces, density & pressure', '9702-5': '5 Work, energy & power', '9702-6': '6 Deformation',
     '9702-7': '7 Waves', '9702-8': '8 Superposition', '9702-9': '9 Electricity', '9702-10': '10 D.C. circuits', '9702-11': '11 Particle physics' };
 
-  var theme = null;
-  try { theme = localStorage.getItem('sim-theme'); } catch (e) { /* storage blocked */ }
-  if (theme) document.documentElement.setAttribute('data-theme', theme);
+  var P = window.SIM_PROGRESS;
+  if (P) P.applyTheme();
+  var theme = document.documentElement.getAttribute('data-theme') || 'dark';
+  function updateQuestChip() {
+    if (!P) return;
+    var p = P.getNodeProgress(g.id);
+    var ringEl = document.getElementById('gProgRing');
+    if (ringEl) ringEl.innerHTML = P.miniRingHtml(p.pct) + (p.mastered ? ' ★' : '');
+    var qb = document.getElementById('questBtn');
+    if (qb) qb.innerHTML = p.mastered ? '★ <span class="txt">Mastered</span>' : '★ <span class="txt">Quest (+50 XP)</span>';
+  }
 
   document.title = g.title;
   document.documentElement.setAttribute('data-course', g.course);
@@ -49,7 +63,7 @@
   function src(m, preset) {
     var p = m.path, sep = p.indexOf('?') >= 0 ? '&' : '?';
     var pr = preset !== null && preset !== undefined ? preset : (m.preset !== undefined ? m.preset : null);
-    return p + sep + 'embed=1' + (theme ? '&theme=' + theme : '') + (pr !== null ? '&preset=' + pr : '');
+    return p + sep + 'embed=1&v=4' + (theme ? '&theme=' + theme : '') + (pr !== null ? '&preset=' + pr : '');
   }
   function show(m, preset) {
     mode = m;
@@ -63,20 +77,25 @@
       rec.unshift({ url: url, title: g.title, mode: g.modes.length > 1 ? m.label : '', course: g.course });
       localStorage.setItem('recent-sims', JSON.stringify(rec.slice(0, 8)));
     } catch (e) { /* storage blocked: fine */ }
+    if (P) { P.recordVisit(g.id, m.id); updateQuestChip(); }
   }
   g.modes.forEach(function (m) {
     var b = document.createElement('button'); b.setAttribute('role', 'tab'); b.setAttribute('data-m', m.id); b.textContent = m.label;
     b.addEventListener('click', function () { show(m, null); });
     nav.appendChild(b);
   });
+  var qBtn = document.getElementById('questBtn');
+  if (qBtn && P) qBtn.addEventListener('click', function () { P.openQuestModal(g.id, updateQuestChip); });
+  window.addEventListener('sim-progress-change', updateQuestChip);
   document.getElementById('themeBtn').addEventListener('click', function () {
     var d = document.documentElement, cur = d.getAttribute('data-theme');
-    var dark = cur ? cur === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    var dark = cur !== 'light';
     theme = dark ? 'light' : 'dark'; d.setAttribute('data-theme', theme);
     try { localStorage.setItem('sim-theme', theme); } catch (e) { /* ignore */ }
     show(mode, null);
   });
   show(mode, firstPreset);
+  updateQuestChip();
 })();
 </script>
 </body>

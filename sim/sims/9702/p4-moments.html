@@ -35,7 +35,7 @@
     { color: 'var(--c-weight)', label: 'weight W (at centre of gravity)' }, { color: 'var(--c-applied)', label: 'applied forces' },
     { color: 'var(--c-normal)', label: 'support / pivot reactions' }, { color: 'var(--c-component)', label: 'line of action and perpendicular distance' },
     { color: 'var(--accent)', label: 'O: point moments are taken about' }]);
-  var momWrap = ui.h('div', { class: 'readout' }); sceneCard.appendChild(momWrap);
+  var momWrap = ui.h('div', { class: 'mom-hud' }); sceneCard.appendChild(momWrap);
 
   var presetCard = pg.card('right', 'Exam setups');
   var paramCard = pg.card('right', 'Parameters');
@@ -203,8 +203,8 @@
       c.beginPath(); c.moveTo(wx, by - 90); c.lineTo(wx, by + 90); c.stroke(); c.restore();
     }
     function tri(x) { var px = vp.X(x); c.save(); c.fillStyle = col.surface; c.strokeStyle = col['object-line']; c.lineWidth = 1.4; c.beginPath(); c.moveTo(px, by + th / 2); c.lineTo(px - 11, by + th / 2 + 20); c.lineTo(px + 11, by + th / 2 + 20); c.closePath(); c.fill(); c.stroke(); c.restore(); }
-    if (md === 'supports') { if (!real) { tri(v.xA); tri(v.xB); } D.label(c, 'A', vp.X(v.xA), by + th / 2 + 30, col.ink, { bold: true, bg: real }); D.label(c, 'B', vp.X(v.xB), by + th / 2 + 30, col.ink, { bold: true, bg: real }); }
-    else { if (!real && v.xP > 1e-9 && v.xP < L - 1e-9) tri(v.xP); D.label(c, real && (v.xP < 1e-9 || v.xP > L - 1e-9) ? 'hinge' : 'pivot', vp.X(v.xP), by + th / 2 + 30, real ? col.ink : col.muted, { size: 11, bg: real }); }
+    if (md === 'supports') { if (!real) { tri(v.xA); tri(v.xB); } D.label(c, 'A', vp.X(v.xA), by + th / 2 + 32, col.ink, { bold: true, bg: true }); D.label(c, 'B', vp.X(v.xB), by + th / 2 + 32, col.ink, { bold: true, bg: true }); }
+    else { if (!real && v.xP > 1e-9 && v.xP < L - 1e-9) tri(v.xP); D.label(c, real && (v.xP < 1e-9 || v.xP > L - 1e-9) ? 'hinge' : 'pivot', vp.X(v.xP), by + th / 2 + 34, real ? col.ink : col.muted, { size: 11, bg: true }); }
     c.save();
     if (tilt) { c.translate(pivX, by); c.rotate(tilt); c.translate(-pivX, -by); }
     if (real) {
@@ -219,6 +219,7 @@
     // scale ticks
     var tk = U.niceTicks(0, L, 6);
     tk.ticks.forEach(function (t) { if (t < -1e-9 || t > L + 1e-9) return; D.line(c, [[vp.X(t), by + th / 2], [vp.X(t), by + th / 2 + 5]], col.muted, { width: 1 }); D.label(c, U.num(t, 3), vp.X(t), by + th / 2 + 13, real ? col.ink : col.muted, { size: 10, bg: real }); });
+    if (c._labelBoxes && vp.w > 460 && !tilt) c._labelBoxes.push({ x: vp.X(0) - 4, y: by - th / 2 - 4, w: vp.X(L) - vp.X(0) + 8, h: th + 18 });
     if (md !== 'supports') { c.save(); c.fillStyle = col['object-line']; c.beginPath(); c.arc(vp.X(v.xP), by, 4, 0, 2 * Math.PI); c.fill(); c.restore(); }
     if (!res) return;
     if (res.invalid) { D.label(c, res.invalid, vp.w / 2, 18, col.warn, { bold: true, size: 12 }); }
@@ -228,16 +229,22 @@
     // O marker
     var ox = vp.X(v.xO);
     c.save(); c.strokeStyle = col.accent; c.lineWidth = 2; c.beginPath(); c.arc(ox, by, 7, 0, 2 * Math.PI); c.stroke(); c.restore();
-    D.label(c, 'O', ox, by - 16, col.accent, { bold: true });
+    D.label(c, 'O', ox, by - th / 2 - 18, col.accent, { bold: true, bg: true });
+    var mx = ui.getMarkedX ? ui.getMarkedX() : null, mxKey = mx ? mx.key : null;
+    var xGold = (typeof document !== 'undefined' && document.documentElement && document.documentElement.getAttribute('data-theme') === 'light') ? '#c98a00' : '#fbbf24';
     all.forEach(function (f) {
       if (!(f.F > 1e-12)) return;
-      var color = f.kind === 'weight' ? col.weight : f.kind === 'reaction' ? col.normal : col.applied;
+      var fKey = f.kind === 'weight' ? 'W' : (f.kind !== 'reaction' && LOADIX[f.name] ? 'F' + LOADIX[f.name] : null);
+      var isX = !!(fKey && (mxKey === fKey || mxKey === 'x' + (fKey === 'W' ? 'G' : fKey.slice(1))));
+      var color = isX ? xGold : (f.kind === 'weight' ? col.weight : f.kind === 'reaction' ? col.normal : col.applied);
       var a = U.rad(f.ang), px = vp.X(f.x), len = Math.max(14, f.F * k);
-      var lab = (f.kind === 'weight' ? 'W' : f.name.replace('_', '')) + ' = ' + U.sf(f.F) + ' N';
+      var baseName = f.kind === 'weight' ? 'W' : f.name.replace('_', '');
+      var lab = isX ? (mxKey && mxKey.charAt(0) === 'x' ? baseName + ' (at x = ?)' : baseName + ' = x ?') : (baseName + ' = ' + U.sf(f.F) + ' N');
       // draw so that the arrow tail is at the beam for pushes away, head at the beam for pushes towards
       var sx = px, sy = by, ex = px + Math.cos(a) * len, ey = by - Math.sin(a) * len;
-      if (f.kind === 'reaction' && Math.sin(a) > 0.5) { sx = px - Math.cos(a) * len; sy = by + Math.sin(a) * len + th / 2 + 22; ex = px; ey = by + th / 2 + 22; }
-      D.arrow(c, sx, sy, ex, ey, color, { label: lab });
+      var isUpReact = f.kind === 'reaction' && Math.sin(a) > 0.5;
+      if (isUpReact) { sx = px - Math.cos(a) * len; sy = by + Math.sin(a) * len + th / 2 + 22; ex = px; ey = by + th / 2 + 22; }
+      D.arrow(c, sx, sy, ex, ey, color, isUpReact ? { label: lab, lx: 16, ly: len * 0.55 + 16, align: 'left', base: 'middle', avoidTip: false } : { label: lab, dash: isX ? [5, 4] : null });
       if (f.kind === 'weight') scene.arrows.push({ kind: 'W', x: ex, y: ey, off: ex - px, color: color });
       else if (f.kind !== 'reaction' && LOADIX[f.name]) scene.arrows.push({ kind: 'F', i: LOADIX[f.name], x: ex, y: ey, off: ex - px, color: color });
       if (showPerp.get() && f.kind !== 'reaction' && Math.abs(Math.cos(a)) > 1e-6 && Math.abs(Math.sin(a)) > 1e-6 && Math.abs(f.x - v.xO) > 1e-9) {
@@ -254,10 +261,13 @@
       var cw = res.Mnet < 0;
       c.save(); c.strokeStyle = col.warn; c.lineWidth = 2; c.beginPath(); c.arc(vp.X(v.xP), by, 30, cw ? -2.4 : -0.7, cw ? -0.7 : -2.4, !cw); c.stroke(); c.restore();
     }
-    if (!(v.W > 1e-12) && !locked('W')) D.label(c, 'W?', vp.X(v.xG), by - th / 2 - 16, col.muted, { size: 10 });
+    if (mxKey === 'W' && !(v.W > 1e-12)) {
+      D.arrow(c, vp.X(v.xG), by, vp.X(v.xG), by + 56, xGold, { label: 'W = x ?', dash: [5, 4] });
+    } else if (!(v.W > 1e-12) && !locked('W')) D.label(c, 'W?', vp.X(v.xG), by - th / 2 - (md === 'pin' && res && !res.balanced ? 42 : 20), col.muted, { size: 11, bg: true });
     c.restore();
-    if (md === 'pin' && res && !res.balanced) D.label(c, 'resultant moment ⇒ rotates ' + (res.Mnet < 0 ? 'clockwise' : 'anticlockwise') + (clock.t === 0 ? ' (press Play)' : ''), vp.w / 2, 16, col.warn, { bold: true, size: 12 });
-    if (md === 'supports' && res && res.tips) D.label(c, 'Not possible: R_' + (res.tips === 'B' ? 'A' : 'B') + ' would be negative ⇒ beam tips about ' + res.tips, vp.w / 2, 16, col.warn, { bold: true, size: 12 });
+    var wsBannerY = (typeof document !== 'undefined' && document.body && document.body.classList && document.body.classList.contains('ws-clean')) ? 114 : 16;
+    if (md === 'pin' && res && !res.balanced) D.label(c, 'resultant moment ⇒ rotates ' + (res.Mnet < 0 ? 'clockwise' : 'anticlockwise') + (clock.t === 0 ? ' (press Play)' : ''), vp.w / 2, wsBannerY, col.warn, { bold: true, size: 12, bg: true });
+    if (md === 'supports' && res && res.tips) D.label(c, 'Not possible: R_' + (res.tips === 'B' ? 'A' : 'B') + ' would be negative ⇒ beam tips about ' + res.tips, vp.w / 2, wsBannerY, col.warn, { bold: true, size: 12, bg: true });
     if (showPoly.get()) drawPolygon(c, all, col);
     if (ix) ix.paint(c);
   }
@@ -268,16 +278,17 @@
     fs.forEach(function (f) { var q = ST.comps(f.F, f.ang), p = pts[pts.length - 1]; pts.push([p[0] + q.x, p[1] + q.y]); });
     var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
     var w = Math.max.apply(null, xs) - Math.min.apply(null, xs), h = Math.max.apply(null, ys) - Math.min.apply(null, ys);
-    var box = Math.min(110, vp.w * 0.22), s = box / Math.max(w, h, 1e-9);
-    var X0 = vp.w - 14 - box - (Math.min.apply(null, xs)) * s - (box - w * s) / 2, Y0 = 34 + Math.max.apply(null, ys) * s + (box - h * s) / 2;
-    D.label(c, 'force polygon', vp.w - 14 - box / 2, 22, col.muted, { size: 11 });
+    var box = Math.min(104, vp.w * 0.2), s = box / Math.max(w, h, 1e-9);
+    var topY = (typeof document !== 'undefined' && document.body && document.body.classList && document.body.classList.contains('ws-clean')) ? 142 : 34;
+    var X0 = vp.w - 18 - box - (Math.min.apply(null, xs)) * s - (box - w * s) / 2, Y0 = topY + Math.max.apply(null, ys) * s + (box - h * s) / 2;
+    D.label(c, 'force polygon', vp.w - 18 - box / 2, topY - 14, col.muted, { size: 11, bg: true });
     fs.forEach(function (f, i) {
       var color = f.kind === 'weight' ? col.weight : f.kind === 'reaction' ? col.normal : col.applied;
       D.arrow(c, X0 + pts[i][0] * s, Y0 - pts[i][1] * s, X0 + pts[i + 1][0] * s, Y0 - pts[i + 1][1] * s, color, { width: 1.8, head: 7 });
     });
     var end = pts[pts.length - 1], gap = Math.hypot(end[0], end[1]);
     var scale = 1; fs.forEach(function (f) { scale = Math.max(scale, f.F); });
-    D.label(c, gap < 1e-9 * scale ? 'closed ⇒ ΣF = 0' : 'not closed', vp.w - 14 - box / 2, 34 + box + 12, gap < 1e-9 * scale ? col.ok : col.warn, { size: 11 });
+    D.label(c, gap < 1e-9 * scale ? 'closed ⇒ ΣF = 0' : 'not closed', vp.w - 18 - box / 2, topY + box + 16, gap < 1e-9 * scale ? col.ok : col.warn, { size: 11, bg: true });
   }
   function drawCouple() {
     var col = ui.colors(), v = prm.values, d = v.dc, cp = ST.couple(v.Fc, d, v.thc);
@@ -575,7 +586,49 @@
   function ask(k, x, y, title, sub, quick, onDone) {
     var sp = spec(k);
     return ui.askNumber({ title: title, sub: sub, value: prm.values[k], min: Number(sp.min), max: Number(sp.max), step: Number(sp.step) < 0.01 ? 0.01 : Number(sp.step), decimals: 3,
-      unit: sp.unit, at: { x: x, y: y }, quick: quick, onInput: function (val) { setVal(k, val); }, onDone: onDone });
+      unit: sp.unit, at: { x: x, y: y }, quick: quick, paramKey: k, paramCtl: prm, paramSym: sp.sym || k, onInput: function (val) { setVal(k, val); }, onDone: onDone });
+  }
+  if (ui.registerXCalculator) {
+    ui.registerXCalculator(function (mx, opt) {
+      var k = mx && mx.key ? mx.key : '', v = prm.values, md = mode.get();
+      if (md === 'couple') { ui.openSolveForX({ preselectRow: mx && mx.row }); return; }
+      var solveChoice = null, target = 'M';
+      if (md === 'pin' && /^(F1|F2|F3|x1|W|xG)$/.test(k)) {
+        solveChoice = k;
+        if (k === 'xG' && uniform.get()) uniform.set(false, true);
+      } else if (md === 'supports' && (k === 'F1' || k === 'x1')) {
+        target = v.x1 >= (v.xA + v.xB) / 2 ? 'RA' : 'RB';
+        solveChoice = k + ':' + target;
+      }
+      if (!solveChoice) { ui.openSolveForX({ preselectRow: mx && mx.row }); return; }
+      var r = ST.solveUnknown(baseModel(), k, target);
+      var lim = { F1: [0, 2000], F2: [0, 2000], F3: [0, 2000], x1: [0, v.L], W: [0, 2000], xG: [0, v.L] }[k];
+      if (!isFinite(r.value) || r.value < lim[0] - 1e-9 || r.value > lim[1] + 1e-9) {
+        ui.openSolveForX({ preselectRow: mx && mx.row }); return;
+      }
+      var orig = Number(v[k]), goal = U.clamp(r.value, lim[0], lim[1]);
+      ui.clearMarkedX();
+      ui.animateParam(orig, goal, opt && opt.immediate ? 0 : 520, function (val) {
+        var o = {}; o[k] = val; prm.set(o, true);
+        res = ST.solveBeam(baseModel()); draw(); readout();
+      }, function () {
+        solve.set(solveChoice, true);
+        update('*');
+        ui.openStepStudio({
+          autoPlay: true,
+          solveX: {
+            paramLabel: mx.label || solveLabel(k),
+            paramSym: String(mx.sym || k).replace(/<[^>]+>/g, ''),
+            unit: k.charAt(0) === 'x' ? 'm' : 'N',
+            solvedVal: U.sf(goal),
+            targetSym: target === 'M' ? 'ΣM' : 'R_' + target.slice(1),
+            targetVal: '0',
+            targetUnit: target === 'M' ? 'N m' : 'N',
+            actualVal: '0'
+          }
+        });
+      });
+    });
   }
   /** add an extra button (e.g. Remove) to the number editor that is open now */
   function popAction(ed, label, fn) {
@@ -676,6 +729,13 @@
 
   ui.onTheme(draw);
   vp.onResize = draw;
+  var initHash = ui.readHash();
+  if (initHash.mode === 'pin' || initHash.mode === 'supports' || initHash.mode === 'couple') { mode.set(initHash.mode, true); refreshSolveOptions(); }
+  if (initHash.uniform !== undefined) uniform.set(Number(initHash.uniform) !== 0 && initHash.uniform !== 'false', true);
+  if (typeof initHash.L === 'number') setRanges(U.clamp(initHash.L, 0.2, 10));
+  var hashVals = {};
+  Object.keys(prm.rows).forEach(function (k) { if (typeof initHash[k] === 'number') hashVals[k] = initHash[k]; });
+  if (Object.keys(hashVals).length) prm.set(hashVals, true);
   update('*');
   presetCtl.fromQuery();
 })();

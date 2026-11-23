@@ -107,12 +107,12 @@
   }
 
   /* ---------- page skeleton ---------- */
-  var LOGO = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-    '<path d="M4 18c3-9 8-12 16-12"/><circle cx="4" cy="18" r="1.6" fill="#fff"/><path d="M15 6h5v5"/></svg>';
+  var LOGO = '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-ink, #111217)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M4 18c3-9 8-12 16-12"/><circle cx="4" cy="18" r="1.6" fill="var(--accent-ink, #111217)"/><path d="M15 6h5v5"/></svg>';
   function themeButton() {
     return h('button', { class: 'theme-btn', 'aria-label': 'Switch light or dark theme', html: '◐ <span style="margin-left:6px">Theme</span>', onclick: function () {
       var d = document.documentElement, cur = d.getAttribute('data-theme');
-      var dark = cur ? cur === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      var dark = cur !== 'light';
       d.setAttribute('data-theme', dark ? 'light' : 'dark');
       try { localStorage.setItem('sim-theme', dark ? 'light' : 'dark'); } catch (e) { /* storage blocked */ }
       themeChanged();
@@ -136,7 +136,12 @@
         themeButton()
       ])
     ]);
-    try { var saved = localStorage.getItem('sim-theme'); if (saved) document.documentElement.setAttribute('data-theme', saved); } catch (e) { /* ignore */ }
+    try {
+      var saved = localStorage.getItem('sim-theme');
+      document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
+      var progRaw = localStorage.getItem('alevel-progress-v1');
+      if (progRaw) { var ps = JSON.parse(progRaw); if (ps && ps.skin && ps.skin !== 'gold' && ps.skin !== 'cream') document.documentElement.setAttribute('data-skin', ps.skin); }
+    } catch (e) { /* ignore */ }
     var left = h('section', { class: 'left' }), right = h('aside', { class: 'right' });
     // ?embed=1: shown as a mode inside a grouped simulation (group.html supplies the header)
     if (query.get('embed') === '1') { document.body.classList.add('embed'); var tg = query.get('theme'); if (tg === 'dark' || tg === 'light') document.documentElement.setAttribute('data-theme', tg); }
@@ -238,14 +243,59 @@
       closePop(false);
     }, true);
   }
+  /* ---------- "Mark as x" workflow (mark any parameter/force as unknown x -> Calculate x) ---------- */
+  var markedX = null, xCalculator = null, wsCalcXPill = null;
+  function findParamRow(key, ctlHint) {
+    for (var i = 0; i < allParamRows.length; i++) {
+      var r = allParamRows[i];
+      if (r.spec.key === key && (!ctlHint || r.ctl === ctlHint)) return r;
+    }
+    return null;
+  }
+  function syncMarkedXPill() {
+    allDocked.forEach(function (r) {
+      if (r.chip && r.chip.classList) r.chip.classList.toggle('is-x', !!(markedX && markedX.row === r));
+    });
+    if (wsCalcXPill) {
+      wsCalcXPill.hidden = !markedX;
+      if (markedX) {
+        var symTxt = markedX.sym ? stripTags(markedX.sym) : (markedX.label || 'x');
+        wsCalcXPill.innerHTML = '⚡ <span class="ws-lbl">Calculate x (' + esc(symTxt) + ')</span><span class="calc-clear" title="Clear unknown x" role="button" aria-label="Clear unknown x">×</span>';
+      }
+    }
+    themeChanged();
+  }
+  function markAsX(rowOrKey, opts) {
+    opts = opts || {};
+    var r = rowOrKey && rowOrKey.spec ? rowOrKey : findParamRow(rowOrKey, opts.ctl);
+    var key = opts.key || (r ? r.spec.key : (typeof rowOrKey === 'string' ? rowOrKey : 'x'));
+    if (opts.toggle && markedX && ((r && markedX.row === r) || (!r && markedX.key === key))) {
+      markedX = null; syncMarkedXPill(); return null;
+    }
+    var lbl = opts.label || (r ? r.labelText : key);
+    var sym = opts.sym || (r && r.spec.sym ? r.spec.sym : lbl);
+    markedX = { row: r || null, key: key, label: lbl, sym: sym, meta: opts.meta || null, ctl: opts.ctl || (r ? r.ctl : null) };
+    syncMarkedXPill();
+    return markedX;
+  }
+  function clearMarkedX() { markedX = null; syncMarkedXPill(); }
+  function getMarkedX() { return markedX; }
+  function registerXCalculator(fn) { xCalculator = fn; }
+  function calculateMarkedX(opt) {
+    if (!markedX) return;
+    if (xCalculator) { xCalculator(markedX, opt || {}); return; }
+    openSolveForX({ preselectRow: markedX.row, autoSolve: !!(opt && opt.autoSolve) });
+  }
+
   /**
    * openEditor({ title, sub, value, min, max, step, decimals, unit, at: {x, y} (stage px) or anchorEl, quick: [values],
-   *              onInput(v) live, onDone(v), onCancel(), doneLabel })
-   * Big typed input with − / + steppers (hold to repeat), a slider and quick values. Enter = done.
+   *              onInput(v) live, onDone(v), onCancel(), doneLabel, paramRow, paramKey, paramCtl, paramSym, meta, onMarkX })
+   * Big typed input with − / + steppers (hold to repeat), a slider, "Set as x" action and quick values. Enter = done.
    */
   function openEditor(o) {
     closePop(false);
     var host = stage ? stage.el : document.body, d = o.decimals === undefined ? 2 : o.decimals, step = o.step || 1;
+    var pr = o.paramRow || (o.paramKey ? findParamRow(o.paramKey, o.paramCtl) : null);
     var input = h('input', { type: 'text', inputmode: 'decimal', autocomplete: 'off', 'aria-label': o.title, value: U.num(o.value, d) });
     var range = h('input', { type: 'range', min: o.min, max: o.max, step: 'any', value: o.value, 'aria-label': o.title + ' slider' });
     var cur = Number(o.value), initVal = Number(o.value);
@@ -279,6 +329,20 @@
       return b;
     }
     function done() { var v = parse(); if (input.value !== '' && isFinite(v)) set(v, 'x'); var cb = o.onDone; closePop(true); if (cb) cb(cur); }
+    var canMarkX = !!(pr || o.paramKey || o.onMarkX);
+    var isCurX = !!(markedX && ((pr && markedX.row === pr) || (o.paramKey && markedX.key === o.paramKey)));
+    var markBtn = canMarkX ? h('button', {
+      class: 'btn btn-mark-x' + (isCurX ? ' active' : ''),
+      type: 'button',
+      text: isCurX ? '✓ Unknown x (Unmark)' : 'Set as x',
+      title: 'Mark this quantity as unknown x so you can press Calculate x directly',
+      onclick: function () {
+        if (isCurX) clearMarkedX();
+        else if (o.onMarkX) o.onMarkX(pr);
+        else markAsX(pr || o.paramKey, { key: o.paramKey, label: stripTags(o.title || ''), sym: o.paramSym, ctl: o.paramCtl, meta: o.meta });
+        closePop(true);
+      }
+    }) : null;
     var el = h('div', { class: 'pop', role: 'dialog', 'aria-label': o.title }, [
       h('button', { class: 'pop-close', type: 'button', text: '×', 'aria-label': 'Close', onclick: function () { closePop(true); if (o.onCancel) o.onCancel(); } }),
       h('p', { class: 'pop-title', html: o.title }),
@@ -293,6 +357,7 @@
       h('div', { class: 'range-ends' }, [h('span', { text: U.num(Number(o.min), 4) }), h('span', { text: 'Tip: 4.7k, 15m, 2*pi, 1/3' }), h('span', { text: U.num(Number(o.max), 4) })]),
       o.quick && o.quick.length ? h('div', { class: 'quick' }, [h('span', { class: 'quick-lbl', text: 'Quick:' })].concat(o.quick.map(function (q) { return h('button', { type: 'button', text: String(q), onclick: function () { set(q); } }); }))) : null,
       h('div', { class: 'pop-actions' }, [
+        markBtn,
         h('button', { class: 'btn', type: 'button', text: '↺ Reset', title: 'Restore value', onclick: function () { set(initVal); } }),
         h('button', { class: 'btn primary', type: 'button', text: o.doneLabel || 'Done', onclick: done })
       ])
@@ -340,6 +405,7 @@
     if (Math.abs(v - min) < step / 2) s = min; if (Math.abs(v - max) < step / 2) s = max;
     return s;
   }
+  var allParamRows = [];
   function params(container, specs, onChange) {
     var ctl = { values: {}, rows: {} };
     specs.forEach(function (sp) {
@@ -353,7 +419,9 @@
       if (sp.hidden) row.style.display = 'none';
       container.appendChild(row);
       ctl.values[sp.key] = Number(sp.value);
-      ctl.rows[sp.key] = { row: row, range: range, box: box, spec: sp, d: d, step: step };
+      var rec = { row: row, range: range, box: box, spec: sp, d: d, step: step, ctl: ctl, vis: !sp.hidden, labelText: String(sp.label).replace(/<[^>]+>/g, '') };
+      ctl.rows[sp.key] = rec;
+      allParamRows.push(rec);
       range.addEventListener('input', function () { notify(); var v = snapValue(Number(range.value), sp, ctl.rows[sp.key].step); ctl.values[sp.key] = v; box.value = U.num(v, d); onChange && onChange(sp.key); });
       box.addEventListener('change', function () {
         var v = parseNum(box.value); if (box.value === '' || !isFinite(v)) { box.value = ctl.values[sp.key]; return; }
@@ -412,9 +480,9 @@
         if (r.locked) return;
         chip.classList.add('open');
         openEditor({ title: sp.label + (sp.sym ? ' <span style="font-family:var(--mono);color:var(--muted)">' + sp.sym + '</span>' : ''),
-          sub: 'Type a value, use − / +, or drag the slider.', value: ctl.values[sp.key], min: Number(sp.min), max: Number(sp.max),
+          sub: 'Type a value, use − / +, or mark it as unknown x.', value: ctl.values[sp.key], min: Number(sp.min), max: Number(sp.max),
           step: r.step, decimals: Math.max(r.d, decimalsOf(sp.step || 1), 2), unit: sp.unit, anchorEl: chip, owner: chip, returnFocus: chip,
-          onInput: commit, onClose: function () { chip.classList.remove('open'); } });
+          paramRow: r, onInput: commit, onClose: function () { chip.classList.remove('open'); } });
       });
       chip.addEventListener('keydown', function (e) {
         if (r.locked || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
@@ -528,6 +596,10 @@
       showCurrent();
       if (sel.value === '') { note.innerHTML = ''; return; }
       var p = list[Number(sel.value)]; note.innerHTML = p.note || ''; apply(p); notify();
+      try {
+        var gid = root.parent && root.parent !== root && root.parent.location ? new URLSearchParams(root.parent.location.search).get('g') : null;
+        if (gid && root.parent.SIM_PROGRESS) root.parent.SIM_PROGRESS.recordPreset(gid);
+      } catch (e) { /* ignore */ }
     });
     showCurrent();
     var api = { el: sel, select: function (i) { sel.value = String(i); sel.dispatchEvent(new Event('change')); },
@@ -591,8 +663,15 @@
   function mechanicsPage() { try { return /\/9709\/|\/9702\/p[2-5]-/.test(root.location.pathname); } catch (e) { return false; } }
   function autoWhy(lhs) { if (!mechanicsPage()) return ''; var k = stripTags(String(lhs || '')).trim(); for (var i = 0; i < WHY.length; i++) if (WHY[i][0].test(k)) return WHY[i][1]; return ''; }
 
+  var allReadouts = [];
+  function isWalkActive() {
+    if (typeof document === 'undefined' || !document.body || !document.body.classList) return false;
+    if (!document.body.classList.contains('ws-clean')) return true;
+    return document.body.classList.contains('ws-calc-open') || !!(document.querySelector && document.querySelector('.step-studio'));
+  }
   function Readout(container) {
     var buf = [], el = h('div', { class: 'readout' }), page = 0, showAll = false, lastTitles = '', onDiagram = true, lastFocus = '', shownPage = -1;
+    var results = [], curHead = '', lastStepsCount = 0, lastSteps = [];
     container.appendChild(el);
     if (el.addEventListener) {
       el.addEventListener('click', function (e) {
@@ -605,16 +684,23 @@
       });
       el.addEventListener('keydown', function (e) {
         if (showAll || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') || (e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName))) return;
-        page += e.key === 'ArrowRight' ? 1 : -1; api.render(); e.preventDefault();
+        page += e.key === 'ArrowRight' ? 1 : -1; api.render();
+        try { el.dispatchEvent(new Event('walkchange', { bubbles: true })); } catch (err) { /* old browsers */ }
+        e.preventDefault();
       });
     }
     var api = {
       el: el,
-      clear: function () { buf = []; return api; },
-      head: function (t) { buf.push({ head: t }); return api; },
+      clear: function () { buf = []; results = []; curHead = ''; return api; },
+      head: function (t) { curHead = stripTags(t); buf.push({ head: t }); return api; },
       /** eq('a', 'F/m = 12/3', 4, 'm s<sup>−2</sup>') — value may be a number (formatted 3 s.f.) or html string */
       eq: function (lhs, work, value, unit, why) {
         var v = typeof value === 'number' ? U.sf(value) : (value === undefined ? '' : String(value));
+        if (v !== '') {
+          var vPlain = stripTags(v);
+          var nVal = typeof value === 'number' ? value : parseNum(vPlain.replace(/−/g, '-'));
+          results.push({ name: stripTags(lhs), symbol: stripTags(lhs), value: vPlain, num: nVal, unit: unit ? stripTags(unit) : '', step: curHead, stepIdx: Math.max(0, buf.filter(function (x) { return x && x.head !== undefined; }).length - 1) });
+        }
         var wy = why || autoWhy(lhs), whyHtml = wy ? '<div class="why">' + wy + '</div>' : '';
         // no single answer: the work is one or more whole equations (e.g. "−T₁ cos 35° + T₂ cos 40° = 0"); one per line, kept intact
         if (v === '' && work && !isProse(String(work).split(/<br\s*\/?>/i)[0])) {
@@ -653,7 +739,8 @@
           if (x && x.head !== undefined) { cur = { title: x.head, items: [] }; steps.push(cur); }
           else (cur ? cur.items : top).push(x);
         });
-        if (steps.length < 2) { el.innerHTML = top.join('') + steps.map(function (st) { return '<div class="head">' + st.title + '</div>' + st.items.join(''); }).join(''); return api; }
+        if (steps.length < 2) { lastStepsCount = steps.length; lastSteps = []; el.innerHTML = top.join('') + steps.map(function (st) { return '<div class="head">' + st.title + '</div>' + st.items.join(''); }).join(''); api.syncFocus(); return api; }
+        lastStepsCount = steps.length;
         var titles = steps.map(function (st) { return stripTags(st.title); }).join('|');
         if (titles !== lastTitles && lastTitles) { var keep = lastTitles.split('|')[page]; var k = steps.map(function (st) { return stripTags(st.title); }).indexOf(keep); page = k >= 0 ? k : 0; }
         lastTitles = titles;
@@ -676,18 +763,32 @@
         } else {
           html += steps.map(function (st2, i) { return '<section class="walk-page all"><h3 class="walk-title"><span class="walk-num">' + (i + 1) + '</span>' + st2.title + '</h3>' + st2.items.join('') + '</section>'; }).join('');
         }
-        el.innerHTML = html; shownPage = showAll ? -1 : page;
-        // highlight on the diagram what this step uses (arrows/labels whose symbol matches an equation's left-hand side)
+        el.innerHTML = html; shownPage = showAll ? -1 : page; lastSteps = steps;
+        api.syncFocus();
+        return api;
+      },
+      syncFocus: function () {
         var keys = [];
-        if (onDiagram && !showAll) steps[page].items.forEach(function (it) { var m = /<span class="lhs">([\s\S]*?)<\/span>/.exec(it); if (m && m[1]) keys.push(stripTags(m[1])); });
+        if (onDiagram && !showAll && isWalkActive() && lastSteps && lastSteps[page]) {
+          lastSteps[page].items.forEach(function (it) { var m = /<span class="lhs">([\s\S]*?)<\/span>/.exec(it); if (m && m[1]) keys.push(stripTags(m[1])); });
+        }
         var fk = keys.join('|');
         if (fk !== lastFocus && SIM.view && SIM.view.setFocus) {
-          lastFocus = fk; SIM.view.setFocus(keys);
+          lastFocus = fk; SIM.view.setFocus(keys.length ? keys : null);
           setTimeout(function () { themeChanged(); setTimeout(themeChanged, 30); }, 0);
         }
-        return api;
+      },
+      getResults: function () { return results.slice(); },
+      getStepInfo: function () { return { page: page, count: lastStepsCount, showAll: showAll }; },
+      setStep: function (p) {
+        if (lastStepsCount < 2) return;
+        showAll = false;
+        page = Math.max(0, Math.min(lastStepsCount - 1, p));
+        api.render();
+        try { el.dispatchEvent(new Event('walkchange', { bubbles: true })); } catch (err) { /* ignore */ }
       }
     };
+    allReadouts.push(api);
     return api;
   }
   /** Exam mode: answers are blurred; tap/click a line (or focus it and press Enter/Space) to reveal it,
@@ -741,6 +842,10 @@
     examResets.push(function () { if (on) { revealed = {}; apply(); } });
     var t = toggle(container, { label: 'Exam mode: hide answers (tap a line to reveal it)' }, function (v) {
       on = v; revealed = {}; target.classList.toggle('exam-hidden', on); bar.style.display = on ? '' : 'none'; apply();
+      if (v) try {
+        var gid = root.parent && root.parent !== root && root.parent.location ? new URLSearchParams(root.parent.location.search).get('g') : null;
+        if (gid && root.parent.SIM_PROGRESS) root.parent.SIM_PROGRESS.recordExamMode(gid);
+      } catch (e) { /* ignore */ }
     });
     container.appendChild(bar);
     return t;
@@ -774,8 +879,8 @@
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
   /* ---------- simulation-first workspace: clean hero stage + corner/fullscreen popup drawers ---------- */
-  var wsDrawers = [];
-  function makeDrawer(cls, title, allowFullscreen, onOpen) {
+  var wsDrawers = [], wsGlobalRefs = null;
+  function makeDrawer(cls, title, allowFullscreen, onOpen, extraBtn) {
     var body = h('div', { class: 'ws-dbody' });
     var fsBtn = allowFullscreen ? h('button', { type: 'button', class: 'ws-dbtn', text: '⛶ Fullscreen', title: 'Toggle fullscreen', onclick: function () {
       var fs = box.classList.toggle('fullscreen');
@@ -785,6 +890,7 @@
     var box = h('section', { class: 'ws-drawer ' + cls, role: 'dialog', 'aria-label': title }, [
       h('div', { class: 'ws-dhead' }, [
         h('h3', { text: title }),
+        extraBtn || null,
         fsBtn,
         h('button', { type: 'button', class: 'ws-dbtn', text: '×', 'aria-label': 'Close ' + title, onclick: function () { setOpen(false); } })
       ]),
@@ -795,6 +901,10 @@
     function setOpen(v) {
       box.hidden = !v;
       if (pill) pill.classList.toggle('on', v);
+      if (cls === 'calc-box' && document.body && document.body.classList) {
+        document.body.classList.toggle('ws-calc-open', v);
+        allReadouts.forEach(function (r) { if (r.syncFocus) r.syncFocus(); });
+      }
       if (v && onOpen) onOpen();
     }
     document.body.appendChild(box);
@@ -805,17 +915,29 @@
   function initWorkspace(refs) {
     if (!stage || !stage.el || !stage.dock || !document.body || !document.body.classList) return;
     if (!refs.setup.length && !refs.explain.length && !refs.calc.length) return;
+    wsGlobalRefs = refs;
     document.body.classList.add('ws-clean');
     function fireResize() {
-      setTimeout(function () { if (typeof root.dispatchEvent === 'function') root.dispatchEvent(new Event('resize')); }, 20);
+      setTimeout(function () {
+        if (typeof root.dispatchEvent === 'function') root.dispatchEvent(new Event('resize'));
+        themeChanged();
+      }, 30);
     }
     var dData = makeDrawer('top-left', '⚙ Data & Parameters', true, fireResize);
     var dExplain = makeDrawer('bottom-left', '💡 Explanations & Legend', true, fireResize);
-    var dCalc = makeDrawer('calc-box', '📊 Calculations & Graphs', true, fireResize);
+    var studioShortcut = h('button', { type: 'button', class: 'ws-dbtn', text: '⚡ Step Studio', title: 'Open Fullscreen Synced Step Studio', onclick: function () { dCalc.setOpen(false); openStepStudio(); } });
+    var dCalc = makeDrawer('calc-box', '📊 Calculations & Graphs', true, fireResize, studioShortcut);
 
     var cnt = visibleParams().length;
     var bData = h('button', { type: 'button', class: 'ws-pill', html: '⚙ <span class="ws-lbl">Data &amp; Setup</span>' + (cnt ? '<span class="ws-cnt">' + cnt + '</span>' : ''), onclick: function () { dData.toggle(); } });
     var bExp = h('button', { type: 'button', class: 'ws-pill', html: '💡 <span class="ws-lbl">Explain</span>', onclick: function () { dExplain.toggle(); } });
+    var bCalcX = h('button', { type: 'button', class: 'ws-pill calc-x', hidden: true, html: '⚡ <span class="ws-lbl">Calculate x</span>', onclick: function (e) {
+      if (e && e.target && e.target.classList && e.target.classList.contains('calc-clear')) { e.stopPropagation(); clearMarkedX(); return; }
+      calculateMarkedX();
+    } });
+    wsCalcXPill = bCalcX;
+    var bSolve = h('button', { type: 'button', class: 'ws-pill', html: '🔍 <span class="ws-lbl">Solve for x</span>', onclick: function () { openSolveForX(); } });
+    var bStudio = h('button', { type: 'button', class: 'ws-pill', html: '⛶ <span class="ws-lbl">Step Studio</span>', onclick: function () { openStepStudio(); } });
     var bCalc = h('button', { type: 'button', class: 'ws-pill primary', html: '📊 <span class="ws-lbl">Calculations &amp; Graphs</span>', onclick: function () { dCalc.toggle(); } });
     dData.bindPill(bData); dExplain.bindPill(bExp); dCalc.bindPill(bCalc);
 
@@ -824,7 +946,9 @@
     var bl = h('div', { class: 'ws-corner bl' });
     var br = h('div', { class: 'ws-corner br' });
     if (refs.explain.length) bl.appendChild(bExp);
-    if (refs.calc.length) br.appendChild(bCalc);
+    br.appendChild(bCalcX);
+    if (solveableParams().length) br.appendChild(bSolve);
+    if (refs.calc.length) { br.appendChild(bStudio); br.appendChild(bCalc); }
     if (query.get('embed') === '1') {
       tl.appendChild(h('button', { type: 'button', class: 'ws-pill', html: '⇣ <span class="ws-lbl">Fetch Data</span>', onclick: openDataHub }));
       tl.appendChild(h('button', { type: 'button', class: 'ws-pill', html: '? <span class="ws-lbl">Guide</span>', onclick: openGuide }));
@@ -842,6 +966,9 @@
         dExplain.body.appendChild(lg);
       });
       Array.prototype.slice.call(refs.left.querySelectorAll('.plots')).forEach(function (pl) { dCalc.body.appendChild(pl); });
+      Array.prototype.slice.call(refs.left.children).slice(1).forEach(function (extra) {
+        if (extra.classList && extra.classList.contains('card')) dCalc.body.appendChild(extra);
+      });
     }
     refs.explain.forEach(function (c) { dExplain.body.appendChild(c); });
     refs.calc.forEach(function (c) { dCalc.body.appendChild(c); });
@@ -857,10 +984,11 @@
   }
   if (typeof document !== 'undefined' && document.addEventListener) {
     document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && activeStudio) { activeStudio.close(); return; }
       if (e.key === 'Escape' && activeModal) { closeModal(); return; }
       if (e.key === 'Escape') { var closed = false; wsDrawers.forEach(function (d) { if (d.isOpen()) { d.setOpen(false); closed = true; } }); if (closed) return; }
       if (e.target && /INPUT|SELECT|TEXTAREA|BUTTON/.test(e.target.tagName || '')) return;
-      if (activeModal || pop) return;
+      if (activeModal || pop || activeStudio) return;
       if (e.key === '?' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); openGuide(); return; }
       if (e.key === ' ' && SIM.anim && SIM.anim.clocks && SIM.anim.clocks.length) { e.preventDefault(); SIM.anim.clocks[0].toggle(); }
     });
@@ -1032,16 +1160,25 @@
     return matches;
   }
   function collectSnapshot() {
-    var rows = [];
+    var rows = [], seen = {};
     visibleParams().forEach(function (r) {
       rows.push({ kind: 'Input', name: r.labelText, symbol: stripTags(r.spec.sym || r.spec.key), value: r.ctl.values[r.spec.key], unit: stripTags(r.spec.unit || '') });
     });
-    if (typeof document !== 'undefined' && document.querySelectorAll) {
+    allReadouts.forEach(function (ro) {
+      if (!ro.getResults) return;
+      ro.getResults().forEach(function (r) {
+        var key = r.symbol + '|' + r.step;
+        if (seen[key]) return; seen[key] = true;
+        rows.push({ kind: 'Result', name: r.name, symbol: r.symbol, value: r.value, num: r.num, unit: r.unit, step: r.step, stepIdx: r.stepIdx });
+      });
+    });
+    if (!rows.some(function (r) { return r.kind === 'Result'; }) && typeof document !== 'undefined' && document.querySelectorAll) {
       Array.prototype.forEach.call(document.querySelectorAll('.readout .eq'), function (eq) {
         if (!eq.classList || !eq.classList.contains('eq')) return;
         var lhs = eq.querySelector('.lhs'), res = eq.querySelector('.res'), u = eq.querySelector('.u');
         if (lhs && res && String(res.textContent || '').trim() !== '') {
-          rows.push({ kind: 'Result', name: stripTags(lhs.innerHTML), symbol: stripTags(lhs.innerHTML), value: stripTags(res.innerHTML), unit: u ? stripTags(u.innerHTML) : '' });
+          var txt = stripTags(res.innerHTML);
+          rows.push({ kind: 'Result', name: stripTags(lhs.innerHTML), symbol: stripTags(lhs.innerHTML), value: txt, num: parseNum(txt.replace(/−/g, '-')), unit: u ? stripTags(u.innerHTML) : '' });
         }
       });
     }
@@ -1116,6 +1253,12 @@
     }
     ta.addEventListener('input', runExtract);
     pane.appendChild(h('p', { style: 'margin:0 0 8px;color:var(--muted)', text: 'Paste any exam question — numbers and units (cm → m, kΩ → Ω, km/h → m/s) are automatically extracted and converted.' }));
+    var solverUrl = (typeof location !== 'undefined' && /\/sims\//.test(location.pathname)) ? '../../solver.html' : 'solver.html';
+    var imgDrop = h('div', { style: 'display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:9px 12px;margin:0 0 10px;border-radius:12px;border:1px dashed var(--accent2);background:color-mix(in srgb, var(--accent2) 8%, var(--panel2))' }, [
+      h('span', { style: 'font-size:12.5px;color:var(--ink)', html: '📸 <b>Have a question screenshot?</b> Auto-detect sim, extract values &amp; generate AI working' }),
+      h('a', { class: 'btn primary', href: solverUrl, target: '_top', text: 'Open AI Screenshot Solver ↗', style: 'min-height:32px;padding:0 12px;font-size:12.5px' })
+    ]);
+    pane.appendChild(imgDrop);
     if (sample) {
       pane.appendChild(h('div', { class: 'hub-bar', style: 'margin:0 0 8px' }, [
         h('button', { type: 'button', class: 'btn', text: '✦ Fill with sample text', onclick: function () { ta.value = 'Given ' + sample + '.'; runExtract(); } })
@@ -1229,6 +1372,396 @@
     ]));
   }
 
+  /* ---------- "Solve for x" Unknown Finder & Fullscreen Synced Step Studio ---------- */
+  var activeStudio = null;
+  function solveableParams() {
+    var out = [], seen = {};
+    var add = function (r) {
+      if (!r || !r.ctl || !r.spec || r.locked) return;
+      if (r.row && r.row.style && r.row.style.display === 'none') return;
+      if (r.row && r.row.parentNode && r.row.parentNode.style && r.row.parentNode.style.display === 'none') return;
+      if (r.chip && r.chip.style && r.chip.style.display === 'none') return;
+      var k = r.labelText + '|' + stripTags(r.spec.sym || r.spec.key);
+      if (seen[k] || r.spec.key === 'n') return;
+      seen[k] = true;
+      out.push(r);
+    };
+    visibleParams().forEach(add);
+    allParamRows.forEach(add);
+    return out;
+  }
+  function animateParam(from, to, ms, setter, onDone) {
+    if (!isFinite(from) || !isFinite(to) || Math.abs(to - from) < 1e-12 || ms <= 0 || typeof requestAnimationFrame !== 'function' || (SIM.anim && SIM.anim.reducedMotion && SIM.anim.reducedMotion())) {
+      setter(to); if (onDone) onDone(); return;
+    }
+    var t0 = performance.now();
+    function tick(now) {
+      var p = Math.min(1, (now - t0) / ms);
+      var ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+      setter(from + (to - from) * ease);
+      if (p < 1) requestAnimationFrame(tick);
+      else { setter(to); if (onDone) onDone(); }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function openSolveForX(opts) {
+    opts = opts || {};
+    var paramsList = solveableParams();
+    var resList = collectSnapshot().filter(function (r) { return r.kind === 'Result' && isFinite(r.num); });
+    if (!paramsList.length && !resList.length) return;
+
+    var wrap = h('div', {});
+    wrap.appendChild(h('p', { style: 'margin:0 0 10px;color:var(--muted)', html: 'Pick a force, angle, mass, or distance to set as unknown <b>x</b> and solve for a target condition — or click any output below to inspect its step-by-step derivation in fullscreen.' }));
+
+    var qSearch = h('input', { type: 'search', class: 'scn-search', placeholder: 'What are you trying to find? e.g. force F₁, angle θ, resultant R, velocity v…', 'aria-label': 'Filter outputs' });
+    wrap.appendChild(qSearch);
+
+    if (paramsList.length && resList.length) {
+      var xSel = h('select', { 'aria-label': 'Unknown parameter x' }, paramsList.map(function (r, idx) {
+        return h('option', { value: String(idx), text: r.labelText + (r.spec.sym ? ' (' + stripTags(r.spec.sym) + ')' : '') });
+      }));
+      if (opts.preselectRow) {
+        var preIdx = paramsList.indexOf(opts.preselectRow);
+        if (preIdx >= 0) xSel.value = String(preIdx);
+      } else if (markedX && markedX.row) {
+        var mkIdx = paramsList.indexOf(markedX.row);
+        if (mkIdx >= 0) xSel.value = String(mkIdx);
+      }
+      var tSel = h('select', { 'aria-label': 'Target result quantity' }, resList.map(function (r, idx) {
+        return h('option', { value: String(idx), text: r.symbol + (r.unit ? ' [' + r.unit + ']' : '') + (r.step ? ' — ' + r.step : '') });
+      }));
+      var eqPref = resList.findIndex(function (r) { return /resultant|net|moment|R|Mnet/i.test(r.symbol + ' ' + r.step); });
+      if (eqPref >= 0) tSel.value = String(eqPref);
+      var tVal = h('input', { type: 'text', value: '0', placeholder: 'Target value (e.g. 0)', 'aria-label': 'Target value' });
+      var msg = h('div', { style: 'margin-top:8px;font-size:13px' });
+
+      var grid = h('div', { class: 'solve-x-grid' }, [
+        h('div', { class: 'solve-x-box' }, [h('label', { text: '1. Treat this input as x' }), xSel]),
+        h('div', { class: 'solve-x-box' }, [h('label', { text: '2. Target output quantity' }), tSel]),
+        h('div', { class: 'solve-x-box' }, [h('label', { text: '3. Desired target value' }), tVal,
+          h('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;margin-top:2px' }, [
+            h('button', { type: 'button', class: 'btn', style: 'min-height:28px;padding:0 10px;font-size:12px', text: '= 0 (Equilibrium)', onclick: function () { tVal.value = '0'; } })
+          ])])
+      ]);
+      wrap.appendChild(grid);
+
+      function setParamSilently(r, val) {
+        var v = U.clamp(val, Number(r.spec.min), Number(r.spec.max));
+        r.box.value = v;
+        r.box.dispatchEvent(new Event('change'));
+        if (r.renderChip) r.renderChip();
+      }
+      function evalTarget(rParam, xTrial, targetSymbol) {
+        setParamSilently(rParam, xTrial);
+        var snap = collectSnapshot().filter(function (r) { return r.kind === 'Result' && r.symbol === targetSymbol; });
+        return snap.length && isFinite(snap[0].num) ? snap[0].num : NaN;
+      }
+
+      var solveBtn = h('button', { type: 'button', class: 'btn primary', text: '⚡ Calculate x & Play Step-by-Step', onclick: function () {
+        var rP = paramsList[Number(xSel.value)], rT = resList[Number(tSel.value)], want = parseNum(tVal.value);
+        if (!rP || !rT || !isFinite(want)) { msg.innerHTML = '<span class="badge warn">Enter a valid numeric target value.</span>'; return; }
+        var lo = Number(rP.spec.min), hi = Number(rP.spec.max), orig = Number(rP.ctl.values[rP.spec.key]);
+        // 40-point coarse grid + bracketed golden-section / bisection refinement
+        var N = 40, bestX = orig, bestErr = Infinity, vals = [];
+        for (var i = 0; i <= N; i++) {
+          var xi = lo + (hi - lo) * i / N;
+          var yi = evalTarget(rP, xi, rT.symbol);
+          vals.push({ x: xi, y: yi, e: isFinite(yi) ? yi - want : NaN });
+          if (isFinite(yi) && Math.abs(yi - want) < bestErr) { bestErr = Math.abs(yi - want); bestX = xi; }
+        }
+        var bracket = null;
+        for (var j = 1; j < vals.length; j++) {
+          if (isFinite(vals[j - 1].e) && isFinite(vals[j].e) && vals[j - 1].e * vals[j].e <= 0) {
+            bracket = [vals[j - 1].x, vals[j].x, vals[j - 1].e, vals[j].e]; break;
+          }
+        }
+        if (bracket) {
+          var a = bracket[0], b = bracket[1], ea = bracket[2];
+          for (var k = 0; k < 24; k++) {
+            var mid = 0.5 * (a + b), ym = evalTarget(rP, mid, rT.symbol), em = ym - want;
+            if (!isFinite(em)) break;
+            if (Math.abs(em) < bestErr) { bestErr = Math.abs(em); bestX = mid; }
+            if (ea * em <= 0) { b = mid; } else { a = mid; ea = em; }
+          }
+        } else {
+          // Local narrow search around best coarse sample
+          var stepW = (hi - lo) / N, sLo = Math.max(lo, bestX - stepW), sHi = Math.min(hi, bestX + stepW);
+          for (var m = 0; m < 20; m++) {
+            var xm = sLo + (sHi - sLo) * m / 19, ym2 = evalTarget(rP, xm, rT.symbol);
+            if (isFinite(ym2) && Math.abs(ym2 - want) < bestErr) { bestErr = Math.abs(ym2 - want); bestX = xm; }
+          }
+        }
+        var dec = rP.spec.decimals === undefined ? 2 : rP.spec.decimals;
+        var finalX = Number(bestX.toFixed(Math.max(2, dec)));
+        setParamSilently(rP, finalX);
+        var finalY = evalTarget(rP, finalX, rT.symbol);
+        if (!isFinite(finalY) || bestErr > Math.max(2, Math.abs(want) * 0.25)) {
+          setParamSilently(rP, orig);
+          msg.innerHTML = '<span class="badge warn">No exact root found for ' + esc(rT.symbol) + ' = ' + esc(want) + ' inside [' + lo + ', ' + hi + ']. Closest was x = ' + U.sf(finalX) + ' giving ' + esc(rT.symbol) + ' = ' + U.sf(finalY) + '.</span>';
+          return;
+        }
+        closeModal();
+        clearMarkedX();
+        var cleanActual = Math.abs(finalY - want) < 1e-3 && want === 0 ? '0' : U.sf(finalY);
+        animateParam(orig, finalX, 460, function (v) { setParamSilently(rP, v); }, function () {
+          openStepStudio({
+            focusStep: rT.stepIdx || 0,
+            autoPlay: true,
+            solveX: {
+              paramLabel: rP.labelText, paramSym: stripTags(rP.spec.sym || 'x'), unit: stripTags(rP.spec.unit || ''),
+              solvedVal: U.sf(finalX), targetSym: rT.symbol, targetVal: U.sf(want), targetUnit: rT.unit, actualVal: cleanActual
+            }
+          });
+        });
+      } });
+      wrap.appendChild(h('div', { class: 'hub-bar' }, [solveBtn]));
+      wrap.appendChild(msg);
+    }
+
+    if (resList.length) {
+      wrap.appendChild(h('div', { style: 'margin-top:16px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em', text: 'Or jump directly to a calculated quantity' }));
+      var pillsWrap = h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;margin-top:8px' });
+      function renderResultPills(filter) {
+        pillsWrap.innerHTML = '';
+        var f = String(filter || '').trim().toLowerCase();
+        resList.forEach(function (r) {
+          var txt = r.symbol + ' = ' + r.value + (r.unit ? ' ' + r.unit : '');
+          if (f && (txt + ' ' + (r.step || '')).toLowerCase().indexOf(f) < 0) return;
+          pillsWrap.appendChild(h('button', { type: 'button', class: 'btn', text: txt, onclick: function () { closeModal(); openStepStudio({ focusStep: r.stepIdx || 0 }); } }));
+        });
+      }
+      qSearch.addEventListener('input', function () { renderResultPills(qSearch.value); });
+      renderResultPills('');
+      wrap.appendChild(pillsWrap);
+    }
+    openModal('🔍 What are you trying to find? (Solve for x)', wrap);
+  }
+
+  function openStepStudio(opts) {
+    if (activeStudio) activeStudio.close();
+    opts = opts || {};
+    wsDrawers.forEach(function (d) { d.setOpen(false); });
+    if (!stage || !stage.el || !wsGlobalRefs) return;
+
+    var moved = [];
+    function moveNode(el, dest) {
+      if (!el || !dest) return;
+      moved.push({ el: el, parent: el.parentNode, next: el.nextSibling });
+      dest.appendChild(el);
+    }
+
+    var ro = allReadouts[0] || null;
+    if (ro && opts.focusStep !== undefined && ro.setStep) ro.setStep(opts.focusStep);
+
+    var stepBadge = h('span', { class: 'chip', text: 'Step 1' });
+    var syncMsg = h('span', { text: 'Synced mode: smooth animated playback links stage & graphs' });
+    var syncStatus = h('b', { text: 'Ready' });
+    var playSpeed = 1;
+    var speedSel = h('select', { class: 'studio-speed', 'aria-label': 'Step playback speed' }, [0.5, 1, 1.5, 2].map(function (sp) {
+      var o = h('option', { value: String(sp), text: sp + '× speed' }); if (sp === 1) o.selected = true; return o;
+    }));
+    speedSel.addEventListener('change', function () { playSpeed = Number(speedSel.value) || 1; });
+    var progFill = h('i', {});
+    var syncBar = h('div', { class: 'studio-sync-bar' }, [
+      h('div', { class: 'studio-sync-row' }, [syncMsg, syncStatus, speedSel]),
+      h('div', { class: 'studio-prog' }, [progFill])
+    ]);
+    var autoBtn = h('button', { type: 'button', class: 'btn primary', text: '▶ Play Steps' });
+    var replayBtn = h('button', { type: 'button', class: 'btn', text: '↺ Replay' });
+    var prevBtn = h('button', { type: 'button', class: 'btn', text: '← Prev' });
+    var nextBtn = h('button', { type: 'button', class: 'btn', text: 'Next →' });
+    var solveShortcut = solveableParams().length ? h('button', { type: 'button', class: 'btn', text: '🔍 Solve for x', onclick: function () { closeStudio(); openSolveForX(); } }) : null;
+    var exitBtn = h('button', { type: 'button', class: 'btn', text: '✕ Exit Fullscreen' });
+
+    var stageHost = h('div', { class: 'studio-stage' });
+    var graphsHost = h('div', { class: 'studio-graphs' });
+    var leftCol = h('div', { class: 'studio-left' }, [stageHost, syncBar, graphsHost]);
+    var rightCol = h('div', { class: 'studio-right' });
+
+    if (opts.solveX) {
+      var sx = opts.solveX;
+      rightCol.appendChild(h('div', { class: 'studio-solve-banner', html:
+        '<span class="x-badge">Solved Unknown x</span>' +
+        '<div style="font-size:15px;font-weight:750">Let <code>x</code> = ' + esc(sx.paramLabel) + ' (' + esc(sx.paramSym) + ')</div>' +
+        '<div style="font-size:13.5px;color:var(--muted);margin:4px 0">Condition: <b>' + esc(sx.targetSym) + ' = ' + sx.targetVal + (sx.targetUnit ? ' ' + esc(sx.targetUnit) : '') + '</b> (achieved ' + sx.actualVal + ')</div>' +
+        '<div style="font-size:18px;font-weight:800;color:var(--accent);margin-top:4px">x = ' + sx.solvedVal + (sx.unit ? ' ' + esc(sx.unit) : '') + '</div>'
+      }));
+    }
+
+    var studio = h('section', { class: 'step-studio', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Fullscreen Synchronized Step Studio' }, [
+      h('header', { class: 'studio-head' }, [
+        h('h2', { text: (document.title || 'Simulation') + ' — Step-by-Step Studio' }),
+        stepBadge,
+        h('div', { class: 'studio-controls' }, [prevBtn, nextBtn, autoBtn, replayBtn, solveShortcut, exitBtn])
+      ]),
+      h('div', { class: 'studio-split' }, [leftCol, rightCol])
+    ]);
+
+    document.body.appendChild(studio);
+    moveNode(stage.el, stageHost);
+    if (typeof document !== 'undefined' && document.querySelectorAll) {
+      Array.prototype.slice.call(document.querySelectorAll('.plots')).forEach(function (pl) { moveNode(pl, graphsHost); });
+    }
+    (wsGlobalRefs.calc || []).forEach(function (c) { moveNode(c, rightCol); });
+
+    var tweenRaf = null, autoRaf = null, isPlayingSteps = false, stepStartMs = 0, lastClockSeek = -1;
+    function stopAutoPlay() {
+      isPlayingSteps = false;
+      if (autoRaf && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(autoRaf);
+      autoRaf = null;
+      if (SIM.view && SIM.view.setPulse) { SIM.view.setPulse(0); themeChanged(); }
+      autoBtn.textContent = '▶ Play Steps';
+    }
+    function syncToStep() {
+      var info = ro && ro.getStepInfo ? ro.getStepInfo() : { page: 0, count: 1 };
+      var total = Math.max(1, info.count);
+      stepBadge.textContent = total > 1 ? 'Step ' + (info.page + 1) + ' of ' + total : 'Live Working';
+      prevBtn.disabled = total < 2 || info.page <= 0;
+      nextBtn.disabled = total < 2 || info.page >= total - 1;
+      var clks = SIM.anim && SIM.anim.clocks ? SIM.anim.clocks : [];
+      if (clks.length && total > 1) {
+        var clk = clks[0], targetT = clk.duration * (info.page / (total - 1));
+        if (clk.pause) clk.pause();
+        if (!isPlayingSteps && clk.seek) {
+          var startT = isFinite(clk.t) ? clk.t : 0;
+          if (tweenRaf && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(tweenRaf);
+          if (Math.abs(targetT - startT) > 1e-4 && typeof requestAnimationFrame === 'function' && !(SIM.anim.reducedMotion && SIM.anim.reducedMotion())) {
+            var tw0 = performance.now();
+            var twStep = function (now) {
+              var p = Math.min(1, (now - tw0) / 380);
+              var ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+              clk.seek(startT + (targetT - startT) * ease);
+              if (p < 1) tweenRaf = requestAnimationFrame(twStep); else tweenRaf = null;
+            };
+            tweenRaf = requestAnimationFrame(twStep);
+          } else clk.seek(targetT);
+        }
+        syncStatus.textContent = 't = ' + U.num(targetT, 2) + ' s (Step ' + (info.page + 1) + '/' + total + ')';
+      } else {
+        syncStatus.textContent = total > 1 ? 'Step ' + (info.page + 1) + '/' + total + ' highlighted' : 'Vector & diagram focus synced';
+      }
+      if (!isPlayingSteps) progFill.style.width = total > 1 ? Math.round(((info.page + 1) / total) * 100) + '%' : '100%';
+      setTimeout(function () {
+        if (typeof root.dispatchEvent === 'function') root.dispatchEvent(new Event('resize'));
+        allReadouts.forEach(function (r) { if (r.syncFocus) r.syncFocus(); });
+        themeChanged();
+      }, 20);
+    }
+
+    var onWalk = function () { syncToStep(); };
+    if (ro && ro.el && ro.el.addEventListener) ro.el.addEventListener('walkchange', onWalk);
+    prevBtn.onclick = function () { stopAutoPlay(); if (ro && ro.setStep) ro.setStep(ro.getStepInfo().page - 1); };
+    nextBtn.onclick = function () { stopAutoPlay(); if (ro && ro.setStep) ro.setStep(ro.getStepInfo().page + 1); };
+
+    function startAutoPlay(fromBeginning) {
+      stopAutoPlay();
+      if (!ro || !ro.getStepInfo || typeof requestAnimationFrame !== 'function') return;
+      var inf0 = ro.getStepInfo(), clks = SIM.anim && SIM.anim.clocks ? SIM.anim.clocks : [];
+      if (inf0.count < 2 && !clks.length) return;
+      if (fromBeginning || (inf0.count > 1 && inf0.page >= inf0.count - 1)) {
+        if (ro.setStep && inf0.count > 1) ro.setStep(0);
+      }
+      isPlayingSteps = true;
+      autoBtn.textContent = '⏸ Pause';
+      stepStartMs = performance.now();
+      lastClockSeek = -1;
+      function frame(now) {
+        if (!isPlayingSteps || !activeStudio) return;
+        var inf = ro.getStepInfo(), total = Math.max(1, inf.count);
+        var stepMs = 2800 / playSpeed;
+        var p = Math.min(1, (now - stepStartMs) / stepMs);
+        var ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        var overall = total > 1 ? ((inf.page + p) / total) * 100 : p * 100;
+        progFill.style.width = Math.min(100, overall).toFixed(1) + '%';
+        if (clks.length) {
+          var clk = clks[0];
+          var t0 = total > 1 ? clk.duration * (inf.page / (total - 1)) : 0;
+          var t1 = total > 1 ? (inf.page < total - 1 ? clk.duration * ((inf.page + 1) / (total - 1)) : clk.duration) : clk.duration;
+          var tt = t0 + (t1 - t0) * ease;
+          if (Math.abs(tt - lastClockSeek) > 1e-4) {
+            clk.seek(tt);
+            lastClockSeek = tt;
+            syncStatus.textContent = 't = ' + U.num(tt, 2) + ' s (Step ' + (inf.page + 1) + '/' + total + ')';
+          }
+        } else if (SIM.view && SIM.view.setPulse) {
+          SIM.view.setPulse(0.5 - 0.5 * Math.cos(p * Math.PI * 2));
+          themeChanged();
+        }
+        if (p >= 1) {
+          if (inf.page < total - 1) {
+            ro.setStep(inf.page + 1);
+            stepStartMs = now;
+            autoRaf = requestAnimationFrame(frame);
+          } else {
+            stopAutoPlay();
+            progFill.style.width = '100%';
+            syncStatus.textContent = 'Completed all ' + total + ' steps ✓';
+          }
+          return;
+        }
+        autoRaf = requestAnimationFrame(frame);
+      }
+      autoRaf = requestAnimationFrame(frame);
+    }
+
+    autoBtn.onclick = function () { if (isPlayingSteps) stopAutoPlay(); else startAutoPlay(false); };
+    replayBtn.onclick = function () { startAutoPlay(true); };
+
+    function closeStudio() {
+      stopAutoPlay();
+      if (tweenRaf && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(tweenRaf);
+      if (ro && ro.el && ro.el.removeEventListener) ro.el.removeEventListener('walkchange', onWalk);
+      for (var i = moved.length - 1; i >= 0; i--) {
+        var m = moved[i];
+        if (m.parent) m.parent.insertBefore(m.el, m.next && m.next.parentNode === m.parent ? m.next : null);
+      }
+      if (studio.parentNode) studio.parentNode.removeChild(studio);
+      activeStudio = null;
+      allReadouts.forEach(function (r) { if (r.syncFocus) r.syncFocus(); });
+      setTimeout(function () {
+        if (typeof root.dispatchEvent === 'function') root.dispatchEvent(new Event('resize'));
+        themeChanged();
+      }, 25);
+    }
+    exitBtn.onclick = closeStudio;
+    activeStudio = { close: closeStudio, play: function () { startAutoPlay(true); } };
+    syncToStep();
+    if (opts.autoPlay) setTimeout(function () { if (activeStudio && activeStudio.play) activeStudio.play(); }, 180);
+  }
+
+  // Deep-link support from Question Solver (#markX=F1&autoSolve=1&autoStudio=1) + cross-frame control
+  if (typeof root !== 'undefined' && root.addEventListener && typeof document !== 'undefined') {
+    var applyHashDirectives = function () {
+      var hsh = readHash();
+      var touched = 0;
+      allParamRows.forEach(function (r) {
+        var k = r.spec && r.spec.key;
+        if (k && hsh[k] !== undefined && isFinite(Number(hsh[k]))) {
+          var v = U.clamp(Number(hsh[k]), Number(r.spec.min), Number(r.spec.max));
+          if (Math.abs(r.ctl.values[k] - v) > 1e-6) {
+            r.box.value = v; r.box.dispatchEvent(new Event('change'));
+            if (r.renderChip) r.renderChip();
+            touched++;
+          }
+        }
+      });
+      if (hsh.markX && findParamRow(String(hsh.markX))) {
+        markAsX(String(hsh.markX));
+        if (String(hsh.autoSolve) === '1') setTimeout(function () { calculateMarkedX({ immediate: true }); }, 140);
+      } else if (String(hsh.autoStudio) === '1' && wsGlobalRefs) {
+        setTimeout(function () { openStepStudio({ autoPlay: true }); }, 140);
+      }
+    };
+    setTimeout(applyHashDirectives, 220);
+    root.addEventListener('message', function (ev) {
+      if (!ev || !ev.data || typeof ev.data !== 'object') return;
+      if (ev.data.type === 'sim-play-studio' && wsGlobalRefs) openStepStudio({ autoPlay: true });
+      else if (ev.data.type === 'sim-calc-x' && markedX) calculateMarkedX();
+    });
+  }
+
   SIM.ui = { redraw: themeChanged, h: h, course: course, gFor: gFor, colors: colors, onTheme: onTheme, page: page, canvas: canvas, params: params, select: select,
-    toggle: toggle, presets: presets, openEditor: openEditor, askNumber: askNumber, parseNum: parseNum, stageTip: stageTip, stageAction: stageAction, placeMode: placeMode, cancelPlace: function () { cancelPlace(false); }, stage: function () { return stage; }, syncChips: function () { syncChips(); }, Readout: Readout, examToggle: examToggle, notes: notes, legend: legend, readHash: readHash, writeHash: writeHash, esc: esc };
+    toggle: toggle, presets: presets, openEditor: openEditor, askNumber: askNumber, parseNum: parseNum, stageTip: stageTip, stageAction: stageAction, placeMode: placeMode, cancelPlace: function () { cancelPlace(false); }, stage: function () { return stage; }, syncChips: function () { syncChips(); }, Readout: Readout, examToggle: examToggle, notes: notes, legend: legend, readHash: readHash, writeHash: writeHash, esc: esc, openSolveForX: openSolveForX, openStepStudio: openStepStudio,
+    markAsX: markAsX, clearMarkedX: clearMarkedX, getMarkedX: getMarkedX, registerXCalculator: registerXCalculator, calculateMarkedX: calculateMarkedX, syncMarkedXPill: syncMarkedXPill, animateParam: animateParam };
 })(typeof self !== 'undefined' ? self : this);

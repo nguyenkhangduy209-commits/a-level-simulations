@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secret Vault · Physics Toys, Relics &amp; Certificates</title>
+<link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="assets/app.css">
+<script src="catalog/groups.js"></script>
+<script src="core/progress.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var P = window.SIM_PROGRESS, esc = P.esc, svg = P.svg;
+  var shell = P.mountShell({
+    active: 'vault',
+    editableName: false,
+    title: 'Secret Physics Vault',
+    subtitle: 'Unlock interactive sandbox toys, collect all 17 relics, equip lab desk skins, and download your mastery certificate.'
+  });
+  var root = shell.content;
+  var tab = new URLSearchParams(location.search).get('tab') || 'toys';
+  if (new URLSearchParams(location.search).get('toy')) tab = 'toys';
+
+  root.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:16px">' +
+    '  <div class="filter-pills" id="vaultTabs">' +
+    '    <button type="button" data-t="toys">✦ Secret Sandbox Toys</button>' +
+    '    <button type="button" data-t="relics">🏆 Relic Cabinet (17)</button>' +
+    '    <button type="button" data-t="skins">🎨 Lab Desk Skins</button>' +
+    '    <button type="button" data-t="cert">📜 Certificate Studio</button>' +
+    '  </div>' +
+    '  <span class="pill-btn" id="vaultMeta">0 XP</span>' +
+    '</div>' +
+    '<div id="vaultBody"></div>';
+
+  var activeLoops = [];
+  function stopLoops() { activeLoops.forEach(function (fn) { fn(); }); activeLoops = []; }
+
+  function openRiddle(toy) {
+    var old = document.getElementById('riddleBack'); if (old) old.remove();
+    var back = document.createElement('div');
+    back.id = 'riddleBack'; back.className = 'sim-modal-back';
+    back.innerHTML =
+      '<div class="sim-modal" role="dialog"><div class="sim-modal-head"><h2>Bonus Riddle · ' + esc(toy.name) + '</h2><button type="button" class="sim-modal-close" id="rClose">×</button></div>' +
+      '<div class="sim-modal-body">' +
+      '<p style="font-size:15.5px;font-weight:700;margin:0 0 12px">' + esc(toy.riddle.q) + '</p>' +
+      '<div id="rOpts" style="display:flex;flex-direction:column;gap:8px">' +
+      toy.riddle.opts.map(function (o, i) { return '<button type="button" class="btn" data-i="' + i + '" style="justify-content:flex-start;min-height:44px">' + esc(o) + '</button>'; }).join('') +
+      '</div><div id="rFb" style="margin-top:12px"></div></div></div>';
+    back.onclick = function (e) { if (e.target === back) back.remove(); };
+    back.querySelector('#rClose').onclick = function () { back.remove(); };
+    back.querySelectorAll('#rOpts button').forEach(function (b) {
+      b.onclick = function () {
+        var i = Number(b.getAttribute('data-i'));
+        if (i === toy.riddle.ans) {
+          P.unlockToyEarly(toy.id);
+          back.remove();
+          render();
+        } else {
+          b.style.borderColor = 'var(--warn)';
+          back.querySelector('#rFb').innerHTML = '<span class="badge warn">Not quite — try another answer!</span>';
+        }
+      };
+    });
+    document.body.appendChild(back);
+  }
+
+  /* ---------- Interactive Sandbox Toy Engines ---------- */
+  function startOrbital(cv, box) {
+    var ctx = cv.getContext('2d'), alive = true, binary = false;
+    var W = 560, H = 350; cv.width = W; cv.height = H;
+    var stars = [{ x: W / 2, y: H / 2, m: 3200 }];
+    var bodies = [
+      { x: W / 2 + 95, y: H / 2, vx: 0, vy: -5.8, col: '#facc15', tr: [] },
+      { x: W / 2 - 145, y: H / 2, vx: 0, vy: 4.6, col: '#38bdf8', tr: [] }
+    ];
+    var drag = null;
+    function pos(e) {
+      var r = cv.getBoundingClientRect();
+      return { x: (e.clientX - r.left) * (W / r.width), y: (e.clientY - r.top) * (H / r.height) };
+    }
+    cv.onpointerdown = function (e) { var p = pos(e); drag = { x0: p.x, y0: p.y, x1: p.x, y1: p.y }; };
+    cv.onpointermove = function (e) { if (drag) { var p = pos(e); drag.x1 = p.x; drag.y1 = p.y; } };
+    cv.onpointerup = function () {
+      if (!drag) return;
+      var cols = ['#facc15', '#34d399', '#38bdf8', '#fb7185', '#c084fc'];
+      bodies.push({ x: drag.x0, y: drag.y0, vx: (drag.x0 - drag.x1) * 0.08, vy: (drag.y0 - drag.y1) * 0.08, col: cols[bodies.length % cols.length], tr: [] });
+      if (bodies.length > 18) bodies.shift();
+      drag = null;
+    };
+    box.querySelector('[data-act="reset"]').onclick = function () {
+      binary = false; stars = [{ x: W / 2, y: H / 2, m: 3200 }];
+      bodies = [{ x: W / 2 + 95, y: H / 2, vx: 0, vy: -5.8, col: '#facc15', tr: [] }, { x: W / 2 - 145, y: H / 2, vx: 0, vy: 4.6, col: '#38bdf8', tr: [] }];
+    };
+    box.querySelector('[data-act="binary"]').onclick = function () {
+      binary = !binary;
+      stars = binary ? [{ x: W / 2 - 60, y: H / 2, m: 2100 }, { x: W / 2 + 60, y: H / 2, m: 2100 }] : [{ x: W / 2, y: H / 2, m: 3200 }];
+    };
+    box.querySelector('[data-act="clear"]').onclick = function () { bodies = []; };
+
+    function tick() {
+      if (!alive) return;
+      ctx.fillStyle = 'rgba(7, 8, 13, 0.25)'; ctx.fillRect(0, 0, W, H);
+      stars.forEach(function (st) {
+        var g = ctx.createRadialGradient(st.x, st.y, 2, st.x, st.y, 26);
+        g.addColorStop(0, '#fffbeb'); g.addColorStop(0.35, '#facc15'); g.addColorStop(1, 'transparent');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(st.x, st.y, 26, 0, Math.PI * 2); ctx.fill();
+      });
+      bodies.forEach(function (b) {
+        stars.forEach(function (st) {
+          var dx = st.x - b.x, dy = st.y - b.y, r2 = Math.max(140, dx * dx + dy * dy), f = st.m / (r2 * Math.sqrt(r2));
+          b.vx += dx * f * 0.45; b.vy += dy * f * 0.45;
+        });
+        b.x += b.vx; b.y += b.vy;
+        b.tr.push([b.x, b.y]); if (b.tr.length > 48) b.tr.shift();
+        ctx.strokeStyle = b.col; ctx.lineWidth = 2; ctx.beginPath();
+        b.tr.forEach(function (pt, idx) { if (idx === 0) ctx.moveTo(pt[0], pt[1]); else ctx.lineTo(pt[0], pt[1]); });
+        ctx.stroke();
+        ctx.fillStyle = b.col; ctx.beginPath(); ctx.arc(b.x, b.y, 4.5, 0, Math.PI * 2); ctx.fill();
+      });
+      if (drag) {
+        ctx.strokeStyle = '#facc15'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(drag.x0, drag.y0); ctx.lineTo(drag.x1, drag.y1); ctx.stroke(); ctx.setLineDash([]);
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    return function () { alive = false; };
+  }
+
+  function startPendulum(cv, box) {
+    var ctx = cv.getContext('2d'), alive = true, W = 560, H = 350; cv.width = W; cv.height = H;
+    var g = 1.0, L1 = 80, L2 = 80, m1 = 10, m2 = 10;
+    function makeP(a1, a2, col) { return { a1: a1, a2: a2, v1: 0, v2: 0, col: col, tr: [] }; }
+    var pA = makeP(Math.PI * 0.68, Math.PI * 0.9, '#facc15'), pB = makeP(Math.PI * 0.684, Math.PI * 0.9, '#38bdf8');
+    function stepP(p) {
+      var num1 = -g * (2 * m1 + m2) * Math.sin(p.a1) - m2 * g * Math.sin(p.a1 - 2 * p.a2) - 2 * Math.sin(p.a1 - p.a2) * m2 * (p.v2 * p.v2 * L2 + p.v1 * p.v1 * L1 * Math.cos(p.a1 - p.a2));
+      var den = L1 * (2 * m1 + m2 - m2 * Math.cos(2 * p.a1 - 2 * p.a2));
+      var a1_a = num1 / den;
+      var num2 = 2 * Math.sin(p.a1 - p.a2) * (p.v1 * p.v1 * L1 * (m1 + m2) + g * (m1 + m2) * Math.cos(p.a1) + p.v2 * p.v2 * L2 * m2 * Math.cos(p.a1 - p.a2));
+      var a2_a = num2 / (L2 * (2 * m1 + m2 - m2 * Math.cos(2 * p.a1 - 2 * p.a2)));
+      p.v1 += a1_a * 0.25; p.v2 += a2_a * 0.25; p.a1 += p.v1 * 0.25; p.a2 += p.v2 * 0.25;
+      p.v1 *= 0.9992; p.v2 *= 0.9992;
+    }
+    box.querySelector('[data-act="drop"]').onclick = function () {
+      var ang = Math.PI * (0.55 + Math.random() * 0.4);
+      pA = makeP(ang, ang + 0.3, '#facc15'); pB = makeP(ang + 0.005, ang + 0.3, '#38bdf8');
+    };
+    box.querySelector('[data-act="clear"]').onclick = function () { pA.tr = []; pB.tr = []; };
+    function tick() {
+      if (!alive) return;
+      ctx.fillStyle = 'rgba(7, 8, 13, 0.2)'; ctx.fillRect(0, 0, W, H);
+      var cx = W / 2, cy = 115;
+      [pA, pB].forEach(function (p) {
+        stepP(p);
+        var x1 = cx + L1 * Math.sin(p.a1), y1 = cy + L1 * Math.cos(p.a1);
+        var x2 = x1 + L2 * Math.sin(p.a2), y2 = y1 + L2 * Math.cos(p.a2);
+        p.tr.push([x2, y2]); if (p.tr.length > 90) p.tr.shift();
+        ctx.strokeStyle = p.col; ctx.lineWidth = 1.6; ctx.beginPath();
+        p.tr.forEach(function (pt, idx) { if (idx === 0) ctx.moveTo(pt[0], pt[1]); else ctx.lineTo(pt[0], pt[1]); });
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.fillStyle = p.col; ctx.beginPath(); ctx.arc(x2, y2, 5, 0, Math.PI * 2); ctx.fill();
+      });
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    return function () { alive = false; };
+  }
+
+  function startRipples(cv, box) {
+    var ctx = cv.getContext('2d'), alive = true, cols = 140, rows = 88;
+    cv.width = cols; cv.height = rows;
+    var cur = new Float32Array(cols * rows), prev = new Float32Array(cols * rows), img = ctx.createImageData(cols, rows);
+    var slit = false, autoOsc = true, ph = 0;
+    function splash(x, y, amp) {
+      x = Math.max(2, Math.min(cols - 3, x | 0)); y = Math.max(2, Math.min(rows - 3, y | 0));
+      cur[y * cols + x] = amp;
+    }
+    cv.onpointerdown = cv.onpointermove = function (e) {
+      if (e.type === 'pointermove' && !e.buttons) return;
+      var r = cv.getBoundingClientRect();
+      splash(((e.clientX - r.left) / r.width) * cols, ((e.clientY - r.top) / r.height) * rows, 280);
+    };
+    box.querySelector('[data-act="slit"]').onclick = function () { slit = !slit; };
+    box.querySelector('[data-act="osc"]').onclick = function () { autoOsc = !autoOsc; };
+    box.querySelector('[data-act="clear"]').onclick = function () { cur.fill(0); prev.fill(0); };
+
+    function tick() {
+      if (!alive) return;
+      ph += 0.25;
+      if (autoOsc) { splash(26, rows / 2, Math.sin(ph) * 140); if (!slit) splash(26, rows / 2 + 16, Math.sin(ph) * 140); }
+      for (var y = 1; y < rows - 1; y++) {
+        for (var x = 1; x < cols - 1; x++) {
+          var i = y * cols + x;
+          if (slit && x === 66 && Math.abs(y - rows / 2 + 10) > 4 && Math.abs(y - rows / 2 - 10) > 4) { cur[i] = 0; continue; }
+          var val = ((prev[i - 1] + prev[i + 1] + prev[i - cols] + prev[i + cols]) * 0.5 - cur[i]) * 0.985;
+          cur[i] = val;
+        }
+      }
+      var tmp = prev; prev = cur; cur = tmp;
+      var d = img.data;
+      for (var j = 0; j < cols * rows; j++) {
+        var v = Math.max(-255, Math.min(255, prev[j]));
+        var p = j * 4;
+        if (slit && (j % cols) === 66 && Math.abs(((j / cols) | 0) - rows / 2 + 10) > 4 && Math.abs(((j / cols) | 0) - rows / 2 - 10) > 4) {
+          d[p] = 60; d[p + 1] = 65; d[p + 2] = 85; d[p + 3] = 255; continue;
+        }
+        d[p] = v > 0 ? Math.min(255, 16 + v * 1.9) : 12;
+        d[p + 1] = v > 0 ? Math.min(220, 18 + v * 1.4) : Math.min(210, 20 - v * 0.9);
+        d[p + 2] = v < 0 ? Math.min(255, 40 - v * 1.8) : 22;
+        d[p + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    return function () { alive = false; };
+  }
+
+  function startCollider(cv, box) {
+    var ctx = cv.getContext('2d'), alive = true, W = 560, H = 350; cv.width = W; cv.height = H;
+    var sparks = [], bField = 0.045;
+    function smash(cx, cy) {
+      var cols = ['#facc15', '#38bdf8', '#fb7185', '#34d399', '#c084fc'];
+      for (var i = 0; i < 28; i++) {
+        var ang = Math.random() * Math.PI * 2, spd = 2.2 + Math.random() * 4.5, q = Math.random() < 0.35 ? 0 : (Math.random() < 0.5 ? 1 : -1);
+        sparks.push({ x: cx, y: cy, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, q: q, col: cols[i % cols.length], life: 1, tr: [] });
+      }
+    }
+    smash(W / 2, H / 2);
+    cv.onpointerdown = function (e) {
+      var r = cv.getBoundingClientRect();
+      smash((e.clientX - r.left) * (W / r.width), (e.clientY - r.top) * (H / r.height));
+    };
+    box.querySelector('[data-act="smash"]').onclick = function () { smash(W / 2 + (Math.random() - 0.5) * 60, H / 2 + (Math.random() - 0.5) * 40); };
+    box.querySelector('[data-act="bfield"]').onclick = function () { bField = bField ? 0 : 0.045; };
+    function tick() {
+      if (!alive) return;
+      ctx.fillStyle = 'rgba(7, 8, 13, 0.14)'; ctx.fillRect(0, 0, W, H);
+      sparks.forEach(function (sp) {
+        if (sp.q) {
+          var nvx = sp.vx - sp.q * bField * sp.vy, nvy = sp.vy + sp.q * bField * sp.vx;
+          sp.vx = nvx * 0.992; sp.vy = nvy * 0.992;
+        }
+        sp.x += sp.vx; sp.y += sp.vy; sp.life -= 0.01;
+        sp.tr.push([sp.x, sp.y]); if (sp.tr.length > 35) sp.tr.shift();
+        ctx.globalAlpha = Math.max(0, sp.life);
+        ctx.strokeStyle = sp.col; ctx.lineWidth = 1.8; ctx.beginPath();
+        sp.tr.forEach(function (pt, idx) { if (idx === 0) ctx.moveTo(pt[0], pt[1]); else ctx.lineTo(pt[0], pt[1]); });
+        ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+      sparks = sparks.filter(function (sp) { return sp.life > 0; });
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    return function () { alive = false; };
+  }
+
+  function renderToys(s, sum) {
+    var body = document.getElementById('vaultBody');
+    var controls = {
+      orbital: '<button type="button" class="btn" data-act="reset">Reset Orbit</button><button type="button" class="btn" data-act="binary">Toggle Binary Star</button><button type="button" class="btn" data-act="clear">Clear</button>',
+      pendulum: '<button type="button" class="btn" data-act="drop">Drop Fresh</button><button type="button" class="btn" data-act="clear">Clear Trails</button>',
+      ripples: '<button type="button" class="btn" data-act="slit">Double Slit</button><button type="button" class="btn" data-act="osc">Auto Wave</button><button type="button" class="btn" data-act="clear">Clear</button>',
+      collider: '<button type="button" class="btn primary" data-act="smash">⚡ Collide Beams</button><button type="button" class="btn" data-act="bfield">Toggle B-Field</button>'
+    };
+    body.innerHTML = '<div class="toy-grid">' + P.TOYS.map(function (t) {
+      var open = P.isToyUnlocked(t, s, sum);
+      return '<article class="toy-card" id="toy-' + t.id + '">' +
+        '  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">' +
+        '    <h3 style="margin:0;font-size:16px">' + esc(t.name) + '</h3>' +
+        '    <span class="chip">' + (open ? '★ Unlocked' : '🔒 ' + t.reqXp + ' XP or ' + t.reqMastered + ' nodes') + '</span>' +
+        '  </div>' +
+        '  <p style="margin:0;font-size:13px;color:var(--muted)">' + esc(t.desc) + '</p>' +
+        '  <div class="toy-canvas-wrap">' +
+        '    <canvas></canvas>' +
+        (!open ? '<div class="toy-lock"><span class="kpi-badge">' + svg('vault') + '</span><b>Locked Secret Sandbox</b><span style="font-size:12.5px;color:#cbd5e1">Earn ' + t.reqXp + ' XP or master ' + t.reqMastered + ' map nodes</span><button type="button" class="btn primary" data-riddle="' + t.id + '">Solve Bonus Riddle to Unlock Early</button></div>' : '') +
+        '  </div>' +
+        '  <div style="display:flex;gap:8px;flex-wrap:wrap">' + (open ? controls[t.id] : '') + '</div>' +
+        '</article>';
+    }).join('') + '</div>';
+
+    P.TOYS.forEach(function (t) {
+      var card = document.getElementById('toy-' + t.id);
+      if (P.isToyUnlocked(t, s, sum)) {
+        var cv = card.querySelector('canvas');
+        if (t.id === 'orbital') activeLoops.push(startOrbital(cv, card));
+        else if (t.id === 'pendulum') activeLoops.push(startPendulum(cv, card));
+        else if (t.id === 'ripples') activeLoops.push(startRipples(cv, card));
+        else if (t.id === 'collider') activeLoops.push(startCollider(cv, card));
+      } else {
+        card.querySelector('[data-riddle]').onclick = function () { openRiddle(t); };
+      }
+    });
+  }
+
+  function renderRelics(s) {
+    document.getElementById('vaultBody').innerHTML =
+      '<div class="badge-grid" style="grid-template-columns:repeat(auto-fill,minmax(190px,1fr))">' +
+      P.NODES.map(function (n) {
+        var ok = P.getNodeProgress(n.id, s).mastered;
+        return '<div class="badge-tile ' + (ok ? 'earned' : 'locked') + '" style="padding:16px">' +
+          '<div class="b-ico">' + svg(n.id) + '</div>' +
+          '<b>' + esc(n.relic.name) + '</b>' +
+          '<small>' + esc(n.relic.fact) + '</small>' +
+          '<a class="pill-btn" style="margin-top:auto;min-height:30px;font-size:11.5px" href="map.html?focus=' + n.id + '">' + (ok ? 'Mastered ✓' : 'Unlock on Map →') + '</a>' +
+          '</div>';
+      }).join('') + '</div>';
+  }
+
+  function renderSkins(s) {
+    document.getElementById('vaultBody').innerHTML =
+      '<div class="skin-grid">' +
+      P.SKINS.map(function (sk) {
+        var eq = (s.skin || 'gold') === sk.id, open = s.xp >= sk.reqXp;
+        return '<button type="button" class="skin-card ' + (eq ? 'equipped' : '') + '" data-skin="' + sk.id + '" style="text-align:left;color:var(--ink)">' +
+          '<div class="skin-swatch" style="background:' + sk.sw + '"></div>' +
+          '<div style="display:flex;justify-content:space-between;align-items:center"><b>' + esc(sk.name) + '</b><span class="chip">' + (eq ? 'Equipped' : open ? 'Available' : sk.reqXp + ' XP') + '</span></div>' +
+          '<small style="color:var(--muted)">' + esc(sk.desc) + '</small></button>';
+      }).join('') + '</div>';
+    document.querySelectorAll('.skin-card').forEach(function (b) {
+      b.onclick = function () {
+        var sk = P.SKINS.filter(function (x) { return x.id === b.getAttribute('data-skin'); })[0];
+        if (!sk) return;
+        if (P.getState().xp < sk.reqXp) { P.celebrate('Locked Skin', 'Reach ' + sk.reqXp + ' XP to equip ' + sk.name, 0); return; }
+        P.setSkin(sk.id);
+        render();
+      };
+    });
+  }
+
+  function renderCert(s, sum) {
+    var body = document.getElementById('vaultBody');
+    body.innerHTML =
+      '<div class="panel-card" style="max-width:860px;margin:0 auto">' +
+      '  <div class="panel-head">' +
+      '    <div class="panel-title"><span class="kpi-badge">' + svg('trophy') + '</span><div><h2>Mastery Certificate Studio</h2><small>Live generated certificate reflecting your current Atlas XP &amp; nodes</small></div></div>' +
+      '    <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn primary" id="dlCertBtn">⇣ Download PNG</button><button type="button" class="btn" id="prCertBtn">Print</button></div>' +
+      '  </div>' +
+      '  <canvas id="certCv" width="960" height="580" style="width:100%;height:auto;border-radius:16px;border:1px solid var(--line)"></canvas>' +
+      '</div>';
+
+    var cv = document.getElementById('certCv'), c = cv.getContext('2d');
+    var g = c.createLinearGradient(0, 0, 960, 580);
+    g.addColorStop(0, '#0f1016'); g.addColorStop(1, '#1a1b24');
+    c.fillStyle = g; c.fillRect(0, 0, 960, 580);
+    var glow = c.createRadialGradient(480, 120, 10, 480, 120, 420);
+    glow.addColorStop(0, 'rgba(250,204,21,0.22)'); glow.addColorStop(1, 'transparent');
+    c.fillStyle = glow; c.fillRect(0, 0, 960, 580);
+
+    c.strokeStyle = '#facc15'; c.lineWidth = 4; c.strokeRect(24, 24, 912, 532);
+    c.strokeStyle = 'rgba(250,204,21,0.35)'; c.lineWidth = 1.5; c.strokeRect(36, 36, 888, 508);
+
+    c.textAlign = 'center';
+    c.fillStyle = '#facc15'; c.font = '700 16px system-ui, sans-serif';
+    c.fillText('CAMBRIDGE A-LEVEL INTERACTIVE PHYSICS & MECHANICS ATLAS', 480, 96);
+    c.fillStyle = '#f4f5f8'; c.font = '800 44px system-ui, sans-serif';
+    c.fillText('Certificate of Mastery', 480, 158);
+    c.fillStyle = '#989ca9'; c.font = '500 19px system-ui, sans-serif';
+    c.fillText('AWARDED TO', 480, 214);
+    c.fillStyle = '#facc15'; c.font = '800 46px system-ui, sans-serif';
+    c.fillText(s.name, 480, 276);
+    c.fillStyle = '#d4d7e0'; c.font = '500 20px system-ui, sans-serif';
+    c.fillText('Rank: ' + sum.rank.name + '  ·  ' + sum.xp + ' Total XP  ·  ' + sum.masteredCount + '/' + sum.totalNodes + ' Nodes Mastered', 480, 336);
+    c.fillStyle = '#989ca9'; c.font = '500 16px system-ui, sans-serif';
+    c.fillText('Verified simulations & past-paper checks across 9709 Paper 4 & 9702 AS Physics', 480, 382);
+
+    c.beginPath(); c.arc(480, 466, 42, 0, Math.PI * 2); c.fillStyle = '#facc15'; c.fill();
+    c.fillStyle = '#111217'; c.font = '800 26px system-ui, sans-serif'; c.fillText('★', 480, 475);
+    c.fillStyle = '#989ca9'; c.font = '600 14px system-ui, sans-serif';
+    c.textAlign = 'left'; c.fillText('Issued ' + new Date().toISOString().slice(0, 10), 64, 514);
+    c.textAlign = 'right'; c.fillText(sum.badgesEarned.length + ' Badges · ' + sum.unlockedToysCount + ' Secret Toys', 896, 514);
+
+    document.getElementById('dlCertBtn').onclick = function () {
+      var a = document.createElement('a'); a.download = 'alevel-certificate.png'; a.href = cv.toDataURL('image/png'); a.click();
+    };
+    document.getElementById('prCertBtn').onclick = function () { window.print(); };
+  }
+
+  function render() {
+    stopLoops();
+    var s = P.getState(), sum = P.getSummary(s);
+    document.getElementById('vaultMeta').textContent = sum.xp + ' XP · ' + sum.unlockedToysCount + '/4 Toys · ' + sum.unlockedRelicsCount + '/17 Relics';
+    document.querySelectorAll('#vaultTabs button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-t') === tab); });
+    if (tab === 'toys') renderToys(s, sum);
+    else if (tab === 'relics') renderRelics(s);
+    else if (tab === 'skins') renderSkins(s);
+    else renderCert(s, sum);
+  }
+
+  document.querySelectorAll('#vaultTabs button').forEach(function (b) {
+    b.onclick = function () { tab = b.getAttribute('data-t'); render(); };
+  });
+  window.addEventListener('sim-progress-change', function () {
+    var s = P.getState(), sum = P.getSummary(s);
+    document.getElementById('vaultMeta').textContent = sum.xp + ' XP · ' + sum.unlockedToysCount + '/4 Toys · ' + sum.unlockedRelicsCount + '/17 Relics';
+  });
+  render();
+})();
+</script>
+</body>
+</html>

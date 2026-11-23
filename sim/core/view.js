@@ -16,8 +16,9 @@
     this.resize();
   }
   Viewport.prototype.resize = function () {
-    var r = this.canvas.getBoundingClientRect(), dpr = root.devicePixelRatio || 1;
-    var w = Math.max(50, r.width), h = Math.max(50, r.height || r.width * 9 / 16);
+    var r = this.canvas.getBoundingClientRect(), dpr = Math.min(2, root.devicePixelRatio || 1);
+    if (r.width < 10) return;
+    var w = Math.min(2200, Math.max(80, r.width)), h = Math.min(1600, Math.max(60, r.height || w * 9 / 16));
     if (this.canvas.width !== Math.round(w * dpr) || this.canvas.height !== Math.round(h * dpr)) {
       this.canvas.width = Math.round(w * dpr); this.canvas.height = Math.round(h * dpr);
     }
@@ -38,12 +39,41 @@
   Viewport.prototype.Y = function (y) { return this.oy - this.scale * y; };
   Viewport.prototype.P = function (x, y) { return [this.X(x), this.Y(y)]; };
   Viewport.prototype.toWorld = function (sx, sy) { return [(sx - this.ox) / this.scale, (this.oy - sy) / this.scale]; };
+  function isLightTheme() {
+    return typeof document !== 'undefined' && document.documentElement && document.documentElement.getAttribute && document.documentElement.getAttribute('data-theme') === 'light';
+  }
+  function hudBoxesFor(canvas, vw, vh) {
+    var out = [];
+    if (!canvas || !canvas.getBoundingClientRect || typeof document === 'undefined' || !document.body || !document.body.classList || !document.body.classList.contains('ws-clean')) return out;
+    if (canvas.closest && canvas.closest('.ws-drawer, .step-studio')) return out;
+    try {
+      var cr = canvas.getBoundingClientRect();
+      if (!(cr.width > 0 && cr.height > 0)) return out;
+      var sx = vw / cr.width, sy = vh / cr.height;
+      var nodes = document.querySelectorAll('.ws-pill, .look-switch, .stage-actions, .anim, .mom-hud');
+      for (var i = 0; i < nodes.length; i++) {
+        var r = nodes[i].getBoundingClientRect();
+        if (!(r.width > 0 && r.height > 0)) continue;
+        var rx = (r.left - cr.left) * sx - 6, ry = (r.top - cr.top) * sy - 6;
+        var rw = r.width * sx + 12, rh = r.height * sy + 12;
+        if (rx + rw > 0 && ry + rh > 0 && rx < vw && ry < vh) out.push({ x: rx, y: ry, w: rw, h: rh });
+      }
+    } catch (e) { /* ignore */ }
+    return out;
+  }
   /** start a frame: clear and set DPR transform. Returns ctx. */
   Viewport.prototype.begin = function () {
     var c = this.ctx, col = SIM.ui.colors();
     c.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     if (this === firstVp || !firstVp) { firstVp = this; hitsLast = hitsNow || (focus ? hitsLast : 0); hitsNow = 0; }
-    c.fillStyle = col.panel; c.fillRect(0, 0, this.w, this.h);
+    c._labelBoxes = []; c._vpW = this.w; c._vpH = this.h;
+    c._hudBoxes = hudBoxesFor(this.el, this.w, this.h);
+    if (!isLightTheme() && c.createRadialGradient) {
+      var bg = c.createRadialGradient(this.w * 0.5, this.h * 0.45, 20, this.w * 0.5, this.h * 0.5, Math.max(this.w, this.h) * 0.72);
+      if (bg && bg.addColorStop) { bg.addColorStop(0, '#0b1218'); bg.addColorStop(1, '#04070a'); c.fillStyle = bg; }
+      else c.fillStyle = '#080e13';
+    } else c.fillStyle = col.panel;
+    c.fillRect(0, 0, this.w, this.h);
     c.lineCap = 'round'; c.lineJoin = 'round';
     return c;
   };
@@ -52,7 +82,8 @@
      setFocus(['X', 'T1']) makes arrows/labels whose symbol matches glow and dims everything else.
      Dimming only happens once a frame has actually found a match, so pages without matching
      labels are never greyed out. */
-  var focus = null, hitsLast = 0, hitsNow = 0, firstVp = null;
+  var focus = null, hitsLast = 0, hitsNow = 0, firstVp = null, pulse = 0;
+  function setPulse(p) { pulse = Math.max(0, Math.min(1, Number(p) || 0)); }
   var SUBS = { '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9', 'ₓ': 'x', 'ᵧ': 'y' };
   function symKey(t) {
     t = String(t || '').replace(/<[^>]+>/g, '').split(/\s=\s|=/)[0];
@@ -86,47 +117,124 @@
     opt = opt || {};
     var dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy);
     if (L < 0.5) return;
-    var head = Math.min(opt.head || 10, L * 0.45), ux = dx / L, uy = dy / L, fs = focusState(opt.label);
+    var head = Math.min(opt.head || 11, L * 0.45), ux = dx / L, uy = dy / L, fs = focusState(opt.label);
     c.save();
-    c.strokeStyle = color; c.fillStyle = color; c.lineWidth = (opt.width || 2.4) + (fs === 'hi' ? 1.6 : 0);
-    if (fs === 'hi') { c.shadowColor = color; c.shadowBlur = 14; } else if (fs === 'dim') c.globalAlpha = 0.28;
+    if (fs === 'dim') c.globalAlpha = 0.48;
+    if (!isLightTheme() && fs !== 'dim') {
+      c.strokeStyle = 'rgba(3, 6, 8, 0.78)';
+      c.lineWidth = (opt.width || 2.8) + (fs === 'hi' ? 4.2 : 2.6);
+      if (opt.dash) c.setLineDash(opt.dash);
+      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - ux * head * 0.72, y2 - uy * head * 0.72); c.stroke();
+      c.setLineDash([]);
+    }
+    c.strokeStyle = color; c.fillStyle = color; c.lineWidth = (opt.width || 2.8) + (fs === 'hi' ? 1.8 + pulse * 0.8 : 0);
+    if (fs === 'hi') { c.shadowColor = color; c.shadowBlur = 16 + pulse * 12; }
+    else { c.shadowColor = color; c.shadowBlur = 5; }
     if (opt.dash) c.setLineDash(opt.dash);
-    c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - ux * head * 0.8, y2 - uy * head * 0.8); c.stroke();
+    c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - ux * head * 0.72, y2 - uy * head * 0.72); c.stroke();
     c.setLineDash([]);
     c.beginPath(); c.moveTo(x2, y2);
-    c.lineTo(x2 - ux * head - uy * head * 0.45, y2 - uy * head + ux * head * 0.45);
-    c.lineTo(x2 - ux * head + uy * head * 0.45, y2 - uy * head - ux * head * 0.45);
-    c.closePath(); if (opt.hollow) { c.lineWidth = 1.5; c.stroke(); } else c.fill();
+    c.lineTo(x2 - ux * head - uy * head * 0.46, y2 - uy * head + ux * head * 0.46);
+    c.lineTo(x2 - ux * head * 0.72, y2 - uy * head * 0.72);
+    c.lineTo(x2 - ux * head + uy * head * 0.46, y2 - uy * head - ux * head * 0.46);
+    c.closePath(); if (opt.hollow) { c.lineWidth = 1.6; c.stroke(); } else c.fill();
     c.shadowBlur = 0;
-    if (opt.label) D.label(c, opt.label, x2 + ux * 6 + (opt.lx || 0), y2 + uy * 6 + (opt.ly || 0), color, { align: ux < -0.3 ? 'right' : ux > 0.3 ? 'left' : 'center', base: uy > 0.3 ? 'top' : uy < -0.3 ? 'bottom' : 'middle', bg: true, fs: fs || 'none' });
+    if (opt.label) {
+      if (c._labelBoxes && (c._vpW || 0) > 460 && L > 12 && opt.avoidTip !== false) {
+        c._labelBoxes.push({ x: x2 - 14, y: y2 - 14, w: 28, h: 28 });
+      }
+      var align = opt.align || (ux < -0.3 ? 'right' : ux > 0.3 ? 'left' : 'center');
+      var base = opt.base || (uy > 0.3 ? 'top' : uy < -0.3 ? 'bottom' : 'middle');
+      D.label(c, opt.label, x2 + ux * 18 + (opt.lx || 0), y2 + uy * 18 + (opt.ly || 0), color, { align: align, base: base, bg: true, fs: fs || 'none' });
+    }
     c.restore();
   };
   /** arrow from a world point in a world direction (angle rad, standard math angle) with screen length px */
   D.arrowPolar = function (c, sx, sy, ang, len, color, opt) {
     D.arrow(c, sx, sy, sx + Math.cos(ang) * len, sy - Math.sin(ang) * len, color, opt);
   };
+  var AVOID_DIRS = [[0, -1], [1, 0], [-1, 0], [0, 1], [1, -1], [-1, -1], [1, 1], [-1, 1]];
   D.label = function (c, text, x, y, color, opt) {
     opt = opt || {};
     text = tidy(text);
     var fs = opt.fs === 'none' ? null : opt.fs || (/=/.test(text) ? focusState(text) : (focus && hitsLast ? 'dim' : null));
     c.save();
-    if (fs === 'dim') c.globalAlpha = 0.35;
-    c.font = (opt.bold || fs === 'hi' ? '700 ' : '500 ') + ((opt.size || 13) + (fs === 'hi' ? 1.5 : 0)) + 'px Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+    if (fs === 'dim') c.globalAlpha = 0.62;
+    var sz = (opt.size || 13) + (fs === 'hi' ? 1.5 : 0);
+    c.font = (opt.bold || fs === 'hi' || opt.bg ? '700 ' : '600 ') + sz + 'px "Plus Jakarta Sans", "Inter", system-ui, -apple-system, sans-serif';
     c.textAlign = opt.align || 'center'; c.textBaseline = opt.base || 'middle';
-    if (opt.bg) {
-      var m = c.measureText(text), w = m.width + 6, hgt = (opt.size || 13) + 4;
-      var bx = opt.align === 'left' ? x - 3 : opt.align === 'right' ? x - w + 3 : x - w / 2;
-      var by = opt.base === 'top' ? y - 2 : opt.base === 'bottom' ? y - hgt + 2 : y - hgt / 2;
-      var ga = isFinite(c.globalAlpha) ? c.globalAlpha : 1; c.fillStyle = SIM.ui.colors().panel; c.globalAlpha = 0.85 * ga; c.fillRect(bx, by, w, hgt); c.globalAlpha = ga;
+    var m = c.measureText(text), padX = 8, w = m.width + padX * 2, hgt = sz + 8;
+    var origBx = opt.align === 'left' ? x - padX : opt.align === 'right' ? x - w + padX : x - w / 2;
+    var origBy = opt.base === 'top' ? y - 3 : opt.base === 'bottom' ? y - hgt + 3 : y - hgt / 2;
+    var bx = origBx, by = origBy, tx = x, ty = y;
+
+    var boxes = c._labelBoxes, hboxes = opt.avoidHud === false ? null : c._hudBoxes, vw = c._vpW || 0, vh = c._vpH || 0;
+    var hudOverlapOnly = !!(boxes && hboxes && hboxes.length && vw > w + 16 && vh > hgt + 16 && !opt.bg && text.length >= 2);
+    var checkCollide = !!(boxes && vw > w + 16 && vh > hgt + 16 && (opt.bg || /[=°+−?]/.test(text) || text.length > 2));
+    if (checkCollide || hudOverlapOnly) {
+      var clampX = function (rx) { return Math.max(8, Math.min(vw - w - 8, rx)); };
+      var clampY = function (ry) { return Math.max(8, Math.min(vh - hgt - 8, ry)); };
+      var hits = function (rx, ry) {
+        if (checkCollide) {
+          for (var i = 0; i < boxes.length; i++) {
+            var b = boxes[i];
+            if (rx < b.x + b.w + 4 && rx + w + 4 > b.x && ry < b.y + b.h + 4 && ry + hgt + 4 > b.y) return true;
+          }
+        }
+        if (hboxes) {
+          for (var j = 0; j < hboxes.length; j++) {
+            var hb = hboxes[j];
+            if (rx < hb.x + hb.w && rx + w > hb.x && ry < hb.y + hb.h && ry + hgt > hb.y) return true;
+          }
+        }
+        return false;
+      };
+      bx = clampX(origBx); by = clampY(origBy);
+      if (hits(bx, by)) {
+        var found = false, radii = [20, 36, 54, 76, 102, 132];
+        for (var rIdx = 0; rIdx < radii.length && !found; rIdx++) {
+          var rad = radii[rIdx];
+          for (var dIdx = 0; dIdx < AVOID_DIRS.length; dIdx++) {
+            var cx = clampX(origBx + AVOID_DIRS[dIdx][0] * rad), cy = clampY(origBy + AVOID_DIRS[dIdx][1] * rad);
+            if (!hits(cx, cy)) { bx = cx; by = cy; found = true; break; }
+          }
+        }
+      }
+      tx = x + (bx - origBx); ty = y + (by - origBy);
+      if (checkCollide) boxes.push({ x: bx, y: by, w: w, h: hgt });
     }
-    c.fillStyle = color || SIM.ui.colors().ink; c.fillText(text, x, y);
+
+    var ga = isFinite(c.globalAlpha) ? c.globalAlpha : 1;
+    if (opt.bg && Math.hypot(bx - origBx, by - origBy) > 20) {
+      c.save();
+      c.strokeStyle = color || SIM.ui.colors().muted; c.lineWidth = 1; c.globalAlpha = 0.45 * ga;
+      c.beginPath(); c.moveTo(x, y); c.lineTo(bx + w / 2, by + hgt / 2); c.stroke();
+      c.restore();
+    }
+    if (opt.bg) {
+      var dk = !isLightTheme();
+      c.beginPath();
+      if (c.roundRect) c.roundRect(bx, by, w, hgt, Math.min(9, hgt / 2)); else c.rect(bx, by, w, hgt);
+      c.fillStyle = dk ? 'rgba(5, 9, 13, 0.94)' : 'rgba(255, 253, 247, 0.96)';
+      c.globalAlpha = Math.max(dk ? 0.88 : 0.92, ga);
+      if (dk) { c.shadowColor = 'rgba(0,0,0,0.65)'; c.shadowBlur = 8; }
+      c.fill();
+      c.shadowBlur = 0;
+      c.strokeStyle = color || SIM.ui.colors().line; c.lineWidth = fs === 'hi' ? 1.8 : 1.3;
+      c.globalAlpha = (fs === 'hi' ? 0.96 : 0.72) * ga; c.stroke();
+      c.globalAlpha = ga;
+    }
+    c.fillStyle = color || SIM.ui.colors().ink; c.fillText(text, tx, ty);
     c.restore();
   };
   /** angle arc centred at (x,y) screen, from angle a0 to a1 (math radians, CCW positive) */
   D.arc = function (c, x, y, r, a0, a1, color, label) {
-    c.save(); c.strokeStyle = color; c.lineWidth = 1.4;
+    c.save();
+    c.fillStyle = color; c.globalAlpha = 0.13;
+    c.beginPath(); c.moveTo(x, y); c.arc(x, y, r, -a0, -a1, a1 > a0); c.closePath(); c.fill();
+    c.globalAlpha = 0.95; c.strokeStyle = color; c.lineWidth = 1.6;
     c.beginPath(); c.arc(x, y, r, -a0, -a1, a1 > a0); c.stroke();
-    if (label) { var am = (a0 + a1) / 2; D.label(c, label, x + Math.cos(am) * (r + 15), y - Math.sin(am) * (r + 15), color, { size: 12, bg: true, fs: 'none' }); }
+    if (label) { var am = (a0 + a1) / 2; D.label(c, label, x + Math.cos(am) * (r + 16), y - Math.sin(am) * (r + 16), color, { size: 12, bg: true, fs: 'none' }); }
     c.restore();
   };
   D.rightAngle = function (c, x, y, a, size, color) {
@@ -153,7 +261,7 @@
     c.save(); c.translate(x, y); c.rotate(-a);
     c.fillStyle = opt.fill || col.object; c.strokeStyle = opt.stroke || col['object-line']; c.lineWidth = 1.5;
     c.beginPath(); c.rect(-w / 2, -h, w, h); c.fill(); c.stroke();
-    if (opt.label) { c.fillStyle = col.ink; c.font = '600 13px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(opt.label, 0, -h / 2); }
+    if (opt.label) { c.fillStyle = col.ink; c.font = '600 13px "Plus Jakarta Sans", "Inter", system-ui, -apple-system, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(opt.label, 0, -h / 2); }
     c.restore();
   };
   D.particle = function (c, x, y, r, opt) {
@@ -247,52 +355,54 @@
     canvas.addEventListener('pointerleave', function (e) { if (!drag && !drawing && e.pointerType !== 'touch') setHover(null); });
     return {
       isDragging: function () { return !!drag || !!drawing; },
-      /** draw creative handle indicators: sleek pill/underline for label handles, precision diamond reticle for drag handles */
+      /** draw hover-only interactive button controls (hidden at rest, pops up smoothly on hover/drag) */
       paint: function (c) {
         var hs = (opt.handles && opt.handles()) || [], col = SIM.ui.colors(), active = drag ? drag.h.id : hover ? hover.id : null;
+        if (!active) return;
         c.save();
         hs.forEach(function (h) {
-          if (h.hidden) return;
-          var on = h.id === active, clr = h.color || col.accent;
+          if (h.hidden || h.id !== active) return;
+          var clr = h.color || col.accent, dk = !isLightTheme(), isDrag = !!(drag && drag.h.id === h.id);
           if (h.kind === 'pill') {
-            var pw = h.w || 78, ph = h.h || 24, px = h.x - pw / 2, py = h.y - ph / 2, pr = Math.min(9, ph / 2);
+            var pw = h.w || 78, ph = h.h || 24, px = h.x - pw / 2, py = h.y - ph / 2, pr = Math.min(10, ph / 2);
             c.save();
             c.beginPath();
             if (c.roundRect) c.roundRect(px, py, pw, ph, pr);
             else c.rect(px, py, pw, ph);
-            if (on) {
-              c.globalAlpha = 0.14; c.fillStyle = clr; c.fill();
-              c.globalAlpha = 0.8; c.strokeStyle = clr; c.lineWidth = 1.6; c.setLineDash([]); c.stroke();
-            } else {
-              c.globalAlpha = 0.22; c.strokeStyle = clr; c.lineWidth = 1; c.setLineDash([]); c.stroke();
-              // subtle underline accent below the label (never obscures digits)
-              c.globalAlpha = 0.72; c.strokeStyle = clr; c.lineWidth = 2; c.lineCap = 'round';
-              c.beginPath(); c.moveTo(px + 8, py + ph - 1); c.lineTo(px + pw - 8, py + ph - 1); c.stroke();
-            }
+            c.fillStyle = clr; c.globalAlpha = 0.16; c.fill();
+            c.strokeStyle = clr; c.lineWidth = 1.8; c.setLineDash([]); c.globalAlpha = 0.92;
+            c.shadowColor = clr; c.shadowBlur = 10; c.stroke();
             c.restore();
             return;
           }
-          // precision corner-bracket reticle + glowing diamond core
-          var r = on ? 13 : 9.5, b = on ? 5.5 : 4;
+          // circular glass button popping up on hover/drag
+          var r = isDrag ? 14 : 12.5;
           c.save();
-          if (on) {
-            c.globalAlpha = 0.16; c.fillStyle = clr;
-            c.beginPath(); c.arc(h.x, h.y, r + 3, 0, Math.PI * 2); c.fill();
-          }
-          c.strokeStyle = clr; c.lineWidth = on ? 2.2 : 1.5; c.lineCap = 'round'; c.lineJoin = 'round';
-          c.setLineDash([]); c.globalAlpha = on ? 0.95 : 0.62;
-          // 4 corner L-brackets
-          [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(function (d) {
-            var cx = h.x + d[0] * r, cy = h.y + d[1] * r;
-            c.beginPath();
-            c.moveTo(cx - d[0] * b, cy); c.lineTo(cx, cy); c.lineTo(cx, cy - d[1] * b);
-            c.stroke();
+          c.beginPath(); c.arc(h.x, h.y, r + 4, 0, Math.PI * 2);
+          c.fillStyle = clr; c.globalAlpha = isDrag ? 0.22 : 0.15; c.fill();
+          c.beginPath(); c.arc(h.x, h.y, r, 0, Math.PI * 2);
+          c.fillStyle = dk ? 'rgba(8, 14, 20, 0.94)' : 'rgba(255, 253, 247, 0.96)';
+          c.globalAlpha = 1;
+          c.shadowColor = clr; c.shadowBlur = isDrag ? 14 : 10; c.fill();
+          c.shadowBlur = 0;
+          c.strokeStyle = clr; c.lineWidth = 2; c.setLineDash([]); c.stroke();
+          // clean 4-dot grip icon inside the circular button
+          c.fillStyle = clr;
+          [[-2.6, -2.6], [2.6, -2.6], [-2.6, 2.6], [2.6, 2.6]].forEach(function (pt) {
+            c.beginPath(); c.arc(h.x + pt[0], h.y + pt[1], 1.5, 0, Math.PI * 2); c.fill();
           });
-          // small central diamond node
-          var dr = on ? 4 : 2.6;
+          // compact popup pill badge on hover
+          var tip = isDrag ? 'Dragging…' : 'Edit / Drag';
+          c.font = '700 11px "Plus Jakarta Sans", "Inter", system-ui, -apple-system, sans-serif';
+          var tw = (c.measureText ? c.measureText(tip).width : 62) + 14, th = 22;
+          var vw = c._vpW || 800, tx = Math.max(8, Math.min(vw - tw - 8, h.x - tw / 2));
+          var ty = h.y - r - th - 6; if (ty < 8) ty = h.y + r + 6;
           c.beginPath();
-          c.moveTo(h.x, h.y - dr); c.lineTo(h.x + dr, h.y); c.lineTo(h.x, h.y + dr); c.lineTo(h.x - dr, h.y); c.closePath();
-          c.fillStyle = clr; c.globalAlpha = on ? 0.9 : 0.45; c.fill();
+          if (c.roundRect) c.roundRect(tx, ty, tw, th, 999); else c.rect(tx, ty, tw, th);
+          c.fillStyle = dk ? 'rgba(5, 9, 13, 0.96)' : 'rgba(255, 253, 247, 0.98)'; c.fill();
+          c.strokeStyle = clr; c.lineWidth = 1.4; c.stroke();
+          c.fillStyle = clr; c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.fillText(tip, tx + tw / 2, ty + th / 2 + 0.5);
           c.restore();
         });
         c.restore();
@@ -302,5 +412,5 @@
   /** angle (degrees, anticlockwise from +x) of the screen vector from (x0,y0) to (x,y) */
   function screenAngle(x0, y0, x, y) { var a = Math.atan2(-(y - y0), x - x0) * 180 / Math.PI; return (a + 360) % 360; }
 
-  SIM.view = { Viewport: Viewport, draw: D, forceScale: forceScale, interact: interact, screenAngle: screenAngle, setFocus: setFocus };
+  SIM.view = { Viewport: Viewport, draw: D, forceScale: forceScale, interact: interact, screenAngle: screenAngle, setFocus: setFocus, setPulse: setPulse };
 })(typeof self !== 'undefined' ? self : this);
