@@ -132,7 +132,7 @@
         .concat(opt.g ? [h('span', { class: 'chip g', html: 'g = ' + opt.g + ' m s<sup>−2</sup>' })] : [])),
       h('div', { class: 'head-actions' }, [
         h('button', { type: 'button', class: 'data-btn', 'aria-label': 'Fetch or export data', html: '⇣ <span class="txt">Fetch Data</span>', onclick: function () { openDataHub(); } }),
-        h('button', { type: 'button', class: 'guide-btn', 'aria-label': 'Simulation guide', html: '<span class="guide-q">?</span><span class="txt">Guide</span>', onclick: function () { openGuide(); } }),
+        h('button', { type: 'button', class: 'guide-btn', 'aria-label': 'Interactive simulation guide and curriculum lab', html: '<span class="guide-q">?</span><span class="txt">Guide &amp; Learn</span>', onclick: function () { openGuide('tour'); } }),
         themeButton()
       ])
     ]);
@@ -382,11 +382,13 @@
   function askNumber(o) { return openEditor(o); }
 
   /* ---------- sliders ---------- */
+  var guideRefreshFn = null, guideProbing = false;
   /** tell the animation clock(s) that an input changed, so the simulation replays from t = 0 */
   function notify() {
-    examResets.forEach(function (f) { f(); });   // new numbers: hide exam answers again
+    if (!guideProbing) examResets.forEach(function (f) { f(); });   // new numbers: hide exam answers again
     if (allDocked.length) setTimeout(syncChips, 0);
-    if (SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged();
+    if (!guideProbing && SIM.anim && SIM.anim.inputChanged) SIM.anim.inputChanged();
+    if (!guideProbing && guideRefreshFn) guideRefreshFn();
   }
   function decimalsOf(step) { var s = String(step); return s.indexOf('.') < 0 ? 0 : s.length - s.indexOf('.') - 1; }
   /** Slider snapping: whole numbers when the range allows it (≥ 10 wide), otherwise 0.1 or 0.01.
@@ -942,17 +944,20 @@
     dData.bindPill(bData); dExplain.bindPill(bExp); dCalc.bindPill(bCalc);
 
     // Mount floating corner triggers directly over the full-screen stage
+    var bGuide = h('button', { type: 'button', class: 'ws-pill', html: '🎓 <span class="ws-lbl">Guide &amp; Learn</span>', title: 'Open interactive walkthrough, curriculum laws & What-If explorer', onclick: function () { openGuide('tour'); } });
+    var bLab = h('button', { type: 'button', class: 'ws-pill', html: '🧪 <span class="ws-lbl">Discovery Lab</span>', title: 'Predict, observe & explain experiments for XP', onclick: function () { openGuide('lab'); } });
     var tl = h('div', { class: 'ws-corner tl' }, [bData]);
     var bl = h('div', { class: 'ws-corner bl' });
     var br = h('div', { class: 'ws-corner br' });
     if (refs.explain.length) bl.appendChild(bExp);
+    bl.appendChild(bLab);
     br.appendChild(bCalcX);
     if (solveableParams().length) br.appendChild(bSolve);
     if (refs.calc.length) { br.appendChild(bStudio); br.appendChild(bCalc); }
     if (query.get('embed') === '1') {
       tl.appendChild(h('button', { type: 'button', class: 'ws-pill', html: '⇣ <span class="ws-lbl">Fetch Data</span>', onclick: openDataHub }));
-      tl.appendChild(h('button', { type: 'button', class: 'ws-pill', html: '? <span class="ws-lbl">Guide</span>', onclick: openGuide }));
     }
+    tl.appendChild(bGuide);
     stage.el.appendChild(tl);
     if (bl.children.length) stage.el.appendChild(bl);
     if (br.children.length) stage.el.appendChild(br);
@@ -985,11 +990,12 @@
   if (typeof document !== 'undefined' && document.addEventListener) {
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && activeStudio) { activeStudio.close(); return; }
+      if (e.key === 'Escape' && activeGuide) { activeGuide.close(); return; }
       if (e.key === 'Escape' && activeModal) { closeModal(); return; }
       if (e.key === 'Escape') { var closed = false; wsDrawers.forEach(function (d) { if (d.isOpen()) { d.setOpen(false); closed = true; } }); if (closed) return; }
       if (e.target && /INPUT|SELECT|TEXTAREA|BUTTON/.test(e.target.tagName || '')) return;
       if (activeModal || pop || activeStudio) return;
-      if (e.key === '?' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); openGuide(); return; }
+      if (e.key === '?' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); openGuide('tour'); return; }
       if (e.key === ' ' && SIM.anim && SIM.anim.clocks && SIM.anim.clocks.length) { e.preventDefault(); SIM.anim.clocks[0].toggle(); }
     });
   }
@@ -1017,7 +1023,7 @@
     stage.dock.appendChild(bEdit);
     if (query.get('embed') === '1') {
       stage.dock.appendChild(h('button', { type: 'button', class: 'pchip dock-act', text: '⇣ Fetch Data', title: 'Extract from question or export data', onclick: openDataHub }));
-      stage.dock.appendChild(h('button', { type: 'button', class: 'pchip dock-act', text: '? Guide', title: 'How to use this simulation', onclick: openGuide }));
+      stage.dock.appendChild(h('button', { type: 'button', class: 'pchip dock-act', text: '🎓 Guide & Learn', title: 'Interactive guide, laws & discovery lab', onclick: function () { openGuide('tour'); } }));
     }
   }
   function visibleParams() {
@@ -1055,46 +1061,899 @@
     openModal('Quick Data Entry — all parameters', wrap);
     if (inputs[0] && inputs[0].focus) setTimeout(function () { inputs[0].focus(); if (inputs[0].select) inputs[0].select(); }, 20);
   }
-  function openGuide() {
+  /* ---------- Cambridge 9709 & 9702 Curriculum Knowledge Base + Interactive On-Stage Guide & Learning Studio ---------- */
+  var CURRICULUM_DB = {
+    'm1-resultant': {
+      code: '9709 Paper 4 Mechanics · 4.1 Forces & equilibrium',
+      law: 'Resolve every coplanar force into perpendicular x and y components: Rx = ΣF cos θ, Ry = ΣF sin θ. Resultant magnitude R = √(Rx² + Ry²) and equilibrium requires ΣFx = 0 and ΣFy = 0 simultaneously.',
+      formulas: ['Rx = Σ F cos θ,  Ry = Σ F sin θ', 'R = √(Rx² + Ry²),  tan α = Ry / Rx', 'Equilibrium ⇔ Rx = 0 AND Ry = 0'],
+      traps: ['Measure every angle consistently from the positive x-axis (or check quadrant signs carefully).', 'At equilibrium, components along ANY two perpendicular axes must both sum to zero.'],
+      quiz: { q: 'If two forces are resolved onto horizontal and vertical axes, when is the particle in complete equilibrium?', opts: ['When both ΣFx = 0 and ΣFy = 0', 'When ΣFx = 0 only', 'When all forces have equal magnitude', 'When Rx equals Ry'], ans: 0, why: 'A resultant exists unless both orthogonal component sums equal zero simultaneously.' }
+    },
+    'm1-strings': {
+      code: '9709 Paper 4 Mechanics · 4.1 Strings, rings & Lami’s theorem',
+      law: 'A light inextensible string passing over a smooth peg or ring carries equal tension T throughout. For three coplanar forces in equilibrium, horizontal and vertical components sum to zero (and Lami’s theorem F₁/sin α = F₂/sin β = F₃/sin γ holds).',
+      formulas: ['T₁ cos θ₁ = T₂ cos θ₂ (horizontal balance)', 'T₁ sin θ₁ + T₂ sin θ₂ = W (vertical balance)', 'Same continuous string around smooth ring ⇒ T₁ = T₂'],
+      traps: ['Two separate strings tied at a knot can have different tensions; one continuous string over a smooth ring has equal tension either side.', 'Do not mix up angle with the horizontal vs angle with the vertical when choosing cos vs sin.'],
+      quiz: { q: 'A particle hangs on a smooth ring threaded onto a single continuous string fixed at two walls. How do the tensions in the two segments compare?', opts: ['They are equal in magnitude', 'The steeper segment always has double tension', 'Their difference equals mg', 'Only equal if the walls are level'], ans: 0, why: 'Because the ring is smooth and the string is light, tension stays uniform throughout the single string.' }
+    },
+    'm1m4-plane': {
+      code: '9709 Paper 4 Mechanics · 4.1 & 4.4 Inclined slopes & friction',
+      law: 'Resolve perpendicular and parallel to the plane: N = mg cos α ± F_app sin θ. Limiting static friction F_max = μN opposes the tendency to slip; kinetic friction equals μN opposing the direction of motion.',
+      formulas: ['R = mg cos θ (if extra forces act parallel only)', 'F_max = μR (limiting equilibrium)', 'Along slope: net force = ma (F = ma parallel to plane)'],
+      traps: ['Never assume F = μR automatically — verify the block is moving or on the point of slipping first.', 'Check the sign of extra pushed/pulled forces on normal reaction R before calculating μR.'],
+      quiz: { q: 'A block rests stationary on a rough 20° slope well below limiting friction. What equals the actual friction force acting on it?', opts: ['mg sin 20° up the slope', 'μ mg cos 20°', 'mg cos 20°', 'Zero'], ans: 0, why: 'Static friction supplies only whatever force balances the down-slope component mg sin θ, up to a cap of μR.' }
+    },
+    'm2-journey': {
+      code: '9709 Paper 4 Mechanics · 4.2 Kinematics & v–t graphs',
+      law: 'Gradient of a velocity–time graph equals acceleration a = dv/dt, while signed area under a velocity–time graph equals displacement s. Speeding-up vs slowing-down stages obey constant-acceleration suvat laws.',
+      formulas: ['v = u + at,  s = ½(u + v)t', 's = ut + ½at²,  v² = u² + 2as', 'Acceleration = gradient of v–t; Displacement = area under v–t'],
+      traps: ['Total distance travelled sums the magnitudes of triangle/trapezium areas, whereas displacement keeps negative areas when v < 0.', 'Convert km/h to m/s (÷ 3.6) before combining with seconds and metres.'],
+      quiz: { q: 'What quantity does the total area between a velocity–time graph and the time axis (above minus below) represent?', opts: ['Net displacement', 'Instantaneous acceleration', 'Average speed squared', 'Change in momentum'], ans: 0, why: 'Integrating velocity with respect to time gives displacement, with negative regions indicating reverse travel.' }
+    },
+    'm2-vertical': {
+      code: '9709 Paper 4 Mechanics · 4.2 Vertical motion under gravity',
+      law: 'Taking upwards as positive gives constant downward acceleration a = −g (−10 m s⁻² in 9709, −9.81 m s⁻² in 9702). At maximum height v = 0 while acceleration remains g downwards; two particles collide when s₁(t) = s₂(t) at the same time t.',
+      formulas: ['v = u − gt', 'y = ut − ½gt²', 'v² = u² − 2gs'],
+      traps: ['Keep a consistent positive sign convention for displacement y, initial velocity u, and g throughout the question.', 'At the highest point v = 0 momentarily, but acceleration is still g downwards — never zero!'],
+      quiz: { q: 'A stone is thrown vertically upwards at speed u and lands back at the launch height. Neglecting air resistance, what is its speed just before landing?', opts: ['u (equal magnitude, opposite direction)', '2u', 'Zero', 'u / √2'], ans: 0, why: 'By symmetry under uniform gravity (v² = u² − 2g(0)), the landing speed equals launch speed u.' }
+    },
+    'm2-calculus': {
+      code: '9709 Paper 4 Mechanics · 4.2 Variable acceleration (calculus)',
+      law: 'Differentiate displacement s(t) to obtain velocity v = ds/dt and differentiate again for acceleration a = dv/dt. Integrate acceleration to get v(t) + c₁ and integrate velocity to get s(t) + c₂ using initial conditions.',
+      formulas: ['v = ds/dt,  a = dv/dt = d²s/dt²', 's = ∫ v dt + c (net change between limits)', 'Maximum/minimum velocity occurs where a = dv/dt = 0'],
+      traps: ['Never apply suvat formulas when acceleration a depends on t, v, or s — calculus is mandatory.', 'If velocity changes sign on [t₁, t₂], split the distance integral at roots where v = 0.'],
+      quiz: { q: 'Given v(t) = 6t − 2t², how do you find the maximum velocity before stopping?', opts: ['Set dv/dt = 0 and substitute t back into v(t)', 'Use v² = u² + 2as', 'Set v(t) = 0', 'Divide v(t) by t'], ans: 0, why: 'Because acceleration is variable, extrema of velocity occur where acceleration a = dv/dt = 0.' }
+    },
+    'm3-collisions': {
+      code: '9709 Paper 4 Mechanics · 4.3 Momentum & 1-D impacts',
+      law: 'In the absence of external horizontal impulse, total linear momentum is conserved in every collision: m₁u₁ + m₂u₂ = m₁v₁ + m₂v₂. Kinetic energy is conserved only in perfectly elastic impacts; in coalescence both bodies share common velocity V.',
+      formulas: ['m₁u₁ + m₂u₂ = m₁v₁ + m₂v₂', 'Coalescence: V = (m₁u₁ + m₂u₂) / (m₁ + m₂)', 'KE loss = Σ(½mu²) − Σ(½mv²)'],
+      traps: ['Velocity is a vector: give opposite signs (+ / −) to opposing directions before summing momenta.', 'Kinetic energy is always positive (scalar), so add ½mv² without signs for direction.'],
+      quiz: { q: 'Two trolleys collide head-on on a smooth horizontal track and coalesce. Which quantity is guaranteed to stay identical before and after impact?', opts: ['Total vector momentum', 'Total kinetic energy', 'Speed of each trolley', 'Force during impact'], ans: 0, why: 'With zero net external impulse, total linear momentum is strictly conserved while KE converts to heat/sound.' }
+    },
+    'm4-connected': {
+      code: '9709 Paper 4 Mechanics · 4.4 Connected particles & pulleys',
+      law: 'In connected systems with a light inextensible string over a smooth pulley, both masses share common acceleration magnitude a and string tension T. Write F = ma separately for each body along its direction of motion, then add equations to eliminate T.',
+      formulas: ['Heavier mass: m₁g − T = m₁a', 'Slope/lighter mass: T − m₂g sin α − F = m₂a', 'Add equations ⇒ (m₁ + m₂)a = net driving force'],
+      traps: ['Check each mass carefully: draw separate free-body diagrams so weight components and friction signs never swap.', 'If the string goes slack (e.g. a mass hits the floor), T drops to 0 and remaining masses move freely at −g sin α.'],
+      quiz: { q: 'Two unequal masses hang over a light smooth pulley. How do their acceleration magnitudes and string tensions compare?', opts: ['Same magnitude of acceleration and same tension T', 'Same acceleration, different tensions', 'Different accelerations, same tension', 'Zero acceleration on the lighter mass'], ans: 0, why: 'An inextensible string enforces equal displacement/acceleration magnitudes and a smooth pulley transmits equal tension.' }
+    },
+    'm4-lift': {
+      code: '9709 Mechanics / 9702 Topic 3 · Apparent weight in a lift',
+      law: 'Applying Newton’s second law vertically on a passenger of mass m inside an accelerating lift gives R − mg = ma (upwards positive). Upward acceleration or downward deceleration makes apparent weight R > mg; downward acceleration makes R < mg.',
+      formulas: ['Upward positive: R − mg = ma ⇒ R = m(g + a)', 'Lift cable tension: T = (M_lift + m_load)(g + a)', 'Steady speed or stationary (a = 0) ⇒ R = mg'],
+      traps: ['Upward velocity with downward deceleration means acceleration a points downwards (a < 0), making R < mg!', 'Clearly distinguish forces acting ON the passenger (R, mg) from forces acting ON the lift cabin (cable tension T).'],
+      quiz: { q: 'A lift moves upwards while slowing down (decelerating) to stop at the top floor. How does the floor normal reaction R compare with passenger weight mg?', opts: ['R < mg', 'R > mg', 'R = mg', 'R = 0'], ans: 0, why: 'Slowing down while moving upwards means acceleration is downwards, so mg − R = ma ⇒ R = m(g − |a|) < mg.' }
+    },
+    'm4-vehicle': {
+      code: '9709 Mechanics / 9702 Topic 5 · Vehicle dynamics & P = Fv',
+      law: 'An engine operating at power P exerts forward driving force D = P / v. Along an incline with tow-bar tension T, write F = ma for car and trailer; maximum steady speed v_max occurs when driving force D balances total resistance plus backward weight component.',
+      formulas: ['Driving force D = P / v', 'Car + trailer total: D − R_total − (m_c + m_t)g sin α = (m_c + m_t)a', 'At v_max (a = 0): P / v_max = R_total + M g sin α'],
+      traps: ['At constant engine power, as speed v increases, driving force D = P/v decreases until acceleration reaches zero at v_max.', 'A tow-bar can push (negative tension = thrust) when the car brakes hard!'],
+      quiz: { q: 'If a car climbs a hill at constant engine power P and steady maximum speed v, what happens if total resistance doubles while climbing?', opts: ['Driving force needed increases, reducing steady v', 'Driving force stays fixed and speed doubles', 'v_max becomes independent of sin θ', 'Power P drops to zero'], ans: 0, why: 'Since steady speed satisfies P / v = R_total + mg sin θ, larger resistance requires a smaller v to raise D = P/v.' }
+    },
+    'm5-energy': {
+      code: '9709 Paper 4 Mechanics · 4.5 Work–energy principle',
+      law: 'Total work done by driving/non-conservative forces equals change in total mechanical energy plus work done against resistance: W_engine − W_friction = ΔKE + ΔGPE = ½m(v² − u²) + mgΔh.',
+      formulas: ['WD by constant force = F d cos θ', 'W_engine = ΔKE + ΔGPE + F_res × d', 'Average power = Total engine work / time'],
+      traps: ['Use vertical height change Δh = d sin α for mgh, NOT slope distance d!', 'Keep clear track of signs for ΔKE (negative if slowing) and W_friction (energy dissipated).'],
+      quiz: { q: 'A cyclist coasts freely uphill (engine off) against constant friction. Which energy equation holds?', opts: ['KE loss = GPE gain + work done against friction', 'KE loss = GPE gain − friction', 'KE gain = GPE loss', 'Work against friction equals zero'], ans: 0, why: 'Initial kinetic energy supplies both gravitational potential gain and thermal losses to resistance.' }
+    },
+    'p1-uncertainty': {
+      code: '9702 AS Physics · Topic 1 Physical quantities & uncertainties',
+      law: 'Random errors scatter readings unpredictably (reduced by averaging repeats; affect precision), whereas systematic/zero errors shift every reading consistently (affect accuracy). When multiplying/dividing quantities X = A^p B^q / C^r, percentage uncertainties add: %ΔX = p(%ΔA) + q(%ΔB) + r(%ΔC).',
+      formulas: ['Addition/Subtraction (Z = A ± B): ΔZ = ΔA + ΔB', 'Product/Quotient (Z = AB/C): ΔZ/Z = ΔA/A + ΔB/B + ΔC/C', 'Power Z = Aⁿ: %ΔZ = |n| × %ΔA'],
+      traps: ['Absolute uncertainties add for A ± B (even when subtracting A − B!).', 'Quote absolute uncertainty to 1 significant figure (or 2 s.f. max) and match the decimal places of the mean value.'],
+      quiz: { q: 'The diameter d of a wire is measured to ±2% uncertainty to find cross-sectional area A = πd²/4. What is the percentage uncertainty in A?', opts: ['±4%', '±2%', '±1%', '±8%'], ans: 0, why: 'Since A depends on d², the percentage uncertainty in d is multiplied by 2: 2 × 2% = 4%.' }
+    },
+    'p1-vectors': {
+      code: '9702 AS Physics · Topic 1 Vectors & relative velocity',
+      law: 'Scalars have magnitude only; vectors have both magnitude and direction. Resultant vectors add tip-to-tail (R = A + B), while subtracting vectors (relative velocity v_A/B = v_A − v_B) adds the opposite vector −v_B.',
+      formulas: ['R_x = A_x + B_x,  R_y = A_y + B_y', '|R| = √(R_x² + R_y²)', 'Boat/aircraft crossing: v_ground = v_craft + v_medium'],
+      traps: ['Always draw vector arrows head-to-tail for addition — a closed loop means resultant = 0.', 'For shortest crossing time across a river, point straight across perpendicular to banks; for shortest straight path across, aim upstream to cancel drift.'],
+      quiz: { q: 'A swimmer in a flowing river wants to cross in the shortest possible time. How should they orient their stroke relative to the bank?', opts: ['Perpendicular (90°) straight across the bank', '45° upstream against the current', '45° downstream with the current', 'Parallel to the current'], ans: 0, why: 'Perpendicular velocity component v sin θ reaches its full speed v only at 90°, minimizing crossing time width/v.' }
+    },
+    'p2-freefall-exp': {
+      code: '9702 AS Physics · Topic 1 & 2 Determining g by free fall',
+      law: 'Dropping a dense sphere through height h gives h = ½gt² when starting from rest. Plotting h against t² gives a straight line through the origin of gradient ½g ⇒ g = 2 × gradient (systematic reaction/release delay shifts intercepts or underestimates g).',
+      formulas: ['h = ½gt² (starting from u = 0)', 'Gradient of h vs t² graph = g / 2 ⇒ g = 2 × grad', '%Δg = %Δh + 2 × %Δt'],
+      traps: ['Double the percentage uncertainty of t because t appears squared in g = 2h/t²!', 'Electronic light gates eliminate human reaction time, while slight air drag reduces measured acceleration slightly below 9.81 m s⁻².'],
+      quiz: { q: 'In a free-fall experiment using h = ½gt², time t has 1.5% uncertainty and height h has 1.0% uncertainty. What is the percentage uncertainty in g?', opts: ['4.0%', '2.5%', '3.5%', '2.0%'], ans: 0, why: 'Because g = 2h / t², %Δg = %Δh + 2(%Δt) = 1.0% + 2(1.5%) = 4.0%.' }
+    },
+    'p2-motion-graphs': {
+      code: '9702 AS Physics · Topic 2 Motion graphs & bouncing',
+      law: 'Gradient of s–t equals velocity v; gradient of v–t equals acceleration a; area under v–t equals displacement Δs. For an elastic/partially elastic bounce, velocity flips sign sharply while acceleration equals −g throughout airborne flight.',
+      formulas: ['v = ds/dt (s–t gradient)', 'a = dv/dt (v–t gradient)', 'e = v_rebound / v_impact (coefficient of restitution)'],
+      traps: ['A horizontal line on v–t means constant velocity (zero acceleration), NOT stationary unless v = 0.', 'During free bounce in air, the parallel diagonal segments on v–t all share the identical slope −g.'],
+      quiz: { q: 'A rubber ball drops from rest and bounces repeatedly on a hard floor. Ignoring impact duration, how do the downward airborne slopes of its v–t graph compare?', opts: ['All parallel with constant gradient g', 'Steeper after every bounce', 'Zero at the peak', 'Curved inversely with height'], ans: 0, why: 'While airborne between bounces, the only force is gravity, so dv/dt = −g stays constant throughout.' }
+    },
+    'p2-projectile': {
+      code: '9702 AS Physics · Topic 2 Projectile motion',
+      law: 'Horizontal and vertical motions are independent: ax = 0 gives constant vx = u cos θ and x = (u cos θ)t, while vertical gravity ay = −g gives vy = u sin θ − gt and y = (u sin θ)t − ½gt².',
+      formulas: ['v_x = u cos θ (constant),  x = u cos θ · t', 'v_y = u sin θ − gt,  y = u sin θ · t − ½gt²', 'Range on level ground R = (u² sin 2θ) / g'],
+      traps: ['At peak height, v_y = 0 only — total speed equals v_x = u cos θ and acceleration is still 9.81 m s⁻² downwards.', 'With air resistance, maximum height, range, and landing angle symmetry all decrease (descending path becomes steeper).'],
+      quiz: { q: 'At the highest point of a projectile fired at 40° with initial speed u, what is the ball’s speed?', opts: ['u cos 40°', 'Zero', 'u sin 40°', 'u'], ans: 0, why: 'Vertical velocity momentarily drops to zero at the vertex, leaving only the unchanged horizontal component u cos 40°.' }
+    },
+    'p3-drag': {
+      code: '9702 AS Physics · Topic 3 Drag & terminal velocity',
+      law: 'Viscous/turbulent fluid drag D increases with speed v. As an object accelerates downwards, net force F = mg − D decreases so acceleration decreases smoothly until drag balances weight (D = mg) and constant terminal velocity is reached.',
+      formulas: ['F_net = W − Upthrust − D = ma', 'At terminal velocity: a = 0 ⇒ D + U = mg', 'Initial acceleration from rest (v = 0, D = 0): a = g (neglecting upthrust)'],
+      traps: ['When terminal velocity is reached, drag does NOT stop and object stays moving at constant maximum speed (F_net = 0).', 'Opening a parachute suddenly makes D > mg, producing upward net force and deceleration to a lower terminal speed.'],
+      quiz: { q: 'Right after a skydiver opens their parachute at high speed, what is the direction of net force and acceleration?', opts: ['Upwards (decelerating downwards)', 'Downwards at 9.81 m s⁻²', 'Zero immediately', 'Horizontal'], ans: 0, why: 'Larger parachute area abruptly raises upward drag above weight, creating an upward resultant force that slows descent.' }
+    },
+    'p3-momentum': {
+      code: '9702 AS Physics · Topic 3 Linear momentum & impulse',
+      law: 'Newton’s second law states resultant force equals rate of change of momentum F = Δp/Δt. In an isolated collision total momentum is conserved; in a perfectly elastic collision between two objects, relative speed of approach equals relative speed of separation (and total KE is conserved).',
+      formulas: ['p = mv,  F = Δp / Δt (area under F–t = Δp)', 'Σ p_before = Σ p_after', 'Elastic ⇔ u₁ − u₂ = v₂ − v₁ and ΣKE_before = ΣKE_after'],
+      traps: ['Conservation of momentum holds in ALL isolated collisions (even explosions & inelastic crashes), whereas KE conservation holds ONLY in elastic collisions.', 'Crumple zones lengthen impact time Δt for the same Δp, cutting average force F = Δp/Δt.'],
+      quiz: { q: 'How does an airbag reduce peak force on a passenger during a stop with fixed momentum change Δp?', opts: ['Increases collision time Δt, decreasing F = Δp/Δt', 'Eliminates momentum change completely', 'Doubles passenger mass', 'Increases kinetic energy'], ans: 0, why: 'Since impulse FΔt = Δp is fixed, extending stopping duration Δt proportionally reduces average impact force F.' }
+    },
+    'p3-momentum-2d': {
+      code: '9702 AS Physics · Topic 3 Momentum in 2 dimensions',
+      law: 'Linear momentum is a vector, so in any 2-D collision or explosion with no external impulse, momentum is conserved independently along both perpendicular x and y axes: Σ m v_x before = Σ m v_x after and Σ m v_y before = Σ m v_y after.',
+      formulas: ['Σ p_x,before = Σ m₁ v₁ cos α₁ + Σ m₂ v₂ cos α₂', 'Σ p_y,before = Σ m₁ v₁ sin α₁ + Σ m₂ v₂ sin α₂', 'Elastic equal-mass off-centre collision ⇒ final angle = 90°'],
+      traps: ['Check upward vs downward signs in sin θ when one sphere deflects below the x-axis!', 'An object at rest exploding radially must end with opposing y-momenta that cancel to zero.'],
+      quiz: { q: 'A stationary firework explodes into two fragments moving in 2-D. How must their momentum vectors relate immediately after explosion?', opts: ['Equal magnitude and exact opposite directions (180°)', 'Equal speeds regardless of masses', 'Perpendicular at 90°', 'Equal kinetic energies always'], ans: 0, why: 'Zero initial momentum requires p₁ + p₂ = 0, so p₂ = −p₁ while lighter pieces gain faster speeds and higher KE.' }
+    },
+    'p4-moments': {
+      code: '9702 AS Physics · Topic 4 Moments, couples & equilibrium',
+      law: 'Moment of a force about a pivot = F d⊥ = F r sin θ. A couple is two equal, opposite parallel forces producing pure torque τ = F d (d = perpendicular separation). Equilibrium requires zero resultant force AND zero resultant moment about any point.',
+      formulas: ['Moment τ = F d (perpendicular distance from pivot)', 'Principle of moments: Στ_cw = Στ_acw', 'Torque of couple = F × perpendicular separation'],
+      traps: ['Always use perpendicular distance to the line of action of the force, NOT just beam length along an angled rod!', 'Taking moments about an unknown pivot support immediately eliminates its unknown reaction force from the moment equation.'],
+      quiz: { q: 'When solving for forces on a uniform beam resting on two supports, why is taking moments about one support helpful?', opts: ['The unknown reaction at that support has zero lever arm (moment = 0)', 'It makes weight equal zero', 'It doubles the beam mass', 'It ignores angles'], ans: 0, why: 'Any force whose line of action passes through the chosen pivot contributes zero turning moment.' }
+    },
+    'p4-pressure': {
+      code: '9702 AS Physics · Topic 4 Density, pressure & Archimedes upthrust',
+      law: 'Pressure is normal force per unit area p = F/A; hydrostatic pressure change is Δp = ρgh. Upthrust F_u on a submerged or floating body equals the weight of displaced fluid ρ_f V_disp g (from pressure difference between bottom and top faces).',
+      formulas: ['p = F / A,  Δp = ρ g h', 'Upthrust F_u = ρ_fluid × V_submerged × g', 'Floating equilibrium ⇒ Upthrust = Weight ⇒ V_sub / V_obj = ρ_obj / ρ_fluid'],
+      traps: ['Hydrostatic pressure Δp = ρgh depends ONLY on vertical depth h and fluid density ρ, NOT container shape or cross-section.', 'In a barometer/manometer, add atmospheric pressure p_atm when computing total absolute pressure.'],
+      quiz: { q: 'A wooden block floats partially submerged in water, then floats in denser brine. How does the submerged volume in brine compare?', opts: ['Smaller submerged volume in brine', 'Larger submerged volume in brine', 'Identical submerged volume', 'Depends only on block height'], ans: 0, why: 'Upthrust must still balance weight W = ρ_fluid V_sub g, so denser fluid requires less displaced volume V_sub.' }
+    },
+    'p5-energy': {
+      code: '9702 AS Physics · Topic 5 Work, energy & efficiency',
+      law: 'Work done W = F s cos θ transfers energy. By energy conservation, input work equals useful ΔKE + ΔGPE + resistive losses, and efficiency η = (useful output energy or power / total input energy or power) × 100%.',
+      formulas: ['W = F s cos θ,  P = W / t = F v', 'ΔE_p = m g Δh,  E_k = ½ m v²', 'Efficiency η = (P_out / P_in) × 100%'],
+      traps: ['Power P = Fv uses instantaneous speed v; dividing work by time gives average power.', 'Forces perpendicular to motion (e.g. normal reaction on a rigid track) do zero mechanical work because cos 90° = 0.'],
+      quiz: { q: 'Why does normal reaction from a curved roller-coaster track do zero work on the cart?', opts: ['Force is always perpendicular (90°) to displacement', 'Normal reaction is zero everywhere', 'Cart speed stays constant', 'Gravity cancels displacement'], ans: 0, why: 'Since W = F s cos θ and θ = 90° between normal reaction and instantaneous motion, cos 90° = 0.' }
+    },
+    'p6-deformation': {
+      code: '9702 AS Physics · Topic 6 Deformation of solids',
+      law: 'Within the limit of proportionality, Hooke’s law F = kx holds and elastic potential energy equals E_p = ½Fx = ½kx². Tensile stress σ = F/A and strain ε = x/L define material stiffness via Young modulus E = σ/ε = FL/(Ax).',
+      formulas: ['F = k x (up to limit of proportionality)', 'E_p = ½ F x = ½ k x² (area under F–x graph)', 'Stress σ = F/A, Strain ε = x/L, Young modulus E = σ/ε'],
+      traps: ['Young modulus E depends ONLY on the material (unlike k, which increases with cross-section A and decreases with length L).', 'Do NOT use ½Fx for non-linear elastic curves beyond proportionality — count area under F–x instead!'],
+      quiz: { q: 'Two copper wires have identical length L, but wire B has twice the radius of wire A. How does wire B’s Young modulus E compare to wire A?', opts: ['Identical (same material property)', 'Four times larger', 'Half as large', 'Twice as large'], ans: 0, why: 'Spring constant k = EA/L quadruples with twice radius, while Young modulus E = σ/ε is an intrinsic material constant.' }
+    },
+    'p7-waves': {
+      code: '9702 AS Physics · Topic 7 Progressive waves & intensity',
+      law: 'Progressive waves transfer energy without net matter transport via wave speed v = fλ and phase difference Δφ = 2π (Δx / λ) rad = 360° (Δx / λ). Wave intensity I = Power / Area is proportional to amplitude squared (I ∝ A²).',
+      formulas: ['v = f λ,  f = 1 / T', 'Phase difference Δφ = (2π Δx) / λ or (2π Δt) / T', 'Intensity I = P / A = P / (4πr²) ∝ A²'],
+      traps: ['Doubling amplitude multiplies wave intensity by 4× (I ∝ A²), NOT 2×!', 'Clearly identify y–x (distance) graphs giving wavelength λ vs y–t (time) graphs giving period T.'],
+      quiz: { q: 'If the amplitude of a sound wave is tripled while frequency stays constant, by what factor does wave intensity change?', opts: ['9×', '3×', '6×', '1/3×'], ans: 0, why: 'Wave intensity is proportional to amplitude squared (I ∝ A²), so 3² = 9× intensity.' }
+    },
+    'p7-cro': {
+      code: '9702 AS Physics · Topic 7 Cathode-ray oscilloscope (CRO)',
+      law: 'A CRO plots instantaneous voltage vertically using Y-gain (V div⁻¹) against horizontal sweep time using time-base (s div⁻¹). Count grid divisions per full cycle N_x ⇒ T = N_x × time-base ⇒ f = 1/T, and vertical peak divisions N_y ⇒ V₀ = N_y × Y-gain.',
+      formulas: ['Peak voltage V₀ = peak divisions × Y-gain', 'Period T = cycle width (divs) × time-base', 'Frequency f = 1 / T,  V_rms = V₀ / √2 (sinusoid)'],
+      traps: ['Peak-to-peak height is 2V₀ — halve vertical peak-to-peak divisions to get peak amplitude V₀!', 'Watch prefix conversions carefully (ms/div = 10⁻³ s/div, µs/div = 10⁻⁶ s/div).'],
+      quiz: { q: 'A sinusoidal trace occupies 4.0 horizontal divisions per complete cycle with time-base set at 5.0 ms div⁻¹. What is the frequency?', opts: ['50 Hz', '200 Hz', '25 Hz', '20 Hz'], ans: 0, why: 'Period T = 4.0 × 5.0 ms = 20 ms = 0.020 s, so f = 1 / 0.020 = 50 Hz.' }
+    },
+    'p7-doppler': {
+      code: '9702 AS Physics · Topic 7 Doppler effect for sound',
+      law: 'When a source emitting frequency f_s moves at speed v_s relative to medium wave speed v, wavefronts compress ahead and stretch behind, shifting observed frequency to f_o = f_s v / (v ± v_s) (minus approaching, plus receding).',
+      formulas: ['Approaching source: f_o = f_s v / (v − v_s)  (> f_s)', 'Receding source: f_o = f_s v / (v + v_s)  (< f_s)', 'Total shift across pass = f_approach − f_recede'],
+      traps: ['Use minus (−) in the denominator when approaching (higher pitch) and plus (+) when receding (lower pitch).', 'If an object passes quickly, observed frequency changes smoothly/rapidly rather than oscillating around the source.'],
+      quiz: { q: 'An ambulance siren emits 600 Hz while driving directly AWAY from you. How does the frequency you hear compare to 600 Hz?', opts: ['Lower than 600 Hz', 'Higher than 600 Hz', 'Identical at 600 Hz', 'Drops to zero'], ans: 0, why: 'Receding motion stretches successive wavefronts to larger apparent wavelength, lowering received frequency f_o = f_s v / (v + v_s).' }
+    },
+    'p7-em-polarisation': {
+      code: '9702 AS Physics · Topic 7 EM spectrum & Malus’s law',
+      law: 'All electromagnetic waves travel at c ≈ 3.00 × 10⁸ m s⁻¹ in vacuum across orders of magnitude (radio ~10³ m to γ-rays <10⁻¹¹ m). Polarisation proves waves are transverse; transmitted intensity through an analyser at angle θ obeys Malus’s law I = I₀ cos² θ.',
+      formulas: ['c = f λ ≈ 3.00 × 10⁸ m s⁻¹ in vacuum', 'Polariser halves unpolarised light: I₁ = ½ I_unpol', 'Malus’s law through analyser: I = I₁ cos² θ'],
+      traps: ['Longitudinal waves (like sound) CANNOT be polarised — only transverse waves can be plane-polarised.', 'Remember cos² θ scales amplitude as I₁ cos θ (electric field) and intensity as cos² θ; at θ = 90° transmission vanishes completely.'],
+      quiz: { q: 'Plane-polarised light of intensity I₀ passes through an analyser rotated by 60° from its transmission axis. What intensity emerges?', opts: ['0.25 I₀', '0.50 I₀', '0.75 I₀', '0.125 I₀'], ans: 0, why: 'By Malus’s law, I = I₀ cos² 60° = I₀ (0.5)² = 0.25 I₀.' }
+    },
+    'p8-stationary': {
+      code: '9702 AS Physics · Topic 8 Stationary waves & resonance',
+      law: 'Two identical coherent waves travelling in opposite directions interfere to form stationary waves with fixed zero-amplitude nodes (N) and maximum-amplitude antinodes (A). Distance between adjacent nodes is λ/2; particles between adjacent nodes vibrate completely in phase.',
+      formulas: ['Adjacent N–N or A–A spacing = λ / 2', 'String harmonics (both ends N): f_n = n (v / 2L), λ_n = 2L / n', 'One open + one closed end pipe: odd harmonics only f = (2k−1)v / (4L)'],
+      traps: ['In stationary waves, net energy is NOT transferred along the wave — all points in one loop are strictly in phase (or 180° out across a node).', 'Notice an air column closed at one end requires a node at the closed end and an antinode at the open end.'],
+      quiz: { q: 'Adjacent nodes along a vibrating stationary wave on a guitar string are 0.15 m apart. What is the wavelength λ?', opts: ['0.30 m', '0.15 m', '0.60 m', '0.075 m'], ans: 0, why: 'Each loop between adjacent nodes spans half a wavelength (λ/2 = 0.15 m), so λ = 0.30 m.' }
+    },
+    'p8-interference': {
+      code: '9702 AS Physics · Topic 8 Two-source interference & diffraction',
+      law: 'Coherent waves (constant phase difference and identical frequency) interfere constructively when path difference Δ = nλ and destructively when Δ = (n + ½)λ. Double-slit fringes have uniform spacing x = λD/a (for D ≫ a).',
+      formulas: ['Constructive: path difference = nλ; Destructive: (n + ½)λ', 'Double-slit fringe spacing: x = λ D / a', 'Coherence = same frequency + constant phase relationship'],
+      traps: ['Slit separation a and screen distance D affect x oppositely: increasing slit separation a squeezes fringes closer together!', 'Single-slit diffraction modulates double-slit intensity so outer fringes fade across the wider central envelope.'],
+      quiz: { q: 'In a Young’s double-slit experiment using red laser light, if the slit separation a is halved while screen distance D stays constant, what happens to fringe separation x?', opts: ['Doubles', 'Halves', 'Stays the same', 'Quadruples'], ans: 0, why: 'Fringe spacing x = λD/a is inversely proportional to slit separation a, so halving a doubles x.' }
+    },
+    'p8-grating': {
+      code: '9702 AS Physics · Topic 8 Diffraction grating',
+      law: 'Multi-slit interference produces sharp bright maxima satisfying d sin θ = nλ, where grating spacing d = 1 / N (lines per unit length) and maximum observable order satisfies sin θ ≤ 1 ⇒ n_max = floor(d / λ).',
+      formulas: ['Grating equation: d sin θ = n λ', 'Grating spacing: d = 1 / (lines per metre)', 'Maximum order: n_max = floor(d / λ)  (total spots = 2 n_max + 1)'],
+      traps: ['Be careful converting lines per mm to lines per m (e.g. 500 lines mm⁻¹ = 5.0 × 10⁵ lines m⁻¹ ⇒ d = 2.0 × 10⁻⁶ m).', 'White light disperses each non-zero order into a spectrum with violet (shorter λ) inside and red (longer λ) outside, while n = 0 stays white.'],
+      quiz: { q: 'Light of wavelength 500 nm hits a grating of spacing d = 2.0 µm. What is the highest order n visible (total beams)?', opts: ['n_max = 4', 'n_max = 2', 'n_max = 5', 'n_max = 3'], ans: 0, why: 'd / λ = 2.0×10⁻⁶ / 5.0×10⁻⁷ = 4.0 (max order at sin θ ≤ 1; strictly < 90° may limit to order 3 physically). Note how d/λ sets the upper cap!' }
+    },
+    'p9-current': {
+      code: '9702 AS Physics · Topic 9 Current, drift velocity & resistivity',
+      law: 'Electric current is charge flow rate I = ΔQ/Δt and relates to charge-carrier number density n, cross-section A, drift velocity v, and elementary charge q via I = nAvq. Wire resistance depends on geometry via R = ρL/A.',
+      formulas: ['I = ΔQ / Δt = n A v q', 'V = I R,  P = V I = I² R = V² / R', 'Resistance R = ρ L / A  (ρ = resistivity in Ω m)'],
+      traps: ['If wire diameter d doubles, area A = πd²/4 quadruples, so resistance drops to ¼ (and drift speed v drops to ¼ for equal I).', 'Ensure area A is in m² when converting mm² (1 mm² = 10⁻⁶ m²).'],
+      quiz: { q: 'A steady current I flows through a cylindrical wire made of one section joined to another section of double diameter (same metal). How does drift speed v change in the wider section?', opts: ['Decreases to ¼', 'Decreases to ½', 'Quadruples', 'Stays the same'], ans: 0, why: 'By I = nAvq with constant I, n, and q, quadrupling cross-sectional area A decreases drift velocity v to one quarter.' }
+    },
+    'p9-iv': {
+      code: '9702 AS Physics · Topic 9 I–V characteristics',
+      law: 'Ohmic conductors give straight lines through origin (R = V/I constant). Filament lamps curve toward V-axis because lattice vibration heating increases R; thermistors (NTC) decrease R as temperature rises; diodes conduct above ~0.6–0.7 V forward bias only.',
+      formulas: ['Resistance at point = V / I (NOT gradient dv/di for non-ohmic components!)', 'Filament lamp: I rises ⇒ T rises ⇒ lattice scattering ↑ ⇒ R = V/I increases', 'NTC thermistor: T ↑ ⇒ charge carriers n ↑ ⇒ R drops sharply'],
+      traps: ['For ANY component at a specific operating point, resistance equals total ratio R = V/I — NEVER take 1/tangent gradient of a curve!', 'Reversing polarity flips I–V identically for ohmic/filament resistors, but blocks current for a diode until breakdown.'],
+      quiz: { q: 'How do you find the electrical resistance of a filament lamp at 6.0 V from its curved I–V graph?', opts: ['Divide voltage V by current I at that point (V / I)', 'Take gradient ΔI / ΔV at 6.0 V', 'Find area under the I–V curve', 'Use 1 / gradient at the origin'], ans: 0, why: 'Resistance is defined as the instantaneous ratio V/I at that operating state, whereas tangent gradient reflects dynamic incremental behavior.' }
+    },
+    'p10-builder': {
+      code: '9702 AS Physics · Topic 10 Interactive Circuit Workbench',
+      law: 'Every real circuit obeys Kirchhoff’s 1st law (charge conservation ΣI_in = ΣI_out at every node) and Kirchhoff’s 2nd law (energy conservation ΣE = ΣIR around every closed loop). Parallel branches share equal p.d. V; series components share identical current I.',
+      formulas: ['Series: I same,  R_tot = R₁ + R₂ + …', 'Parallel: V same,  1/R_tot = 1/R₁ + 1/R₂ + …', 'KCL: ΣI_in = ΣI_out;  KVL: ΣE = ΣIR around closed loop'],
+      traps: ['Closing a parallel switch lowers total resistance R_tot, increasing total battery current I — check both branch current AND terminal voltage drop Ir!', 'Use the multimeter in V mode across a component (parallel) and A mode inline inside a loop (series).'],
+      quiz: { q: 'Adding an identical resistor in parallel across a single ideal resistor connected to an ideal cell causes total circuit current from the cell to:', opts: ['Double', 'Halve', 'Stay identical', 'Drop to zero'], ans: 0, why: 'Total equivalent resistance halves (R/2) across the same cell p.d. E, so battery current I = E / (R/2) doubles.' }
+    },
+    'p10-emf': {
+      code: '9702 AS Physics · Topic 10 E.m.f. & internal resistance',
+      law: 'Real cells convert chemical energy E per unit charge, losing Ir inside internal resistance r so terminal p.d. is V = E − Ir = IR. Plotting V against I yields a straight line with y-intercept E and gradient −r; power delivered to external load R peaks when R = r.',
+      formulas: ['E = I(R + r) ⇒ V = E − I r ("lost volts" = Ir)', 'Power to external load P = I²R = E²R / (R + r)²', 'Maximum power transfer theorem: P_max at R = r'],
+      traps: ['Open circuit (I = 0) gives V = E (ideal high-resistance voltmeter measures e.m.f. directly).', 'Remember y-intercept of V vs I is E and negative slope magnitude |gradient| equals r.'],
+      quiz: { q: 'When a variable external resistor R equals the battery internal resistance r, what happens to the useful power delivered to load R?', opts: ['Load power reaches its maximum possible value', 'Load power becomes zero', 'Efficiency becomes 100%', 'Terminal voltage equals E'], ans: 0, why: 'Though efficiency at R = r is 50%, load power P = E²R/(R+r)² peaks cleanly when load R matches r.' }
+    },
+    'p10-circuits': {
+      code: '9702 AS Physics · Topic 10 Kirchhoff’s laws & resistor networks',
+      law: 'Junction conservation of charge gives ΣI_in = ΣI_out at every node (Kirchhoff 1), while loop conservation of energy gives algebraic sum of e.m.f.s equals sum of potential drops ΣE = ΣIR around any closed loop (Kirchhoff 2).',
+      formulas: ['KCL (Junction): ΣI_in = ΣI_out (charge conserved)', 'KVL (Loop): ΣE = ΣIR (energy conserved)', 'Balanced Wheatstone bridge: R₁/R₂ = R₃/R₄ ⇒ zero bridge deflection'],
+      traps: ['Follow a consistent clockwise or anticlockwise loop traversal direction: crossing a cell − → + adds +E, opposing current adds −IR.', 'Note which quantities come from conservation of charge (1st law) vs conservation of energy (2nd law).'],
+      quiz: { q: 'Which fundamental conservation principle underlies Kirchhoff’s second law (ΣE = ΣIR)?', opts: ['Conservation of energy', 'Conservation of electric charge', 'Conservation of momentum', 'Conservation of mass'], ans: 0, why: 'Moving a unit charge completely around any closed loop must result in zero net change in electric potential energy.' }
+    },
+    'p10-divider': {
+      code: '9702 AS Physics · Topic 10 Potential dividers & sensing circuits',
+      law: 'Two resistors in series divide supply voltage in direct ratio to resistance: V_out = V_in × R₂/(R₁ + R₂). Replacing one resistor with an LDR or NTC thermistor turns light or temperature changes into automatic output voltage triggers.',
+      formulas: ['V_out = V_in × R₂ / (R₁ + R₂)', 'Zero-balance potentiometer: V_x = E_driver × (L_balance / L_total)', 'With parallel load R_L across R₂: combine R₂ ∥ R_L first (R_eff < R₂)'],
+      traps: ['Connecting a low-resistance voltmeter or load R_L across R₂ decreases effective bottom resistance and lowers V_out below ideal unloaded ratio!', 'For NTC thermistor / LDR: R drops when T or light intensity rises — check which half of the divider is R₂ before deciding whether V_out rises or falls.'],
+      quiz: { q: 'An LDR sits in the LOWER position (R₂) of a potential divider powered by a steady 12 V supply. When bright light shines onto the LDR, what happens to V_out across the LDR?', opts: ['V_out decreases', 'V_out increases', 'V_out stays at 6 V', 'Supply p.d. drops to zero'], ans: 0, why: 'Bright light reduces LDR resistance R₂ dramatically, so its share V_out = 12 R₂/(R₁ + R₂) decreases.' }
+    },
+    'p11-alpha': {
+      code: '9702 AS Physics · Topic 11 Rutherford α-particle scattering',
+      law: 'Firing α-particles at thin gold foil showed most pass straight through (atom is mostly empty space), small deflections reveal positive charge repulsion, and rare backscatter (>90°) proves mass and +Ze charge sit inside a tiny dense nucleus (<10⁻¹⁴ m).',
+      formulas: ['Most α pass straight (b large) ⇒ empty space ~10⁻¹⁰ m', 'Rare >90° backscatter ⇒ tiny dense positive nucleus ~10⁻¹⁵ m', 'Closest approach distance (head-on): ½mv² = Qq / (4πε₀ r_min)'],
+      traps: ['Gold foil must be ultra-thin so each α-particle undergoes at most one significant single collision.', 'Backscatter fraction stays tiny (~1 in 8000–10000); increasing α kinetic energy penetrates closer to the nucleus.'],
+      quiz: { q: 'Which observation from Rutherford’s α-scattering experiment directly showed that most of the atom’s mass and positive charge lie in a tiny central nucleus?', opts: ['A very small fraction deflected by more than 90° backwards', 'All α-particles passed straight through without deflection', 'Electrons orbited outside', 'Foil glowed green'], ans: 0, why: 'Deflecting heavy fast α-particles backward requires hitting a much more massive, tiny concentrated positive charge.' }
+    },
+    'p11-nuclear': {
+      code: '9702 AS Physics · Topic 11 Nuclear decay & quark model',
+      law: 'In every nuclear reaction, nucleon number A, proton number Z, energy-momentum, and charge are conserved. Protons (uud) and neutrons (udd) are hadrons/baryons built from quarks; β⁻ decay turns d → u + e⁻ + ν̄ₑ while β⁺ turns u → d + e⁺ + νₑ.',
+      formulas: ['α-decay: ⁴₂He emitted (A → A−4, Z → Z−2)', 'β⁻ decay: d → u + ⁰₋₁e + ν̄ₑ (A same, Z → Z+1)', 'β⁺ decay: u → d + ⁰₊₁e + νₑ (A same, Z → Z−1)'],
+      traps: ['β⁻ particles emerge with a continuous kinetic energy spectrum because energy is shared with an antineutrino ν̄ₑ!', 'Leptons (e⁻, e⁺, ν, ν̄) are fundamental (not made of quarks), whereas hadrons experience the strong nuclear force.'],
+      quiz: { q: 'What quark transformation occurs inside a neutron during β⁻ radioactive decay?', opts: ['A down quark converts into an up quark (d → u + e⁻ + ν̄ₑ)', 'An up quark turns into a down quark', 'Two up quarks annihilate', 'Three strange quarks form a proton'], ans: 0, why: 'Neutron (udd) becomes proton (uud) via weak interaction converting one d (−⅓e) into u (+⅔e) while emitting electron and antineutrino.' }
+    }
+  };
+  var CURR_DEFAULT = {
+    code: 'Cambridge 9709 / 9702 Interactive Simulation',
+    law: 'Experiment systematically by holding one variable steady while changing another, observing how quantities and vector diagrams scale together in real time.',
+    formulas: ['g = 10 m s⁻² (9709 Mechanics) · g = 9.81 m s⁻² (9702 AS Physics)', 'SI prefixes & expressions (e.g. 4.7k, 15m, 2*pi) work inside every numeric input'],
+    traps: ['Convert cm, mm, ms, kΩ, km/h into standard SI units before substituting into exam formulas.', 'Check both magnitude AND vector direction/sign before finalizing an answer.'],
+    quiz: { q: 'Which value of gravitational field strength g is standard in Cambridge 9702 AS Physics vs 9709 Mechanics?', opts: ['9.81 m s⁻² in 9702 and 10 m s⁻² in 9709', '10 m s⁻² in both papers', '9.8 m s⁻² in 9709 and 10 in 9702', '9.81 N in both papers'], ans: 0, why: '9702 uses g = 9.81 m s⁻² from the data booklet whereas 9709 Mechanics uses g = 10 m s⁻² unless stated otherwise.' }
+  };
+  function simSlug() {
+    try {
+      var m = /\/([a-z0-9-]+)\.html$/i.exec(location.pathname || '');
+      if (m && CURRICULUM_DB[m[1]]) return m[1];
+    } catch (e) { /* ignore */ }
+    var ttl = String(typeof document !== 'undefined' && document.title || '').toLowerCase();
+    var mapTitle = [
+      ['resultant', 'm1-resultant'], ['strings and rings', 'm1-strings'], ['slope', 'm1m4-plane'],
+      ['journeys', 'm2-journey'], ['vertical motion', 'm2-vertical'], ['variable acceleration', 'm2-calculus'],
+      ['collisions on a line', 'm3-collisions'], ['pulleys and connected', 'm4-connected'], ['lift', 'm4-lift'],
+      ['car, trailer', 'm4-vehicle'], ['work–energy', 'm5-energy'], ['uncertainty', 'p1-uncertainty'],
+      ['vectors', 'p1-vectors'], ['measuring g', 'p2-freefall-exp'], ['motion graphs', 'p2-motion-graphs'],
+      ['projectile', 'p2-projectile'], ['drag', 'p3-drag'], ['2-d', 'p3-momentum-2d'], ['1-d', 'p3-momentum'],
+      ['moments', 'p4-moments'], ['pressure', 'p4-pressure'], ['efficiency', 'p5-energy'], ['deformation', 'p6-deformation'],
+      ['oscilloscope', 'p7-cro'], ['doppler', 'p7-doppler'], ['polarisation', 'p7-em-polarisation'], ['progressive wave', 'p7-waves'],
+      ['stationary', 'p8-stationary'], ['interference', 'p8-interference'], ['grating', 'p8-grating'],
+      ['resistivity', 'p9-current'], ['i–v', 'p9-iv'], ['circuit builder', 'p10-builder'],
+      ['e.m.f', 'p10-emf'], ['kirchhoff', 'p10-circuits'], ['divider', 'p10-divider'],
+      ['scattering', 'p11-alpha'], ['quarks', 'p11-nuclear']
+    ];
+    for (var i = 0; i < mapTitle.length; i++) if (ttl.indexOf(mapTitle[i][0]) >= 0 && CURRICULUM_DB[mapTitle[i][1]]) return mapTitle[i][1];
+    return '';
+  }
+  function getCurriculumEntry() {
+    var slug = simSlug();
+    return CURRICULUM_DB[slug] || CURR_DEFAULT;
+  }
+  function grantGuideXp(amt, title, sub) {
+    try {
+      var P = root.SIM_PROGRESS || (root.parent && root.parent !== root && root.parent.SIM_PROGRESS);
+      if (P && P.awardBonusXp) { P.awardBonusXp(amt, title, sub); return true; }
+    } catch (e) { /* ignore */ }
+    return false;
+  }
+
+  var activeGuide = null, guideXpAwarded = {};
+  function openGuide(initTab) {
+    var startTab = (typeof initTab === 'string' && /^(tour|curriculum|lab|si)$/.test(initTab)) ? initTab : 'tour';
+    if (activeGuide) { activeGuide.setTab(startTab); return activeGuide; }
+
     var tipTxt = stage && stage.tip && stage.tip.textContent ? stage.tip.textContent : 'Drag handles directly on the simulation canvas or tap parameter chips below.';
     var vis = visibleParams();
-    var wrap = h('div', {}), tabs = h('div', { class: 'sim-tabs' }), pane = h('div', {});
-    var b1 = h('button', { type: 'button', class: 'sim-tab on', text: '🧭 How to use' });
-    var b2 = h('button', { type: 'button', class: 'sim-tab', text: '📐 SI Prefixes & Shortcuts' });
-    function show(tab) {
-      b1.classList.toggle('on', tab === 1); b2.classList.toggle('on', tab === 2);
-      if (tab === 1) {
-        pane.innerHTML =
-          '<p style="margin-top:0"><b>Current simulation:</b> ' + esc(document.title || 'Physics / Mechanics Simulation') + '</p>' +
-          '<div class="guide-grid">' +
-            '<div class="guide-card"><h3><span class="guide-num">1</span>Interact on the Canvas</h3><p style="margin:0;color:var(--muted)">' + esc(tipTxt) + '</p></div>' +
-            '<div class="guide-card"><h3><span class="guide-num">2</span>Enter Data Easily</h3><p style="margin:0;color:var(--muted)">Tap any chip under the stage, or click <b>✎ Edit all</b> to type everything in one grid. Type SI prefixes like <code>4.7k</code>, <code>15m</code>, <code>200u</code> or math like <code>2*pi</code>, <code>1/4</code>.</p></div>' +
-            '<div class="guide-card"><h3><span class="guide-num">3</span>Fetch &amp; Export Data</h3><p style="margin:0;color:var(--muted)">Click <b>⇣ Fetch Data</b> to paste an exam question (auto-extracts values &amp; converts units!) or export live results &amp; time-series tables as CSV, JSON, or Markdown.</p></div>' +
-            '<div class="guide-card"><h3><span class="guide-num">4</span>Learn &amp; Test Yourself</h3><p style="margin:0;color:var(--muted)">Switch between <b>Real life</b> and <b>Diagram</b> on the stage. Step through <b>Live working</b> below, or toggle <b>Exam mode</b> to hide answers and check your own working.</p></div>' +
-          '</div>' +
-          (vis.length ? '<p style="margin:10px 0 6px"><b>Editable values on this page:</b> ' + vis.map(function (r) { return '<code>' + esc(r.labelText) + '</code>'; }).join(' · ') + '</p>' : '') +
-          '<p style="margin:8px 0 0;color:var(--muted)"><b>Shortcuts:</b> <span class="guide-kbd">Space</span> play/pause · <span class="guide-kbd">?</span> guide · <span class="guide-kbd">↑</span>/<span class="guide-kbd">↓</span> nudge chip (<span class="guide-kbd">Shift</span> ×10) · <span class="guide-kbd">←</span>/<span class="guide-kbd">→</span> step working · <span class="guide-kbd">Esc</span> close</p>';
-      } else {
-        pane.innerHTML =
-          '<p style="margin-top:0;color:var(--muted)">You can type any of these SI prefixes or math expressions directly into any number box or <b>✎ Edit all</b>:</p>' +
-          '<table class="tbl"><thead><tr><th>Prefix / Input</th><th style="text-align:left">Meaning</th><th>Example</th><th>Evaluates to</th></tr></thead><tbody>' +
-          '<tr><td><code>G</code></td><td class="txt">giga (×10⁹)</td><td><code>2.4G</code></td><td>2.4×10⁹</td></tr>' +
-          '<tr><td><code>M</code></td><td class="txt">mega (×10⁶)</td><td><code>1.5M</code></td><td>1.5×10⁶</td></tr>' +
-          '<tr><td><code>k</code></td><td class="txt">kilo (×10³)</td><td><code>4.7k</code></td><td>4700</td></tr>' +
-          '<tr><td><code>c</code></td><td class="txt">centi (×10⁻²)</td><td><code>25c</code></td><td>0.25</td></tr>' +
-          '<tr><td><code>m</code></td><td class="txt">milli (×10⁻³)</td><td><code>15m</code></td><td>0.015</td></tr>' +
-          '<tr><td><code>u</code> / <code>µ</code></td><td class="txt">micro (×10⁻⁶)</td><td><code>200u</code></td><td>0.0002</td></tr>' +
-          '<tr><td><code>n</code></td><td class="txt">nano (×10⁻⁹)</td><td><code>550n</code></td><td>5.5×10⁻⁷</td></tr>' +
-          '<tr><td><code>p</code></td><td class="txt">pico (×10⁻¹²)</td><td><code>10p</code></td><td>1×10⁻¹¹</td></tr>' +
-          '<tr><td>Math</td><td class="txt"><code>+ − * / ^ pi sqrt()</code></td><td><code>2*pi/3</code></td><td>2.094</td></tr>' +
-          '</tbody></table>';
+    var entry = getCurriculumEntry();
+    var slugKey = simSlug() || String(document.title || 'sim').slice(0, 24);
+    var spotlightedEls = [];
+
+    function clearSpotlights() {
+      spotlightedEls.forEach(function (el) {
+        if (el && el.classList) el.classList.remove('guide-spotlight');
+      });
+      spotlightedEls = [];
+    }
+    function setGuideSpotlight(targetEl) {
+      clearSpotlights();
+      if (!targetEl) return;
+      var el = targetEl;
+      if (typeof targetEl === 'string' && typeof document !== 'undefined' && document.querySelector) {
+        // Fallback matching safe in fake DOMs too
+        if (targetEl === 'canvas') el = stage && stage.canvas;
+        else if (targetEl === 'stage') el = stage && stage.el;
+        else {
+          var cand = Array.prototype.slice.call(document.querySelectorAll ? document.querySelectorAll(targetEl.replace(/^\./, 'div.')) : []);
+          el = cand.find ? cand.find(function (x) { return x && x.className && x.className.indexOf(targetEl.replace(/^\./, '')) >= 0; }) : document.querySelector(targetEl);
+        }
+      }
+      if (el && el.classList && el.classList.add) {
+        el.classList.add('guide-spotlight');
+        spotlightedEls.push(el);
       }
     }
-    b1.onclick = function () { show(1); }; b2.onclick = function () { show(2); };
-    tabs.appendChild(b1); tabs.appendChild(b2);
-    wrap.appendChild(tabs); wrap.appendChild(pane);
-    show(1);
-    openModal('Simulation Guide', wrap);
+
+    function setRowValue(r, val) {
+      if (!r || !r.spec || !r.box) return;
+      var v = U.clamp(val, Number(r.spec.min), Number(r.spec.max));
+      r.box.value = v;
+      r.box.dispatchEvent(new Event('change'));
+      if (r.renderChip) r.renderChip();
+    }
+    function silentEvalOutput(rP, trialX, targetSym) {
+      if (!rP || !rP.spec) return NaN;
+      var orig = Number(rP.ctl.values[rP.spec.key]);
+      guideProbing = true;
+      try {
+        setRowValue(rP, trialX);
+        var snap = collectSnapshot().filter(function (x) { return x.kind === 'Result' && x.symbol === targetSym && isFinite(x.num); });
+        return snap.length ? snap[0].num : NaN;
+      } finally {
+        setRowValue(rP, orig);
+        guideProbing = false;
+      }
+    }
+
+    // Floating Non-Blocking Interactive Dock (canvas remains 100% live & clickable underneath)
+    var curTab = startTab, tourStep = 0, trapDone = {};
+    var dock = h('section', { class: 'sim-guide-dock', role: 'dialog', 'aria-label': 'Interactive Guide and Learning Studio' });
+    var headTitle = h('h2', { html: '🎓 Guide &amp; Learning Studio <span class="curr-badge">' + esc(entry.code.split('·')[0].trim()) + '</span>' });
+    var modeBtn = h('button', { type: 'button', class: 'ws-dbtn', text: '⊡ Mini', title: 'Switch between Normal, Mini Co-Pilot and Wide Studio view' });
+    var closeBtn = h('button', { type: 'button', class: 'ws-dbtn', text: '×', 'aria-label': 'Close interactive guide' });
+    var head = h('div', { class: 'sim-guide-head', title: 'Drag header to move panel anywhere on stage' }, [headTitle, modeBtn, closeBtn]);
+    var tabs = h('div', { class: 'sim-tabs' });
+    var pane = h('div', { class: 'sim-guide-body' });
+
+    var sizeState = 0; // 0 = default, 1 = mini, 2 = expanded
+    modeBtn.onclick = function () {
+      sizeState = (sizeState + 1) % 3;
+      dock.classList.toggle('mini', sizeState === 1);
+      dock.classList.toggle('expanded', sizeState === 2);
+      modeBtn.textContent = sizeState === 1 ? '⛶ Wide' : sizeState === 2 ? '◰ Normal' : '⊡ Mini';
+    };
+
+    // Draggable header so student can dock anywhere over the simulation
+    var dragging = null;
+    if (head.addEventListener && root.addEventListener) {
+      head.addEventListener('pointerdown', function (e) {
+        if (e.target && e.target.closest && e.target.closest('button')) return;
+        var rect = dock.getBoundingClientRect ? dock.getBoundingClientRect() : null;
+        if (!rect) return;
+        dragging = { dx: e.clientX - rect.left, dy: e.clientY - rect.top, w: rect.width, h: rect.height };
+        dock.style.right = 'auto';
+        dock.style.left = rect.left + 'px';
+        dock.style.top = rect.top + 'px';
+      });
+      var onMoveDrag = function (e) {
+        if (!dragging) return;
+        var vw = root.innerWidth || 1200, vh = root.innerHeight || 800;
+        var nx = Math.max(8, Math.min(vw - Math.min(dragging.w, vw - 16) - 8, e.clientX - dragging.dx));
+        var ny = Math.max(8, Math.min(vh - 90, e.clientY - dragging.dy));
+        dock.style.left = nx + 'px';
+        dock.style.top = ny + 'px';
+      };
+      var onUpDrag = function () { dragging = null; };
+      root.addEventListener('pointermove', onMoveDrag);
+      root.addEventListener('pointerup', onUpDrag);
+    }
+
+    function closeGuide() {
+      clearSpotlights();
+      guideRefreshFn = null;
+      if (dragging) dragging = null;
+      if (dock.parentNode) dock.parentNode.removeChild(dock);
+      activeGuide = null;
+    }
+    closeBtn.onclick = closeGuide;
+
+    var tabDefs = [
+      { id: 'tour', label: '🧭 Interactive Tour' },
+      { id: 'curriculum', label: '📚 Curriculum & Laws' },
+      { id: 'lab', label: '🧪 Discovery Lab' },
+      { id: 'si', label: '📐 SI & Formula Lab' }
+    ];
+    var tabBtns = {};
+    tabDefs.forEach(function (t) {
+      var b = h('button', { type: 'button', class: 'sim-tab', text: t.label, onclick: function () { setTab(t.id); } });
+      tabBtns[t.id] = b;
+      tabs.appendChild(b);
+    });
+
+    function liveOutputPills(maxCount) {
+      var res = collectSnapshot().filter(function (r) { return r.kind === 'Result'; }).slice(0, maxCount || 6);
+      if (!res.length) return '<span style="font-size:12px;color:var(--muted)">Interact on the stage to inspect calculated values.</span>';
+      return res.map(function (r) {
+        var valStr = (r.value !== undefined && r.value !== '') ? esc(r.value) : '—';
+        return '<span class="guide-live-pill"><b>' + esc(r.symbol) + '</b> = ' + valStr + (r.unit ? ' ' + esc(r.unit) : '') + '</span>';
+      }).join('');
+    }
+
+    function renderTour() {
+      pane.innerHTML = '';
+      var hasVis = vis.length > 0;
+      var curParamIdx = 0;
+      var baseVals = vis.map(function (r) { return Number(r.ctl.values[r.spec.key]); });
+      var ro = allReadouts[0] || null;
+      var roInfo = ro && ro.getStepInfo ? ro.getStepInfo() : { page: 0, count: 1 };
+
+      var stepDefs = [
+        {
+          title: '1. Direct Canvas & Real-Life / Diagram',
+          desc: tipTxt + ' Try an instant animated sweep or flip between Realistic hardware and Exam Vectors.',
+          spot: function () { setGuideSpotlight(stage ? stage.canvas : null); },
+          build: function (box) {
+            var liveBar = h('div', { class: 'guide-live-row', html: liveOutputPills(4) });
+            var btnDemo = h('button', { type: 'button', class: 'btn primary', text: '⚡ Animate Canvas Demo', onclick: function () {
+              if (hasVis) {
+                var r0 = vis[0], lo = Number(r0.spec.min), hi = Number(r0.spec.max), v0 = Number(r0.ctl.values[r0.spec.key]);
+                var mid = Number(((lo + hi) * 0.5).toFixed(r0.d || 2));
+                var tgt = Math.abs(v0 - lo) > (hi - lo) * 0.25 ? Number((lo + (hi - lo) * 0.22).toFixed(r0.d || 2)) : Number((lo + (hi - lo) * 0.78).toFixed(r0.d || 2));
+                if (Math.abs(tgt - v0) < 1e-6) tgt = mid;
+                animateParam(v0, tgt, 520, function (x) { setRowValue(r0, x); }, function () {
+                  animateParam(tgt, v0, 520, function (x) { setRowValue(r0, x); });
+                });
+              } else if (SIM.anim && SIM.anim.clocks && SIM.anim.clocks.length) {
+                SIM.anim.clocks[0].toggle();
+              }
+            } });
+            var btnLook = h('button', { type: 'button', class: 'btn', text: '👁 Switch View / Play', onclick: function () {
+              var lookBtns = stage && stage.el && stage.el.querySelectorAll ? Array.prototype.slice.call(stage.el.querySelectorAll('button')).filter(function (b) { return /Real life|Diagram/i.test(b.textContent || ''); }) : [];
+              if (lookBtns.length >= 2) {
+                var inactive = lookBtns.find ? lookBtns.find(function (b) { return b.getAttribute('aria-pressed') !== 'true'; }) : lookBtns[1];
+                if (inactive && inactive.click) inactive.click();
+              } else if (SIM.anim && SIM.anim.clocks && SIM.anim.clocks.length) {
+                SIM.anim.clocks[0].toggle();
+              }
+            } });
+            box.appendChild(h('div', { class: 'hub-bar', style: 'margin:8px 0' }, [btnDemo, btnLook]));
+            box.appendChild(liveBar);
+            guideRefreshFn = function () { liveBar.innerHTML = liveOutputPills(4); };
+          }
+        },
+        {
+          title: '2. Live Parameter Control & Chip Nudging',
+          desc: hasVis ? 'Pick any value below and adjust it directly — watch vectors, graphs, and calculations update simultaneously.' : 'Interact directly with components on the workbench stage above to build and measure live physics.',
+          spot: function () { setGuideSpotlight(wsDrawers[0] ? '.ws-corner' : (stage ? stage.dock : null)); },
+          build: function (box) {
+            if (!hasVis) return;
+            var pSel = h('select', { style: 'width:100%;margin-bottom:8px' }, vis.map(function (r, idx) {
+              return h('option', { value: String(idx), text: r.labelText + (r.spec.sym ? ' (' + stripTags(r.spec.sym) + ')' : '') });
+            }));
+            var curStatus = h('div', { class: 'guide-live-row' });
+            function syncTourParam() {
+              var r = vis[curParamIdx]; if (!r) return;
+              curStatus.innerHTML = '<span class="guide-live-pill"><b>' + esc(r.labelText) + '</b> = ' + fmtChip(r.ctl.values[r.spec.key]) + (r.spec.unit ? ' ' + r.spec.unit : '') + '</span>' + liveOutputPills(3);
+            }
+            pSel.onchange = function () { curParamIdx = Number(pSel.value) || 0; syncTourParam(); };
+            var btns = h('div', { class: 'hub-bar', style: 'margin:6px 0' }, [
+              h('button', { type: 'button', class: 'btn', text: '− Step', onclick: function () { var r = vis[curParamIdx]; setRowValue(r, r.ctl.values[r.spec.key] - r.step); syncTourParam(); } }),
+              h('button', { type: 'button', class: 'btn', text: '+ Step', onclick: function () { var r = vis[curParamIdx]; setRowValue(r, r.ctl.values[r.spec.key] + r.step); syncTourParam(); } }),
+              h('button', { type: 'button', class: 'btn', text: '×2 Double', onclick: function () { var r = vis[curParamIdx], v = r.ctl.values[r.spec.key]; animateParam(v, U.clamp(v * 2, Number(r.spec.min), Number(r.spec.max)), 360, function (x) { setRowValue(r, x); }, syncTourParam); } }),
+              h('button', { type: 'button', class: 'btn', text: '↺ Reset', onclick: function () { var r = vis[curParamIdx]; setRowValue(r, baseVals[curParamIdx]); syncTourParam(); } })
+            ]);
+            box.appendChild(pSel); box.appendChild(btns); box.appendChild(curStatus);
+            syncTourParam();
+            guideRefreshFn = syncTourParam;
+          }
+        },
+        {
+          title: '3. Mark Unknown x & Auto-Solve',
+          desc: hasVis ? 'In past-paper questions where one force, angle, or distance is unknown, mark any value as x and let the solver isolate it automatically.' : 'Open Solve for x or Question Solver to jump directly between exam papers and live apparatus.',
+          spot: function () { setGuideSpotlight(stage ? stage.el : null); },
+          build: function (box) {
+            var actions = [];
+            if (hasVis) {
+              actions.push(h('button', { type: 'button', class: 'btn primary', text: '⚡ Mark "' + esc(vis[0].labelText) + '" as x', onclick: function () {
+                markAsX(vis[0], { toggle: false });
+              } }));
+            }
+            if (solveableParams().length) {
+              actions.push(h('button', { type: 'button', class: 'btn', text: '🔍 Open Solve for x', onclick: function () { openSolveForX(); } }));
+            }
+            if (actions.length) box.appendChild(h('div', { class: 'hub-bar', style: 'margin:8px 0' }, actions));
+          }
+        },
+        {
+          title: '4. Synchronized Step-by-Step Working',
+          desc: roInfo.count > 1 ? 'Walk through each mark-scheme step one line at a time while highlighted vectors glow in sync on the diagram.' : 'Open Fullscreen Step Studio or Calculations & Graphs to trace equations line by line with the animated simulation.',
+          spot: function () { setGuideSpotlight(stage ? stage.canvas : null); },
+          build: function (box) {
+            var stepLbl = h('div', { style: 'font-size:12.5px;color:var(--muted);margin-bottom:6px' });
+            function syncRoLbl() {
+              if (ro && ro.getStepInfo) {
+                var inf = ro.getStepInfo();
+                stepLbl.textContent = inf.count > 1 ? 'Currently showing Step ' + (inf.page + 1) + ' of ' + inf.count + ' in Calculations.' : 'Live equation derivation synced with canvas.';
+              } else stepLbl.textContent = 'Live working tracks your edits immediately.';
+            }
+            syncRoLbl();
+            var bar = [];
+            if (ro && ro.getStepInfo && ro.getStepInfo().count > 1) {
+              bar.push(h('button', { type: 'button', class: 'btn', text: '← Prev Step', onclick: function () { var inf = ro.getStepInfo(); ro.setStep(Math.max(0, inf.page - 1)); syncRoLbl(); } }));
+              bar.push(h('button', { type: 'button', class: 'btn', text: 'Next Step →', onclick: function () { var inf = ro.getStepInfo(); ro.setStep(Math.min(inf.count - 1, inf.page + 1)); syncRoLbl(); } }));
+            }
+            if (wsGlobalRefs && wsGlobalRefs.calc && wsGlobalRefs.calc.length) {
+              bar.push(h('button', { type: 'button', class: 'btn primary', text: '⛶ Launch Step Studio', onclick: function () { openStepStudio({ autoPlay: true }); } }));
+            }
+            box.appendChild(stepLbl);
+            if (bar.length) box.appendChild(h('div', { class: 'hub-bar', style: 'margin:6px 0' }, bar));
+            guideRefreshFn = syncRoLbl;
+          }
+        },
+        {
+          title: '5. Cambridge Curriculum & Discovery Challenge',
+          desc: 'Ready to learn why the physics works? Test proportional scaling laws in Curriculum & Laws or earn +15 XP in the Predict → Observe → Explain Lab!',
+          spot: function () { clearSpotlights(); },
+          build: function (box) {
+            box.appendChild(h('div', { class: 'hub-bar', style: 'margin:8px 0' }, [
+              h('button', { type: 'button', class: 'btn', text: '📚 Explore Syllabus Laws →', onclick: function () { setTab('curriculum'); } }),
+              h('button', { type: 'button', class: 'btn primary', text: '🧪 Open Discovery Lab →', onclick: function () { setTab('lab'); } })
+            ]));
+          }
+        }
+      ];
+
+      function renderCurrentTourStep() {
+        pane.innerHTML = '';
+        guideRefreshFn = null;
+        var st = stepDefs[tourStep];
+        if (st.spot) st.spot();
+
+        var navPills = h('div', { class: 'guide-step-dots' }, stepDefs.map(function (s, idx) {
+          return h('button', { type: 'button', class: 'guide-dot' + (idx === tourStep ? ' on' : idx < tourStep ? ' done' : ''), text: String(idx + 1), title: s.title, onclick: function () { tourStep = idx; renderCurrentTourStep(); } });
+        }));
+        var card = h('div', { class: 'guide-tour-card' }, [
+          h('div', { style: 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px' }, [
+            h('strong', { style: 'font-size:14.5px', text: st.title }),
+            h('span', { class: 'chip', text: (tourStep + 1) + ' / ' + stepDefs.length })
+          ]),
+          h('p', { style: 'margin:0 0 8px;color:var(--muted);font-size:13px;line-height:1.45', text: st.desc })
+        ]);
+        st.build(card);
+
+        var foot = h('div', { class: 'hub-bar', style: 'justify-content:space-between;margin-top:10px' }, [
+          h('button', { type: 'button', class: 'btn', text: '← Previous', disabled: tourStep === 0, onclick: function () { if (tourStep > 0) { tourStep--; renderCurrentTourStep(); } } }),
+          h('button', { type: 'button', class: 'btn primary', text: tourStep < stepDefs.length - 1 ? 'Next Step →' : 'Start Discovery Lab →', onclick: function () {
+            if (tourStep < stepDefs.length - 1) { tourStep++; renderCurrentTourStep(); }
+            else setTab('lab');
+          } })
+        ]);
+
+        pane.appendChild(navPills);
+        pane.appendChild(card);
+        pane.appendChild(foot);
+      }
+      renderCurrentTourStep();
+    }
+
+    function renderCurriculum() {
+      pane.innerHTML = '';
+      guideRefreshFn = null;
+      clearSpotlights();
+
+      var lawCard = h('div', { class: 'guide-card' }, [
+        h('div', { class: 'curr-badge', text: entry.code }),
+        h('p', { style: 'margin:6px 0 8px;font-size:13px;line-height:1.5', text: entry.law }),
+        h('div', { style: 'display:flex;flex-direction:column;gap:4px' }, entry.formulas.map(function (f) {
+          return h('div', { class: 'curr-formula', html: '<code>' + esc(f) + '</code>' });
+        }))
+      ]);
+      pane.appendChild(lawCard);
+
+      // Interactive "What-If" Proportionality Explorer
+      if (vis.length) {
+        var wiIdx = 0;
+        var baseMap = null, baseParamVal = Number(vis[0].ctl.values[vis[0].spec.key]);
+        var wiSel = h('select', { 'aria-label': 'Parameter to test in What-If explorer' }, vis.map(function (r, idx) {
+          return h('option', { value: String(idx), text: r.labelText + (r.spec.sym ? ' (' + stripTags(r.spec.sym) + ')' : '') });
+        }));
+        var deltaHost = h('div', { style: 'margin-top:8px' });
+        function snapMap() {
+          var m = {};
+          collectSnapshot().filter(function (x) { return x.kind === 'Result' && isFinite(x.num); }).forEach(function (x) {
+            if (m[x.symbol] === undefined) m[x.symbol] = x;
+          });
+          return m;
+        }
+        function classifyScale(x0, x1, y0, y1) {
+          if (!isFinite(y0) || !isFinite(y1)) return '—';
+          if (Math.abs(y1 - y0) <= 1e-6 * Math.max(1, Math.abs(y0))) return 'Invariant (constant)';
+          if (x0 === 0 || x1 === 0 || y0 === 0 || (x1 / x0) <= 0) return y1 > y0 ? 'Increases (+)' : 'Decreases (−)';
+          var rx = x1 / x0, ry = y1 / y0;
+          if (Math.abs(rx - 1) < 0.02) return 'Unchanged';
+          if (Math.abs(ry - rx) <= 0.08 * Math.abs(rx)) return 'Linear ∝ x';
+          if (Math.abs(ry - rx * rx) <= 0.12 * rx * rx) return 'Quadratic ∝ x²';
+          if (Math.abs(ry - 1 / rx) <= 0.08 / rx) return 'Inverse ∝ 1/x';
+          if (Math.abs(ry - Math.sqrt(rx)) <= 0.08 * Math.sqrt(rx)) return 'Root ∝ √x';
+          return ry > 1 ? ('×' + ry.toFixed(2)) : ('×' + ry.toFixed(2));
+        }
+        function renderDeltaTable(x0, x1, rP, bMap, aMap) {
+          var keys = Object.keys(aMap).slice(0, 6);
+          if (!keys.length) { deltaHost.innerHTML = '<div style="font-size:12px;color:var(--muted)">Adjust values to compare outputs.</div>'; return; }
+          var rowsHtml = keys.map(function (k) {
+            var y0 = bMap[k] ? bMap[k].num : NaN, y1 = aMap[k].num;
+            var pct = (isFinite(y0) && Math.abs(y0) > 1e-9) ? ((y1 - y0) / Math.abs(y0) * 100) : NaN;
+            var pctStr = isFinite(pct) ? ((pct >= 0 ? '+' : '') + pct.toFixed(1) + '%') : '—';
+            var rel = classifyScale(x0, x1, y0, y1);
+            var u = aMap[k].unit ? ' ' + esc(aMap[k].unit) : '';
+            return '<tr><td><b>' + esc(k) + '</b></td><td>' + (isFinite(y0) ? U.sf(y0) + u : '—') + '</td><td><b>' + (isFinite(y1) ? U.sf(y1) + u : '—') + '</b></td><td><span class="curr-rel-tag">' + esc(pctStr) + ' · ' + esc(rel) + '</span></td></tr>';
+          }).join('');
+          deltaHost.innerHTML = '<div style="font-size:11.5px;color:var(--muted);margin-bottom:4px">Changed <b>' + esc(rP.labelText) + '</b> from <code>' + U.sf(x0) + '</code> to <code>' + U.sf(x1) + '</code>:</div>' +
+            '<table class="tbl whatif-delta-tbl"><thead><tr><th>Output</th><th>Before</th><th>After</th><th>Scaling Law</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
+        }
+        function runWhatIf(targetVal) {
+          var rP = vis[wiIdx]; if (!rP) return;
+          var x0 = Number(rP.ctl.values[rP.spec.key]);
+          var bMap = snapMap();
+          if (!baseMap) { baseMap = bMap; baseParamVal = x0; }
+          var x1 = U.clamp(Number(targetVal), Number(rP.spec.min), Number(rP.spec.max));
+          animateParam(x0, x1, 360, function (v) { setRowValue(rP, v); }, function () {
+            renderDeltaTable(x0, Number(rP.ctl.values[rP.spec.key]), rP, bMap, snapMap());
+          });
+        }
+        wiSel.onchange = function () {
+          wiIdx = Number(wiSel.value) || 0;
+          baseMap = snapMap();
+          baseParamVal = Number(vis[wiIdx].ctl.values[vis[wiIdx].spec.key]);
+          deltaHost.innerHTML = '<div class="guide-live-row">' + liveOutputPills(4) + '</div>';
+        };
+        var wiBox = h('div', { class: 'whatif-box' }, [
+          h('h3', { style: 'margin:0 0 6px;font-size:13.5px', text: '🔬 What-If Proportionality Explorer' }),
+          h('p', { style: 'margin:0 0 8px;font-size:12px;color:var(--muted)', text: 'Scale one variable and immediately observe linear, quadratic, inverse, or invariant laws on the live simulation:' }),
+          wiSel,
+          h('div', { class: 'hub-bar', style: 'margin:8px 0 4px' }, [
+            h('button', { type: 'button', class: 'btn', text: '×2 Double', onclick: function () { var r = vis[wiIdx]; runWhatIf(r.ctl.values[r.spec.key] * 2); } }),
+            h('button', { type: 'button', class: 'btn', text: '÷2 Halve', onclick: function () { var r = vis[wiIdx]; runWhatIf(r.ctl.values[r.spec.key] * 0.5); } }),
+            h('button', { type: 'button', class: 'btn', text: 'Min', onclick: function () { runWhatIf(vis[wiIdx].spec.min); } }),
+            h('button', { type: 'button', class: 'btn', text: 'Mid', onclick: function () { var sp = vis[wiIdx].spec; runWhatIf((Number(sp.min) + Number(sp.max)) * 0.5); } }),
+            h('button', { type: 'button', class: 'btn', text: 'Max', onclick: function () { runWhatIf(vis[wiIdx].spec.max); } }),
+            h('button', { type: 'button', class: 'btn primary', text: '↺ Baseline', onclick: function () { runWhatIf(baseParamVal); } })
+          ]),
+          deltaHost
+        ]);
+        deltaHost.innerHTML = '<div class="guide-live-row">' + liveOutputPills(4) + '</div>';
+        pane.appendChild(wiBox);
+        guideRefreshFn = function () { if (!deltaHost.querySelector('table')) deltaHost.innerHTML = '<div class="guide-live-row">' + liveOutputPills(4) + '</div>'; };
+      }
+
+      // Examiner Traps & Mark-Scheme Checklist (merges entry.traps + any explain card bullets)
+      var trapsList = entry.traps.slice();
+      if (wsGlobalRefs && wsGlobalRefs.explain) {
+        wsGlobalRefs.explain.forEach(function (cardEl) {
+          Array.prototype.forEach.call(cardEl.querySelectorAll ? cardEl.querySelectorAll('li') : [], function (li) {
+            var txt = String(li.textContent || '').trim();
+            if (txt && trapsList.length < 5 && trapsList.indexOf(txt) < 0) trapsList.push(txt);
+          });
+        });
+      }
+      var trapBox = h('div', { class: 'guide-card', style: 'margin-top:10px' }, [
+        h('h3', { style: 'margin:0 0 8px;font-size:13.5px', text: '⚠ Examiner Traps & Mark-Scheme Checklist' })
+      ]);
+      trapsList.forEach(function (t, i) {
+        var id = 'trap_' + i;
+        var cb = h('input', { type: 'checkbox' }); cb.checked = !!trapDone[id];
+        cb.onchange = function () { trapDone[id] = cb.checked; };
+        trapBox.appendChild(h('label', { class: 'curr-trap-item' }, [cb, h('span', { text: t })]));
+      });
+      pane.appendChild(trapBox);
+    }
+
+    function renderLab() {
+      pane.innerHTML = '';
+      guideRefreshFn = null;
+      clearSpotlights();
+
+      // Part A: Live Predict -> Observe -> Explain (POE) Canvas Experiment
+      var poeChallengeIdx = 0;
+      var poeHost = h('div', { class: 'poe-card' });
+
+      function buildPoeExperiment() {
+        poeHost.innerHTML = '';
+        var resAll = collectSnapshot().filter(function (x) { return x.kind === 'Result' && isFinite(x.num); });
+        if (!vis.length || !resAll.length) {
+          poeHost.appendChild(h('div', {}, [
+            h('strong', { style: 'font-size:13.5px', text: '🧪 Open-Ended Apparatus Exploration' }),
+            h('p', { style: 'margin:6px 0 0;font-size:12.5px;color:var(--muted)', text: 'Build or manipulate components directly on the stage, then answer the Cambridge Concept Check below!' })
+          ]));
+          return;
+        }
+        var rP = vis[poeChallengeIdx % vis.length];
+        var v0 = Number(rP.ctl.values[rP.spec.key]);
+        var lo = Number(rP.spec.min), hi = Number(rP.spec.max), span = hi - lo;
+        var v1 = v0 + span * 0.35 <= hi ? Number((v0 + Math.max(rP.step * 2, span * 0.35)).toFixed(rP.d || 2)) : Number((v0 - Math.max(rP.step * 2, span * 0.35)).toFixed(rP.d || 2));
+        v1 = U.clamp(v1, lo, hi);
+        if (Math.abs(v1 - v0) < 1e-6) v1 = Math.abs(hi - v0) > Math.abs(v0 - lo) ? hi : lo;
+
+        // Probe outputs at v1 silently to select a responsive physical output
+        var candidates = [];
+        resAll.forEach(function (out) {
+          var y1 = silentEvalOutput(rP, v1, out.symbol);
+          if (isFinite(y1)) candidates.push({ out: out, y0: out.num, y1: y1, diff: Math.abs(y1 - out.num) });
+        });
+        candidates.sort(function (a, b) { return b.diff - a.diff; });
+        var pick = candidates.length ? candidates[Math.floor(poeChallengeIdx / vis.length) % Math.min(3, candidates.length)] : null;
+        if (!pick) {
+          poeHost.innerHTML = '<div style="font-size:12.5px;color:var(--muted)">Try adjusting stage values to inspect live responses, or complete the Concept Check below.</div>';
+          return;
+        }
+        var y0 = pick.y0, y1 = pick.y1, uP = rP.spec.unit ? ' ' + stripTags(rP.spec.unit) : '', uO = pick.out.unit ? ' ' + esc(pick.out.unit) : '';
+        var tol = 1e-4 * Math.max(1, Math.abs(y0));
+        var trueDir = Math.abs(y1 - y0) <= tol ? 'same' : (y1 > y0 ? 'up' : 'down');
+
+        var pickedDir = '';
+        var dirBtns = {}, resArea = h('div', {});
+        var headRow = h('div', { style: 'display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px' }, [
+          h('strong', { style: 'font-size:13.5px', text: '🧪 Predict → Observe → Explain' }),
+          h('button', { type: 'button', class: 'ws-dbtn', text: '🎲 New Experiment', onclick: function () { poeChallengeIdx++; buildPoeExperiment(); } })
+        ]);
+        var promptEl = h('p', { style: 'margin:0 0 8px;font-size:13px;line-height:1.45', html:
+          'Currently <b>' + esc(rP.labelText) + '</b> = <code>' + U.sf(v0) + esc(uP) + '</code> gives <b>' + esc(pick.out.symbol) + '</b> = <code>' + U.sf(y0) + uO + '</code>. ' +
+          'If we change <b>' + esc(rP.labelText) + '</b> to <code>' + U.sf(v1) + esc(uP) + '</code>, what happens to <b>' + esc(pick.out.symbol) + '</b>?' });
+        var optRow = h('div', { class: 'poe-opts' });
+        [['up', '📈 Increases'], ['down', '📉 Decreases'], ['same', '⚖️ Stays constant']].forEach(function (pair) {
+          var b = h('button', { type: 'button', class: 'poe-opt', text: pair[1], onclick: function () {
+            pickedDir = pair[0];
+            Object.keys(dirBtns).forEach(function (k) { dirBtns[k].classList.toggle('on', k === pickedDir); });
+          } });
+          dirBtns[pair[0]] = b;
+          optRow.appendChild(b);
+        });
+        var runBtn = h('button', { type: 'button', class: 'btn primary', style: 'margin-top:8px;width:100%', text: '🚀 Lock Prediction & Run on Canvas', onclick: function () {
+          if (!pickedDir) { resArea.innerHTML = '<div class="poe-result warn">Choose Increases, Decreases, or Stays constant first!</div>'; return; }
+          runBtn.disabled = true;
+          animateParam(v0, v1, 540, function (x) { setRowValue(rP, x); }, function () {
+            if (SIM.view && SIM.view.setFocus) { SIM.view.setFocus([pick.out.symbol]); setTimeout(themeChanged, 0); }
+            var correct = pickedDir === trueDir;
+            var whyStr = autoWhy(pick.out.symbol) || entry.law;
+            var xpMsg = '';
+            var xpId = 'poe:' + slugKey + ':' + rP.spec.key + ':' + pick.out.symbol;
+            if (correct && !guideXpAwarded[xpId]) {
+              guideXpAwarded[xpId] = true;
+              if (grantGuideXp(15, 'Discovery Lab Mastered!', esc(rP.labelText) + ' → ' + esc(pick.out.symbol))) xpMsg = ' · +15 XP awarded!';
+            }
+            resArea.innerHTML =
+              '<div class="poe-result ' + (correct ? 'ok' : 'warn') + '">' +
+              '<b>' + (correct ? '✓ Correct Observation!' + xpMsg : '✗ Look closely at the canvas!') + '</b><br>' +
+              '<span>Observed <b>' + esc(pick.out.symbol) + '</b>: <code>' + U.sf(y0) + uO + '</code> → <code>' + U.sf(y1) + uO + '</code></span>' +
+              '<div style="margin-top:4px;color:var(--muted);font-size:12px">' + esc(whyStr) + '</div>' +
+              '</div>';
+            resArea.appendChild(h('div', { class: 'hub-bar', style: 'margin-top:6px' }, [
+              h('button', { type: 'button', class: 'btn', text: '↺ Restore Baseline', onclick: function () { animateParam(v1, v0, 360, function (x) { setRowValue(rP, x); }); } }),
+              h('button', { type: 'button', class: 'btn primary', text: '🎲 Next Challenge', onclick: function () { poeChallengeIdx++; buildPoeExperiment(); } })
+            ]));
+            runBtn.disabled = false;
+          });
+        } });
+        poeHost.appendChild(headRow);
+        poeHost.appendChild(promptEl);
+        poeHost.appendChild(optRow);
+        poeHost.appendChild(runBtn);
+        poeHost.appendChild(resArea);
+      }
+      buildPoeExperiment();
+      pane.appendChild(poeHost);
+
+      // Part B: Cambridge Concept Check Quiz
+      var qz = entry.quiz || CURR_DEFAULT.quiz;
+      var qCard = h('div', { class: 'poe-card', style: 'margin-top:10px' });
+      var qFb = h('div', {});
+      qCard.appendChild(h('strong', { style: 'font-size:13.5px;display:block;margin-bottom:6px', text: '🎯 Cambridge Concept Check' }));
+      qCard.appendChild(h('p', { style: 'margin:0 0 8px;font-size:13px;line-height:1.45', text: qz.q }));
+      var qBtns = [];
+      qz.opts.forEach(function (opt, idx) {
+        var ob = h('button', { type: 'button', class: 'poe-opt', style: 'text-align:left;width:100%', text: String.fromCharCode(65 + idx) + '. ' + opt, onclick: function () {
+          qBtns.forEach(function (b, bi) {
+            b.classList.toggle('on', bi === idx);
+          });
+          var ok = idx === qz.ans;
+          var qId = 'quiz:' + slugKey;
+          var xpNote = '';
+          if (ok && !guideXpAwarded[qId]) {
+            guideXpAwarded[qId] = true;
+            if (grantGuideXp(10, 'Concept Check Cleared!', entry.code)) xpNote = ' (+10 XP)';
+          }
+          qFb.innerHTML = '<div class="poe-result ' + (ok ? 'ok' : 'warn') + '" style="margin-top:8px"><b>' + (ok ? '✓ Mark-Scheme Match!' + xpNote : '✗ Not quite — review the law:') + '</b><div style="margin-top:3px">' + esc(qz.why) + '</div></div>';
+        } });
+        qBtns.push(ob);
+        qCard.appendChild(h('div', { style: 'margin-bottom:5px' }, [ob]));
+      });
+      qCard.appendChild(qFb);
+      pane.appendChild(qCard);
+    }
+
+    function renderSi() {
+      pane.innerHTML = '';
+      guideRefreshFn = null;
+      clearSpotlights();
+
+      // Interactive Expression Sandbox
+      var sbIn = h('input', { type: 'text', class: 'scn-search', value: '2*pi/3', placeholder: 'Type expression e.g. 4.7k, 15m, sqrt(2)*10, 2*pi/3', 'aria-label': 'SI and math expression evaluator', style: 'margin-bottom:6px' });
+      var sbOut = h('div', { style: 'font-size:13px;font-weight:700;color:var(--accent);margin-bottom:8px' });
+      function updateSb() {
+        var val = parseNum(sbIn.value);
+        sbOut.textContent = isFinite(val) ? '= ' + U.sf(val) + ' (SI base value: ' + val + ')' : 'Enter a valid SI number or math expression (e.g. 4.7k, 15m, sqrt(2)*10)';
+      }
+      sbIn.oninput = updateSb;
+      updateSb();
+
+      var sbCard = h('div', { class: 'guide-card', style: 'margin-bottom:10px' }, [
+        h('h3', { style: 'margin:0 0 6px;font-size:13.5px', text: '🧮 Live SI & Math Expression Tester' }),
+        sbIn,
+        sbOut
+      ]);
+      if (vis.length) {
+        var targetSel = h('select', { 'aria-label': 'Parameter to apply expression value' }, vis.map(function (r, i) {
+          return h('option', { value: String(i), text: r.labelText + (r.spec.unit ? ' [' + stripTags(r.spec.unit) + ']' : '') });
+        }));
+        var applyBtn = h('button', { type: 'button', class: 'btn primary', text: '⚡ Apply to Parameter', onclick: function () {
+          var v = parseNum(sbIn.value), r = vis[Number(targetSel.value) || 0];
+          if (isFinite(v) && r) setRowValue(r, v);
+        } });
+        sbCard.appendChild(h('div', { class: 'hub-bar', style: 'margin-top:4px' }, [targetSel, applyBtn]));
+      }
+      pane.appendChild(sbCard);
+
+      pane.appendChild(h('div', { html:
+        '<table class="tbl"><thead><tr><th>Prefix</th><th style="text-align:left">Factor</th><th>Example</th><th>SI Value</th></tr></thead><tbody>' +
+        '<tr><td><code>G</code> / <code>M</code> / <code>k</code></td><td class="txt">10⁹ / 10⁶ / 10³</td><td><code>4.7k</code></td><td>4700</td></tr>' +
+        '<tr><td><code>c</code> / <code>m</code></td><td class="txt">10⁻² / 10⁻³</td><td><code>15m</code></td><td>0.015</td></tr>' +
+        '<tr><td><code>u</code> / <code>µ</code> / <code>n</code> / <code>p</code></td><td class="txt">10⁻⁶ / 10⁻⁹ / 10⁻¹²</td><td><code>550n</code></td><td>5.5×10⁻⁷</td></tr>' +
+        '<tr><td>Math</td><td class="txt"><code>+ − * / ^ pi sqrt() sin() cos()</code></td><td><code>2*pi/3</code></td><td>2.094</td></tr>' +
+        '</tbody></table>' +
+        '<p style="margin:10px 0 0;color:var(--muted);font-size:12px"><b>Keyboard Shortcuts:</b> <span class="guide-kbd">Space</span> Play/Pause · <span class="guide-kbd">?</span> Toggle Guide · <span class="guide-kbd">↑</span>/<span class="guide-kbd">↓</span> Nudge chip (<span class="guide-kbd">Shift</span> ×10) · <span class="guide-kbd">Esc</span> Close</p>'
+      }));
+    }
+
+    function setTab(id) {
+      curTab = /^(tour|curriculum|lab|si)$/.test(id) ? id : 'tour';
+      Object.keys(tabBtns).forEach(function (k) { tabBtns[k].classList.toggle('on', k === curTab); });
+      if (curTab === 'tour') renderTour();
+      else if (curTab === 'curriculum') renderCurriculum();
+      else if (curTab === 'lab') renderLab();
+      else renderSi();
+    }
+
+    dock.appendChild(head);
+    dock.appendChild(tabs);
+    dock.appendChild(pane);
+    document.body.appendChild(dock);
+    activeGuide = { el: dock, close: closeGuide, setTab: setTab };
+    setTab(startTab);
+    return activeGuide;
   }
 
   /* ---------- Fetch Data Hub (Smart Question Extractor + Live/Time-Series Export + Import) ---------- */
@@ -1762,6 +2621,6 @@
   }
 
   SIM.ui = { redraw: themeChanged, h: h, course: course, gFor: gFor, colors: colors, onTheme: onTheme, page: page, canvas: canvas, params: params, select: select,
-    toggle: toggle, presets: presets, openEditor: openEditor, askNumber: askNumber, parseNum: parseNum, stageTip: stageTip, stageAction: stageAction, placeMode: placeMode, cancelPlace: function () { cancelPlace(false); }, stage: function () { return stage; }, syncChips: function () { syncChips(); }, Readout: Readout, examToggle: examToggle, notes: notes, legend: legend, readHash: readHash, writeHash: writeHash, esc: esc, openSolveForX: openSolveForX, openStepStudio: openStepStudio,
+    toggle: toggle, presets: presets, openEditor: openEditor, askNumber: askNumber, parseNum: parseNum, stageTip: stageTip, stageAction: stageAction, placeMode: placeMode, cancelPlace: function () { cancelPlace(false); }, stage: function () { return stage; }, syncChips: function () { syncChips(); }, Readout: Readout, examToggle: examToggle, notes: notes, legend: legend, readHash: readHash, writeHash: writeHash, esc: esc, openSolveForX: openSolveForX, openStepStudio: openStepStudio, openGuide: openGuide,
     markAsX: markAsX, clearMarkedX: clearMarkedX, getMarkedX: getMarkedX, registerXCalculator: registerXCalculator, calculateMarkedX: calculateMarkedX, syncMarkedXPill: syncMarkedXPill, animateParam: animateParam };
 })(typeof self !== 'undefined' ? self : this);

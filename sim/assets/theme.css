@@ -545,3 +545,223 @@ body.ws-clean .mom-hud {
   .studio-split { grid-template-columns: minmax(0, 1fr); overflow-y: auto; }
   .studio-left, .studio-right { overflow: visible; }
 }
+
+/* ---------- Interactive On-Stage Guide Dock & Curriculum Discovery Lab ---------- */
+.sim-guide-dock {
+  position: fixed;
+  top: 60px;
+  right: 14px;
+  width: min(460px, calc(100vw - 28px));
+  max-height: calc(100vh - 134px);
+  z-index: 72;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  border: 1.5px solid color-mix(in srgb, var(--accent) 42%, var(--line));
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, .52), 0 0 0 1px rgba(255, 255, 255, .05) inset;
+  overflow: hidden;
+}
+.sim-guide-dock.mini {
+  width: min(360px, calc(100vw - 28px));
+  max-height: 280px;
+}
+.sim-guide-dock.expanded {
+  width: min(760px, calc(100vw - 28px));
+  max-height: calc(100vh - 88px);
+}
+.sim-guide-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--panel2);
+  border-bottom: 1px solid var(--line);
+  cursor: move;
+  user-select: none;
+}
+.sim-guide-head h2 {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 800;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.sim-guide-dock .sim-tabs {
+  padding: 10px 14px 8px;
+  margin-bottom: 0;
+  gap: 5px;
+}
+.sim-guide-dock .sim-tab {
+  min-height: 31px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+.sim-guide-body {
+  padding: 12px 14px 14px;
+  overflow-y: auto;
+  flex: 1;
+  font-size: 13.5px;
+}
+.guide-spotlight {
+  box-shadow: 0 0 0 3px var(--accent), 0 0 28px var(--glow) !important;
+  animation: guidePulse 1.6s ease-in-out infinite;
+}
+@keyframes guidePulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--accent), 0 0 20px var(--glow); }
+  50% { box-shadow: 0 0 0 5px var(--accent), 0 0 34px var(--glow); }
+}
+.guide-step-dots {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.guide-dot {
+  flex: 1;
+  height: 28px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  color: var(--muted);
+  font: 750 12px var(--sans);
+  cursor: pointer;
+}
+.guide-dot.done {
+  border-color: color-mix(in srgb, var(--ok) 45%, var(--line));
+  color: var(--ok);
+}
+.guide-dot.on {
+  background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+  color: var(--accent-ink);
+  border-color: transparent;
+}
+.guide-tour-card, .whatif-box, .poe-card {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+}
+.whatif-box {
+  margin-top: 10px;
+  border-color: color-mix(in srgb, var(--accent2) 38%, var(--line));
+}
+.guide-live-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.guide-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.curr-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  color: var(--accent);
+  font: 750 11px var(--sans);
+}
+.curr-formula {
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+.whatif-delta-tbl {
+  margin-top: 6px;
+  font-size: 12px;
+}
+.whatif-delta-tbl th, .whatif-delta-tbl td {
+  padding: 5px 6px;
+  text-align: left;
+}
+.curr-rel-tag {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent2) 16%, transparent);
+  color: var(--ink);
+  font: 700 11px var(--sans);
+}
+.curr-trap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--muted);
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+.curr-trap-item input:checked + span {
+  text-decoration: line-through;
+  opacity: .65;
+}
+.poe-opts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.poe-opt {
+  min-height: 36px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  font: 650 12.5px var(--sans);
+  cursor: pointer;
+}
+.poe-opt:hover { border-color: var(--accent); }
+.poe-opt.on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, var(--panel2));
+  color: var(--accent);
+  font-weight: 750;
+}
+.poe-result {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+.poe-result.ok {
+  border-color: color-mix(in srgb, var(--ok) 55%, var(--line));
+  background: color-mix(in srgb, var(--ok) 12%, var(--bg));
+}
+.poe-result.warn {
+  border-color: color-mix(in srgb, var(--warn) 55%, var(--line));
+  background: color-mix(in srgb, var(--warn) 10%, var(--bg));
+}
+@media (max-width: 720px) {
+  .sim-guide-dock {
+    top: auto;
+    bottom: 64px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-height: 58vh;
+  }
+  .poe-opts { grid-template-columns: minmax(0, 1fr); }
+}
