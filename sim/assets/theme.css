@@ -102,25 +102,129 @@ details.advanced > summary { min-height: var(--tap2); display: flex; align-items
 .sim-stage > canvas { border: 1px solid var(--line); }
 .sim-stage .stage-tip { position: absolute; left: 10px; top: 10px; z-index: 3; font-size: 12px; color: var(--muted); background: color-mix(in srgb, var(--panel) 86%, transparent); border: 1px solid var(--line);
   border-radius: 999px; padding: 4px 10px; pointer-events: none; backdrop-filter: blur(6px); max-width: calc(100% - 20px); }
-.dock { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px 2px 2px; align-items: stretch; }
+.dock { display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 10px; padding: 10px 2px 4px; align-items: stretch; }
 .dock:empty { display: none; }
 .dock .dock-label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-right: 2px; }
-.pchip { display: inline-flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 3px; min-height: 58px; min-width: 122px; max-width: 248px; padding: 8px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--panel2); color: var(--ink);
-  font: 600 14px var(--sans); cursor: pointer; box-shadow: var(--shadow); text-align: left; transition: transform .12s, border-color .12s, box-shadow .12s; touch-action: manipulation; }
-.pchip:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 6px 20px var(--glow); }
-.pchip .chip-top { display: flex; align-items: center; gap: 6px; width: 100%; font-size: 12px; color: var(--muted); font-weight: 600; line-height: 1.25; }
-.pchip .chip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-.pchip .sym { font-family: var(--sans); font-weight: 750; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); padding: 1px 6px; border-radius: 6px; font-size: 11.5px; white-space: nowrap; }
-.pchip .chip-main { display: flex; align-items: baseline; gap: 5px; width: 100%; }
-.pchip .val { font-family: var(--sans); font-weight: 800; font-size: 18px; letter-spacing: -.015em; color: var(--ink); font-variant-numeric: lining-nums tabular-nums; }
-.pchip .unit { color: var(--muted); font-weight: 600; font-size: 13.5px; }
-.pchip .chip-edit { margin-left: auto; font-size: 12px; color: var(--muted); opacity: .55; transition: opacity .12s, color .12s; }
-.pchip:hover .chip-edit { opacity: 1; color: var(--accent); }
+.dock-toolbar {
+  order: -1;
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 10px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+  background: radial-gradient(220px 70px at 0% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 72%), var(--panel2);
+}
+.dock-tleft { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--ink); }
+.dock-tleft b { font-weight: 800; letter-spacing: -.01em; }
+.dock-sub { font-size: 11px; color: var(--muted); font-weight: 500; }
+.dock-pulse { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--ok); box-shadow: 0 0 10px var(--ok); animation: dockPulse 2s ease-in-out infinite; }
+@keyframes dockPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .5; transform: scale(.82); } }
+.dock-tright { display: flex; flex-wrap: wrap; gap: 5px; }
+.dock-tbtn {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 0 9px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: 700 11.5px var(--sans);
+  cursor: pointer; transition: border-color .12s, transform .12s, color .12s;
+}
+.dock-tbtn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+.dock-tbtn.primary { background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); color: var(--accent-ink); border-color: transparent; }
+.dock-tbtn.primary:hover { filter: brightness(1.06); color: var(--accent-ink); }
+
+.pchip {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 7px;
+  min-height: 88px;
+  min-width: 0;
+  width: 100%;
+  padding: 10px 11px 8px 13px;
+  border-radius: 15px;
+  border: 1.5px solid color-mix(in srgb, var(--p-col, var(--accent)) 24%, var(--line));
+  background: radial-gradient(140px 60px at 0% 0%, color-mix(in srgb, var(--p-col, var(--accent)) 14%, transparent), transparent 72%), var(--panel2);
+  color: var(--ink);
+  font: 600 13.5px var(--sans);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  text-align: left;
+  transition: transform .14s, border-color .14s, box-shadow .14s;
+  touch-action: manipulation;
+}
+.pchip::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--p-col, var(--accent));
+  opacity: .85;
+}
+.pchip:hover {
+  border-color: var(--p-col, var(--accent));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--p-col, var(--accent)) 22%, rgba(0, 0, 0, .45));
+}
+.pchip .chip-top { display: flex; align-items: flex-start; gap: 6px; width: 100%; font-size: 11.5px; color: var(--muted); font-weight: 650; line-height: 1.25; }
+.pchip .chip-ico {
+  width: 22px; height: 22px; border-radius: 7px; flex: none; display: grid; place-items: center;
+  font-size: 12px; color: var(--p-col, var(--accent));
+  background: color-mix(in srgb, var(--p-col, var(--accent)) 15%, var(--bg));
+  border: 1px solid color-mix(in srgb, var(--p-col, var(--accent)) 32%, transparent);
+}
+.pchip .chip-ico svg.chip-dial { width: 15px; height: 13px; display: block; }
+.pchip .chip-name {
+  flex: 1; min-width: 0; color: var(--ink); font-weight: 650;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.pchip .sym {
+  flex: none; font-family: var(--sans); font-weight: 750; color: var(--p-col, var(--accent));
+  background: color-mix(in srgb, var(--p-col, var(--accent)) 14%, transparent);
+  padding: 1px 6px; border-radius: 6px; font-size: 11px; white-space: nowrap;
+}
+.pchip .chip-xtag {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 18px; padding: 0 5px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--muted);
+  font: 800 10px var(--sans); cursor: pointer; transition: .12s;
+}
+.pchip .chip-xtag:hover { border-color: var(--accent); color: var(--accent); }
+.pchip .chip-xtag.on {
+  background: linear-gradient(135deg, #facc15, #2dd4bf);
+  color: #05110f; border-color: transparent;
+}
+.pchip .chip-main { display: flex; align-items: center; gap: 4px; width: 100%; }
+.pchip .val { font-family: var(--sans); font-weight: 850; font-size: 18px; letter-spacing: -.02em; color: var(--ink); font-variant-numeric: lining-nums tabular-nums; }
+.pchip .unit { color: var(--muted); font-weight: 600; font-size: 12.5px; }
+.pchip .chip-step-grp { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.pchip .chip-step {
+  width: 22px; height: 22px; border-radius: 7px; border: 1px solid var(--line);
+  background: var(--bg); color: var(--ink); display: grid; place-items: center;
+  font: 750 14px/1 var(--sans); cursor: pointer; transition: .12s;
+}
+.pchip .chip-step:hover { border-color: var(--p-col, var(--accent)); color: var(--p-col, var(--accent)); background: color-mix(in srgb, var(--p-col, var(--accent)) 14%, var(--bg)); }
+.pchip .chip-edit { margin-left: 2px; font-size: 11px; color: var(--muted); opacity: .55; transition: opacity .12s, color .12s; }
+.pchip:hover .chip-edit { opacity: 1; color: var(--p-col, var(--accent)); }
+.pchip .chip-foot { display: flex; flex-direction: column; gap: 3px; width: 100%; }
+.pchip .chip-gauge { height: 4px; width: 100%; border-radius: 999px; background: var(--grid); overflow: hidden; display: block; }
+.pchip .chip-gauge > i {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--p-col, var(--accent)) 70%, #ffffff), var(--p-col, var(--accent)));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--p-col, var(--accent)) 45%, transparent);
+  transition: width .18s ease;
+}
+.pchip .chip-bounds { display: flex; justify-content: space-between; font-size: 10px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; opacity: .82; }
 .pchip .lbl { color: var(--muted); font-weight: 600; font-size: 12.5px; max-width: 18ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pchip.open { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
 .pchip.locked { background: transparent; border-style: dashed; cursor: default; }
 .pchip.locked .val { color: var(--accent); }
-.pchip.locked .chip-edit { display: none; }
+.pchip.locked .chip-edit { display: inline; }
 .pchip.locked::after { content: "SOLVED"; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--accent); }
 
 /* number editor popover (also used for draw-then-type) */
@@ -372,6 +476,7 @@ main.sim > .bottom:empty { display: none; }
 .data-btn { background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); border: 0; color: var(--accent-ink); font-weight: 700; box-shadow: 0 4px 14px var(--glow); }
 .data-btn:hover { filter: brightness(1.08); }
 .pchip.dock-act { flex-direction: row; align-items: center; justify-content: center; gap: 6px; min-width: auto; min-height: 58px; padding: 8px 16px; background: var(--panel); border-style: dashed; color: var(--accent); font-size: 14px; font-weight: 700; }
+.pchip.dock-act::before { display: none; }
 .pchip.dock-act:hover { border-style: solid; }
 .pop .pop-hint { font-size: 12px; font-weight: 600; color: var(--accent); margin: 5px 0 0; min-height: 16px; text-align: right; }
 .pop .pop-hint.warn { color: var(--warn); }
@@ -472,6 +577,7 @@ body.ws-clean .mom-hud {
 }
 
 .ws-pill { display: inline-flex; align-items: center; gap: 7px; min-height: 42px; padding: 0 15px; border-radius: 999px; border: 1.5px solid var(--line); background: color-mix(in srgb, var(--panel) 94%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: var(--ink); font: 650 13.5px var(--sans); cursor: pointer; box-shadow: var(--shadow); transition: border-color .12s, transform .12s, box-shadow .12s; }
+.ws-pill[hidden] { display: none !important; }
 .ws-pill:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 8px 24px var(--glow); }
 .ws-pill.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--panel)); color: var(--accent); }
 .ws-pill.primary { background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); color: var(--accent-ink); font-weight: 750; border-color: transparent; box-shadow: 0 8px 22px var(--glow); }

@@ -255,6 +255,7 @@
   function syncMarkedXPill() {
     allDocked.forEach(function (r) {
       if (r.chip && r.chip.classList) r.chip.classList.toggle('is-x', !!(markedX && markedX.row === r));
+      if (r.renderChip) r.renderChip();
     });
     if (wsCalcXPill) {
       wsCalcXPill.hidden = !markedX;
@@ -454,32 +455,92 @@
     return ctl;
   }
 
-  /* ---------- parameter chips on the stage ----------
-     Every slider whose container is a card becomes a chip under the simulation ("m = 10 kg").
-     Tap the chip (or focus it and press Enter) to type a value, use − / + or drag; ↑ / ↓ nudge it directly.
-     The original row stays the source of truth (same events), so every page keeps working unchanged. */
+  /* ---------- parameter pods on the stage (Tactile Physics Instrument Deck) ----------
+     Every slider whose container is a card becomes a live telemetry pod ("m = 3 kg").
+     Displays domain icon/angle dial, live value, inline −/+ micro-steppers, ?x mark button,
+     and range progress bar. Tap the pod (or press Enter) for the precision dial editor. */
   var syncTimer = null, allDocked = [];
   function fmtChip(v) { return U.num(v, 4).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, ''); }
+  function svgAngleDial(val, unit) {
+    var rad = !isFinite(val) ? Math.PI / 6 : (/rad/i.test(unit || '') ? val : val * Math.PI / 180);
+    rad = Math.max(-Math.PI, Math.min(Math.PI, rad));
+    var x = (11 + 8.5 * Math.cos(rad)).toFixed(1), y = (15 - 8.5 * Math.sin(rad)).toFixed(1);
+    return '<svg viewBox="0 0 22 18" class="chip-dial" aria-hidden="true">' +
+      '<line x1="3" y1="15" x2="20" y2="15" stroke="currentColor" stroke-opacity=".35" stroke-width="1.6" stroke-linecap="round"/>' +
+      '<line x1="11" y1="15" x2="' + x + '" y2="' + y + '" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
+      '<circle cx="11" cy="15" r="2" fill="currentColor"/>' +
+      '</svg>';
+  }
+  function paramMeta(sp, labelText, val) {
+    var u = stripTags(sp.unit || '').trim().toLowerCase();
+    var sym = stripTags(sp.sym || '').trim();
+    var lbl = String(labelText || '').toLowerCase();
+    if (/°|deg|rad/.test(u) || /angle|theta|alpha|phi|phase/i.test(lbl) || /^[θαφ]$/.test(sym)) {
+      return { col: 'var(--c-velocity)', ico: svgAngleDial(val, u) };
+    }
+    if (/^k?g$/.test(u) || /\bmass\b/.test(lbl)) return { col: 'var(--c-weight)', ico: '⚖' };
+    if (/m\s*s|m\/s|km\/h/.test(u) || /speed|velocity/.test(lbl) || /^[uv]$/.test(sym)) return { col: 'var(--c-velocity)', ico: '➔' };
+    if (/^k?n$/.test(u) || /\bforce\b|tension|weight|thrust|drag|load/.test(lbl) || /^[FTR]$/.test(sym)) return { col: 'var(--c-applied)', ico: '⚡' };
+    if (/^[jk]?j$|^[mk]?w$/.test(u) || /work|energy|power/.test(lbl) || /^[WEP]/.test(sym)) return { col: 'var(--accent)', ico: '✦' };
+    if (/[vω]|ohm|volt|amp/.test(u) || /voltage|current|resist|emf|e\.m\.f|potential/.test(lbl)) return { col: 'var(--accent2)', ico: '⏚' };
+    if (/^m?s$|^[mk]?hz$/.test(u) || /time|period|freq/.test(lbl)) return { col: 'var(--c-tension)', ico: '⏱' };
+    if (/^[cmnµ]?m$/.test(u) || /length|height|dist|width|wave|slit|radius|diam|depth/.test(lbl) || /^[Lxhdrλ]$/.test(sym)) return { col: 'var(--c-s1)', ico: '📏' };
+    return { col: 'var(--c-friction)', ico: '◈' };
+  }
   function dockParams(container, ctl, specs) {
     if (!stage || !container || !container.classList || !container.classList.contains('card')) return;
     specs.forEach(function (sp) {
       var r = ctl.rows[sp.key]; if (!r) return;
-      r.ctl = ctl; r.vis = !sp.hidden; r.labelText = String(sp.label).replace(/<[^>]+>/g, '');
+      r.ctl = ctl; r.vis = !sp.hidden; r.initVal = Number(sp.value); r.labelText = String(sp.label).replace(/<[^>]+>/g, '');
       var ph = h('span', { class: 'ph', 'aria-hidden': 'true', style: 'display:block;height:0' });
       if (r.row.parentNode) { r.row.parentNode.insertBefore(ph, r.row); r.row.parentNode.removeChild(r.row); }
-      var chip = h('button', { type: 'button', class: 'pchip', title: r.labelText + ' — tap to change' });
+      var chip = h('button', { type: 'button', class: 'pchip', title: r.labelText + ' — tap pod to dial, or use inline − / + and ?x' });
       r.chip = chip; r.ph = ph; r.docked = true;
       function render() {
         var v = r.locked && r.lockedVal !== undefined ? r.lockedVal : ctl.values[sp.key];
+        var min = Number(sp.min), max = Number(sp.max);
+        var pct = isFinite(v) && max > min ? U.clamp(((v - min) / (max - min)) * 100, 0, 100).toFixed(1) : '0';
+        var meta = paramMeta(sp, r.labelText, v);
+        var isX = !!(markedX && markedX.row === r);
+        if (chip.style && chip.style.setProperty) {
+          chip.style.setProperty('--p-col', meta.col);
+          chip.style.setProperty('--p-pct', pct + '%');
+        }
+        chip.classList.toggle('is-x', isX);
+        var xTag = !r.locked ? '<span role="button" class="chip-xtag' + (isX ? ' on' : '') + '" data-act="markx" title="' + (isX ? 'Clear unknown x' : 'Mark as unknown x') + '">' + (isX ? '✓x' : '?x') + '</span>' : '';
+        var stepGrp = !r.locked
+          ? '<span class="chip-step-grp"><span role="button" class="chip-step" data-act="dec" title="Decrease by ' + fmtChip(r.step) + '">−</span><span role="button" class="chip-step" data-act="inc" title="Increase by ' + fmtChip(r.step) + '">+</span><span class="chip-edit" aria-hidden="true">✎</span></span>'
+          : '<span class="chip-edit" aria-hidden="true">🔒</span>';
         chip.innerHTML =
-          '<span class="chip-top"><span class="chip-name">' + esc(r.labelText) + '</span>' + (sp.sym ? '<span class="sym">' + sp.sym + '</span>' : '') + '</span>' +
-          '<span class="chip-main"><span class="val">' + (isFinite(v) ? (r.locked ? U.sf(v) : fmtChip(v)) : '—') + '</span>' + (sp.unit ? '<span class="unit">' + sp.unit + '</span>' : '') + '<span class="chip-edit" aria-hidden="true">✎</span></span>';
+          '<span class="chip-top">' +
+            '<span class="chip-ico" aria-hidden="true">' + meta.ico + '</span>' +
+            '<span class="chip-name">' + esc(r.labelText) + '</span>' +
+            (sp.sym ? '<span class="sym">' + sp.sym + '</span>' : '') +
+            xTag +
+          '</span>' +
+          '<span class="chip-main">' +
+            '<span class="val">' + (isFinite(v) ? (r.locked ? U.sf(v) : fmtChip(v)) : '—') + '</span>' +
+            (sp.unit ? '<span class="unit">' + sp.unit + '</span>' : '') +
+            stepGrp +
+          '</span>' +
+          '<span class="chip-foot" aria-hidden="true">' +
+            '<span class="chip-gauge"><i style="width:' + pct + '%"></i></span>' +
+            '<span class="chip-bounds"><span>' + fmtChip(min) + '</span><span>' + fmtChip(max) + (sp.unit ? ' ' + sp.unit : '') + '</span></span>' +
+          '</span>';
         chip.setAttribute('aria-label', r.labelText + ': ' + (isFinite(v) ? fmtChip(v) : 'not set') + ' ' + String(sp.unit || '').replace(/<[^>]+>/g, '') + (r.locked ? ' (solved)' : ', press Enter to change'));
       }
       r.renderChip = render;
       function commit(v) { r.box.value = v; r.box.dispatchEvent(new Event('change')); render(); }
-      chip.addEventListener('click', function () {
+      chip.addEventListener('click', function (e) {
         if (r.locked) return;
+        var actEl = e && e.target && e.target.closest ? e.target.closest('[data-act]') : null;
+        if (actEl) {
+          var act = actEl.getAttribute('data-act');
+          e.stopPropagation();
+          if (act === 'dec') { commit(U.clamp(ctl.values[sp.key] - r.step, Number(sp.min), Number(sp.max))); return; }
+          if (act === 'inc') { commit(U.clamp(ctl.values[sp.key] + r.step, Number(sp.min), Number(sp.max))); return; }
+          if (act === 'markx') { markAsX(r, { toggle: true }); render(); return; }
+        }
         chip.classList.add('open');
         openEditor({ title: sp.label + (sp.sym ? ' <span style="font-family:var(--mono);color:var(--muted)">' + sp.sym + '</span>' : ''),
           sub: 'Type a value, use − / +, or mark it as unknown x.', value: ctl.values[sp.key], min: Number(sp.min), max: Number(sp.max),
@@ -1019,8 +1080,33 @@
     if (!stage || !stage.dock || dockToolsAdded) return;
     if (allDocked.length < 2) return;
     dockToolsAdded = true;
-    var bEdit = h('button', { type: 'button', class: 'pchip dock-act', text: '✎ Edit all', title: 'Edit all parameters at once', onclick: openQuickEntry });
-    stage.dock.appendChild(bEdit);
+    var toolbar = h('div', { class: 'dock-toolbar' }, [
+      h('div', { class: 'dock-tleft', html: '<span class="dock-pulse" aria-hidden="true"></span><div><b>Instrument Telemetry Deck</b><div class="dock-sub">Tap pod for dial · inline −/+ &amp; ?x</div></div>' }),
+      h('div', { class: 'dock-tright' }, [
+        h('button', { type: 'button', class: 'dock-tbtn primary', text: '✎ Matrix Edit', title: 'Edit all parameters in one precision grid', onclick: openQuickEntry }),
+        h('button', { type: 'button', class: 'dock-tbtn', text: '🎲 Randomize', title: 'Try a fresh random combination of inputs', onclick: function () {
+          visibleParams().forEach(function (r) {
+            var lo = Number(r.spec.min), hi = Number(r.spec.max);
+            if (!isFinite(lo) || !isFinite(hi) || hi <= lo) return;
+            var raw = lo + (0.2 + Math.random() * 0.65) * (hi - lo);
+            var st = r.step > 0 ? r.step : (hi - lo) / 20;
+            var v = U.clamp(Math.round(raw / st) * st, lo, hi);
+            r.box.value = v; r.box.dispatchEvent(new Event('change'));
+            if (r.renderChip) r.renderChip();
+          });
+        } }),
+        h('button', { type: 'button', class: 'dock-tbtn', text: '↺ Defaults', title: 'Restore initial default parameters', onclick: function () {
+          visibleParams().forEach(function (r) {
+            if (!isFinite(r.initVal)) return;
+            var v = U.clamp(r.initVal, Number(r.spec.min), Number(r.spec.max));
+            r.box.value = v; r.box.dispatchEvent(new Event('change'));
+            if (r.renderChip) r.renderChip();
+          });
+        } }),
+        h('button', { type: 'button', class: 'dock-tbtn', text: '🔍 Solve x', title: 'Set any input as unknown x and solve', onclick: function () { openSolveForX(); } })
+      ])
+    ]);
+    stage.dock.insertBefore(toolbar, stage.dock.firstChild || null);
     if (query.get('embed') === '1') {
       stage.dock.appendChild(h('button', { type: 'button', class: 'pchip dock-act', text: '⇣ Fetch Data', title: 'Extract from question or export data', onclick: openDataHub }));
       stage.dock.appendChild(h('button', { type: 'button', class: 'pchip dock-act', text: '🎓 Guide & Learn', title: 'Interactive guide, laws & discovery lab', onclick: function () { openGuide('tour'); } }));
