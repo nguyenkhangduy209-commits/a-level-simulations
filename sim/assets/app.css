@@ -1991,14 +1991,37 @@ body.app-body {
 .orbit-atom i:last-of-type { border-color: color-mix(in srgb, var(--accent) 75%, transparent); transform: rotate(-35deg) scaleY(.45); animation-direction: reverse; animation-duration: 3.6s; }
 @keyframes orbitSpin { from { rotate: 0deg; } to { rotate: 360deg; } }
 .orbit-ring { position: absolute; right: 6px; bottom: 6px; pointer-events: none; }
+.orbit-ring::before {
+  content: "";
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  width: 292px;
+  height: 284px;
+  border-radius: 260px 24px 32px 24px;
+  background: radial-gradient(circle at 92% 92%, color-mix(in srgb, var(--accent) 14%, rgba(6, 12, 18, .72)), rgba(6, 12, 18, .36) 68%, transparent 74%);
+  border: 1px dashed color-mix(in srgb, var(--accent) 28%, transparent);
+  opacity: 0;
+  transform: scale(.6);
+  transform-origin: bottom right;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity .22s ease, transform .28s cubic-bezier(.22, 1, .36, 1);
+}
+.ui-orbit.open .orbit-ring::before {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
 .orbit-node {
   position: absolute;
   right: 0;
   bottom: 0;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 40px;
+  height: 38px;
   padding: 0 12px;
   border-radius: 999px;
   border: 1px solid var(--line);
@@ -2012,16 +2035,21 @@ body.app-body {
   box-shadow: var(--shadow);
   opacity: 0;
   transform: translate(0, 0) scale(.4);
-  transition: transform .28s cubic-bezier(.22, 1.25, .36, 1), opacity .2s, border-color .14s;
+  transition: transform .28s cubic-bezier(.22, 1.25, .36, 1), opacity .2s, border-color .14s, box-shadow .14s;
   transition-delay: calc(var(--oi, 0) * 24ms);
 }
-.orbit-node svg { width: 16px; height: 16px; color: var(--accent); }
+.orbit-node svg { width: 16px; height: 16px; color: var(--accent); flex: none; }
 .orbit-node.active { border-color: var(--accent); background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); color: var(--accent-ink); }
 .orbit-node.active svg { color: var(--accent-ink); }
 .ui-orbit.open .orbit-node {
   opacity: 1;
   pointer-events: auto;
   transform: translate(var(--rx, 0px), var(--ry, 0px)) scale(1);
+}
+.ui-orbit.open .orbit-node:hover {
+  border-color: var(--accent);
+  box-shadow: 0 6px 20px var(--glow);
+  transform: translate(var(--rx, 0px), var(--ry, 0px)) scale(1.05);
 }
 .ui-orbit.open .orbit-fab { transform: rotate(45deg); border-color: var(--accent); }
 

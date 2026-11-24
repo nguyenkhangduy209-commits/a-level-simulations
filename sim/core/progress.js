@@ -1149,18 +1149,27 @@
       '<button type="button" class="dock-item" id="dockCoachBtn" data-tip="Newton AI Coach"><span class="dock-ico">' + svg('spark') + '</span><span class="dock-lbl">Coach</span></button>' +
       '<button type="button" class="dock-item dock-ui" id="dockUiBtn" data-tip="Customize UI Style"><span class="dock-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg></span><span class="dock-lbl">UI Studio</span></button>';
 
-    // Radial Orbit Atom Launcher (creative orbital menu fan-out)
+    // Radial Orbit Atom Launcher (dual-shell conflict-free orbital constellation)
+    var orbitCoords = [
+      [-2, -224],   // 0: Home (Inner/Upper-Right Shell)
+      [-18, -174],  // 1: Map
+      [-38, -124],  // 2: Solver AI
+      [-62, -74],   // 3: 9709
+      [-148, -198], // 4: 9702 (Outer/Lower-Left Shell)
+      [-174, -148], // 5: Vault
+      [-176, -98],  // 6: Coach
+      [-74, -14]    // 7: UI (Left of Atom FAB)
+    ];
     var orbit = document.createElement('div');
     orbit.className = 'ui-orbit';
     orbit.innerHTML =
       '<div class="orbit-ring" aria-hidden="true">' +
       navItems.map(function (it, idx) {
-        var ang = (-92 - idx * (82 / Math.max(1, navItems.length))) * Math.PI / 180;
-        var rx = Math.round(Math.cos(ang) * 142), ry = Math.round(Math.sin(ang) * 142);
-        return '<a href="' + it.href + '" data-nav="' + it.id + '" class="orbit-node' + (active === it.id ? ' active' : '') + '" style="--rx:' + rx + 'px;--ry:' + ry + 'px;--oi:' + idx + '" title="' + esc(it.label) + '">' + svg(it.icon) + '<span>' + esc(shortLabels[it.id] || it.label) + '</span></a>';
+        var xy = orbitCoords[idx] || [-20, -70 - idx * 44];
+        return '<a href="' + it.href + '" data-nav="' + it.id + '" class="orbit-node' + (active === it.id ? ' active' : '') + '" style="--rx:' + xy[0] + 'px;--ry:' + xy[1] + 'px;--oi:' + idx + '" title="' + esc(it.label) + '">' + svg(it.icon) + '<span>' + esc(shortLabels[it.id] || it.label) + '</span></a>';
       }).join('') +
-      '<button type="button" class="orbit-node" id="orbitCoachBtn" style="--rx:-142px;--ry:-8px;--oi:' + navItems.length + '" title="Newton Coach">' + svg('spark') + '<span>Coach</span></button>' +
-      '<button type="button" class="orbit-node" id="orbitUiBtn" style="--rx:-96px;--ry:-98px;--oi:' + (navItems.length + 1) + '" title="UI Studio">🎨<span>UI</span></button>' +
+      '<button type="button" class="orbit-node" id="orbitCoachBtn" style="--rx:' + orbitCoords[6][0] + 'px;--ry:' + orbitCoords[6][1] + 'px;--oi:6" title="Newton Coach">' + svg('spark') + '<span>Coach</span></button>' +
+      '<button type="button" class="orbit-node" id="orbitUiBtn" style="--rx:' + orbitCoords[7][0] + 'px;--ry:' + orbitCoords[7][1] + 'px;--oi:7" title="UI Studio">🎨<span>UI</span></button>' +
       '</div>' +
       '<button type="button" class="orbit-fab" id="orbitFabBtn" aria-label="Open Orbital Menu" aria-expanded="false">' +
       '  <span class="orbit-atom" aria-hidden="true"><i></i><i></i><b></b></span>' +
@@ -1248,13 +1257,36 @@
       root.addEventListener('sim-ui-change', function () { setTimeout(positionIslandGlider, 30); });
     }
 
-    // Orbit FAB controls
+    // Orbit FAB controls (click toggle + smooth hover constellation fan-out)
     var orbitFab = orbit.querySelector('#orbitFabBtn');
-    function closeOrbit() { orbit.classList.remove('open'); orbitFab.setAttribute('aria-expanded', 'false'); }
+    var orbitRing = orbit.querySelector('.orbit-ring');
+    var orbitLeaveTimer = null, orbitHoverAt = 0, orbitPinned = false;
+    function setOrbitOpen(open) {
+      orbit.classList.toggle('open', !!open);
+      orbitFab.setAttribute('aria-expanded', String(!!open));
+      if (orbitRing) orbitRing.setAttribute('aria-hidden', String(!open));
+    }
+    function closeOrbit() { orbitPinned = false; clearTimeout(orbitLeaveTimer); setOrbitOpen(false); }
+    orbit.addEventListener('pointerenter', function (e) {
+      if (e.pointerType === 'touch') return;
+      clearTimeout(orbitLeaveTimer);
+      if (!orbit.classList.contains('open')) orbitHoverAt = Date.now();
+      setOrbitOpen(true);
+    });
+    orbit.addEventListener('pointerleave', function (e) {
+      if (e.pointerType === 'touch' || orbitPinned) return;
+      clearTimeout(orbitLeaveTimer);
+      orbitLeaveTimer = setTimeout(function () { setOrbitOpen(false); }, 240);
+    });
     orbitFab.onclick = function (e) {
       e.stopPropagation();
-      var open = orbit.classList.toggle('open');
-      orbitFab.setAttribute('aria-expanded', String(open));
+      var wasOpen = orbit.classList.contains('open');
+      if (wasOpen && !orbitPinned && (Date.now() - orbitHoverAt < 450)) {
+        orbitPinned = true;
+      } else {
+        orbitPinned = !wasOpen;
+        setOrbitOpen(!wasOpen);
+      }
       playChime('step');
     };
     document.addEventListener('click', function (e) { if (!orbit.contains(e.target)) closeOrbit(); });
